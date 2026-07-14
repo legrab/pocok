@@ -1,0 +1,8 @@
+<Project>
+  <Target Name="ValidatePocokPackageMetadata" BeforeTargets="Pack" Condition="'$(IsPackable)' == 'true'">
+    <Error Condition="'$(PackageId)' == '' or !$([System.String]::Copy('$(PackageId)').StartsWith('Pocok.'))"
+           Text="Packable projects must use a Pocok.* PackageId." />
+    <Error Condition="'$(Description)' == ''" Text="Packable projects must define Description." />
+    <Error Condition="'$(PackageTags)' == ''" Text="Packable projects must define PackageTags." />
+  </Target>
+</Project>

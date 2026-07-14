@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+artifacts/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.nupkg
+*.snupkg
+TestResults/
+*.received.*
+*.private.md

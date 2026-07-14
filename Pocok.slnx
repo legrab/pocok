@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/Architecture/Pocok.Architecture.Tests.csproj" />
+    <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj" />
+  </Folder>
+</Solution>
