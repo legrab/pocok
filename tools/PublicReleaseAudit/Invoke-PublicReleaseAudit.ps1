@@ -60,6 +60,28 @@ if (Test-Path -LiteralPath $resolvedPackageDirectory -PathType Container) {
                     throw "$($package.Name) does not contain $requiredEntry."
                 }
             }
+
+            $nuspecEntry = $archive.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
+            $reader = [System.IO.StreamReader]::new($nuspecEntry.Open())
+            try {
+                [xml]$nuspec = $reader.ReadToEnd()
+            }
+            finally {
+                $reader.Dispose()
+            }
+
+            $metadata = $nuspec.package.metadata
+            if ($metadata.license.type -ne 'expression' -or $metadata.license.'#text' -ne 'Apache-2.0') {
+                throw "$($package.Name) does not declare Apache-2.0 as a license expression."
+            }
+
+            if ($metadata.repository.url -ne 'https://github.com/legrab/pocok') {
+                throw "$($package.Name) does not declare the canonical repository URL."
+            }
+
+            if ($metadata.readme -ne 'README.md') {
+                throw "$($package.Name) does not declare its packaged README."
+            }
         }
         finally {
             $archive.Dispose()

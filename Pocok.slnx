@@ -1,6 +1,13 @@
 <Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/Primitives.Console/Primitives.Console.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Primitives/Pocok.Primitives.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Architecture/Pocok.Architecture.Tests.csproj" />
     <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj" />
+    <Project Path="tests/Unit/Primitives.Tests/Pocok.Primitives.Tests.csproj" />
   </Folder>
 </Solution>

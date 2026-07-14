@@ -46,6 +46,13 @@ jobs:
       - name: Test
         run: dotnet test --configuration Release --no-build --logger trx --results-directory artifacts/test-results
 
+      - name: Pack
+        run: dotnet pack --configuration Release --no-build --output artifacts/packages
+
+      - name: Test package from local feed
+        shell: pwsh
+        run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack
+
       - name: Audit public contents
         shell: pwsh
         run: ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1

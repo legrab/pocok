@@ -43,6 +43,6 @@ public sealed class RepositoryMetadataTests
 
         includes.ShouldContain("$(MSBuildThisFileDirectory)LICENSE");
         includes.ShouldContain("$(MSBuildThisFileDirectory)NOTICE");
-        includes.ShouldContain("$(MSBuildThisFileDirectory)README.md");
+        includes.ShouldContain("$(MSBuildProjectDirectory)/README.md");
     }
 }

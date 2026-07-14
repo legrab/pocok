@@ -1,0 +1,14 @@
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.dll binary
+*.exe binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.nupkg binary
+*.png binary
+*.snupkg binary
+*.webp binary

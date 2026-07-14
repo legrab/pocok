@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Pocok.Primitives</PackageId>
+    <Version>0.1.0-alpha.1</Version>
+    <Description>Explicit success and structured failure contracts for expected operational outcomes.</Description>
+    <PackageTags>result;error;primitives;contracts</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

@@ -6,7 +6,7 @@ Pocok is a collection of small, independently packaged .NET libraries for recurr
 
 | Package | Purpose | Status |
 |---|---|---|
-| `Pocok.Primitives` | Result and structured error contracts | Planned first |
+| [`Pocok.Primitives`](src/Primitives/README.md) | Result and structured error contracts | Public candidate |
 | `Pocok.Conversion.*` | Explicit, policy-driven runtime value conversion | Planned |
 | `Pocok.Contracts.*` | Deterministic allowlisted contract metadata | Planned |
 | `Pocok.Hosting` | Observable host readiness and lifecycle | Planned |
@@ -25,6 +25,7 @@ dotnet restore --locked-mode
 dotnet build --no-restore
 dotnet test --no-build
 dotnet pack --no-build --output artifacts/packages
+pwsh ./tools/PackageSmoke/Invoke-PackageSmoke.ps1
 ```
 
 The repository uses central package management and committed dependency lock files. Project references may not escape this repository.
