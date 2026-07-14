@@ -10,7 +10,7 @@ Pocok is a collection of small, independently packaged .NET libraries for recurr
 | [`Pocok.Conversion.Abstractions`](src/Conversion.Abstractions/README.md) | Explicit runtime conversion policies and contracts | Experimental alpha |
 | [`Pocok.Conversion`](src/Conversion/README.md) | Strict serializer-free runtime value conversion | Experimental alpha |
 | `Pocok.Contracts.*` | Deterministic allowlisted contract metadata | Planned |
-| `Pocok.Hosting` | Observable host readiness and lifecycle | Planned |
+| [`Pocok.Hosting`](src/Hosting/README.md) | Observable host readiness and lifecycle | Public candidate |
 | `Pocok.Numerics` | Carefully specified generic numeric operations | Planned |
 | `Pocok.Logging.*` | Opinionated logging composition with optional sinks | Planned |
 | `Pocok.Localization.*` | Composite localization and resource adapters | Planned |
@@ -33,17 +33,14 @@ The repository uses central package management and committed dependency lock fil
 
 ## Publishing
 
-Package versions are derived by MinVer from package-specific Git tags. Commit
-height is ignored so changes to one package do not silently change another
-package's dependency version. The first package uses tags such as
-`primitives-v0.1.0-alpha.1` and is published by
-`.github/workflows/publish-primitives.yml` after validation. Untagged local
-builds must not be published.
+Package versions are derived by MinVer from package-specific Git tags. 
+Commit height is ignored so changes to one package do not silently change another package's dependency version. 
+The first package uses tags such as `primitives-v0.1.0-alpha.1` and is published by `.github/workflows/publish-primitives.yml` after validation. 
+Only packages listed in `PUBLICATION.md` have an enabled publication workflow.
+Untagged local builds must not be published.
 
-To enable publishing, create a `NUGET_USERNAME` repository variable containing
-the nuget.org profile name and configure a NuGet trusted-publishing policy for
-`legrab/pocok` and `publish-primitives.yml`. The workflow requests a
-short-lived publishing credential through GitHub Actions OIDC.
+To enable publishing, create a `NUGET_USERNAME` repository variable containing the nuget.org profile name and configure a NuGet trusted-publishing policy for `legrab/pocok` and `publish-primitives.yml`. 
+The workflow requests a short-lived publishing credential through GitHub Actions OIDC.
 
 ## License
 

@@ -15,6 +15,9 @@ $allowedDependencies = @{
     'Pocok.Conversion' = @{
         'Pocok.Conversion.Abstractions' = '0.1.0-alpha.1'
     }
+	'Pocok.Hosting' = @{
+        'Pocok.Primitives' = '0.1.0-alpha.2'
+    }
 }
 
 foreach ($requiredFile in $requiredFiles) {

@@ -29,6 +29,10 @@ $consumerSpecs = @{
         Template = 'ConversionConsumer/Pocok.Conversion.Consumer.csproj.template'
         Program = 'ConversionConsumer/Program.cs'
     }
+    'Pocok.Hosting' = @{
+        Template = 'HostingConsumer/Pocok.Hosting.Consumer.csproj.template'
+        Program = 'HostingConsumer/Program.cs'
+    }
 }
 
 if ($PackageIds.Count -eq 0) {

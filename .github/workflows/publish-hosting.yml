@@ -1,0 +1,89 @@
+name: Publish Pocok.Hosting
+
+on:
+  push:
+    tags: ['hosting-v*']
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish-hosting-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish Pocok.Hosting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+
+      - name: Restore
+        run: dotnet restore --locked-mode
+
+      - name: Build and test
+        run: |
+          dotnet build Pocok.slnx --configuration Release --no-restore
+          dotnet test Pocok.slnx --configuration Release --no-build
+
+      - name: Pack Pocok.Hosting
+        run: dotnet pack src/Hosting/Pocok.Hosting.csproj --configuration Release --no-build --no-restore --output artifacts/packages
+
+      - name: Verify tag-derived package version
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version="${RELEASE_TAG#hosting-v}"
+          expected="artifacts/packages/Pocok.Hosting.${version}.nupkg"
+          test "$version" != "$RELEASE_TAG"
+          test -f "$expected"
+
+      - name: Test package from local feed
+        shell: pwsh
+        run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -PackageIds Pocok.Hosting
+
+      - name: Audit public contents
+        shell: pwsh
+        run: ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
+
+      - name: Validate NuGet publishing configuration
+        env:
+          NUGET_USERNAME: ${{ vars.NUGET_USERNAME }}
+        run: test -n "$NUGET_USERNAME"
+
+      - name: Log in to NuGet with trusted publishing
+        uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
+        id: nuget-login
+        with:
+          user: ${{ vars.NUGET_USERNAME }}
+
+      - name: Push Pocok.Hosting to NuGet
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push artifacts/packages/Pocok.Hosting.*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+
+      - name: Create GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          release_args=(--verify-tag --generate-notes --title "$RELEASE_TAG")
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            release_args+=(--prerelease)
+          fi
+          gh release create "$RELEASE_TAG" artifacts/packages/* "${release_args[@]}"
