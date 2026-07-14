@@ -37,8 +37,14 @@ Passing automation never grants publication by itself.
 
 ## Public allowlist
 
-No package is currently allowlisted for NuGet publication.
+`Pocok.Primitives` is allowlisted for NuGet publication through the
+`primitives-v*` release workflow after its tagged build passes the package,
+public-content, and external-consumer checks.
 
 | Package | Tier | Package review | Publication approved |
 |---|---|---:|---:|
-| _None_ | — | No | No |
+| `Pocok.Primitives` | `Public` | Yes | Yes |
+
+The workflow uses MinVer to derive the package version from the release tag.
+The NuGet trusted-publishing policy must target repository owner `legrab`,
+repository `pocok`, and workflow file `publish-primitives.yml`.
