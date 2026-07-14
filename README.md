@@ -7,7 +7,8 @@ Pocok is a collection of small, independently packaged .NET libraries for recurr
 | Package | Purpose | Status |
 |---|---|---|
 | [`Pocok.Primitives`](src/Primitives/README.md) | Result and structured error contracts | Public candidate |
-| `Pocok.Conversion.*` | Explicit, policy-driven runtime value conversion | Planned |
+| [`Pocok.Conversion.Abstractions`](src/Conversion.Abstractions/README.md) | Explicit runtime conversion policies and contracts | Experimental alpha |
+| [`Pocok.Conversion`](src/Conversion/README.md) | Strict serializer-free runtime value conversion | Experimental alpha |
 | `Pocok.Contracts.*` | Deterministic allowlisted contract metadata | Planned |
 | `Pocok.Hosting` | Observable host readiness and lifecycle | Planned |
 | `Pocok.Numerics` | Carefully specified generic numeric operations | Planned |

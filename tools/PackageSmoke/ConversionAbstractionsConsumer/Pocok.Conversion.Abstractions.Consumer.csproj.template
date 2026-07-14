@@ -8,6 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pocok.Primitives" Version="__PACKAGE_VERSION__" />
+    <PackageReference Include="Pocok.Conversion.Abstractions" Version="__PACKAGE_VERSION__" />
   </ItemGroup>
 </Project>

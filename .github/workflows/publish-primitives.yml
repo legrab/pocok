@@ -53,7 +53,7 @@ jobs:
 
       - name: Test package from local feed
         shell: pwsh
-        run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack
+        run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -PackageIds Pocok.Primitives
 
       - name: Audit public contents
         shell: pwsh

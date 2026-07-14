@@ -7,6 +7,11 @@ $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $requiredFiles = @('LICENSE', 'NOTICE', 'README.md', 'STEWARDSHIP.md', 'SECURITY.md')
+$allowedDependencies = @{
+    'Pocok.Primitives' = @()
+    'Pocok.Conversion.Abstractions' = @('Pocok.Primitives')
+    'Pocok.Conversion' = @('Pocok.Conversion.Abstractions')
+}
 
 foreach ($requiredFile in $requiredFiles) {
     $path = Join-Path $repositoryRoot $requiredFile
@@ -81,6 +86,43 @@ if (Test-Path -LiteralPath $resolvedPackageDirectory -PathType Container) {
 
             if ($metadata.readme -ne 'README.md') {
                 throw "$($package.Name) does not declare its packaged README."
+            }
+
+            $packageId = [string]$metadata.id
+            $packageVersion = [string]$metadata.version
+            if (-not $allowedDependencies.ContainsKey($packageId)) {
+                throw "$($package.Name) has no reviewed dependency allowlist."
+            }
+
+            foreach ($requiredLibraryEntry in @("lib/net10.0/$packageId.dll", "lib/net10.0/$packageId.xml")) {
+                if ($entryNames -notcontains $requiredLibraryEntry) {
+                    throw "$($package.Name) does not contain $requiredLibraryEntry."
+                }
+            }
+
+            $dependencyIds = @(@($metadata.dependencies.group.dependency) + @($metadata.dependencies.dependency) |
+                Where-Object { $null -ne $_ } |
+                ForEach-Object { [string]$_.id } |
+                Sort-Object -Unique)
+            $expectedDependencies = @($allowedDependencies[$packageId]) | Sort-Object -Unique
+
+            if (($dependencyIds -join "`n") -ne ($expectedDependencies -join "`n")) {
+                throw "$($package.Name) dependencies differ from its allowlist. Actual: $($dependencyIds -join ', ')"
+            }
+
+            $symbolsPath = Join-Path $resolvedPackageDirectory "$packageId.$packageVersion.snupkg"
+            if (-not (Test-Path -LiteralPath $symbolsPath -PathType Leaf)) {
+                throw "$($package.Name) has no matching symbols package."
+            }
+
+            $symbolsArchive = [System.IO.Compression.ZipFile]::OpenRead($symbolsPath)
+            try {
+                if ($symbolsArchive.Entries.FullName -notcontains "lib/net10.0/$packageId.pdb") {
+                    throw "$([System.IO.Path]::GetFileName($symbolsPath)) does not contain the portable PDB."
+                }
+            }
+            finally {
+                $symbolsArchive.Dispose()
             }
         }
         finally {
