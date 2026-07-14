@@ -21,6 +21,7 @@ Extract alpha-releaseable conversion abstractions and a serializer-free implemen
 - Reject implicit numeric booleans, fractional loss, overflow, local-time inference, undefined enums, and arbitrary object mapping.
 - Preserve valid flags combinations in the strict default when every bit is declared.
 - Defer serializer conversion to a separately reviewed adapter.
+- Ignore Git commit height for package-specific MinVer prefixes so unrelated package commits do not create unpublished dependency versions.
 
 ## Changes
 
@@ -34,7 +35,8 @@ Extract alpha-releaseable conversion abstractions and a serializer-free implemen
 - Release build passed with zero warnings and zero errors.
 - All 137 tests passed: 96 conversion, 30 primitives, 8 packaging, and 3 architecture tests.
 - The conversion sample ran and demonstrated strict, culture-aware, saturating, flags, and collection conversion.
-- Packed `Pocok.Conversion.Abstractions` and `Pocok.Conversion` as `0.1.0-alpha.1.8` with symbols and Source Link metadata.
+- Packed `Pocok.Conversion.Abstractions` and `Pocok.Conversion` as `0.1.0-alpha.1` with symbols and Source Link metadata.
+- Verified the package dependency graph uses reviewed versions exactly: Conversion depends on Conversion.Abstractions `0.1.0-alpha.1`, which depends on released Primitives `0.1.0-alpha.2`.
 - Isolated local-feed consumers passed for Conversion, Conversion.Abstractions, and Primitives.
 - Public release audit and the transitive vulnerability scan passed.
 - Repeated packs produced identical meaningful entry payloads. Raw archive hashes differ because NuGet regenerates OPC relationship and core-property metadata; this non-blocking release-hardening item is documented for follow-up.

@@ -8,9 +8,13 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $requiredFiles = @('LICENSE', 'NOTICE', 'README.md', 'STEWARDSHIP.md', 'SECURITY.md')
 $allowedDependencies = @{
-    'Pocok.Primitives' = @()
-    'Pocok.Conversion.Abstractions' = @('Pocok.Primitives')
-    'Pocok.Conversion' = @('Pocok.Conversion.Abstractions')
+    'Pocok.Primitives' = @{}
+    'Pocok.Conversion.Abstractions' = @{
+        'Pocok.Primitives' = '0.1.0-alpha.2'
+    }
+    'Pocok.Conversion' = @{
+        'Pocok.Conversion.Abstractions' = '0.1.0-alpha.1'
+    }
 }
 
 foreach ($requiredFile in $requiredFiles) {
@@ -100,14 +104,23 @@ if (Test-Path -LiteralPath $resolvedPackageDirectory -PathType Container) {
                 }
             }
 
-            $dependencyIds = @(@($metadata.dependencies.group.dependency) + @($metadata.dependencies.dependency) |
+            $dependencies = @(@($metadata.dependencies.group.dependency) + @($metadata.dependencies.dependency) |
                 Where-Object { $null -ne $_ } |
-                ForEach-Object { [string]$_.id } |
-                Sort-Object -Unique)
-            $expectedDependencies = @($allowedDependencies[$packageId]) | Sort-Object -Unique
+                Sort-Object { [string]$_.id })
+            $dependencyIds = @($dependencies | ForEach-Object { [string]$_.id })
+            $expectedDependencies = @($allowedDependencies[$packageId].Keys) | Sort-Object
 
             if (($dependencyIds -join "`n") -ne ($expectedDependencies -join "`n")) {
                 throw "$($package.Name) dependencies differ from its allowlist. Actual: $($dependencyIds -join ', ')"
+            }
+
+            foreach ($dependency in $dependencies) {
+                $dependencyId = [string]$dependency.id
+                $dependencyVersion = [string]$dependency.version
+                $expectedVersion = [string]$allowedDependencies[$packageId][$dependencyId]
+                if ($dependencyVersion -ne $expectedVersion) {
+                    throw "$($package.Name) depends on $dependencyId $dependencyVersion instead of reviewed version $expectedVersion."
+                }
             }
 
             $symbolsPath = Join-Path $resolvedPackageDirectory "$packageId.$packageVersion.snupkg"

@@ -33,11 +33,12 @@ The repository uses central package management and committed dependency lock fil
 
 ## Publishing
 
-Package versions are derived by MinVer from package-specific Git tags. The
-first package uses tags such as `primitives-v0.1.0-alpha.1` and is published by
-`.github/workflows/publish-primitives.yml` after validation. A local build
-without a release tag uses MinVer's development version and must not be
-published.
+Package versions are derived by MinVer from package-specific Git tags. Commit
+height is ignored so changes to one package do not silently change another
+package's dependency version. The first package uses tags such as
+`primitives-v0.1.0-alpha.1` and is published by
+`.github/workflows/publish-primitives.yml` after validation. Untagged local
+builds must not be published.
 
 To enable publishing, create a `NUGET_USERNAME` repository variable containing
 the nuget.org profile name and configure a NuGet trusted-publishing policy for
