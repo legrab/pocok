@@ -23,6 +23,17 @@ if ($null -eq $package) {
     throw "Pocok.Primitives package was not found in $packageDirectory."
 }
 
+$packageName = [System.IO.Path]::GetFileNameWithoutExtension($package.Name)
+$packagePrefix = 'Pocok.Primitives.'
+if (-not $packageName.StartsWith($packagePrefix, [System.StringComparison]::Ordinal)) {
+    throw "Unexpected Pocok.Primitives package name: $($package.Name)."
+}
+
+$packageVersion = $packageName.Substring($packagePrefix.Length)
+if ($packageVersion -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') {
+    throw "Unexpected Pocok.Primitives package version: $packageVersion."
+}
+
 $templateRoot = Join-Path $PSScriptRoot 'ExternalConsumer'
 $systemTemp = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $workRoot = [System.IO.Path]::GetFullPath((Join-Path $systemTemp "pocok-package-smoke-$([guid]::NewGuid().ToString('N'))"))
@@ -34,10 +45,12 @@ if (-not $workRoot.StartsWith($systemTemp, [System.StringComparison]::OrdinalIgn
 try {
     New-Item -ItemType Directory -Path $workRoot | Out-Null
     Copy-Item -LiteralPath (Join-Path $templateRoot 'Program.cs') -Destination $workRoot
-    Copy-Item -LiteralPath (Join-Path $templateRoot 'Pocok.Primitives.Consumer.csproj.template') -Destination (Join-Path $workRoot 'Pocok.Primitives.Consumer.csproj')
 
     $project = Join-Path $workRoot 'Pocok.Primitives.Consumer.csproj'
     $packages = Join-Path $workRoot '.packages'
+    $projectTemplate = [IO.File]::ReadAllText((Join-Path $templateRoot 'Pocok.Primitives.Consumer.csproj.template'))
+    $projectContent = $projectTemplate.Replace('__POCOK_PRIMITIVES_VERSION__', $packageVersion)
+    [IO.File]::WriteAllText($project, $projectContent, [Text.UTF8Encoding]::new($false))
 
     & dotnet restore $project --source $packageDirectory --packages $packages
     if ($LASTEXITCODE -ne 0) {
