@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Pocok.Conversion.Abstractions</PackageId>
+    <MinVerTagPrefix>conversion-v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
+    <Description>Explicit policies and contracts for runtime value conversion.</Description>
+    <PackageTags>conversion;contracts;culture;normalization</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Primitives/Pocok.Primitives.csproj" />
+  </ItemGroup>
+</Project>

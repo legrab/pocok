@@ -1,0 +1,41 @@
+ConversionContext.Culture: System.Globalization.CultureInfo
+ConversionContext.Enums: Pocok.Conversion.EnumPolicy
+ConversionContext.Nulls: Pocok.Conversion.NullPolicy
+ConversionContext.NumericBooleans: Pocok.Conversion.NumericBooleanPolicy
+ConversionContext.NumericLoss: Pocok.Conversion.NumericLossPolicy
+ConversionContext.Overflow: Pocok.Conversion.OverflowPolicy
+ConversionContext.Strict: Pocok.Conversion.ConversionContext
+ConversionContext.TemporalText: Pocok.Conversion.TemporalTextPolicy
+ConversionContext.ctor(System.Globalization.CultureInfo, Pocok.Conversion.OverflowPolicy, Pocok.Conversion.NullPolicy, Pocok.Conversion.EnumPolicy, Pocok.Conversion.NumericLossPolicy, Pocok.Conversion.NumericBooleanPolicy, Pocok.Conversion.TemporalTextPolicy)
+ConversionErrorCodes.CollectionItem: System.String = "conversion.collection-item"
+ConversionErrorCodes.InvalidEnum: System.String = "conversion.invalid-enum"
+ConversionErrorCodes.InvalidFormat: System.String = "conversion.invalid-format"
+ConversionErrorCodes.Lossy: System.String = "conversion.lossy"
+ConversionErrorCodes.NullNotAllowed: System.String = "conversion.null-not-allowed"
+ConversionErrorCodes.Overflow: System.String = "conversion.overflow"
+ConversionErrorCodes.Unsupported: System.String = "conversion.unsupported"
+EnumPolicy.DefinedValuesAndFlags = 1
+EnumPolicy.DefinedValuesOnly = 0
+IValueConverter.Convert(System.Object, Pocok.Conversion.ConversionContext) -> Pocok.Primitives.Result<TTarget>
+IValueConverter.Convert(System.Object, System.Type, Pocok.Conversion.ConversionContext) -> Pocok.Primitives.Result<System.Object>
+NullPolicy.Preserve = 0
+NullPolicy.Reject = 2
+NullPolicy.UseDefault = 1
+NumericBooleanPolicy.NonZeroIsTrue = 2
+NumericBooleanPolicy.Reject = 0
+NumericBooleanPolicy.ZeroOrOne = 1
+NumericLossPolicy.Reject = 0
+NumericLossPolicy.RoundToNearest = 1
+OverflowPolicy.Fail = 0
+OverflowPolicy.Saturate = 1
+Pocok.Conversion.ConversionContext
+Pocok.Conversion.ConversionErrorCodes
+Pocok.Conversion.EnumPolicy
+Pocok.Conversion.IValueConverter
+Pocok.Conversion.NullPolicy
+Pocok.Conversion.NumericBooleanPolicy
+Pocok.Conversion.NumericLossPolicy
+Pocok.Conversion.OverflowPolicy
+Pocok.Conversion.TemporalTextPolicy
+TemporalTextPolicy.CultureAware = 1
+TemporalTextPolicy.RoundTrip = 0

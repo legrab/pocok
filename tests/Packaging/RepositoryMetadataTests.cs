@@ -31,6 +31,7 @@ public sealed class RepositoryMetadataTests
         properties["IncludeSymbols"].ShouldBe("true");
         properties["SymbolPackageFormat"].ShouldBe("snupkg");
         properties["PublishRepositoryUrl"].ShouldBe("true");
+        properties["MinVerIgnoreHeight"].ShouldBe("true");
     }
 
     [Test]
