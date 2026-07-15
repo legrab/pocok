@@ -99,7 +99,8 @@
         "Microsoft.Extensions.DependencyInjection.Abstractions",
         "Microsoft.Extensions.Hosting.Abstractions",
         "Microsoft.Extensions.Logging",
-        "Microsoft.Extensions.Logging.Console"
+        "Microsoft.Extensions.Logging.Console",
+        "Microsoft.Extensions.Options"
       ],
       "versionProperty": "PocokAppDefaultsLoggingPackageVersion"
     },
@@ -108,7 +109,7 @@
       "project": "src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj",
       "tagPrefix": "appdefaults.logging.serilog-v",
       "family": "MaintainerDefaults",
-      "releaseTier": 2,
+      "releaseTier": 1,
       "state": "Active",
       "releasable": true,
       "consumer": "AppDefaultsLoggingSerilogConsumer",
@@ -119,6 +120,7 @@
         "Microsoft.Extensions.Configuration.Binder",
         "Microsoft.Extensions.DependencyInjection.Abstractions",
         "Microsoft.Extensions.Hosting.Abstractions",
+        "Microsoft.Extensions.Options",
         "Serilog",
         "Serilog.Extensions.Hosting",
         "Serilog.Settings.Configuration"
@@ -175,7 +177,8 @@
       "allowedExternalDependencies": [
         "Microsoft.Extensions.Configuration.Binder",
         "Microsoft.Extensions.DependencyInjection.Abstractions",
-        "Microsoft.Extensions.Hosting.Abstractions"
+        "Microsoft.Extensions.Hosting.Abstractions",
+        "Microsoft.Extensions.Options"
       ],
       "versionProperty": "PocokAppDefaultsModularityPackageVersion"
     }

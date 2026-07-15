@@ -3,10 +3,12 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Pocok.AppDefaults.Modularity;
 using Pocok.Modularity;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.AddPocokModularityDefaults(defaults => defaults.PluginDirectory = "missing-plugins");
 using var host = builder.Build();
-return host.Services.GetRequiredService<IModuleCatalog>().Modules.Count == 0 ? 0 : 1;
+var defaults = host.Services.GetRequiredService<IOptions<ModularityDefaultsOptions>>().Value;
+return host.Services.GetRequiredService<IModuleCatalog>().Modules.Count == 0 && defaults.PluginDirectory == "missing-plugins" ? 0 : 1;
