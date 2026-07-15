@@ -45,6 +45,24 @@ jobs:
       - name: Test
         run: dotnet test Pocok.slnx --configuration Release --no-build --logger trx --results-directory artifacts/test-results
 
+      - name: Run core samples
+        shell: pwsh
+        run: |
+          dotnet run --project samples/Conversion.Console/Conversion.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Conversion sample failed.' }
+          dotnet run --project samples/Readiness.Console/Readiness.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Readiness sample failed.' }
+          dotnet run --project samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'AppDefaults sample failed.' }
+
+      - name: Publish trimmed Conversion sample
+        shell: pwsh
+        run: |
+          dotnet publish samples/Conversion.Trimmed/Conversion.Trimmed.csproj --configuration Release --output artifacts/trimmed-conversion
+          if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample publish failed.' }
+          dotnet artifacts/trimmed-conversion/Conversion.Trimmed.dll
+          if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample execution failed.' }
+
       - name: Pack
         run: dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
 

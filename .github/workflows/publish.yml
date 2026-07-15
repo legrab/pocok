@@ -44,9 +44,11 @@ jobs:
       - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
-      - name: Resolve release package versions
+      - name: Resolve release package versions and closure
         shell: pwsh
-        run: ./tools/PackageCatalog/New-ReleaseVersionsProps.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -CandidateVersion '${{ needs.resolve.outputs.version }}' -OutputPath artifacts/release-versions.props
+        run: |
+          ./tools/PackageCatalog/New-ReleaseVersionsProps.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -CandidateVersion '${{ needs.resolve.outputs.version }}' -OutputPath artifacts/release-versions.props
+          ./tools/PackageCatalog/Resolve-PackageClosure.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -OutputPath artifacts/release-closure.json
       - name: Restore, build, and test release graph
         shell: bash
         run: |
@@ -55,11 +57,18 @@ jobs:
           dotnet build Pocok.Core.slnx --configuration Release --no-restore -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
           dotnet test Pocok.Core.slnx --configuration Release --no-build -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
       - name: Pack local package closure
-        shell: bash
+        shell: pwsh
         run: |
-          rm -rf artifacts/packages
-          release_props="$PWD/artifacts/release-versions.props"
-          dotnet pack Pocok.Core.slnx --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
+          Remove-Item artifacts/packages -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory artifacts/packages -Force | Out-Null
+          $releaseProps = Join-Path $PWD 'artifacts/release-versions.props'
+          $closure = Get-Content artifacts/release-closure.json -Raw | ConvertFrom-Json
+          foreach ($package in $closure) {
+            dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=false
+            if ($LASTEXITCODE -ne 0) {
+              throw "Packing $($package.id) failed with exit code $LASTEXITCODE."
+            }
+          }
       - name: Verify exact candidate
         shell: bash
         run: |
@@ -75,7 +84,7 @@ jobs:
         run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode Publication -PackageIds '${{ needs.resolve.outputs.package-id }}'
       - name: Audit public contents
         shell: pwsh
-        run: ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
+        run: ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1 -PackageIds '${{ needs.resolve.outputs.package-id }}'
       - name: Log in to NuGet with trusted publishing
         uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
         id: nuget-login
