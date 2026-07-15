@@ -1,17 +1,20 @@
 <Solution>
   <Folder Name="/samples/">
     <Project Path="samples/Conversion.Console/Conversion.Console.csproj" />
+    <Project Path="samples/Hosting.Console/Hosting.Console.csproj" />
     <Project Path="samples/Primitives.Console/Primitives.Console.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Conversion.Abstractions/Pocok.Conversion.Abstractions.csproj" />
     <Project Path="src/Conversion/Pocok.Conversion.csproj" />
+    <Project Path="src/Hosting/Pocok.Hosting.csproj" />
     <Project Path="src/Primitives/Pocok.Primitives.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Architecture/Pocok.Architecture.Tests.csproj" />
     <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj" />
     <Project Path="tests/Unit/Conversion.Tests/Pocok.Conversion.Tests.csproj" />
+    <Project Path="tests/Unit/Hosting.Tests/Pocok.Hosting.Tests.csproj" />
     <Project Path="tests/Unit/Primitives.Tests/Pocok.Primitives.Tests.csproj" />
   </Folder>
 </Solution>

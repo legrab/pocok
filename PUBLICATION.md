@@ -46,6 +46,7 @@ public-content, and external-consumer checks.
 | `Pocok.Primitives` | `Public` | Yes | Yes |
 | `Pocok.Conversion.Abstractions` | `Experimental` | No | No |
 | `Pocok.Conversion` | `Experimental` | No | No |
+| `Pocok.Hosting` | `PublicCandidate` | Pending final tag review | No |
 
 The workflow uses MinVer to derive the package version from the release tag.
 The NuGet trusted-publishing policy must target repository owner `legrab`,

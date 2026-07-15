@@ -134,6 +134,15 @@
         "dependencies": {
           "System.CodeDom": "6.0.0"
         }
+      },
+      "pocok.hosting": {
+        "type": "Project",
+        "dependencies": {
+          "Pocok.Primitives": "[1.0.0, )"
+        }
+      },
+      "pocok.primitives": {
+        "type": "Project"
       }
     }
   }
