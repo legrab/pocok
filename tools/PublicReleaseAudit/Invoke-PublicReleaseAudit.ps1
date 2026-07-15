@@ -191,11 +191,27 @@ foreach ($package in $artifacts) {
         }
 
         $packagePolicy = $packagePolicies[$packageId]
-        $dependencies = @(@($metadata.dependencies.group.dependency) + @($metadata.dependencies.dependency) |
-            Where-Object { $null -ne $_ } |
-            Sort-Object { [string]$_.id })
-        $dependencyIds = @($dependencies | ForEach-Object { [string]$_.id })
-        $expectedDependencies = @(@($packagePolicy.internalDependencies) + @($packagePolicy.allowedExternalDependencies)) |
+
+        $dependencies = @(
+            $nuspec.SelectNodes(
+                "/*[local-name()='package']" +
+                "/*[local-name()='metadata']" +
+                "/*[local-name()='dependencies']" +
+                "//*[local-name()='dependency']"
+            )
+        ) | Sort-Object { [string]$_.id }
+
+        $dependencyIds = @(
+            $dependencies |
+                ForEach-Object { [string]$_.id }
+        )
+
+        $expectedDependencies = @(
+            @($packagePolicy.internalDependencies)
+            @($packagePolicy.allowedExternalDependencies)
+        ) |
+            Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } |
+            ForEach-Object { [string]$_ } |
             Sort-Object
 
         if (($dependencyIds -join "`n") -ne ($expectedDependencies -join "`n")) {
@@ -206,7 +222,7 @@ foreach ($package in $artifacts) {
             $dependencyId = [string]$dependency.id
             $dependencyVersion = [string]$dependency.version
             if ([string]::IsNullOrWhiteSpace($dependencyVersion) -or $dependencyVersion.Contains('*')) {
-                throw "$($package.Name) has an invalid dependency version for $dependencyId: '$dependencyVersion'."
+                throw "$($package.Name) has an invalid dependency version for ${dependencyId}: '$dependencyVersion'."
             }
 
             if ($artifactVersions.ContainsKey($dependencyId)) {
