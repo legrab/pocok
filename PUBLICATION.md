@@ -1,6 +1,6 @@
 # Publication policy
 
-> **Current status:** Initial consolidation applied. Follow the stabilization plan in `docs/plans/repository-consolidation.md` before tagging or publishing any package.
+> **Current status:** The initial package family is structurally consolidated. Do not tag a package until the executable acceptance commands in this document pass on the exact commit being tagged.
 
 All public Pocok packages use nuget.org. Package intent is expressed through IDs, family metadata, and documentation rather than separate authenticated feeds.
 
@@ -17,7 +17,7 @@ All public Pocok packages use nuget.org. Package intent is expressed through IDs
 - release-version MSBuild property;
 - clean external-consumer fixture.
 
-Every active packable project must have exactly one catalog entry. A publication tag must match exactly one releasable entry.
+Every active packable project must have exactly one catalog entry. A publication tag must match exactly one releasable entry. `tools/PackageCatalog/Resolve-PackageClosure.ps1` resolves the candidate and its transitive internal dependencies in dependency-first order.
 
 ## Initial release set and order
 
@@ -51,17 +51,55 @@ The generated file pins:
 
 The same file is supplied to restore, build, test, and pack. This prevents independently versioned projects from producing a candidate that depends on an unpublished development version of another Pocok package.
 
+## Candidate closure
+
+The publication workflow builds and tests `Pocok.Core.slnx`, then packs only the candidate and its transitive internal package closure. The package directory is cleaned first, so an audit cannot accidentally pass against stale or unrelated artifacts.
+
+The closure is dependency-first. For example:
+
+```text
+Pocok.AppDefaults
+Pocok.AppDefaults.Logging
+```
+
+No retired or experimental package may enter a releasable candidate closure.
+
 ## Smoke modes
 
 ### Local closure
 
-The candidate is restored from a clean local feed containing every `.nupkg` produced by the repository. This proves that the package dependency graph is complete and that no project reference is required by an external consumer.
+The candidate consumer restores from:
+
+- a clean local feed containing only the candidate and its transitive Pocok dependencies;
+- nuget.org for reviewed external dependencies.
+
+Package source mapping forces `Pocok.*` to the local feed. A missing internal package therefore cannot be hidden by an already-published copy. This proves that the generated package closure is complete and that no project reference is required by an external consumer.
 
 ### Publication
 
-The candidate is restored from a feed containing only that candidate plus nuget.org. This proves that every internal dependency is already publicly resolvable.
+The candidate consumer restores from:
 
-Both modes use isolated package caches. Both must pass before push.
+- a local feed containing only the exact candidate;
+- nuget.org for exact internal dependency IDs and reviewed external dependency families.
+
+This proves that all internal dependencies required by the candidate are already publicly resolvable. Publication mode is expected to fail when a required dependency has not yet been released.
+
+Both modes use isolated package caches and generated `NuGet.Config` files. Both must pass before push.
+
+## Package audit
+
+`tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1` accepts an optional candidate package ID and then audits exactly that closure. It rejects missing, duplicate, stale, and unrelated package artifacts. The audit verifies:
+
+- package identity and exact file names;
+- license, project URL, repository metadata, and package README declaration;
+- reviewed dependency IDs and concrete versions;
+- internal dependency versions matching the closure artifacts;
+- package-local README links;
+- assembly XML documentation;
+- matching symbols packages and portable PDB presence;
+- absence of repository-only files, retired projects, and obvious secret material.
+
+NuGet package validation remains enabled in MSBuild. The final release gate also requires clean installation and sample execution because archive inspection alone cannot prove runtime behavior or debugger Source Link behavior.
 
 ## Current tag formats
 
@@ -83,19 +121,37 @@ Modularity prefixes are reserved in the package catalog but deliberately absent 
 
 ## Release gates
 
-A package is releasable only when:
+A package is releasable only when, on the exact candidate commit:
 
-- restore, formatting, Release build, and tests pass;
-- package validation and the reviewed API inventory pass;
+- restore, formatting, Release build, and focused tests pass;
+- member-level API snapshots and NuGet package validation pass;
+- relevant samples run, including the trimmed Conversion sample;
 - local-closure and publication smoke tests pass;
-- package-content audit passes;
+- candidate-scoped package-content audit passes;
 - packaged README links render outside the source tree;
-- symbols and Source Link are present;
+- symbols, repository metadata, and Source Link behavior are verified;
 - dependency IDs match the catalog allowlist;
 - the exact candidate `.nupkg` and `.snupkg` are selected;
+- Linux and Windows CI pass;
 - the catalog entry has `releasable: true`.
 
 Modularity additionally requires its real plugin fixture matrix on Linux and Windows before any release eligibility change.
+
+## Local acceptance
+
+```pwsh
+dotnet restore Pocok.slnx
+dotnet format Pocok.slnx --verify-no-changes --no-restore
+dotnet build Pocok.slnx --configuration Release --no-restore
+dotnet test Pocok.slnx --configuration Release --no-build
+dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
+
+./tools/PackageCatalog/Test-PackageCatalog.ps1
+./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode LocalClosure
+./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
+```
+
+For an actual candidate, generate release-version props and run both smoke modes for that package before pushing the tag.
 
 ## Release command
 

@@ -52,4 +52,24 @@ foreach ($package in $catalog.packages) {
     }
 }
 
+
+$closureResolver = Join-Path $PSScriptRoot 'Resolve-PackageClosure.ps1'
+foreach ($package in $catalog.packages | Where-Object { $_.state -ne 'Retired' }) {
+    $closure = @(& $closureResolver -CandidatePackageId ([string]$package.id))
+    if ($closure.Count -eq 0 -or [string]$closure[-1].id -ne [string]$package.id) {
+        throw "Package closure for $($package.id) does not end with the candidate."
+    }
+
+    $closureIds = @($closure | ForEach-Object { [string]$_.id })
+    if (@($closureIds | Group-Object | Where-Object Count -gt 1).Count -gt 0) {
+        throw "Package closure for $($package.id) contains duplicate entries."
+    }
+
+    foreach ($dependency in $package.internalDependencies) {
+        if ([array]::IndexOf($closureIds, [string]$dependency) -ge [array]::IndexOf($closureIds, [string]$package.id)) {
+            throw "Package closure for $($package.id) is not dependency-first at $dependency."
+        }
+    }
+}
+
 Write-Host 'Package catalog validation passed.'

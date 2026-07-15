@@ -14,6 +14,13 @@ $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'
 $packageDirectoryPath = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $PackageDirectory))
 $closureFeed = Join-Path $repositoryRoot 'artifacts/package-smoke/closure-feed'
 $candidateFeedRoot = Join-Path $repositoryRoot 'artifacts/package-smoke/candidate-feeds'
+$nugetSource = 'https://api.nuget.org/v3/index.json'
+$closureResolver = Join-Path $repositoryRoot 'tools/PackageCatalog/Resolve-PackageClosure.ps1'
+$catalog = Get-Content -LiteralPath (Join-Path $repositoryRoot 'eng/packages.json') -Raw | ConvertFrom-Json
+$packagesById = @{}
+foreach ($package in $catalog.packages) {
+    $packagesById[[string]$package.id] = $package
+}
 
 $consumerSpecs = @{
     'Pocok.AppDefaults.Modularity' = @{ Template = 'AppDefaultsModularityConsumer/Pocok.AppDefaults.Modularity.Consumer.csproj.template'; Program = 'AppDefaultsModularityConsumer/Program.cs' }
@@ -45,12 +52,59 @@ function Get-PackageArtifact {
     return $matches[0]
 }
 
+function Write-NuGetConfig {
+    param(
+        [Parameter(Mandatory)] [string]$Path,
+        [Parameter(Mandatory)] [object[]]$Sources,
+        [Parameter(Mandatory)] [hashtable]$Mappings
+    )
+
+    $settings = [System.Xml.XmlWriterSettings]::new()
+    $settings.Indent = $true
+    $settings.Encoding = [System.Text.UTF8Encoding]::new($false)
+    $writer = [System.Xml.XmlWriter]::Create($Path, $settings)
+    try {
+        $writer.WriteStartDocument()
+        $writer.WriteStartElement('configuration')
+        $writer.WriteStartElement('packageSources')
+        $writer.WriteStartElement('clear')
+        $writer.WriteEndElement()
+        foreach ($source in $Sources) {
+            $writer.WriteStartElement('add')
+            $writer.WriteAttributeString('key', [string]$source.Key)
+            $writer.WriteAttributeString('value', [string]$source.Value)
+            $writer.WriteEndElement()
+        }
+        $writer.WriteEndElement()
+
+        $writer.WriteStartElement('packageSourceMapping')
+        foreach ($source in $Sources) {
+            $key = [string]$source.Key
+            $writer.WriteStartElement('packageSource')
+            $writer.WriteAttributeString('key', $key)
+            foreach ($pattern in @($Mappings[$key])) {
+                $writer.WriteStartElement('package')
+                $writer.WriteAttributeString('pattern', [string]$pattern)
+                $writer.WriteEndElement()
+            }
+            $writer.WriteEndElement()
+        }
+        $writer.WriteEndElement()
+        $writer.WriteEndElement()
+        $writer.WriteEndDocument()
+    }
+    finally {
+        $writer.Dispose()
+    }
+}
+
 function Invoke-Consumer {
     param(
         [Parameter(Mandatory)] [string]$PackageId,
         [Parameter(Mandatory)] [System.IO.FileInfo]$Package,
         [Parameter(Mandatory)] [string]$FeedMode,
-        [Parameter(Mandatory)] [string[]]$Sources,
+        [Parameter(Mandatory)] [object[]]$Sources,
+        [Parameter(Mandatory)] [hashtable]$Mappings,
         [Parameter(Mandatory)] [string]$WorkRoot
     )
 
@@ -68,46 +122,20 @@ function Invoke-Consumer {
         $template.Replace('__PACKAGE_VERSION__', $version),
         [System.Text.UTF8Encoding]::new($false))
 
-    $configContent = @"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <clear />
-"@
-    for ($i = 0; $i -lt $Sources.Count; $i++) {
-        $configContent += "`n    <add key=""source_$i"" value=""$($Sources[$i])"" />"
-    }
-    $configContent += @"
-`n  </packageSources>
-</configuration>
-"@
-    [System.IO.File]::WriteAllText((Join-Path $consumerRoot 'NuGet.Config'), $configContent, [System.Text.UTF8Encoding]::new($false))
+    $nugetConfig = Join-Path $consumerRoot 'NuGet.Config'
+    Write-NuGetConfig -Path $nugetConfig -Sources $Sources -Mappings $Mappings
 
-    $restoreArguments = @('restore', (Join-Path $consumerRoot 'Pocok.Consumer.csproj'), '--packages', $packagesRoot, '--no-cache')
-    & dotnet @restoreArguments
+    & dotnet restore (Join-Path $consumerRoot 'Pocok.Consumer.csproj') --packages $packagesRoot --no-cache --configfile $nugetConfig
     if ($LASTEXITCODE -ne 0) {
         throw "$PackageId $FeedMode external consumer restore failed with exit code $LASTEXITCODE."
     }
 
-    & dotnet run --project (Join-Path $consumerRoot 'Pocok.Consumer.csproj') --no-restore
+    & dotnet run --project (Join-Path $consumerRoot 'Pocok.Consumer.csproj') --configuration Release --no-restore
     if ($LASTEXITCODE -ne 0) {
         throw "$PackageId $FeedMode external consumer failed with exit code $LASTEXITCODE."
     }
 
     Write-Host "$PackageId $FeedMode smoke passed using $($Package.Name)."
-}
-
-if (-not $NoPack) {
-    Remove-Item -LiteralPath $packageDirectoryPath -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -ItemType Directory -Path $packageDirectoryPath -Force | Out-Null
-    & dotnet pack (Join-Path $repositoryRoot 'Pocok.slnx') --configuration Release --output $packageDirectoryPath
-    if ($LASTEXITCODE -ne 0) {
-        throw "Package build failed with exit code $LASTEXITCODE."
-    }
-}
-
-if (-not (Test-Path -LiteralPath $packageDirectoryPath -PathType Container)) {
-    throw "Package directory does not exist: $packageDirectoryPath"
 }
 
 if ($PackageIds.Count -eq 0) {
@@ -119,12 +147,43 @@ if ($unknownPackageIds.Count -gt 0) {
     throw "No external consumer is configured for: $($unknownPackageIds -join ', ')"
 }
 
+$requestedClosures = @{}
+$closureIds = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+$orderedClosureIds = [System.Collections.Generic.List[string]]::new()
+foreach ($packageId in $PackageIds) {
+    $closure = @(& $closureResolver -CandidatePackageId $packageId | ForEach-Object { [string]$_.id })
+    $requestedClosures[$packageId] = $closure
+    foreach ($closureId in $closure) {
+        if ($closureIds.Add($closureId)) {
+            $orderedClosureIds.Add($closureId)
+        }
+    }
+}
+
+if (-not $NoPack) {
+    Remove-Item -LiteralPath $packageDirectoryPath -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path $packageDirectoryPath -Force | Out-Null
+    foreach ($closureId in $orderedClosureIds) {
+        $project = [string]$packagesById[$closureId].project
+        & dotnet pack (Join-Path $repositoryRoot $project) --configuration Release --output $packageDirectoryPath
+        if ($LASTEXITCODE -ne 0) {
+            throw "Packing $closureId failed with exit code $LASTEXITCODE."
+        }
+    }
+}
+
+if (-not (Test-Path -LiteralPath $packageDirectoryPath -PathType Container)) {
+    throw "Package directory does not exist: $packageDirectoryPath"
+}
+
 Remove-Item -LiteralPath $closureFeed -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $candidateFeedRoot -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $closureFeed -Force | Out-Null
 New-Item -ItemType Directory -Path $candidateFeedRoot -Force | Out-Null
-Get-ChildItem -LiteralPath $packageDirectoryPath -File -Filter '*.nupkg' |`
-    Copy-Item -Destination $closureFeed
+foreach ($closureId in $closureIds) {
+    $artifact = Get-PackageArtifact -PackageId $closureId -Directory $packageDirectoryPath
+    Copy-Item -LiteralPath $artifact.FullName -Destination $closureFeed
+}
 
 $systemTemp = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $workRoot = [System.IO.Path]::GetFullPath((Join-Path $systemTemp "pocok-package-smoke-$([guid]::NewGuid().ToString('N'))"))
@@ -142,11 +201,28 @@ try {
         Copy-Item -LiteralPath $package.FullName -Destination $candidateFeed
 
         if ($Mode -in @('LocalClosure', 'Both')) {
-            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'local-closure' -Sources @($closureFeed, 'https://api.nuget.org/v3/index.json') -WorkRoot $workRoot
+            $sources = @(
+                [pscustomobject]@{ Key = 'pocok-local'; Value = $closureFeed },
+                [pscustomobject]@{ Key = 'nuget-org'; Value = $nugetSource }
+            )
+            $mappings = @{
+                'pocok-local' = @('Pocok.*')
+                'nuget-org' = @('Microsoft.*', 'System.*', 'Serilog*', 'NETStandard.Library')
+            }
+            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'local-closure' -Sources $sources -Mappings $mappings -WorkRoot $workRoot
         }
 
         if ($Mode -in @('Publication', 'Both')) {
-            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'publication' -Sources @($candidateFeed, 'https://api.nuget.org/v3/index.json') -WorkRoot $workRoot
+            $publishedInternalDependencies = @($requestedClosures[$packageId] | Where-Object { $_ -ne $packageId })
+            $sources = @(
+                [pscustomobject]@{ Key = 'candidate-local'; Value = $candidateFeed },
+                [pscustomobject]@{ Key = 'nuget-org'; Value = $nugetSource }
+            )
+            $mappings = @{
+                'candidate-local' = @($packageId)
+                'nuget-org' = @($publishedInternalDependencies + @('Microsoft.*', 'System.*', 'Serilog*', 'NETStandard.Library'))
+            }
+            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'publication' -Sources $sources -Mappings $mappings -WorkRoot $workRoot
         }
     }
 }
