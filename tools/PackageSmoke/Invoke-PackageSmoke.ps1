@@ -16,6 +16,9 @@ $closureFeed = Join-Path $repositoryRoot 'artifacts/package-smoke/closure-feed'
 $candidateFeedRoot = Join-Path $repositoryRoot 'artifacts/package-smoke/candidate-feeds'
 
 $consumerSpecs = @{
+    'Pocok.AppDefaults.Modularity' = @{ Template = 'AppDefaultsModularityConsumer/Pocok.AppDefaults.Modularity.Consumer.csproj.template'; Program = 'AppDefaultsModularityConsumer/Program.cs' }
+    'Pocok.Modularity' = @{ Template = 'ModularityConsumer/Pocok.Modularity.Consumer.csproj.template'; Program = 'ModularityConsumer/Program.cs' }
+    'Pocok.Modularity.Contracts' = @{ Template = 'ModularityContractsConsumer/Pocok.Modularity.Contracts.Consumer.csproj.template'; Program = 'ModularityContractsConsumer/Program.cs' }
     'Pocok.AppDefaults.Logging.Serilog' = @{ Template = 'AppDefaultsLoggingSerilogConsumer/Pocok.AppDefaults.Logging.Serilog.Consumer.csproj.template'; Program = 'AppDefaultsLoggingSerilogConsumer/Program.cs' }
     'Pocok.AppDefaults.Logging' = @{ Template = 'AppDefaultsLoggingConsumer/Pocok.AppDefaults.Logging.Consumer.csproj.template'; Program = 'AppDefaultsLoggingConsumer/Program.cs' }
     'Pocok.AppDefaults' = @{ Template = 'AppDefaultsConsumer/Pocok.AppDefaults.Consumer.csproj.template'; Program = 'AppDefaultsConsumer/Program.cs' }

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Pocok.Modularity.FixturePlugin</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
+    <ProjectReference Include="../Modularity.Contracts/Pocok.Modularity.FixtureContracts.csproj"/>
+    <ProjectReference Include="../Modularity.Dependency/Pocok.Modularity.FixtureDependency.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="pocok.module.json" CopyToOutputDirectory="PreserveNewest"/>
+  </ItemGroup>
+</Project>

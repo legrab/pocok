@@ -1,0 +1,11 @@
+Pocok.Modularity.IModuleCatalog
+Pocok.Modularity.ModuleCatalog
+Pocok.Modularity.ModuleDescriptor
+Pocok.Modularity.ModuleDiagnostic
+Pocok.Modularity.ModuleDiagnosticSeverity
+Pocok.Modularity.ModuleLoadException
+Pocok.Modularity.ModuleLoadOptions
+Pocok.Modularity.ModuleLoader
+Pocok.Modularity.ModuleManifest
+Pocok.Modularity.ModuleServiceCollectionExtensions
+Pocok.Modularity.ModuleStatus

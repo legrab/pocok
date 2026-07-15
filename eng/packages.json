@@ -124,6 +124,60 @@
         "Serilog.Settings.Configuration"
       ],
       "versionProperty": "PocokAppDefaultsLoggingSerilogPackageVersion"
+    },
+    {
+      "id": "Pocok.Modularity.Contracts",
+      "project": "src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj",
+      "tagPrefix": "modularity.contracts-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "ModularityContractsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Abstractions",
+        "Microsoft.Extensions.DependencyInjection.Abstractions"
+      ],
+      "versionProperty": "PocokModularityContractsPackageVersion"
+    },
+    {
+      "id": "Pocok.Modularity",
+      "project": "src/Modularity/Pocok.Modularity.csproj",
+      "tagPrefix": "modularity-v",
+      "family": "Capability",
+      "releaseTier": 1,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "ModularityConsumer",
+      "internalDependencies": [
+        "Pocok.Modularity.Contracts"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Abstractions",
+        "Microsoft.Extensions.DependencyInjection"
+      ],
+      "versionProperty": "PocokModularityPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults.Modularity",
+      "project": "src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj",
+      "tagPrefix": "appdefaults.modularity-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "AppDefaultsModularityConsumer",
+      "internalDependencies": [
+        "Pocok.AppDefaults",
+        "Pocok.Modularity"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Binder",
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Hosting.Abstractions"
+      ],
+      "versionProperty": "PocokAppDefaultsModularityPackageVersion"
     }
   ]
 }
