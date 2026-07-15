@@ -10,7 +10,7 @@ public sealed class ConversionContextTests
     [Test]
     public void StrictContextUsesInvariantFailClosedPolicies()
     {
-        var context = ConversionContext.Strict;
+        ConversionContext context = ConversionContext.Strict;
 
         context.Culture.ShouldBe(CultureInfo.InvariantCulture);
         context.Culture.IsReadOnly.ShouldBeTrue();
@@ -35,12 +35,16 @@ public sealed class ConversionContextTests
     }
 
     [Test]
-    public void ContextRejectsNullCulture() =>
+    public void ContextRejectsNullCulture()
+    {
         Should.Throw<ArgumentNullException>(() => new ConversionContext(null!));
+    }
 
     [Test]
-    public void ContextRejectsUndefinedPolicies() =>
+    public void ContextRejectsUndefinedPolicies()
+    {
         Should.Throw<ArgumentOutOfRangeException>(() => new ConversionContext(
             CultureInfo.InvariantCulture,
-            overflow: (OverflowPolicy)99));
+            (OverflowPolicy)99));
+    }
 }

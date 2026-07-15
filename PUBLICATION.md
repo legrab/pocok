@@ -1,53 +1,67 @@
-# Publication Policy
+# Publication policy
 
-## Repository visibility
+All public packages are published to nuget.org. Package intent is expressed through IDs and catalog metadata, not separate authenticated feeds.
 
-Every standalone Pocok repository is public from its first commit so its CI and package audits run in the same environment users will see. Public repository visibility does not automatically approve a package release.
+## Authority
 
-## Package state
+`eng/packages.json` is the authoritative package catalog. It defines:
 
-All packages begin as internal. Publishing to NuGet is allowlist-only and requires an explicit review after package contents have been built and inspected.
+- package ID and project path;
+- tag prefix;
+- package family and release tier;
+- release eligibility;
+- internal package dependencies;
+- reviewed external dependency IDs;
+- external-consumer fixture.
 
-## Package tiers
+A packable project must have exactly one catalog entry. A tag must match exactly one releasable entry.
 
-| Tier | Meaning | Compatibility |
-|---|---|---|
-| `Internal` | Personal convenience or unfinished infrastructure. | No external promise. |
-| `Experimental` | Independently useful package whose API is still changing. | Breaking changes allowed and documented. |
-| `PublicCandidate` | Documented, tested, packaged, and awaiting final release review. | Proposed semantic-versioning policy. |
-| `Public` | Explicitly approved and released package. | Documented semantic-versioning policy. |
+## Release order
 
-The internal `Foundation` facade remains internal permanently. Public packages never depend on it.
+Internal dependencies must be released before their consumers. The current tiers are validated by `tools/PackageCatalog/Test-PackageCatalog.ps1`.
 
-## Public admission gate
+## Smoke modes
 
-A package must:
+### Local closure
 
-- solve a general problem without company, customer, project, operational, or domain-specific contracts;
-- contain no complete-application, domain-orchestration, application-UI, branding, activation, deployment, or runtime-content material;
-- have a cohesive API and a smaller dependency cone than the problem it solves;
-- document nullability, cancellation, culture, time, equality, serialization, concurrency, lifecycle, and security semantics where relevant;
-- avoid process-global mutable initialization, hidden service locators, and implicit environment behavior;
-- have focused unit tests, contract tests for adapters, and an external local-feed consumer smoke test;
-- build deterministic packages with README, license, symbols, Source Link, and reviewed public API metadata;
-- pass secret, company/product-name, task-reference, binary-content, dependency, vulnerability, and license scans;
-- have one synthetic sample and a named maintainer.
+The candidate is restored from a clean local feed containing every package produced by the repository. This proves that the nupkg dependency graph is complete and usable without project references.
 
-Passing automation never grants publication by itself.
+### Publication
 
-## Public allowlist
+The candidate is restored from a feed containing only that candidate plus nuget.org. This proves that every internal dependency declared by the candidate is already publicly resolvable.
 
-`Pocok.Primitives` is allowlisted for NuGet publication through the
-`primitives-v*` release workflow after its tagged build passes the package,
-public-content, and external-consumer checks.
+Both modes use isolated package caches. The publication workflow must pass both modes before pushing.
 
-| Package | Tier | Package review | Publication approved |
-|---|---|---:|---:|
-| `Pocok.Primitives` | `Public` | Yes | Yes |
-| `Pocok.Conversion.Abstractions` | `Experimental` | No | No |
-| `Pocok.Conversion` | `Experimental` | No | No |
-| `Pocok.Hosting` | `PublicCandidate` | Pending final tag review | No |
+## Tag format
 
-The workflow uses MinVer to derive the package version from the release tag.
-The NuGet trusted-publishing policy must target repository owner `legrab`,
-repository `pocok`, and workflow file `publish-primitives.yml`.
+Tags use the catalog prefix followed by a semantic version, for example:
+
+```text
+conversion-v0.2.0
+readiness-v0.1.0
+appdefaults-v0.1.0
+appdefaults.logging-v0.1.0
+appdefaults.logging.serilog-v0.1.0
+modularity.contracts-v0.1.0
+modularity-v0.1.0
+appdefaults.modularity-v0.1.0
+```
+
+## Retired packages
+
+`Pocok.Primitives` is retired without a forwarding package. Its nuget.org listing should be deprecated with a link to `docs/migrations/primitives-retirement.md`. A retired ID must not remain packable merely to preserve a poor dependency boundary.
+
+## Release gates
+
+A package is releasable only when:
+
+- restore, formatting, build, and tests pass;
+- package validation and API compatibility pass;
+- local-closure and publication smoke tests pass;
+- package audit passes;
+- README links render outside the source tree;
+- symbols and Source Link are present;
+- dependency IDs match the reviewed catalog;
+- the package's catalog entry has `releasable: true`.
+
+Modularity packages remain non-releasable until their real plugin fixture matrix passes on supported operating systems.

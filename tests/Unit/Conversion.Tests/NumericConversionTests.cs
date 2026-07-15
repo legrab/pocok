@@ -27,7 +27,7 @@ public sealed class NumericConversionTests
     [TestCaseSource(nameof(NumericTargets))]
     public void NumericTextConvertsAcrossSupportedTargets(string source, Type targetType, object expected)
     {
-        var result = _converter.Convert(source, targetType);
+        ConversionResult<object?> result = _converter.Convert(source, targetType);
 
         result.Value.ShouldBe(expected);
     }
@@ -46,7 +46,7 @@ public sealed class NumericConversionTests
     [TestCase(0.5)]
     public void StrictIntegralConversionRejectsFractionalLoss(double source)
     {
-        var result = _converter.Convert<int>(source);
+        ConversionResult<int> result = _converter.Convert<int>(source);
 
         result.Error!.Code.ShouldBe(ConversionErrorCodes.Lossy);
     }
@@ -74,7 +74,7 @@ public sealed class NumericConversionTests
     [Test]
     public void SaturatingOverflowClampsBothBoundaries()
     {
-        var context = new ConversionContext(CultureInfo.InvariantCulture, overflow: OverflowPolicy.Saturate);
+        var context = new ConversionContext(CultureInfo.InvariantCulture, OverflowPolicy.Saturate);
 
         _converter.Convert<byte>(300, context).Value.ShouldBe(byte.MaxValue);
         _converter.Convert<byte>(-10, context).Value.ShouldBe(byte.MinValue);
@@ -87,7 +87,7 @@ public sealed class NumericConversionTests
     {
         _converter.Convert<float>(double.MaxValue).Error!.Code.ShouldBe(ConversionErrorCodes.Overflow);
 
-        var context = new ConversionContext(CultureInfo.InvariantCulture, overflow: OverflowPolicy.Saturate);
+        var context = new ConversionContext(CultureInfo.InvariantCulture, OverflowPolicy.Saturate);
         _converter.Convert<float>(double.MaxValue, context).Value.ShouldBe(float.MaxValue);
         _converter.Convert<float>(double.MinValue, context).Value.ShouldBe(float.MinValue);
     }
@@ -122,21 +122,27 @@ public sealed class NumericConversionTests
     }
 
     [Test]
-    public void CharacterUsesItsNumericCodePoint() =>
+    public void CharacterUsesItsNumericCodePoint()
+    {
         _converter.Convert<int>('A').Value.ShouldBe(65);
+    }
 
     [Test]
-    public void InvalidNumericTextHasStableFormatFailure() =>
+    public void InvalidNumericTextHasStableFormatFailure()
+    {
         _converter.Convert<int>("twelve").Error!.Code.ShouldBe(ConversionErrorCodes.InvalidFormat);
+    }
 
     [Test]
-    public void HugeNumericTextIsReportedAsOverflow() =>
+    public void HugeNumericTextIsReportedAsOverflow()
+    {
         _converter.Convert<int>("1e100").Error!.Code.ShouldBe(ConversionErrorCodes.Overflow);
+    }
 
     [Test]
     public void HugeNumericTextCanSaturate()
     {
-        var context = new ConversionContext(CultureInfo.InvariantCulture, overflow: OverflowPolicy.Saturate);
+        var context = new ConversionContext(CultureInfo.InvariantCulture, OverflowPolicy.Saturate);
 
         _converter.Convert<int>("1e100", context).Value.ShouldBe(int.MaxValue);
         _converter.Convert<int>("-1e100", context).Value.ShouldBe(int.MinValue);

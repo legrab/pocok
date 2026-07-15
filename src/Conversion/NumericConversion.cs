@@ -2,7 +2,6 @@
 // Copyright 2026 Pocok contributors
 
 using System.Globalization;
-using Pocok.Primitives;
 
 namespace Pocok.Conversion;
 
@@ -10,29 +9,17 @@ internal static class NumericConversion
 {
     private const NumberStyles NumericTextStyles = NumberStyles.Float | NumberStyles.AllowThousands;
 
-    internal static Result<object?> Convert(object value, Type targetType, ConversionContext context)
+    internal static ConversionResult<object?> Convert(object value, Type targetType, ConversionContext context)
     {
-        if (targetType == typeof(float))
-        {
-            return ConvertToFloat(value, context);
-        }
+        if (targetType == typeof(float)) return ConvertToFloat(value, context);
 
-        if (targetType == typeof(double))
-        {
-            return ConvertToDouble(value, context);
-        }
+        if (targetType == typeof(double)) return ConvertToDouble(value, context);
 
-        var decimalResult = ReadDecimal(value, targetType, context);
-        if (decimalResult.IsFailure)
-        {
-            return Result<object?>.Failure(decimalResult.Error!);
-        }
+        ConversionResult<decimal> decimalResult = ReadDecimal(value, targetType, context);
+        if (decimalResult.IsFailure) return ConversionResult<object?>.Failure(decimalResult.Error!);
 
         var decimalValue = decimalResult.Value;
-        if (targetType == typeof(decimal))
-        {
-            return Result<object?>.Success(decimalValue);
-        }
+        if (targetType == typeof(decimal)) return ConversionResult<object?>.Success(decimalValue);
 
         return ConvertDecimalToIntegral(decimalValue, targetType, context);
     }
@@ -53,35 +40,29 @@ internal static class NumericConversion
         }
     }
 
-    private static Result<decimal> ReadDecimal(object value, Type targetType, ConversionContext context)
+    private static ConversionResult<decimal> ReadDecimal(object value, Type targetType, ConversionContext context)
     {
         if (value is bool boolean)
         {
             if (context.NumericBooleans == NumericBooleanPolicy.Reject)
-            {
-                return Result<decimal>.Failure(new Error(
+                return ConversionResult<decimal>.Failure(new ConversionFailure(
                     ConversionErrorCodes.Unsupported,
                     "Boolean-to-numeric conversion is disabled by the selected policy."));
-            }
 
-            return Result<decimal>.Success(boolean ? decimal.One : decimal.Zero);
+            return ConversionResult<decimal>.Success(boolean ? decimal.One : decimal.Zero);
         }
 
         if (value is string text)
         {
             if (decimal.TryParse(text, NumericTextStyles, context.Culture, out var parsed))
-            {
-                return Result<decimal>.Success(parsed);
-            }
+                return ConversionResult<decimal>.Success(parsed);
 
             if (double.TryParse(text, NumericTextStyles, context.Culture, out var floating) &&
                 !double.IsNaN(floating) &&
                 (double.IsInfinity(floating) || Math.Abs(floating) > (double)decimal.MaxValue))
-            {
                 return SaturateDecimalOrFail(floating, targetType, context);
-            }
 
-            return Result<decimal>.Failure(ConversionFailures.InvalidFormat(targetType).Error!);
+            return ConversionResult<decimal>.Failure(ConversionFailures.InvalidFormat(targetType).Error!);
         }
 
         var source = NormalizeNumericSource(value);
@@ -89,15 +70,13 @@ internal static class NumericConversion
         if (source is float single)
         {
             if (!float.IsFinite(single))
-            {
                 return float.IsNaN(single)
-                    ? Result<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!)
+                    ? ConversionResult<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!)
                     : SaturateDecimalOrFail(single, targetType, context);
-            }
 
             try
             {
-                return Result<decimal>.Success((decimal)single);
+                return ConversionResult<decimal>.Success((decimal)single);
             }
             catch (OverflowException)
             {
@@ -108,15 +87,13 @@ internal static class NumericConversion
         if (source is double floatingPoint)
         {
             if (!double.IsFinite(floatingPoint))
-            {
                 return double.IsNaN(floatingPoint)
-                    ? Result<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!)
+                    ? ConversionResult<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!)
                     : SaturateDecimalOrFail(floatingPoint, targetType, context);
-            }
 
             try
             {
-                return Result<decimal>.Success((decimal)floatingPoint);
+                return ConversionResult<decimal>.Success((decimal)floatingPoint);
             }
             catch (OverflowException)
             {
@@ -126,19 +103,20 @@ internal static class NumericConversion
 
         try
         {
-            return Result<decimal>.Success(System.Convert.ToDecimal(source, context.Culture));
+            return ConversionResult<decimal>.Success(System.Convert.ToDecimal(source, context.Culture));
         }
         catch (OverflowException)
         {
-            return Result<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!);
+            return ConversionResult<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!);
         }
         catch (Exception exception) when (exception is InvalidCastException or FormatException)
         {
-            return Result<decimal>.Failure(ConversionFailures.Unsupported(value.GetType(), targetType).Error!);
+            return ConversionResult<decimal>.Failure(ConversionFailures.Unsupported(value.GetType(), targetType)
+                .Error!);
         }
     }
 
-    private static Result<object?> ConvertDecimalToIntegral(
+    private static ConversionResult<object?> ConvertDecimalToIntegral(
         decimal value,
         Type targetType,
         ConversionContext context)
@@ -146,10 +124,7 @@ internal static class NumericConversion
         var integralValue = decimal.Truncate(value);
         if (integralValue != value)
         {
-            if (context.NumericLoss == NumericLossPolicy.Reject)
-            {
-                return ConversionFailures.Lossy(targetType);
-            }
+            if (context.NumericLoss == NumericLossPolicy.Reject) return ConversionFailures.Lossy(targetType);
 
             integralValue = decimal.Round(value, 0, MidpointRounding.AwayFromZero);
         }
@@ -157,10 +132,7 @@ internal static class NumericConversion
         var (minimum, maximum) = GetIntegralBounds(targetType);
         if (integralValue < minimum || integralValue > maximum)
         {
-            if (context.Overflow == OverflowPolicy.Fail)
-            {
-                return ConversionFailures.Overflow(targetType);
-            }
+            if (context.Overflow == OverflowPolicy.Fail) return ConversionFailures.Overflow(targetType);
 
             integralValue = decimal.Clamp(integralValue, minimum, maximum);
         }
@@ -175,34 +147,28 @@ internal static class NumericConversion
             targetType == typeof(ulong) ? decimal.ToUInt64(integralValue) :
             throw new ArgumentException("Unsupported integral target type.", nameof(targetType));
 
-        return Result<object?>.Success(converted);
+        return ConversionResult<object?>.Success(converted);
     }
 
-    private static Result<object?> ConvertToFloat(object value, ConversionContext context)
+    private static ConversionResult<object?> ConvertToFloat(object value, ConversionContext context)
     {
-        if (!TryReadDouble(value, typeof(float), context, out var source, out var failure))
-        {
+        if (!TryReadDouble(value, typeof(float), context, out var source, out ConversionResult<object?>? failure))
             return failure!;
-        }
 
-        if (double.IsFinite(source) && (source > float.MaxValue || source < float.MinValue))
-        {
+        if (double.IsFinite(source) && source is > float.MaxValue or < float.MinValue)
             return context.Overflow == OverflowPolicy.Fail
                 ? ConversionFailures.Overflow(typeof(float))
-                : Result<object?>.Success(source > 0 ? float.MaxValue : float.MinValue);
-        }
+                : ConversionResult<object?>.Success(source > 0 ? float.MaxValue : float.MinValue);
 
-        return Result<object?>.Success((float)source);
+        return ConversionResult<object?>.Success((float)source);
     }
 
-    private static Result<object?> ConvertToDouble(object value, ConversionContext context)
+    private static ConversionResult<object?> ConvertToDouble(object value, ConversionContext context)
     {
-        if (!TryReadDouble(value, typeof(double), context, out var source, out var failure))
-        {
+        if (!TryReadDouble(value, typeof(double), context, out var source, out ConversionResult<object?>? failure))
             return failure!;
-        }
 
-        return Result<object?>.Success(source);
+        return ConversionResult<object?>.Success(source);
     }
 
     private static bool TryReadDouble(
@@ -210,14 +176,14 @@ internal static class NumericConversion
         Type targetType,
         ConversionContext context,
         out double number,
-        out Result<object?>? failure)
+        out ConversionResult<object?>? failure)
     {
         if (value is bool boolean)
         {
             if (context.NumericBooleans == NumericBooleanPolicy.Reject)
             {
                 number = default;
-                failure = Result<object?>.Failure(new Error(
+                failure = ConversionResult<object?>.Failure(new ConversionFailure(
                     ConversionErrorCodes.Unsupported,
                     "Boolean-to-numeric conversion is disabled by the selected policy."));
                 return false;
@@ -242,7 +208,9 @@ internal static class NumericConversion
 
                     number = number > 0
                         ? targetType == typeof(float) ? float.MaxValue : double.MaxValue
-                        : targetType == typeof(float) ? float.MinValue : double.MinValue;
+                        : targetType == typeof(float)
+                            ? float.MinValue
+                            : double.MinValue;
                 }
 
                 failure = null;
@@ -276,43 +244,41 @@ internal static class NumericConversion
         }
     }
 
-    private static Result<decimal> SaturateDecimalOrFail(
+    private static ConversionResult<decimal> SaturateDecimalOrFail(
         double value,
         Type targetType,
         ConversionContext context)
     {
         if (context.Overflow == OverflowPolicy.Fail)
-        {
-            return Result<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!);
-        }
+            return ConversionResult<decimal>.Failure(ConversionFailures.Overflow(targetType).Error!);
 
-        return Result<decimal>.Success(value < 0 ? decimal.MinValue : decimal.MaxValue);
+        return ConversionResult<decimal>.Success(value < 0 ? decimal.MinValue : decimal.MaxValue);
     }
 
     private static bool IsExplicitInfinity(string text, CultureInfo culture)
     {
         var trimmed = text.Trim();
-        return string.Equals(trimmed, culture.NumberFormat.PositiveInfinitySymbol, StringComparison.OrdinalIgnoreCase) ||
+        return string.Equals(trimmed, culture.NumberFormat.PositiveInfinitySymbol,
+                   StringComparison.OrdinalIgnoreCase) ||
                string.Equals(trimmed, culture.NumberFormat.NegativeInfinitySymbol, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static (decimal Minimum, decimal Maximum) GetIntegralBounds(Type targetType) =>
-        targetType == typeof(byte) ? (byte.MinValue, byte.MaxValue) :
-        targetType == typeof(sbyte) ? (sbyte.MinValue, sbyte.MaxValue) :
-        targetType == typeof(short) ? (short.MinValue, short.MaxValue) :
-        targetType == typeof(ushort) ? (ushort.MinValue, ushort.MaxValue) :
-        targetType == typeof(int) ? (int.MinValue, int.MaxValue) :
-        targetType == typeof(uint) ? (uint.MinValue, uint.MaxValue) :
-        targetType == typeof(long) ? (long.MinValue, long.MaxValue) :
-        targetType == typeof(ulong) ? (ulong.MinValue, ulong.MaxValue) :
-        throw new ArgumentException("Unsupported integral target type.", nameof(targetType));
+    private static (decimal Minimum, decimal Maximum) GetIntegralBounds(Type targetType)
+    {
+        return targetType == typeof(byte) ? (byte.MinValue, byte.MaxValue) :
+            targetType == typeof(sbyte) ? (sbyte.MinValue, sbyte.MaxValue) :
+            targetType == typeof(short) ? (short.MinValue, short.MaxValue) :
+            targetType == typeof(ushort) ? (ushort.MinValue, ushort.MaxValue) :
+            targetType == typeof(int) ? (int.MinValue, int.MaxValue) :
+            targetType == typeof(uint) ? (uint.MinValue, uint.MaxValue) :
+            targetType == typeof(long) ? (long.MinValue, long.MaxValue) :
+            targetType == typeof(ulong) ? (ulong.MinValue, ulong.MaxValue) :
+            throw new ArgumentException("Unsupported integral target type.", nameof(targetType));
+    }
 
     private static object NormalizeNumericSource(object value)
     {
-        if (value is char character)
-        {
-            return (ushort)character;
-        }
+        if (value is char character) return (ushort)character;
 
         return value.GetType().IsEnum
             ? System.Convert.ChangeType(value, Enum.GetUnderlyingType(value.GetType()), CultureInfo.InvariantCulture)

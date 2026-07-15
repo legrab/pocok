@@ -13,10 +13,7 @@ internal static class RepositoryRoot
 
         while (directory is not null)
         {
-            if (File.Exists(System.IO.Path.Combine(directory.FullName, "Pocok.slnx")))
-            {
-                return directory.FullName;
-            }
+            if (File.Exists(System.IO.Path.Combine(directory.FullName, "Pocok.slnx"))) return directory.FullName;
 
             directory = directory.Parent;
         }

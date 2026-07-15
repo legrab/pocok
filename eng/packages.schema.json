@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "packages"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "project",
+          "tagPrefix",
+          "versionProperty",
+          "family",
+          "releaseTier",
+          "state",
+          "releasable",
+          "consumer",
+          "internalDependencies",
+          "allowedExternalDependencies"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^Pocok\\."
+          },
+          "project": {
+            "type": "string",
+            "pattern": "^src/.+\\.csproj$"
+          },
+          "tagPrefix": {
+            "type": "string",
+            "minLength": 2
+          },
+          "family": {
+            "enum": [
+              "Capability",
+              "MaintainerDefaults"
+            ]
+          },
+          "releaseTier": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "state": {
+            "enum": [
+              "Active",
+              "Experimental",
+              "Consolidating",
+              "Renaming",
+              "Retiring",
+              "Retired"
+            ]
+          },
+          "releasable": {
+            "type": "boolean"
+          },
+          "consumer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "internalDependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "allowedExternalDependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "versionProperty": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9]+$"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
