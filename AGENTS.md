@@ -59,10 +59,10 @@ Act as a senior library engineer. Prefer correctness, explicit contracts, mainta
 
 ## Current handoff
 
-- Read `docs/plans/repository-consolidation.md` before changing code or release configuration.
-- Treat the repository as an unverified implementation candidate.
-- Establish an executable .NET 10 and PowerShell 7 baseline before extending packages.
-- Do not create release tags until the revised stabilization acceptance sequence passes.
+- Read `docs/plans/repository-consolidation.md` and `sessions/2026-07-15-package-semantics-appdefaults.md` before changing code or release configuration.
+- Waves C and D are implemented structurally; execute their .NET 10 and PowerShell 7 acceptance matrix before extending packages.
+- Keep Modularity non-releasable and treat Wave E as a separate cross-platform proof task.
+- Do not create release tags until candidate-scoped local-closure, publication, audit, and CI checks pass.
 
 ## Workflow
 

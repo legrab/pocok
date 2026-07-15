@@ -125,7 +125,8 @@ A package is releasable only when, on the exact candidate commit:
 
 - restore, formatting, Release build, and focused tests pass;
 - member-level API snapshots and NuGet package validation pass;
-- relevant samples run, including the trimmed Conversion sample;
+- relevant samples run, including the explicit trimmed-array Conversion smoke fixture;
+- trim-incompatible public APIs surface `RequiresUnreferencedCode` rather than leaking internal linker warnings;
 - local-closure and publication smoke tests pass;
 - candidate-scoped package-content audit passes;
 - packaged README links render outside the source tree;

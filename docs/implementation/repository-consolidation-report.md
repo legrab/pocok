@@ -1,10 +1,8 @@
 # Repository consolidation report
 
-> **Current status:** This file records the consolidation changes applied. The repository has been formatted and build errors have been fixed. Further stabilization and test verification should follow the [consolidation plan](../plans/repository-consolidation.md).
+## Current result
 
-## Result
-
-The repository has been transformed into a consolidated state with a coherent target package portfolio. It is ready for final stabilization and verification.
+The repository is a coherent implementation candidate for five initial public packages and three experimental Modularity packages. The previous executable baseline passed 182 tests. The V2 follow-up finalized pending Modularity WIP, implemented package-semantic Wave C, and made AppDefaults policy Wave D explicit. Those latest changes still require a fresh .NET 10 and PowerShell 7 acceptance run before release.
 
 ### Intended initial release set
 
@@ -26,51 +24,59 @@ The repository has been transformed into a consolidated state with a coherent ta
 - `Pocok.Hosting`
 - `Pocok.Conversion.Abstractions`
 
-## Material changes
+## Consolidation outcome
 
 - Generic Error/Result coupling was replaced by package-owned failure models.
 - Conversion contracts and implementation were consolidated into one package.
-- Conversion gained bounded recursive work, path-aware failures, explicit custom strategies, fuzz coverage, trim guidance, and a benchmark project.
 - Hosting was renamed to Readiness and gained atomic snapshots, restart cycles, stale-token rejection, and concurrency-oriented tests.
 - AppDefaults established one deliberately small explicit configurator contract.
-- Logging defaults remain additive unless provider clearing is explicitly selected.
-- Serilog integration reads standard Serilog configuration and forces no sink, file, endpoint, or static logger policy.
-- Modularity uses manifest-led startup discovery, one BCL load context per plugin, explicit shared assemblies, staged service registration, and immutable diagnostics.
-- Public package dependencies are governed by one catalog and one tag-driven publication workflow.
-- Package smoke tests now distinguish complete local closure from candidate-plus-nuget.org publication rehearsal.
-- Release builds pin internal dependency versions from existing package tags before restore, eliminating unpublished MinVer dependency edges.
-- Publication pushes the exact candidate once, lets the NuGet client publish its matching symbols package, and determines GitHub prerelease status from the semantic version rather than the hyphenated tag prefix.
+- Provider-neutral logging and Serilog policy remain separate packages.
+- Modularity remains startup-only, trusted, manifest-led, and non-releasable.
+- Public package dependencies, tags, versions, consumers, and release tiers are governed by one catalog.
+- Member-level public API snapshots use Verify and PublicApiGenerator.
+- The five initial packages are isolated from experimental Modularity through `Pocok.Core.slnx`.
 
-## Deliberate deviations from the original plan
+## V2 improvements
 
-- `Pocok.AppDefaults.Logging.Serilog` does not depend on `Pocok.AppDefaults.Logging`. They are alternative policies and coupling them would pull the built-in console provider into a Serilog-only application.
-- Serilog version 1 ships no sink. Sink selection remains explicit application ownership and avoids file or network side effects.
-- Modularity uses a small BCL `AssemblyLoadContext` adapter rather than adding McMaster.NETCore.Plugins. The decision and replacement threshold are recorded in ADR 0009.
-- Modularity discovers all public parameterless `IServiceModule` implementations in the manifest-selected entry assembly rather than requiring a module type string. Discovery remains bounded to one explicit assembly and deterministic.
-- Modularity is implemented for evaluation but remains non-releasable until executable cross-platform fixtures pass.
-- Package API inventories are lightweight exported-type baselines in addition to NuGet package validation. A heavier API tool can replace them after the first real release if it provides enough value.
+### Package semantics
 
-## Known issues for the stabilization session
+- One dependency-first closure resolver now drives release packing, smoke feeds, catalog validation, and candidate-scoped auditing.
+- Local-closure smoke uses only the exact Pocok closure and package source mapping prevents nuget.org fallback for `Pocok.*`.
+- Publication smoke keeps only the candidate local and requires internal dependencies to resolve from nuget.org.
+- Local smoke packing can pack only requested package closures instead of the whole repository.
+- The publication workflow builds the core release graph but packs and audits only the candidate closure.
+- The audit rejects missing, duplicate, stale, unrelated, and repository-contaminated artifacts and checks concrete dependency versions.
+- CI executes core samples and publishes and runs an explicit trimmed-array Conversion smoke fixture.
+- General Conversion APIs are marked with `RequiresUnreferencedCode`; the fixture is a narrow opt-in regression check, not a package-wide trim-compatibility claim.
 
-- `.github/workflows/publish.yml` builds and tests the complete solution, so experimental Modularity can block every initial package release.
-- The exported-type baseline is not a sufficient member-level API compatibility mechanism.
-- All runtime, packaging, PowerShell, GitHub Actions, trimming, and cross-platform plugin claims remain unverified.
+### AppDefaults policy
 
-## Static verification performed
+- Configuration binding precedes code delegates.
+- Duplicate concern configurator application throws instead of hiding later conflicting options.
+- Resolved startup policy is exposed as `IOptions<T>`.
+- Logging providers remain additive unless explicit clearing is selected.
+- Simple-console registration is disabled by default because the standard host already owns providers.
+- Serilog remains sink-free and application-owned.
+- The same duplicate and options policy is applied to experimental Modularity defaults.
 
-The final repository checks:
+### Pending Modularity WIP
 
-- JSON, XML, solution XML, and workflow YAML parsing;
-- project-reference existence and repository containment;
-- central package-version usage;
-- package catalog uniqueness, release tiers, and dependency acyclicity;
-- active packable-project/catalog agreement;
-- publication trigger agreement with releasable entries;
-- public exported-type inventory agreement by source inspection;
-- required source headers;
-- absence of retired project references and build artifacts;
-- absence of copied origin archives or origin implementation trees.
+- Redundant tests tied to local output layouts were removed.
+- Required duplicate module IDs remain fatal.
+- Optional duplicate module IDs remain diagnostics unless strict optional failure mode is selected.
+- The stronger external plugin integration fixtures remain the authoritative loader tests.
 
-## Execution status
+## Deliberate boundaries
 
-The repository is now in an environment containing .NET 10 and PowerShell 7. Initial build and formatting issues have been resolved. Complete test execution and package validation remain as the next steps.
+- Capability packages do not depend on AppDefaults.
+- `Pocok.AppDefaults.Logging.Serilog` does not depend on `Pocok.AppDefaults.Logging`.
+- No public Common, Utils, Foundation, or generic Primitives package exists.
+- No application-specific origin implementation is copied into the package portfolio.
+- Modularity is trusted in-process extension loading, not a security sandbox.
+- Runtime plugin installation, hot reload, child containers, and unload guarantees remain out of scope.
+
+## Validation status
+
+The repository passed static checks for JSON, XML, workflow YAML, project paths, package catalog consistency, dependency acyclicity, package closure ordering, source headers, retired references, documentation links, and Git cleanliness.
+
+The V2 environment had no .NET SDK or PowerShell runtime. The latest C#, MSBuild, PowerShell, package, and workflow changes have not been executed here. This is the only release-blocking uncertainty for the initial package set. See the implementation ledger and `PUBLICATION.md` for the exact acceptance commands.
