@@ -66,6 +66,64 @@
       "internalDependencies": [],
       "allowedExternalDependencies": [],
       "versionProperty": "PocokReadinessPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults",
+      "project": "src/AppDefaults/Pocok.AppDefaults.csproj",
+      "tagPrefix": "appdefaults-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 0,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "AppDefaultsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Hosting.Abstractions"
+      ],
+      "versionProperty": "PocokAppDefaultsPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults.Logging",
+      "project": "src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj",
+      "tagPrefix": "appdefaults.logging-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 1,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "AppDefaultsLoggingConsumer",
+      "internalDependencies": [
+        "Pocok.AppDefaults"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Binder",
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Hosting.Abstractions",
+        "Microsoft.Extensions.Logging",
+        "Microsoft.Extensions.Logging.Console"
+      ],
+      "versionProperty": "PocokAppDefaultsLoggingPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults.Logging.Serilog",
+      "project": "src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj",
+      "tagPrefix": "appdefaults.logging.serilog-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 2,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "AppDefaultsLoggingSerilogConsumer",
+      "internalDependencies": [
+        "Pocok.AppDefaults"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Binder",
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Hosting.Abstractions",
+        "Serilog",
+        "Serilog.Extensions.Hosting",
+        "Serilog.Settings.Configuration"
+      ],
+      "versionProperty": "PocokAppDefaultsLoggingSerilogPackageVersion"
     }
   ]
 }
