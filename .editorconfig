@@ -32,6 +32,12 @@ dotnet_diagnostic.CA1032.severity = none
 [src/Readiness/ReadinessStoppedException.cs]
 dotnet_diagnostic.CA1032.severity = none
 
+[src/Modularity/ModuleLoadException.cs]
+dotnet_diagnostic.CA1032.severity = none
+
+[src/Modularity/ModuleManifest.cs]
+dotnet_diagnostic.CA2227.severity = none
+
 [samples/**/*.cs]
 dotnet_diagnostic.CA1848.severity = none
 

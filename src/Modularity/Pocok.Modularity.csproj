@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Pocok.Modularity</PackageId>
+    <PackageVersion Condition="'$(PocokModularityPackageVersion)' != ''">$(PocokModularityPackageVersion)</PackageVersion>
+    <MinVerTagPrefix>modularity-v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
+    <Description>Manifest-led, trusted startup plugin loading with isolated dependency resolution and standard DI registration.</Description>
+    <PackageTags>plugins;modules;dependency-injection;assemblyloadcontext</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+  </ItemGroup>
+</Project>

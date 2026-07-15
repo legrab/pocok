@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
+    <ProjectReference Include="../ModularCommunicator.Contracts/Pocok.ModularCommunicator.Contracts.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="pocok.module.json" CopyToOutputDirectory="PreserveNewest"/>
+  </ItemGroup>
+</Project>

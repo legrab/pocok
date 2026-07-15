@@ -6,6 +6,7 @@ using Pocok.AppDefaults;
 using Pocok.AppDefaults.Logging;
 using Pocok.AppDefaults.Modularity;
 using Pocok.Conversion;
+using Pocok.Modularity;
 using Pocok.Readiness;
 using SerilogDefaultsOptions = Pocok.AppDefaults.Logging.Serilog.SerilogDefaultsOptions;
 

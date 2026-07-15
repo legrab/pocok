@@ -1,0 +1,14 @@
+{
+  "manifestVersion": 1,
+  "id": "fixture.greeting",
+  "version": "1.0.0",
+  "entryAssembly": "Pocok.Modularity.FixturePlugin.dll",
+  "required": false,
+  "configurationSection": "Modules:fixture.greeting",
+  "sharedAssemblies": [
+    "Pocok.Modularity.FixtureContracts"
+  ],
+  "metadata": {
+    "purpose": "integration-test"
+  }
+}

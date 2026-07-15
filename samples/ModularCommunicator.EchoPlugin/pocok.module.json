@@ -1,0 +1,13 @@
+{
+  "manifestVersion": 1,
+  "id": "sample.echo-communicator",
+  "version": "1.0.0",
+  "entryAssembly": "Pocok.ModularCommunicator.EchoPlugin.dll",
+  "required": false,
+  "sharedAssemblies": [
+    "Pocok.ModularCommunicator.Contracts"
+  ],
+  "metadata": {
+    "purpose": "reference-sample"
+  }
+}
