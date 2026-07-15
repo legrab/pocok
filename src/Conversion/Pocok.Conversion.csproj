@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Pocok.Conversion</PackageId>
+    <PackageVersion Condition="'$(PocokConversionPackageVersion)' != ''">$(PocokConversionPackageVersion)</PackageVersion>
     <MinVerTagPrefix>conversion-v</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
     <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
@@ -10,7 +11,4 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../Conversion.Abstractions/Pocok.Conversion.Abstractions.csproj" />
-  </ItemGroup>
 </Project>

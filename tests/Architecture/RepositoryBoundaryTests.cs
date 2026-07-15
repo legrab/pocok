@@ -11,20 +11,20 @@ public sealed class RepositoryBoundaryTests
     public void ProjectReferencesStayWithinRepository()
     {
         var root = RepositoryRoot.Path;
-        var rootPrefix = root + System.IO.Path.DirectorySeparatorChar;
+        var rootPrefix = root + Path.DirectorySeparatorChar;
 
         foreach (var project in Directory.EnumerateFiles(root, "*.csproj", SearchOption.AllDirectories)
                      .Where(IsRepositoryFile))
         {
             var document = XDocument.Load(project);
 
-            foreach (var reference in document.Descendants("ProjectReference"))
+            foreach (XElement reference in document.Descendants("ProjectReference"))
             {
                 var include = reference.Attribute("Include")?.Value;
                 include.ShouldNotBeNullOrWhiteSpace();
 
-                var resolved = System.IO.Path.GetFullPath(
-                    System.IO.Path.Combine(System.IO.Path.GetDirectoryName(project)!, include));
+                var resolved = Path.GetFullPath(
+                    Path.Combine(Path.GetDirectoryName(project)!, include));
 
                 resolved.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase).ShouldBeTrue(
                     $"Project reference escapes the repository: {project} -> {include}");
@@ -50,7 +50,103 @@ public sealed class RepositoryBoundaryTests
         }
     }
 
-    private static bool IsRepositoryFile(string path) =>
-        !path.Contains($"{System.IO.Path.DirectorySeparatorChar}obj{System.IO.Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase) &&
-        !path.Contains($"{System.IO.Path.DirectorySeparatorChar}artifacts{System.IO.Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase);
+
+    [Test]
+    public void PackableProjectsDoNotReferenceNonPackableRuntimeProjects()
+    {
+        var root = RepositoryRoot.Path;
+        var projects = Directory.EnumerateFiles(root, "*.csproj", SearchOption.AllDirectories)
+            .Where(IsRepositoryFile)
+            .ToDictionary(Path.GetFullPath, XDocument.Load, StringComparer.OrdinalIgnoreCase);
+
+        foreach ((var projectPath, XDocument document) in projects)
+        {
+            if (!IsPackable(document)) continue;
+
+            foreach (XElement reference in document.Descendants("ProjectReference"))
+            {
+                var include = reference.Attribute("Include")?.Value;
+                include.ShouldNotBeNullOrWhiteSpace();
+                var referencedPath = Path.GetFullPath(
+                    Path.Combine(Path.GetDirectoryName(projectPath)!, include));
+
+                projects.ContainsKey(referencedPath)
+                    .ShouldBeTrue($"Unknown project reference: {projectPath} -> {include}");
+                IsPackable(projects[referencedPath]).ShouldBeTrue(
+                    $"Packable project {projectPath} references non-packable runtime project {referencedPath}.");
+            }
+        }
+    }
+
+    [Test]
+    public void RepositoryDoesNotIntroduceCatchAllProjects()
+    {
+        var forbiddenNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "Common",
+            "Utils",
+            "Utilities",
+            "Foundation",
+            "SharedKernel"
+        };
+
+        var offenders = Directory.EnumerateFiles(RepositoryRoot.Path, "*.csproj", SearchOption.AllDirectories)
+            .Where(IsRepositoryFile)
+            .Where(path => forbiddenNames.Contains(Path.GetFileNameWithoutExtension(path)))
+            .Select(path => Path.GetRelativePath(RepositoryRoot.Path, path))
+            .ToArray();
+
+        offenders.ShouldBeEmpty();
+    }
+
+    [Test]
+    public void SharedSourceIsLinkedExplicitlyAndRemainsInternal()
+    {
+        var root = RepositoryRoot.Path;
+        var sharedRoot = Path.Combine(root, "src", "Shared");
+        var sharedFiles = Directory.Exists(sharedRoot)
+            ? Directory.EnumerateFiles(sharedRoot, "*.cs", SearchOption.AllDirectories).ToArray()
+            : [];
+
+        foreach (var file in sharedFiles)
+        {
+            var text = File.ReadAllText(file);
+            text.ShouldNotContain("public class ");
+            text.ShouldNotContain("public static class ");
+            text.ShouldNotContain("public interface ");
+            text.ShouldNotContain("public record ");
+            text.ShouldNotContain("public enum ");
+        }
+
+        foreach (var project in Directory.EnumerateFiles(root, "*.csproj", SearchOption.AllDirectories)
+                     .Where(IsRepositoryFile))
+        {
+            var document = XDocument.Load(project);
+            foreach (XElement compile in document.Descendants("Compile"))
+            {
+                var include = compile.Attribute("Include")?.Value;
+                if (include is null || !include.Replace('\\', '/')
+                        .Contains("src/Shared/", StringComparison.OrdinalIgnoreCase)) continue;
+
+                include.ShouldNotContain("*");
+                compile.Attribute("Link")?.Value.ShouldNotBeNullOrWhiteSpace();
+            }
+        }
+    }
+
+    private static bool IsPackable(XDocument document)
+    {
+        return string.Equals(
+            document.Descendants("IsPackable").LastOrDefault()?.Value,
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsRepositoryFile(string path)
+    {
+        return !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}",
+                   StringComparison.OrdinalIgnoreCase) &&
+               !path.Contains($"{Path.DirectorySeparatorChar}artifacts{Path.DirectorySeparatorChar}",
+                   StringComparison.OrdinalIgnoreCase);
+    }
 }

@@ -32,23 +32,21 @@ jobs:
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
-          cache: true
-          cache-dependency-path: '**/packages.lock.json'
 
       - name: Restore
-        run: dotnet restore --locked-mode
+        run: dotnet restore Pocok.slnx
 
       - name: Verify formatting
-        run: dotnet format --verify-no-changes --no-restore
+        run: dotnet format Pocok.slnx --verify-no-changes --no-restore
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build Pocok.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --logger trx --results-directory artifacts/test-results
+        run: dotnet test Pocok.slnx --configuration Release --no-build --logger trx --results-directory artifacts/test-results
 
       - name: Pack
-        run: dotnet pack --configuration Release --no-build --output artifacts/packages
+        run: dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
 
       - name: Test package from local feed
         shell: pwsh

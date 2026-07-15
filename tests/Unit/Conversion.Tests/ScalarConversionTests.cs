@@ -19,7 +19,7 @@ public sealed class ScalarConversionTests
     [Test]
     public void StrictNullFailsForNonNullableTarget()
     {
-        var result = _converter.Convert<int>(null);
+        ConversionResult<int> result = _converter.Convert<int>(null);
 
         result.IsFailure.ShouldBeTrue();
         result.Error!.Code.ShouldBe(ConversionErrorCodes.NullNotAllowed);
@@ -45,16 +45,22 @@ public sealed class ScalarConversionTests
 
     [TestCase("true", true)]
     [TestCase("FALSE", false)]
-    public void BooleanTextIsParsed(string source, bool expected) =>
+    public void BooleanTextIsParsed(string source, bool expected)
+    {
         _converter.Convert<bool>(source).Value.ShouldBe(expected);
+    }
 
     [Test]
-    public void InvalidBooleanTextFailsSafely() =>
+    public void InvalidBooleanTextFailsSafely()
+    {
         _converter.Convert<bool>("enabled").Error!.Code.ShouldBe(ConversionErrorCodes.InvalidFormat);
+    }
 
     [Test]
-    public void NumericBooleansAreDisabledByDefault() =>
+    public void NumericBooleansAreDisabledByDefault()
+    {
         _converter.Convert<bool>(1).Error!.Code.ShouldBe(ConversionErrorCodes.Unsupported);
+    }
 
     [TestCase(0, false)]
     [TestCase(1, true)]
@@ -118,7 +124,7 @@ public sealed class ScalarConversionTests
     [Test]
     public void UnsupportedObjectConversionDoesNotUseSerializerFallback()
     {
-        var result = _converter.Convert<SampleRecord>(new { Value = 42 });
+        ConversionResult<SampleRecord> result = _converter.Convert<SampleRecord>(new { Value = 42 });
 
         result.Error!.Code.ShouldBe(ConversionErrorCodes.Unsupported);
     }
@@ -126,7 +132,7 @@ public sealed class ScalarConversionTests
     [Test]
     public void NonGenericConversionMatchesGenericConversion()
     {
-        var result = _converter.Convert("42", typeof(int));
+        ConversionResult<object?> result = _converter.Convert("42", typeof(int));
 
         result.Value.ShouldBe(42);
     }

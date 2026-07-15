@@ -15,7 +15,7 @@ public sealed class CollectionConversionTests
     {
         string[] source = ["1", "2", "3"];
 
-        var result = _converter.Convert<int[]>(source);
+        ConversionResult<int[]> result = _converter.Convert<int[]>(source);
 
         result.Value.ShouldBe([1, 2, 3]);
     }
@@ -24,8 +24,8 @@ public sealed class CollectionConversionTests
     public void CommonCollectionInterfacesUseAssignableImplementations()
     {
         string[] source = ["1", "1", "2"];
-        var list = _converter.Convert<IReadOnlyList<int>>(new ArrayList { "1", 2, 3m }).Value;
-        var set = _converter.Convert<ISet<int>>(source).Value;
+        IReadOnlyList<int> list = _converter.Convert<IReadOnlyList<int>>(new ArrayList { "1", 2, 3m }).Value;
+        ISet<int> set = _converter.Convert<ISet<int>>(source).Value;
 
         list.ShouldBe([1, 2, 3]);
         set.SetEquals([1, 2]).ShouldBeTrue();
@@ -36,7 +36,7 @@ public sealed class CollectionConversionTests
     {
         string[] source = ["1", "2", "3"];
 
-        var result = _converter.Convert<ConcurrentBag<int>>(source);
+        ConversionResult<ConcurrentBag<int>> result = _converter.Convert<ConcurrentBag<int>>(source);
 
         result.Value.Order().ShouldBe([1, 2, 3]);
     }
@@ -48,7 +48,7 @@ public sealed class CollectionConversionTests
         string[] second = ["3"];
         object[] source = [first, second];
 
-        var result = _converter.Convert<int[][]>(source);
+        ConversionResult<int[][]> result = _converter.Convert<int[][]>(source);
 
         result.Value.Length.ShouldBe(2);
         result.Value[0].ShouldBe([1, 2]);
@@ -60,7 +60,7 @@ public sealed class CollectionConversionTests
     {
         string[] source = ["1", "invalid", "3"];
 
-        var result = _converter.Convert<int[]>(source);
+        ConversionResult<int[]> result = _converter.Convert<int[]>(source);
 
         result.Error!.Code.ShouldBe(ConversionErrorCodes.InvalidFormat);
     }
@@ -75,15 +75,17 @@ public sealed class CollectionConversionTests
     }
 
     [Test]
-    public void StringIsNotImplicitlyTreatedAsCharacterCollection() =>
+    public void StringIsNotImplicitlyTreatedAsCharacterCollection()
+    {
         _converter.Convert<char[]>("abc").Error!.Code.ShouldBe(ConversionErrorCodes.Unsupported);
+    }
 
     [Test]
     public void KeyValuePairConvertsBothSides()
     {
         var source = new KeyValuePair<string, string>("42", "12.5");
 
-        var result = _converter.Convert<KeyValuePair<int, decimal>>(source);
+        ConversionResult<KeyValuePair<int, decimal>> result = _converter.Convert<KeyValuePair<int, decimal>>(source);
 
         result.Value.ShouldBe(new KeyValuePair<int, decimal>(42, 12.5m));
     }
@@ -92,7 +94,7 @@ public sealed class CollectionConversionTests
     public void DictionaryEntryAndKeyValuePairInteroperate()
     {
         var entry = new DictionaryEntry("7", "ready");
-        var pair = _converter.Convert<KeyValuePair<int, string>>(entry).Value;
+        KeyValuePair<int, string> pair = _converter.Convert<KeyValuePair<int, string>>(entry).Value;
 
         pair.ShouldBe(new KeyValuePair<int, string>(7, "ready"));
         _converter.Convert<DictionaryEntry>(pair).Value.ShouldBe(new DictionaryEntry(7, "ready"));
@@ -103,7 +105,8 @@ public sealed class CollectionConversionTests
     {
         var source = new Dictionary<string, string> { ["1"] = "1.5", ["2"] = "2.5" };
 
-        var result = _converter.Convert<IReadOnlyDictionary<int, decimal>>(source);
+        ConversionResult<IReadOnlyDictionary<int, decimal>> result =
+            _converter.Convert<IReadOnlyDictionary<int, decimal>>(source);
 
         result.Value.Count.ShouldBe(2);
         result.Value[1].ShouldBe(1.5m);
@@ -115,7 +118,8 @@ public sealed class CollectionConversionTests
     {
         var source = new Dictionary<string, string> { ["1"] = "10", ["2"] = "20" };
 
-        var result = _converter.Convert<ConcurrentDictionary<int, long>>(source);
+        ConversionResult<ConcurrentDictionary<int, long>> result =
+            _converter.Convert<ConcurrentDictionary<int, long>>(source);
 
         result.Value.Count.ShouldBe(2);
         result.Value[1].ShouldBe(10);
@@ -131,9 +135,9 @@ public sealed class CollectionConversionTests
             new("01", 20)
         ];
 
-        var result = _converter.Convert<Dictionary<int, int>>(source);
+        ConversionResult<Dictionary<int, int>> result = _converter.Convert<Dictionary<int, int>>(source);
 
-        result.Error!.Code.ShouldBe(ConversionErrorCodes.CollectionItem);
+        result.Error!.Code.ShouldBe(ConversionErrorCodes.DuplicateKey);
     }
 
     [Test]
@@ -141,7 +145,7 @@ public sealed class CollectionConversionTests
     {
         int[] source = [1, 2];
 
-        var result = _converter.Convert<Dictionary<int, int>>(source);
+        ConversionResult<Dictionary<int, int>> result = _converter.Convert<Dictionary<int, int>>(source);
 
         result.Error!.Code.ShouldBe(ConversionErrorCodes.CollectionItem);
     }
@@ -160,7 +164,7 @@ public sealed class CollectionConversionTests
     {
         string[] source = ["1"];
 
-        var result = _converter.Convert<ICustomCollection<int>>(source);
+        ConversionResult<ICustomCollection<int>> result = _converter.Convert<ICustomCollection<int>>(source);
 
         result.Error!.Code.ShouldBe(ConversionErrorCodes.Unsupported);
     }
@@ -170,7 +174,7 @@ public sealed class CollectionConversionTests
     {
         KeyValuePair<string, string>[] source = [new("1", "2")];
 
-        var result = _converter.Convert(source, typeof(ICustomDictionary<int, int>));
+        ConversionResult<object?> result = _converter.Convert(source, typeof(ICustomDictionary<int, int>));
 
         result.Error!.Code.ShouldBe(ConversionErrorCodes.Unsupported);
     }
@@ -180,7 +184,7 @@ public sealed class CollectionConversionTests
     {
         int[] source = [1, 2];
 
-        var result = _converter.Convert(source, typeof(int[,]));
+        ConversionResult<object?> result = _converter.Convert(source, typeof(int[,]));
 
         result.Error!.Code.ShouldBe(ConversionErrorCodes.Unsupported);
     }
@@ -199,12 +203,37 @@ public sealed class CollectionConversionTests
         public int Count => 0;
         public bool IsReadOnly => false;
 
-        public void Add(T item) => throw new OperationCanceledException();
-        public void Clear() { }
-        public bool Contains(T item) => false;
-        public void CopyTo(T[] array, int arrayIndex) { }
-        public bool Remove(T item) => false;
-        public IEnumerator<T> GetEnumerator() => Enumerable.Empty<T>().GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public void Add(T item)
+        {
+            throw new OperationCanceledException();
+        }
+
+        public void Clear()
+        {
+        }
+
+        public bool Contains(T item)
+        {
+            return false;
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+        }
+
+        public bool Remove(T item)
+        {
+            return false;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return Enumerable.Empty<T>().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

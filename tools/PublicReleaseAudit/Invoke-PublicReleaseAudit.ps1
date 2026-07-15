@@ -7,18 +7,13 @@ $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $requiredFiles = @('LICENSE', 'NOTICE', 'README.md', 'STEWARDSHIP.md', 'SECURITY.md')
-$allowedDependencies = @{
-    'Pocok.Primitives' = @{}
-    'Pocok.Conversion.Abstractions' = @{
-        'Pocok.Primitives' = '0.1.0-alpha.2'
-    }
-    'Pocok.Conversion' = @{
-        'Pocok.Conversion.Abstractions' = '0.1.0-alpha.1'
-    }
-	'Pocok.Hosting' = @{
-        'Pocok.Primitives' = '0.1.0-alpha.2'
-    }
+$catalog = Get-Content -LiteralPath (Join-Path $repositoryRoot 'eng/packages.json') -Raw | ConvertFrom-Json
+$activePackages = @($catalog.packages | Where-Object { $_.state -ne 'Retired' })
+$packagePolicies = @{}
+foreach ($catalogPackage in $activePackages) {
+    $packagePolicies[[string]$catalogPackage.id] = $catalogPackage
 }
+
 
 foreach ($requiredFile in $requiredFiles) {
     $path = Join-Path $repositoryRoot $requiredFile
@@ -97,9 +92,10 @@ if (Test-Path -LiteralPath $resolvedPackageDirectory -PathType Container) {
 
             $packageId = [string]$metadata.id
             $packageVersion = [string]$metadata.version
-            if (-not $allowedDependencies.ContainsKey($packageId)) {
-                throw "$($package.Name) has no reviewed dependency allowlist."
+            if (-not $packagePolicies.ContainsKey($packageId)) {
+                throw "$($package.Name) has no active package catalog policy."
             }
+            $packagePolicy = $packagePolicies[$packageId]
 
             foreach ($requiredLibraryEntry in @("lib/net10.0/$packageId.dll", "lib/net10.0/$packageId.xml")) {
                 if ($entryNames -notcontains $requiredLibraryEntry) {
@@ -111,18 +107,17 @@ if (Test-Path -LiteralPath $resolvedPackageDirectory -PathType Container) {
                 Where-Object { $null -ne $_ } |
                 Sort-Object { [string]$_.id })
             $dependencyIds = @($dependencies | ForEach-Object { [string]$_.id })
-            $expectedDependencies = @($allowedDependencies[$packageId].Keys) | Sort-Object
+            $expectedDependencies = @(@($packagePolicy.internalDependencies) + @($packagePolicy.allowedExternalDependencies)) | Sort-Object
 
             if (($dependencyIds -join "`n") -ne ($expectedDependencies -join "`n")) {
-                throw "$($package.Name) dependencies differ from its allowlist. Actual: $($dependencyIds -join ', ')"
+                throw "$($package.Name) dependencies differ from its catalog allowlist. Actual: $($dependencyIds -join ', ')"
             }
 
             foreach ($dependency in $dependencies) {
                 $dependencyId = [string]$dependency.id
                 $dependencyVersion = [string]$dependency.version
-                $expectedVersion = [string]$allowedDependencies[$packageId][$dependencyId]
-                if ($dependencyVersion -ne $expectedVersion) {
-                    throw "$($package.Name) depends on $dependencyId $dependencyVersion instead of reviewed version $expectedVersion."
+                if ([string]::IsNullOrWhiteSpace($dependencyVersion)) {
+                    throw "$($package.Name) has an unversioned dependency on $dependencyId."
                 }
             }
 

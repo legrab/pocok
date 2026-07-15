@@ -24,7 +24,7 @@ public sealed class TemporalConversionTests
     public void TemporalValuesRoundTripThroughInvariantText(object value, Type targetType)
     {
         var text = _converter.Convert<string>(value).Value;
-        var converted = _converter.Convert(text, targetType);
+        ConversionResult<object?> converted = _converter.Convert(text, targetType);
 
         converted.Value.ShouldBe(value);
     }
