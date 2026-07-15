@@ -1,0 +1,9 @@
+# Human-readable supplementary API inventory. NuGet package validation is authoritative.
+Pocok.Readiness.IReadinessSignal
+Pocok.Readiness.ReadinessCycle
+Pocok.Readiness.ReadinessFailedException
+Pocok.Readiness.ReadinessFailure
+Pocok.Readiness.ReadinessSnapshot
+Pocok.Readiness.ReadinessSource
+Pocok.Readiness.ReadinessState
+Pocok.Readiness.ReadinessStoppedException

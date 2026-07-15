@@ -1,39 +1,27 @@
-# ADR 0004: Result Semantics
+# ADR 0004: Generic result semantics
 
-- Status: Accepted
+- Status: Superseded by package-owned failure models
 - Date: 2026-07-14
+- Superseded: 2026-07-15
 
-## Context
+## Original decision
 
-Expected operational failures need an explicit return type that does not couple callers to logging, transports, or exception-driven control flow. The contract must remain small enough to sit beneath every other Pocok package.
+The initial extraction introduced public `Error`, `Result`, and `Result<T>` primitives for explicit operational failures.
 
-## Decision
+## Superseding decision
 
-`Result` and `Result<T>` have exactly two states: success and failure. Construction is factory-only so these invariants always hold:
+Do not maintain a generic result package merely to share a small amount of code. Conversion now owns `ConversionFailure` and `ConversionResult<T>`. Readiness owns `ReadinessFailure` and communicates lifecycle failure through `ReadinessFailedException` to asynchronous waiters.
 
-- success has no error;
-- failure has one non-null `Error`;
-- `Result<T>` success may contain a legitimate null when `T` permits null;
-- failure never carries a partial value;
-- reading `Value` from a failure throws `InvalidOperationException`;
-- `TryGetValue` supports branch-oriented access without exceptions;
-- cancellation remains cancellation and `OperationCanceledException` cannot be stored as an error diagnostic;
-- error code and safe message are required non-whitespace strings;
-- an attached exception is optional diagnostic context and is not a substitute for the safe message.
+The shared invariants remain useful:
 
-There are no implicit conversions from booleans, exceptions, values, or tasks. Expected failures are created explicitly. Invalid arguments, broken invariants, and exceptions thrown by mapping delegates propagate normally.
+- success and failure are mutually exclusive;
+- safe code and message are explicit;
+- cancellation is not converted into a failure object;
+- diagnostic exceptions are optional and are not caller-facing messages;
+- invalid API arguments and broken invariants still throw.
 
-The initial combinator surface is deliberately small:
-
-- `Match` handles both states explicitly;
-- `Map` transforms a successful value;
-- `Bind` chains an operation already returning a Result;
-- `ToResult` intentionally discards a successful value.
-
-No async combinators, exception-catching helpers, serialization contracts, HTTP mappings, logging hooks, process identifiers, or application-specific third states belong in this package.
-
-The conventional C# names `Error` and `Result<T>.Success` / `Result<T>.Failure` are intentional. Their narrowly scoped cross-language and generic-static analyzer warnings are suppressed only on the defining source files.
+These semantics are implemented in the package that owns the behavior rather than exposed through `Pocok.Primitives`.
 
 ## Consequences
 
-Callers cannot create contradictory states or accidentally treat failure as a boolean. Nullable success is distinguishable from failure. Consumers must decide where exceptions become safe structured errors, which keeps security-sensitive messaging at the correct boundary. Additional combinators require demonstrated use in at least one real package.
+Consumers no longer acquire a generic foundation dependency. A future cross-package result abstraction requires independent public demand, not merely two similar implementations inside this repository.

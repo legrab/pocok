@@ -1,4 +1,18 @@
+# Human-readable supplementary API inventory. NuGet package validation is authoritative.
+Pocok.Conversion.ConversionContext
+Pocok.Conversion.ConversionErrorCodes
+Pocok.Conversion.ConversionFailure
+Pocok.Conversion.ConversionResult`1
+Pocok.Conversion.ConversionStrategyContext
+Pocok.Conversion.ConversionStrategyPrecedence
+Pocok.Conversion.ConversionStrategyResult
+Pocok.Conversion.ConversionStrategyStatus
+Pocok.Conversion.EnumPolicy
+Pocok.Conversion.IConversionStrategy
+Pocok.Conversion.IValueConverter
+Pocok.Conversion.NullPolicy
+Pocok.Conversion.NumericBooleanPolicy
+Pocok.Conversion.NumericLossPolicy
+Pocok.Conversion.OverflowPolicy
+Pocok.Conversion.TemporalTextPolicy
 Pocok.Conversion.ValueConverter
-ValueConverter.Convert(System.Object, Pocok.Conversion.ConversionContext) -> Pocok.Primitives.Result<TTarget>
-ValueConverter.Convert(System.Object, System.Type, Pocok.Conversion.ConversionContext) -> Pocok.Primitives.Result<System.Object>
-ValueConverter.ctor()

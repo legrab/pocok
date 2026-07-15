@@ -41,25 +41,31 @@ public sealed class EnumConversionTests
     }
 
     [Test]
-    public void UndeclaredFlagBitsAreRejected() =>
+    public void UndeclaredFlagBitsAreRejected()
+    {
         _converter.Convert<Access>(8).Error!.Code.ShouldBe(ConversionErrorCodes.InvalidEnum);
+    }
 
     [Test]
-    public void ZeroRequiresADeclaredZeroFlag() =>
+    public void ZeroRequiresADeclaredZeroFlag()
+    {
         _converter.Convert<AccessWithoutZero>(0).Error!.Code.ShouldBe(ConversionErrorCodes.InvalidEnum);
+    }
 
     [Test]
     public void EnumNumericOverflowUsesNumericPolicyFirst()
     {
         _converter.Convert<ByteCode>(300).Error!.Code.ShouldBe(ConversionErrorCodes.Overflow);
 
-        var context = new ConversionContext(CultureInfo.InvariantCulture, overflow: OverflowPolicy.Saturate);
+        var context = new ConversionContext(CultureInfo.InvariantCulture, OverflowPolicy.Saturate);
         _converter.Convert<ByteCode>(300, context).Value.ShouldBe(ByteCode.Maximum);
     }
 
     [Test]
-    public void SourceEnumCanConvertByUnderlyingValue() =>
+    public void SourceEnumCanConvertByUnderlyingValue()
+    {
         _converter.Convert<Mode>(OtherMode.Ready).Value.ShouldBe(Mode.Ready);
+    }
 
     private enum Mode
     {

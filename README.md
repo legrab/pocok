@@ -1,47 +1,48 @@
 # Pocok
 
-Pocok is a collection of small, independently packaged .NET libraries for recurring infrastructure problems. Packages stay narrow, explicit, and usable without adopting an application framework or a large convenience assembly.
+Pocok is a deliberately small .NET package portfolio extracted from repeated application needs. It contains focused runtime capabilities and transparent application-default configurators. It is also maintained as a reference repository for package design, compatibility, testing, and release engineering.
 
-## Planned packages
+## Package families
 
-| Package | Purpose | Status |
-|---|---|---|
-| [`Pocok.Primitives`](src/Primitives/README.md) | Result and structured error contracts | Public candidate |
-| [`Pocok.Conversion.Abstractions`](src/Conversion.Abstractions/README.md) | Explicit runtime conversion policies and contracts | Experimental alpha |
-| [`Pocok.Conversion`](src/Conversion/README.md) | Strict serializer-free runtime value conversion | Experimental alpha |
-| `Pocok.Contracts.*` | Deterministic allowlisted contract metadata | Planned |
-| [`Pocok.Hosting`](src/Hosting/README.md) | Observable host readiness and lifecycle | Public candidate |
-| `Pocok.Numerics` | Carefully specified generic numeric operations | Planned |
-| `Pocok.Logging.*` | Opinionated logging composition with optional sinks | Planned |
-| `Pocok.Localization.*` | Composite localization and resource adapters | Planned |
+### Capability packages
 
-No package is published until it has a cohesive public contract, focused tests, a synthetic sample, deterministic package output, and an external local-feed consumer test.
+- **Pocok.Conversion**: strict, serializer-free, policy-driven runtime value conversion.
+- **Pocok.Readiness**: observable and restartable readiness lifecycle coordination.
+- **Pocok.Modularity.Contracts**: stable startup module contracts.
+- **Pocok.Modularity**: trusted startup-time plugin discovery and dependency registration.
 
-## Development
+### Maintainer defaults
 
-Requires the .NET 10 SDK.
+- **Pocok.AppDefaults**: explicit ordered application configurators.
+- **Pocok.AppDefaults.Logging**: conservative provider-neutral logging defaults.
+- **Pocok.AppDefaults.Logging.Serilog**: focused Serilog defaults.
+- **Pocok.AppDefaults.Modularity**: opinionated host defaults for Pocok.Modularity.
 
-```shell
-dotnet restore --locked-mode
-dotnet build --no-restore
-dotnet test --no-build
-dotnet pack --no-build --output artifacts/packages
-pwsh ./tools/PackageSmoke/Invoke-PackageSmoke.ps1
+Maintainer-default packages configure standard or selected third-party infrastructure. They do not replace dependency injection, configuration, logging, hosting, or plugin loading with a private framework.
+
+## Package policy
+
+A package is kept only when it represents a stable, reusable capability or repeated cross-application policy. Small internal helpers remain package-local or are linked as explicitly selected internal source. There is no public `Common`, `Utils`, `Foundation`, or generic `Primitives` package.
+
+`Pocok.Primitives` was published during the repository's initial extraction and is intentionally retired. Its useful behavior is owned by the packages that need it. See [the migration guide](docs/migrations/primitives-retirement.md).
+
+## Build
+
+```pwsh
+dotnet restore
+dotnet build --configuration Release --no-restore
+dotnet test --configuration Release --no-build
+dotnet pack --configuration Release --no-build --output artifacts/packages
+./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode LocalClosure
+./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
 ```
 
-The repository uses central package management and committed dependency lock files. Project references may not escape this repository.
+The repository targets .NET 10. Publication uses package-specific tags and a catalog-driven workflow. See [PUBLICATION.md](PUBLICATION.md).
 
-## Publishing
+## Design record
 
-Package versions are derived by MinVer from package-specific Git tags. 
-Commit height is ignored so changes to one package do not silently change another package's dependency version. 
-The first package uses tags such as `primitives-v0.1.0-alpha.1` and is published by `.github/workflows/publish-primitives.yml` after validation. 
-Only packages listed in `PUBLICATION.md` have an enabled publication workflow.
-Untagged local builds must not be published.
+The consolidation rationale and implementation plan are retained in [docs/plans/repository-consolidation.md](docs/plans/repository-consolidation.md). Architectural decisions live under [docs/decisions](docs/decisions).
 
-To enable publishing, create a `NUGET_USERNAME` repository variable containing the nuget.org profile name and configure a NuGet trusted-publishing policy for `legrab/pocok` and `publish-primitives.yml`. 
-The workflow requests a short-lived publishing credential through GitHub Actions OIDC.
+## License and stewardship
 
-## License
-
-Pocok is licensed under the [Apache License 2.0](LICENSE). Commercial, educational, private, and noncommercial use are permitted under its terms. See [NOTICE](NOTICE) for attribution and [STEWARDSHIP.md](STEWARDSHIP.md) for a nonbinding community request.
+Pocok is licensed under Apache-2.0. See [CONTRIBUTING.md](CONTRIBUTING.md), [STEWARDSHIP.md](STEWARDSHIP.md), and [SECURITY.md](SECURITY.md).

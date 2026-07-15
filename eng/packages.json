@@ -1,0 +1,71 @@
+{
+  "$schema": "./packages.schema.json",
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "id": "Pocok.Primitives",
+      "project": "src/Primitives/Pocok.Primitives.csproj",
+      "tagPrefix": "primitives-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Retired",
+      "releasable": false,
+      "consumer": "PrimitivesConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "RetiredPrimitivesPackageVersion"
+    },
+    {
+      "id": "Pocok.Conversion.Abstractions",
+      "project": "src/Conversion.Abstractions/Pocok.Conversion.Abstractions.csproj",
+      "tagPrefix": "conversion.abstractions-v",
+      "family": "Capability",
+      "releaseTier": 1,
+      "state": "Retired",
+      "releasable": false,
+      "consumer": "ConversionAbstractionsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "RetiredConversionAbstractionsPackageVersion"
+    },
+    {
+      "id": "Pocok.Conversion",
+      "project": "src/Conversion/Pocok.Conversion.csproj",
+      "tagPrefix": "conversion-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "ConversionConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokConversionPackageVersion"
+    },
+    {
+      "id": "Pocok.Hosting",
+      "project": "src/Hosting/Pocok.Hosting.csproj",
+      "tagPrefix": "hosting-v",
+      "family": "Capability",
+      "releaseTier": 1,
+      "state": "Retired",
+      "releasable": false,
+      "consumer": "HostingConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "RetiredHostingPackageVersion"
+    },
+    {
+      "id": "Pocok.Readiness",
+      "project": "src/Readiness/Pocok.Readiness.csproj",
+      "tagPrefix": "readiness-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "ReadinessConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokReadinessPackageVersion"
+    }
+  ]
+}

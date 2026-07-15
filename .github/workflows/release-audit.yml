@@ -2,8 +2,6 @@ name: Release audit
 
 on:
   workflow_dispatch:
-  push:
-    tags: ['v*', '*-v*']
 
 permissions:
   contents: read
@@ -26,17 +24,15 @@ jobs:
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
-          cache: true
-          cache-dependency-path: '**/packages.lock.json'
 
       - name: Restore
-        run: dotnet restore --locked-mode
+        run: dotnet restore Pocok.slnx
 
       - name: Build and test
-        run: dotnet test --configuration Release --no-restore
+        run: dotnet test Pocok.slnx --configuration Release --no-restore
 
       - name: Pack
-        run: dotnet pack --configuration Release --no-build --output artifacts/packages
+        run: dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
 
       - name: Test package from local feed
         shell: pwsh

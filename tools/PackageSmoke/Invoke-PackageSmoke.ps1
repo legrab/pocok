@@ -1,105 +1,136 @@
 [CmdletBinding()]
 param(
+    [ValidateSet('LocalClosure', 'Publication', 'Both')]
+    [string]$Mode = 'LocalClosure',
     [switch]$NoPack,
-    [string[]]$PackageIds = @()
+    [string[]]$PackageIds = @(),
+    [string]$PackageDirectory = 'artifacts/packages'
 )
 
 $ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
 
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$packageDirectory = Join-Path $repositoryRoot 'artifacts/packages'
+$packageDirectoryPath = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $PackageDirectory))
+$closureFeed = Join-Path $repositoryRoot 'artifacts/package-smoke/closure-feed'
+$candidateFeedRoot = Join-Path $repositoryRoot 'artifacts/package-smoke/candidate-feeds'
+
+$consumerSpecs = @{
+    'Pocok.Conversion' = @{ Template = 'ConversionConsumer/Pocok.Conversion.Consumer.csproj.template'; Program = 'ConversionConsumer/Program.cs' }
+    'Pocok.Readiness' = @{ Template = 'ReadinessConsumer/Pocok.Readiness.Consumer.csproj.template'; Program = 'ReadinessConsumer/Program.cs' }
+}
+
+function Get-PackageArtifact {
+    param(
+        [Parameter(Mandatory)] [string]$PackageId,
+        [Parameter(Mandatory)] [string]$Directory
+    )
+
+    $escapedPackageId = [regex]::Escape($PackageId)
+    $matches = @(Get-ChildItem -LiteralPath $Directory -File -Filter "$PackageId.*.nupkg" |
+        Where-Object { $_.Name -notlike '*.snupkg' } |
+        Where-Object { $_.Name -match "^$escapedPackageId\.(?<version>[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)\.nupkg$" })
+
+    if ($matches.Count -ne 1) {
+        $found = if ($matches.Count -eq 0) { 'none' } else { $matches.Name -join ', ' }
+        throw "Expected exactly one $PackageId package in $Directory, found: $found"
+    }
+
+    return $matches[0]
+}
+
+function Invoke-Consumer {
+    param(
+        [Parameter(Mandatory)] [string]$PackageId,
+        [Parameter(Mandatory)] [System.IO.FileInfo]$Package,
+        [Parameter(Mandatory)] [string]$FeedMode,
+        [Parameter(Mandatory)] [string[]]$Sources,
+        [Parameter(Mandatory)] [string]$WorkRoot
+    )
+
+    $escapedPackageId = [regex]::Escape($PackageId)
+    $version = [regex]::Match($Package.Name, "^$escapedPackageId\.(?<version>.+)\.nupkg$").Groups['version'].Value
+    $consumerRoot = Join-Path $WorkRoot "$PackageId/$FeedMode"
+    $packagesRoot = Join-Path $consumerRoot '.packages'
+    New-Item -ItemType Directory -Path $consumerRoot -Force | Out-Null
+
+    $spec = $consumerSpecs[$PackageId]
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot $spec.Program) -Destination (Join-Path $consumerRoot 'Program.cs')
+    $template = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot $spec.Template))
+    [System.IO.File]::WriteAllText(
+        (Join-Path $consumerRoot 'Pocok.Consumer.csproj'),
+        $template.Replace('__PACKAGE_VERSION__', $version),
+        [System.Text.UTF8Encoding]::new($false))
+
+    $restoreArguments = @('restore', (Join-Path $consumerRoot 'Pocok.Consumer.csproj'), '--packages', $packagesRoot, '--no-cache')
+    foreach ($source in $Sources) {
+        $restoreArguments += @('--source', $source)
+    }
+
+    & dotnet @restoreArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "$PackageId $FeedMode external consumer restore failed with exit code $LASTEXITCODE."
+    }
+
+    & dotnet run --project (Join-Path $consumerRoot 'Pocok.Consumer.csproj') --no-restore
+    if ($LASTEXITCODE -ne 0) {
+        throw "$PackageId $FeedMode external consumer failed with exit code $LASTEXITCODE."
+    }
+
+    Write-Host "$PackageId $FeedMode smoke passed using $($Package.Name)."
+}
 
 if (-not $NoPack) {
-    & dotnet pack (Join-Path $repositoryRoot 'Pocok.slnx') --configuration Release --output $packageDirectory
+    Remove-Item -LiteralPath $packageDirectoryPath -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Path $packageDirectoryPath -Force | Out-Null
+    & dotnet pack (Join-Path $repositoryRoot 'Pocok.slnx') --configuration Release --output $packageDirectoryPath
     if ($LASTEXITCODE -ne 0) {
         throw "Package build failed with exit code $LASTEXITCODE."
     }
 }
 
-$consumerSpecs = @{
-    'Pocok.Primitives' = @{
-        Template = 'PrimitivesConsumer/Pocok.Primitives.Consumer.csproj.template'
-        Program = 'PrimitivesConsumer/Program.cs'
-    }
-    'Pocok.Conversion.Abstractions' = @{
-        Template = 'ConversionAbstractionsConsumer/Pocok.Conversion.Abstractions.Consumer.csproj.template'
-        Program = 'ConversionAbstractionsConsumer/Program.cs'
-    }
-    'Pocok.Conversion' = @{
-        Template = 'ConversionConsumer/Pocok.Conversion.Consumer.csproj.template'
-        Program = 'ConversionConsumer/Program.cs'
-    }
-    'Pocok.Hosting' = @{
-        Template = 'HostingConsumer/Pocok.Hosting.Consumer.csproj.template'
-        Program = 'HostingConsumer/Program.cs'
-    }
+if (-not (Test-Path -LiteralPath $packageDirectoryPath -PathType Container)) {
+    throw "Package directory does not exist: $packageDirectoryPath"
 }
 
 if ($PackageIds.Count -eq 0) {
-    $PackageIds = Get-ChildItem -LiteralPath (Join-Path $repositoryRoot 'src') -Recurse -File -Filter '*.csproj' |
-        ForEach-Object {
-            [xml]$projectDocument = [System.IO.File]::ReadAllText($_.FullName)
-            $isPackableNode = $projectDocument.SelectSingleNode('/Project/PropertyGroup/IsPackable')
-            $packageIdNode = $projectDocument.SelectSingleNode('/Project/PropertyGroup/PackageId')
-            if ($isPackableNode.InnerText -eq 'true' -and $null -ne $packageIdNode) {
-                $packageIdNode.InnerText
-            }
-        }
+    $PackageIds = @($consumerSpecs.Keys | Sort-Object)
 }
 
-$unknownPackageIds = $PackageIds | Where-Object { -not $consumerSpecs.ContainsKey($_) }
-if ($unknownPackageIds) {
+$unknownPackageIds = @($PackageIds | Where-Object { -not $consumerSpecs.ContainsKey($_) })
+if ($unknownPackageIds.Count -gt 0) {
     throw "No external consumer is configured for: $($unknownPackageIds -join ', ')"
 }
 
+Remove-Item -LiteralPath $closureFeed -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $candidateFeedRoot -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path $closureFeed -Force | Out-Null
+New-Item -ItemType Directory -Path $candidateFeedRoot -Force | Out-Null
+Get-ChildItem -LiteralPath $packageDirectoryPath -File -Filter '*.nupkg' |`
+    Copy-Item -Destination $closureFeed
+
 $systemTemp = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $workRoot = [System.IO.Path]::GetFullPath((Join-Path $systemTemp "pocok-package-smoke-$([guid]::NewGuid().ToString('N'))"))
-
 if (-not $workRoot.StartsWith($systemTemp, [System.StringComparison]::OrdinalIgnoreCase)) {
     throw "Smoke-test directory escaped the system temporary directory: $workRoot"
 }
 
 try {
-    New-Item -ItemType Directory -Path $workRoot | Out-Null
+    New-Item -ItemType Directory -Path $workRoot -Force | Out-Null
 
     foreach ($packageId in $PackageIds) {
-        $escapedPackageId = [regex]::Escape($packageId)
-        $package = Get-ChildItem -LiteralPath $packageDirectory -File -Filter "$packageId.*.nupkg" |
-            Where-Object { $_.Name -notlike '*.snupkg' } |
-            Where-Object { $_.Name -match "^$escapedPackageId\.(?<version>[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)\.nupkg$" } |
-            Sort-Object LastWriteTimeUtc -Descending |
-            Select-Object -First 1
+        $package = Get-PackageArtifact -PackageId $packageId -Directory $packageDirectoryPath
+        $candidateFeed = Join-Path $candidateFeedRoot $packageId
+        New-Item -ItemType Directory -Path $candidateFeed -Force | Out-Null
+        Copy-Item -LiteralPath $package.FullName -Destination $candidateFeed
 
-        if ($null -eq $package) {
-            throw "$packageId package was not found in $packageDirectory."
+        if ($Mode -in @('LocalClosure', 'Both')) {
+            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'local-closure' -Sources @($closureFeed) -WorkRoot $workRoot
         }
 
-        $packageVersion = [regex]::Match(
-            $package.Name,
-            "^$escapedPackageId\.(?<version>.+)\.nupkg$").Groups['version'].Value
-        $consumerRoot = Join-Path $workRoot $packageId
-        $packages = Join-Path $consumerRoot '.packages'
-        New-Item -ItemType Directory -Path $consumerRoot | Out-Null
-
-        $spec = $consumerSpecs[$packageId]
-        Copy-Item -LiteralPath (Join-Path $PSScriptRoot $spec.Program) -Destination (Join-Path $consumerRoot 'Program.cs')
-
-        $consumerProjectPath = Join-Path $consumerRoot 'Pocok.Consumer.csproj'
-        $projectTemplate = [System.IO.File]::ReadAllText((Join-Path $PSScriptRoot $spec.Template))
-        $projectContent = $projectTemplate.Replace('__PACKAGE_VERSION__', $packageVersion)
-        [System.IO.File]::WriteAllText($consumerProjectPath, $projectContent, [Text.UTF8Encoding]::new($false))
-
-        & dotnet restore $consumerProjectPath --source $packageDirectory --packages $packages
-        if ($LASTEXITCODE -ne 0) {
-            throw "$packageId external consumer restore failed with exit code $LASTEXITCODE."
+        if ($Mode -in @('Publication', 'Both')) {
+            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'publication' -Sources @($candidateFeed, 'https://api.nuget.org/v3/index.json') -WorkRoot $workRoot
         }
-
-        & dotnet run --project $consumerProjectPath --no-restore
-        if ($LASTEXITCODE -ne 0) {
-            throw "$packageId external consumer failed with exit code $LASTEXITCODE."
-        }
-
-        Write-Host "Package smoke passed using $($package.Name)."
     }
 }
 finally {

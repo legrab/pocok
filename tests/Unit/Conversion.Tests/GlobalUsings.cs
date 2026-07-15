@@ -3,5 +3,4 @@
 
 global using NUnit.Framework;
 global using Pocok.Conversion;
-global using Pocok.Primitives;
 global using Shouldly;

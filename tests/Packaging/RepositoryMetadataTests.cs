@@ -13,13 +13,15 @@ public sealed class RepositoryMetadataTests
     [TestCase("STEWARDSHIP.md")]
     [TestCase("SECURITY.md")]
     [TestCase("CONTRIBUTING.md")]
-    public void RequiredPublicFileExists(string relativePath) =>
-        File.Exists(System.IO.Path.Combine(RepositoryRoot.Path, relativePath)).ShouldBeTrue();
+    public void RequiredPublicFileExists(string relativePath)
+    {
+        File.Exists(Path.Combine(RepositoryRoot.Path, relativePath)).ShouldBeTrue();
+    }
 
     [Test]
     public void SharedPackageMetadataIsComplete()
     {
-        var document = XDocument.Load(System.IO.Path.Combine(RepositoryRoot.Path, "Directory.Build.props"));
+        var document = XDocument.Load(Path.Combine(RepositoryRoot.Path, "Directory.Build.props"));
         var properties = document.Descendants("PropertyGroup")
             .Elements()
             .GroupBy(element => element.Name.LocalName)
@@ -37,7 +39,7 @@ public sealed class RepositoryMetadataTests
     [Test]
     public void SharedPackageItemsIncludeRequiredDocuments()
     {
-        var document = XDocument.Load(System.IO.Path.Combine(RepositoryRoot.Path, "Directory.Build.props"));
+        var document = XDocument.Load(Path.Combine(RepositoryRoot.Path, "Directory.Build.props"));
         var includes = document.Descendants("None")
             .Select(element => element.Attribute("Include")?.Value)
             .ToArray();
