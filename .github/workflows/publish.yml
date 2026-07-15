@@ -1,0 +1,109 @@
+name: Publish package
+
+on:
+  push:
+    tags:
+      - 'conversion-v*'
+      - 'readiness-v*'
+      - 'appdefaults-v*'
+      - 'appdefaults.logging-v*'
+      - 'appdefaults.logging.serilog-v*'
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      package-id: ${{ steps.package.outputs.package-id }}
+      project: ${{ steps.package.outputs.project }}
+      version: ${{ steps.package.outputs.version }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - id: package
+        name: Resolve package from tag
+        shell: pwsh
+        run: ./tools/PackageCatalog/Resolve-PackageFromTag.ps1 -Tag '${{ github.ref_name }}' -GitHubOutput $env:GITHUB_OUTPUT
+
+  publish:
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+      - name: Resolve release package versions and closure
+        shell: pwsh
+        run: |
+          ./tools/PackageCatalog/New-ReleaseVersionsProps.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -CandidateVersion '${{ needs.resolve.outputs.version }}' -OutputPath artifacts/release-versions.props
+          ./tools/PackageCatalog/Resolve-PackageClosure.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -OutputPath artifacts/release-closure.json
+      - name: Restore, build, and test release graph
+        shell: bash
+        run: |
+          release_props="$PWD/artifacts/release-versions.props"
+          dotnet restore Pocok.Core.slnx -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
+          dotnet build Pocok.Core.slnx --configuration Release --no-restore -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
+          dotnet test Pocok.Core.slnx --configuration Release --no-build -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
+      - name: Pack local package closure
+        shell: pwsh
+        run: |
+          Remove-Item artifacts/packages -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory artifacts/packages -Force | Out-Null
+          $releaseProps = Join-Path $PWD 'artifacts/release-versions.props'
+          $closure = Get-Content artifacts/release-closure.json -Raw | ConvertFrom-Json
+          foreach ($package in $closure) {
+            dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=false
+            if ($LASTEXITCODE -ne 0) {
+              throw "Packing $($package.id) failed with exit code $LASTEXITCODE."
+            }
+          }
+      - name: Verify exact candidate
+        shell: bash
+        run: |
+          candidate="artifacts/packages/${{ needs.resolve.outputs.package-id }}.${{ needs.resolve.outputs.version }}.nupkg"
+          symbols="artifacts/packages/${{ needs.resolve.outputs.package-id }}.${{ needs.resolve.outputs.version }}.snupkg"
+          test -f "$candidate"
+          test -f "$symbols"
+      - name: Test complete local closure
+        shell: pwsh
+        run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode LocalClosure -PackageIds '${{ needs.resolve.outputs.package-id }}'
+      - name: Test publication-shaped restore
+        shell: pwsh
+        run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode Publication -PackageIds '${{ needs.resolve.outputs.package-id }}'
+      - name: Audit public contents
+        shell: pwsh
+        run: ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1 -PackageIds '${{ needs.resolve.outputs.package-id }}'
+      - name: Log in to NuGet with trusted publishing
+        uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
+        id: nuget-login
+        with:
+          user: ${{ vars.NUGET_USERNAME }}
+      - name: Push exact package
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push "artifacts/packages/${{ needs.resolve.outputs.package-id }}.${{ needs.resolve.outputs.version }}.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+      - name: Create GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          args=(--verify-tag --generate-notes --title '${{ github.ref_name }}')
+          [[ '${{ needs.resolve.outputs.version }}' == *-* ]] && args+=(--prerelease)
+          gh release create '${{ github.ref_name }}' \
+            "artifacts/packages/${{ needs.resolve.outputs.package-id }}.${{ needs.resolve.outputs.version }}.nupkg" \
+            "artifacts/packages/${{ needs.resolve.outputs.package-id }}.${{ needs.resolve.outputs.version }}.snupkg" \
+            "${args[@]}"

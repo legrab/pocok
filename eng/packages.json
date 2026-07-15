@@ -1,0 +1,186 @@
+{
+  "$schema": "./packages.schema.json",
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "id": "Pocok.Primitives",
+      "project": "src/Primitives/Pocok.Primitives.csproj",
+      "tagPrefix": "primitives-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Retired",
+      "releasable": false,
+      "consumer": "PrimitivesConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "RetiredPrimitivesPackageVersion"
+    },
+    {
+      "id": "Pocok.Conversion.Abstractions",
+      "project": "src/Conversion.Abstractions/Pocok.Conversion.Abstractions.csproj",
+      "tagPrefix": "conversion.abstractions-v",
+      "family": "Capability",
+      "releaseTier": 1,
+      "state": "Retired",
+      "releasable": false,
+      "consumer": "ConversionAbstractionsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "RetiredConversionAbstractionsPackageVersion"
+    },
+    {
+      "id": "Pocok.Conversion",
+      "project": "src/Conversion/Pocok.Conversion.csproj",
+      "tagPrefix": "conversion-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "ConversionConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokConversionPackageVersion"
+    },
+    {
+      "id": "Pocok.Hosting",
+      "project": "src/Hosting/Pocok.Hosting.csproj",
+      "tagPrefix": "hosting-v",
+      "family": "Capability",
+      "releaseTier": 1,
+      "state": "Retired",
+      "releasable": false,
+      "consumer": "HostingConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "RetiredHostingPackageVersion"
+    },
+    {
+      "id": "Pocok.Readiness",
+      "project": "src/Readiness/Pocok.Readiness.csproj",
+      "tagPrefix": "readiness-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "ReadinessConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokReadinessPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults",
+      "project": "src/AppDefaults/Pocok.AppDefaults.csproj",
+      "tagPrefix": "appdefaults-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 0,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "AppDefaultsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Hosting.Abstractions"
+      ],
+      "versionProperty": "PocokAppDefaultsPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults.Logging",
+      "project": "src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj",
+      "tagPrefix": "appdefaults.logging-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 1,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "AppDefaultsLoggingConsumer",
+      "internalDependencies": [
+        "Pocok.AppDefaults"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Binder",
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Hosting.Abstractions",
+        "Microsoft.Extensions.Logging",
+        "Microsoft.Extensions.Logging.Console",
+        "Microsoft.Extensions.Options"
+      ],
+      "versionProperty": "PocokAppDefaultsLoggingPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults.Logging.Serilog",
+      "project": "src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj",
+      "tagPrefix": "appdefaults.logging.serilog-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 1,
+      "state": "Active",
+      "releasable": true,
+      "consumer": "AppDefaultsLoggingSerilogConsumer",
+      "internalDependencies": [
+        "Pocok.AppDefaults"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Binder",
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Hosting.Abstractions",
+        "Microsoft.Extensions.Options",
+        "Serilog",
+        "Serilog.Extensions.Hosting",
+        "Serilog.Settings.Configuration"
+      ],
+      "versionProperty": "PocokAppDefaultsLoggingSerilogPackageVersion"
+    },
+    {
+      "id": "Pocok.Modularity.Contracts",
+      "project": "src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj",
+      "tagPrefix": "modularity.contracts-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "ModularityContractsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Abstractions",
+        "Microsoft.Extensions.DependencyInjection.Abstractions"
+      ],
+      "versionProperty": "PocokModularityContractsPackageVersion"
+    },
+    {
+      "id": "Pocok.Modularity",
+      "project": "src/Modularity/Pocok.Modularity.csproj",
+      "tagPrefix": "modularity-v",
+      "family": "Capability",
+      "releaseTier": 1,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "ModularityConsumer",
+      "internalDependencies": [
+        "Pocok.Modularity.Contracts"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Abstractions",
+        "Microsoft.Extensions.DependencyInjection"
+      ],
+      "versionProperty": "PocokModularityPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults.Modularity",
+      "project": "src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj",
+      "tagPrefix": "appdefaults.modularity-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "AppDefaultsModularityConsumer",
+      "internalDependencies": [
+        "Pocok.AppDefaults",
+        "Pocok.Modularity"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Binder",
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Hosting.Abstractions",
+        "Microsoft.Extensions.Options"
+      ],
+      "versionProperty": "PocokAppDefaultsModularityPackageVersion"
+    }
+  ]
+}

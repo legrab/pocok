@@ -1,0 +1,22 @@
+﻿namespace Pocok.AppDefaults.Modularity
+{
+    public sealed class ModularityDefaultsConfigurator : Pocok.AppDefaults.IApplicationConfigurator
+    {
+        public ModularityDefaultsConfigurator(System.Action<Pocok.AppDefaults.Modularity.ModularityDefaultsOptions>? configureDefaults = null, System.Action<Pocok.Modularity.ModuleLoadOptions>? configureLoader = null) { }
+        public void Configure(Microsoft.Extensions.Hosting.IHostApplicationBuilder builder) { }
+    }
+    public static class ModularityDefaultsExtensions
+    {
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddPocokModularityDefaults(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Pocok.AppDefaults.Modularity.ModularityDefaultsOptions>? configureDefaults = null, System.Action<Pocok.Modularity.ModuleLoadOptions>? configureLoader = null) { }
+    }
+    public sealed class ModularityDefaultsOptions
+    {
+        public const string DefaultSectionName = "Pocok:Modularity";
+        public ModularityDefaultsOptions() { }
+        public bool IgnoreMissingDirectory { get; set; }
+        public string PluginDirectory { get; set; }
+        public bool SearchRecursively { get; set; }
+        public System.Collections.Generic.ISet<string> SharedAssemblyNames { get; }
+        public bool ThrowOnOptionalFailure { get; set; }
+    }
+}

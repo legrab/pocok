@@ -1,31 +1,53 @@
-# ADR 0002: Repository and Package Shape
+# ADR 0002: Repository and package shape
 
-- Status: Accepted
+- Status: Accepted, revised after consolidation
 - Date: 2026-07-14
+- Revised: 2026-07-15
 
 ## Decision
 
-Use three independent public repository roots:
+Keep this repository as one public monorepo with two explicit package families.
 
-- `legrab/pocok` for small foundational `Pocok.*` packages and an internal convenience facade;
-- `legrab/pocok-scripting` for embedded JavaScript infrastructure;
-- `legrab/pocok-signals` for live-value integration infrastructure.
+### Capability packages
 
-Each root has its own solution, build settings, package management, `.gitignore`, CI workflows, documentation, tests, samples, and agent harness. Cross-repository dependencies are consumed from a local package feed during development and from a versioned package feed after release. Relative project references never cross repository boundaries.
+- `Pocok.Conversion`
+- `Pocok.Readiness`
+- `Pocok.Modularity.Contracts`, experimental and release-gated
+- `Pocok.Modularity`, experimental and release-gated
 
-Within a repository, code remains internal until it has a cohesive contract, focused tests, a real consumer, and an independent reason to version. Avoid both one-method packages and dependency-heavy “everything common” assemblies.
+### Maintainer-default packages
 
-## Dependency direction
+- `Pocok.AppDefaults`
+- `Pocok.AppDefaults.Logging`
+- `Pocok.AppDefaults.Logging.Serilog`
+- `Pocok.AppDefaults.Modularity`, experimental and release-gated
+
+Maintainer-default packages are public and published through nuget.org. Their opinionated identity is expressed by package names and documentation, not by a private feed.
+
+The stable dependency graph is:
 
 ```text
-Pocok.Primitives ─┬─> Pocok.Conversion
-                  ├─> Pocok.Hosting
-                   └─> other coherent Common packages
+Pocok.Conversion
+Pocok.Readiness
 
-Pocok packages ──> Pocok.Scripting packages
-Pocok packages ──> Pocok.Signals packages
+Pocok.AppDefaults
+├── Pocok.AppDefaults.Logging
+└── Pocok.AppDefaults.Logging.Serilog
 
-selected Pocok packages ──> Pocok.Foundation (internal leaf)
+Pocok.Modularity.Contracts
+└── Pocok.Modularity
+    └── Pocok.AppDefaults.Modularity
+        └── Pocok.AppDefaults
 ```
 
-Scripting and Signals cores do not depend on each other. A future integration package may depend on both after each core is stable.
+The diagram shows only internal package dependencies. `Pocok.AppDefaults.Logging.Serilog` is an alternative provider policy and intentionally does not depend on provider-neutral `Pocok.AppDefaults.Logging`.
+
+`Pocok.Primitives`, `Pocok.Hosting`, and `Pocok.Conversion.Abstractions` are retired package shapes. Useful behavior is owned by Conversion or Readiness instead of preserved through a generic foundation.
+
+## Internal reuse
+
+Package-local internal code is the default. Tiny identical helpers used by at least four projects may be linked explicitly from `src/Shared`, but no `Common`, `Utils`, `Foundation`, or non-packaged runtime assembly may sit beneath public packages.
+
+## Consequences
+
+The repository can release packages independently while keeping one review, test, and publication system. Capability packages do not depend on AppDefaults. Experimental Modularity projects remain buildable and testable in the repository but cannot be published until their catalog entries are explicitly made releasable.

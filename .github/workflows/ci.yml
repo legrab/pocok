@@ -32,23 +32,39 @@ jobs:
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
-          cache: true
-          cache-dependency-path: '**/packages.lock.json'
 
       - name: Restore
-        run: dotnet restore --locked-mode
+        run: dotnet restore Pocok.slnx
 
       - name: Verify formatting
-        run: dotnet format --verify-no-changes --no-restore
+        run: dotnet format Pocok.slnx --verify-no-changes --no-restore
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build Pocok.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --logger trx --results-directory artifacts/test-results
+        run: dotnet test Pocok.slnx --configuration Release --no-build --logger trx --results-directory artifacts/test-results
+
+      - name: Run core samples
+        shell: pwsh
+        run: |
+          dotnet run --project samples/Conversion.Console/Conversion.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Conversion sample failed.' }
+          dotnet run --project samples/Readiness.Console/Readiness.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Readiness sample failed.' }
+          dotnet run --project samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'AppDefaults sample failed.' }
+
+      - name: Publish trimmed Conversion sample
+        shell: pwsh
+        run: |
+          dotnet publish samples/Conversion.Trimmed/Conversion.Trimmed.csproj --configuration Release --output artifacts/trimmed-conversion
+          if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample publish failed.' }
+          dotnet artifacts/trimmed-conversion/Conversion.Trimmed.dll
+          if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample execution failed.' }
 
       - name: Pack
-        run: dotnet pack --configuration Release --no-build --output artifacts/packages
+        run: dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
 
       - name: Test package from local feed
         shell: pwsh

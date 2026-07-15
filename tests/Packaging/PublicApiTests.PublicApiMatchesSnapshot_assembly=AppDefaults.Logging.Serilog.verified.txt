@@ -1,0 +1,20 @@
+﻿namespace Pocok.AppDefaults.Logging.Serilog
+{
+    public sealed class SerilogDefaultsConfigurator : Pocok.AppDefaults.IApplicationConfigurator
+    {
+        public SerilogDefaultsConfigurator(System.Action<Pocok.AppDefaults.Logging.Serilog.SerilogDefaultsOptions>? configureOptions = null, System.Action<Serilog.LoggerConfiguration>? configureLogger = null) { }
+        public void Configure(Microsoft.Extensions.Hosting.IHostApplicationBuilder builder) { }
+    }
+    public static class SerilogDefaultsExtensions
+    {
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddPocokSerilogDefaults(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Pocok.AppDefaults.Logging.Serilog.SerilogDefaultsOptions>? configureOptions = null, System.Action<Serilog.LoggerConfiguration>? configureLogger = null) { }
+    }
+    public sealed class SerilogDefaultsOptions
+    {
+        public const string DefaultSectionName = "Pocok:Logging:Serilog";
+        public SerilogDefaultsOptions() { }
+        public bool EnrichFromLogContext { get; set; }
+        public bool PreserveStaticLogger { get; set; }
+        public bool WriteToProviders { get; set; }
+    }
+}

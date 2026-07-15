@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Pocok.AppDefaults.Logging.Serilog</PackageId>
+    <PackageVersion Condition="'$(PocokAppDefaultsLoggingSerilogPackageVersion)' != ''">$(PocokAppDefaultsLoggingSerilogPackageVersion)</PackageVersion>
+    <MinVerTagPrefix>appdefaults.logging.serilog-v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
+    <Description>Configuration-driven Serilog hosting integration for Pocok application defaults.</Description>
+    <PackageTags>serilog;logging;configuration;hosting;application-defaults</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../AppDefaults/Pocok.AppDefaults.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.Options"/>
+    <PackageReference Include="Serilog"/>
+    <PackageReference Include="Serilog.Extensions.Hosting"/>
+    <PackageReference Include="Serilog.Settings.Configuration"/>
+  </ItemGroup>
+</Project>

@@ -1,31 +1,41 @@
-# ADR 0005: Tag-derived package versions and publication
+# ADR 0005: Catalog-driven independent package publication
+
+- Status: Accepted, revised after release rehearsal
+- Date: 2026-07-14
+- Revised: 2026-07-15
 
 ## Decision
 
-Pocok package versions are derived from Git tags with MinVer. Each package owns
-a tag prefix so a monorepo can release libraries independently. `Pocok.Primitives`
-uses `primitives-v`, for example `primitives-v0.1.0-alpha.1`.
+Use package-specific Git tags, MinVer development versions, and one authoritative package catalog at `eng/packages.json`.
 
-The corresponding release workflow validates the repository, packs the selected
-project, publishes the package to nuget.org through trusted publishing, and
-attaches the package and symbols to a GitHub Release.
+Each active package declares:
 
-## Rationale
+- its package ID and project path;
+- a unique tag prefix;
+- a unique MSBuild release-version property;
+- release eligibility and tier;
+- internal package dependencies;
+- reviewed external dependency IDs;
+- a clean external-consumer fixture.
 
-Tag-derived versions keep the release commit, assembly metadata, package
-metadata, and release name aligned without a version-bump commit. MinVer also
-provides deterministic development versions between tags and does not require a
-runtime dependency in the published package.
+A release tag resolves to exactly one releasable catalog entry. The workflow creates a generated props file before restore and injects:
 
-NuGet trusted publishing keeps long-lived API keys out of the repository and
-uses a short-lived credential scoped to the configured GitHub workflow.
+- the candidate version from the release tag;
+- the latest published tag version for every required internal dependency.
 
-## Release contract
+The same props file is used for restore, build, test, and pack. This prevents a package from declaring dependencies on unpublished development versions produced by independent MinVer prefixes.
 
-- Release tags use SemVer 2.0 after the package prefix.
-- A package version is never reused after publication.
-- CI must use a full Git history so MinVer can resolve tags.
-- The NuGet trusted-publishing policy must name the exact repository and
-  workflow file.
-- A package is published only after tests, package smoke tests, and the public
-  release audit pass.
+## Package rehearsal
+
+Two clean restore modes are required:
+
+1. **Local closure:** the candidate restores from a local feed containing the complete repository package closure.
+2. **Publication:** the candidate restores from a feed containing only the candidate plus nuget.org.
+
+The first mode proves that project references were represented correctly as package dependencies. The second proves that required internal dependencies have actually been released.
+
+Publication selects exact `.nupkg` and `.snupkg` files. Wildcard pushing is forbidden. Trusted publishing provides the temporary NuGet credential.
+
+## Consequences
+
+Independent package versions remain possible without hiding project-reference dependencies or accidentally publishing every artifact from a solution-wide pack. Dependency packages must be tagged and published before their consumers.

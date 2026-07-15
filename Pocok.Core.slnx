@@ -1,0 +1,27 @@
+﻿<Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/Conversion.Benchmarks/Conversion.Benchmarks.csproj"/>
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Conversion.Console/Conversion.Console.csproj"/>
+    <Project Path="samples/Conversion.Trimmed/Conversion.Trimmed.csproj"/>
+    <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
+    <Project Path="samples/Readiness.Console/Readiness.Console.csproj"/>
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AppDefaults/Pocok.AppDefaults.csproj"/>
+    <Project Path="src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj"/>
+    <Project Path="src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj"/>
+    <Project Path="src/Conversion/Pocok.Conversion.csproj"/>
+    <Project Path="src/Readiness/Pocok.Readiness.csproj"/>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Unit/AppDefaults.Tests/Pocok.AppDefaults.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Logging.Tests/Pocok.AppDefaults.Logging.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Logging.Serilog.Tests/Pocok.AppDefaults.Logging.Serilog.Tests.csproj"/>
+    <Project Path="tests/Architecture/Pocok.Architecture.Tests.csproj"/>
+    <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj"/>
+    <Project Path="tests/Unit/Conversion.Tests/Pocok.Conversion.Tests.csproj"/>
+    <Project Path="tests/Unit/Readiness.Tests/Pocok.Readiness.Tests.csproj"/>
+  </Folder>
+</Solution>

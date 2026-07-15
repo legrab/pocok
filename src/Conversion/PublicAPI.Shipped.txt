@@ -1,4 +1,0 @@
-Pocok.Conversion.ValueConverter
-ValueConverter.Convert(System.Object, Pocok.Conversion.ConversionContext) -> Pocok.Primitives.Result<TTarget>
-ValueConverter.Convert(System.Object, System.Type, Pocok.Conversion.ConversionContext) -> Pocok.Primitives.Result<System.Object>
-ValueConverter.ctor()

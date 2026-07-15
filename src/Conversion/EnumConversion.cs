@@ -2,32 +2,26 @@
 // Copyright 2026 Pocok contributors
 
 using System.Globalization;
-using Pocok.Primitives;
 
 namespace Pocok.Conversion;
 
 internal static class EnumConversion
 {
-    internal static Result<object?> Convert(object value, Type targetType, ConversionContext context)
+    internal static ConversionResult<object?> Convert(object value, Type targetType, ConversionContext context)
     {
         object parsed;
         if (value is string text)
         {
             if (!Enum.TryParse(targetType, text, true, out var parsedValue) || parsedValue is null)
-            {
                 return ConversionFailures.InvalidEnum(targetType);
-            }
 
             parsed = parsedValue;
         }
         else if (TypeShape.IsNumeric(value.GetType()) || value.GetType().IsEnum)
         {
-            var underlyingType = Enum.GetUnderlyingType(targetType);
-            var numericResult = NumericConversion.Convert(value, underlyingType, context);
-            if (numericResult.IsFailure)
-            {
-                return numericResult;
-            }
+            Type underlyingType = Enum.GetUnderlyingType(targetType);
+            ConversionResult<object?> numericResult = NumericConversion.Convert(value, underlyingType, context);
+            if (numericResult.IsFailure) return numericResult;
 
             parsed = Enum.ToObject(targetType, numericResult.Value!);
         }
@@ -37,24 +31,19 @@ internal static class EnumConversion
         }
 
         return IsAccepted(parsed, targetType, context.Enums)
-            ? Result<object?>.Success(parsed)
+            ? ConversionResult<object?>.Success(parsed)
             : ConversionFailures.InvalidEnum(targetType);
     }
 
     private static bool IsAccepted(object value, Type enumType, EnumPolicy policy)
     {
-        if (Enum.IsDefined(enumType, value))
-        {
-            return true;
-        }
+        if (Enum.IsDefined(enumType, value)) return true;
 
         if (policy != EnumPolicy.DefinedValuesAndFlags ||
             enumType.GetCustomAttributes(typeof(FlagsAttribute), false).Length == 0)
-        {
             return false;
-        }
 
-        var underlyingType = Enum.GetUnderlyingType(enumType);
+        Type underlyingType = Enum.GetUnderlyingType(enumType);
         var valueBits = GetBits(value, underlyingType);
         ulong allowedBits = 0;
         var zeroIsDefined = false;
@@ -69,8 +58,9 @@ internal static class EnumConversion
         return (valueBits != 0 || zeroIsDefined) && (valueBits & ~allowedBits) == 0;
     }
 
-    private static ulong GetBits(object value, Type underlyingType) =>
-        Type.GetTypeCode(underlyingType) switch
+    private static ulong GetBits(object value, Type underlyingType)
+    {
+        return Type.GetTypeCode(underlyingType) switch
         {
             TypeCode.SByte => unchecked((ulong)System.Convert.ToSByte(value, CultureInfo.InvariantCulture)),
             TypeCode.Int16 => unchecked((ulong)System.Convert.ToInt16(value, CultureInfo.InvariantCulture)),
@@ -78,4 +68,5 @@ internal static class EnumConversion
             TypeCode.Int64 => unchecked((ulong)System.Convert.ToInt64(value, CultureInfo.InvariantCulture)),
             _ => System.Convert.ToUInt64(value, CultureInfo.InvariantCulture)
         };
+    }
 }
