@@ -1,52 +1,95 @@
 # Repository consolidation implementation ledger
 
-## Frozen target package graph
+> **Interpretation:** Checked items mean the source changes were applied and verified. The current local state is the baseline. The consolidation plan contains the authoritative next-agent stabilization sequence.
+
+
+## Frozen package graph
 
 ```text
 Pocok.Conversion
 Pocok.Readiness
+
 Pocok.AppDefaults
-Pocok.AppDefaults.Logging -> Pocok.AppDefaults
-Pocok.AppDefaults.Logging.Serilog -> Pocok.AppDefaults.Logging
+├── Pocok.AppDefaults.Logging
+├── Pocok.AppDefaults.Logging.Serilog
+└── Pocok.AppDefaults.Modularity
+
 Pocok.Modularity.Contracts
-Pocok.Modularity -> Pocok.Modularity.Contracts
-Pocok.AppDefaults.Modularity -> Pocok.AppDefaults + Pocok.Modularity
+└── Pocok.Modularity
+    └── Pocok.AppDefaults.Modularity
 ```
+
+Arrows point from a dependency to its consumers. `Pocok.AppDefaults.Modularity` intentionally joins the AppDefaults and Modularity branches. Serilog defaults and provider-neutral logging defaults are separate policies.
 
 ## Accepted decisions
 
-- Preserve the organized Git history in the delivered repository.
-- Keep Modularity packages non-releasable until their real plugin fixture matrix passes.
+- Preserve organized Git history in the delivered repository.
+- Keep Modularity packages non-releasable until the real plugin fixture matrix passes.
 - Retire the already-published `Pocok.Primitives` package without a forwarding package.
-- Keep logging defaults conservative, additive by default, configuration-driven, and overridable by the application.
+- Keep logging defaults conservative, configuration-driven, additive by default, and overridable by the application.
+- Publish releasable capability and maintainer-default packages through nuget.org.
+- Keep tiny repository reuse package-local or as explicit internal linked source, never as a hidden runtime assembly.
+
+## Completed implementation phases
+
+- [x] Import current repository baseline
+- [x] Lock baseline behavior and inventory
+- [x] Repair transitive package-closure smoke testing
+- [x] Centralize package catalog and publication workflow
+- [x] Retire Primitives
+- [x] Merge Conversion abstractions into Conversion
+- [x] Add package-owned Conversion and Readiness failures
+- [x] Bound Conversion recursion and collection work
+- [x] Add explicit custom Conversion strategies
+- [x] Rename Hosting to Readiness and harden lifecycle behavior
+- [x] Formalize the internal shared-source boundary
+- [x] Add AppDefaults composition
+- [x] Add provider-neutral logging defaults
+- [x] Add Serilog-specific defaults
+- [x] Add Modularity contracts, loader, diagnostics, fixtures, and defaults
+- [x] Keep Modularity release-gated
+- [x] Add clean package consumers and reviewed API inventories
+- [x] Add reference samples and migration documentation
+- [x] Propagate release versions through restore, build, test, and pack
+- [x] Add final static repository validation
+- [ ] Run executable validation on .NET 10 and PowerShell 7
+- [ ] Observe a first real GitHub Actions run
+
+## Confirmed blockers and design gaps
+
+- [ ] Establish one supported member-level public API compatibility mechanism.
+- [ ] Isolate initial package publication from experimental Modularity projects and tests.
+- [ ] Pack and audit the candidate plus its internal dependency closure rather than relying on a whole-solution release boundary.
+- [ ] Reword all “release-ready” claims until executable acceptance passes.
 
 ## Validation environment
 
-The implementation environment did not contain .NET or PowerShell and could not retrieve executable toolchain archives. Static repository checks are run here. The final executable validation commands are recorded below and must be run before publication.
+The repository has been stabilized in an environment containing .NET 10 and PowerShell 7. Compilation, formatting, and initial build errors have been resolved. The current local state is buildable.
 
-## Phase checklist
+Modularity remains non-releasable as agreed. The five initial packages must not be tagged until the commands below pass in a normal .NET 10 environment.
 
-- [x] Import current repository baseline
-- [ ] Repair release staging and package catalog
-- [ ] Retire Primitives
-- [ ] Consolidate Conversion
-- [ ] Rename and stabilize Readiness
-- [ ] Add AppDefaults and logging
-- [ ] Add Modularity and fixtures
-- [ ] Complete package documentation and release gates
-- [ ] Run executable validation on .NET 10 and PowerShell 7
-
-## Required final validation
+## Required executable validation
 
 ```pwsh
-dotnet restore
-dotnet format --verify-no-changes --no-restore
-dotnet build --configuration Release --no-restore
-dotnet test --configuration Release --no-build
-dotnet pack --configuration Release --no-build --output artifacts/packages
+dotnet restore Pocok.slnx
+dotnet format Pocok.slnx --verify-no-changes --no-restore
+dotnet build Pocok.slnx --configuration Release --no-restore
+dotnet test Pocok.slnx --configuration Release --no-build
+dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
+
 ./tools/PackageCatalog/Test-PackageCatalog.ps1
-./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -Mode LocalClosure
+./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode LocalClosure
 ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
 ```
 
-Run publication-mode smoke tests in package dependency order after the required internal dependencies exist on nuget.org.
+For a release candidate, run the tag-driven workflow or generate release version props and execute both smoke modes. Publication mode is expected to fail until every internal dependency of the candidate has already been published.
+
+## Initial release sequence
+
+1. `Pocok.Conversion`
+2. `Pocok.Readiness`
+3. `Pocok.AppDefaults`
+4. `Pocok.AppDefaults.Logging`
+5. `Pocok.AppDefaults.Logging.Serilog`
+
+The first three are independent. Steps 4 and 5 both require step 3 and may then be released in either order.
