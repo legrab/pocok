@@ -1,11 +1,11 @@
 # Pocok repository evaluation, implementation retrospective, and stabilization plan
 
 **Original evaluation date:** 2026-07-15
-**Current state:** locally available repository with initial consolidation applied.
+**Current state:** V2 implementation candidate on `dev/bg/est` with consolidation Waves A through D applied.
 **Historical inputs:** `origin.zip` (reference only).
 **Primary objective:** turn Pocok into a small, credible portfolio of reusable .NET packages and public application-default configurators without preserving low-value abstractions or copying application-specific legacy code.
 
-> **Status update:** The repository has been formatted, commits cleaned, and build errors fixed. It is now ready for a 1-step improvement session to stabilize the implementation, verify tests, and finalize the consolidation.
+> **Status update:** A previous .NET 10 and PowerShell 7 stabilization run recorded 182 passing tests. The V2 follow-up finalized pending Modularity WIP and implemented package-semantic Wave C and AppDefaults-policy Wave D. The environment used for those latest edits had no .NET or PowerShell runtime, so the exact HEAD remains an implementation candidate until the acceptance matrix is rerun.
 
 ## Evidence levels
 
@@ -28,14 +28,14 @@ The generated repository contains eight active packable projects:
 
 | Package | Intended status | Current confidence |
 |---|---|---|
-| `Pocok.Conversion` | Initial public release | **Not release-ready.** Structure is promising, but one retained test is provably stale after the abstractions merge. |
-| `Pocok.Readiness` | Initial public release | Plausible, unverified. Requires executable lifecycle and concurrency tests. |
-| `Pocok.AppDefaults` | Initial public release | Plausible, unverified. The base contract is intentionally small. |
-| `Pocok.AppDefaults.Logging` | Initial public release after `Pocok.AppDefaults` | Plausible, unverified. Duplicate-call and override semantics need deliberate confirmation. |
-| `Pocok.AppDefaults.Logging.Serilog` | Initial public release after `Pocok.AppDefaults` | Plausible, unverified. Requires real host construction and configuration tests. |
-| `Pocok.Modularity.Contracts` | Experimental, non-releasable | Implemented for evaluation, not proven. |
-| `Pocok.Modularity` | Experimental, non-releasable | Highest-risk area. Requires real cross-platform plugin fixtures. |
-| `Pocok.AppDefaults.Modularity` | Experimental, non-releasable | Depends on the unproven Modularity runtime. |
+| `Pocok.Conversion` | Initial public release | Previously compiled and tested. Candidate-scoped pack, smoke, audit, sample, and trim checks now require one fresh run. |
+| `Pocok.Readiness` | Initial public release | Previously compiled and tested, including concurrency coverage. Package-semantic changes require one fresh release rehearsal. |
+| `Pocok.AppDefaults` | Initial public release | Previously compiled and tested. Its composition contract remains deliberately small and unchanged. |
+| `Pocok.AppDefaults.Logging` | Initial public release after `Pocok.AppDefaults` | Duplicate, options, provider, override, and console semantics are now explicit and tested in source; executable rerun pending. |
+| `Pocok.AppDefaults.Logging.Serilog` | Initial public release after `Pocok.AppDefaults` | Sink-free policy and duplicate/options behavior are explicit; executable host and package rerun pending. |
+| `Pocok.Modularity.Contracts` | Experimental, non-releasable | Implemented for evaluation. Keep gated until Wave E passes on Linux and Windows. |
+| `Pocok.Modularity` | Experimental, non-releasable | Pending WIP contradictions were corrected. Highest-risk runtime area and still not a release candidate. |
+| `Pocok.AppDefaults.Modularity` | Experimental, non-releasable | Configurator policy is aligned with other AppDefaults packages, but release depends on Wave E. |
 
 The following package shapes were removed from the active repository:
 
@@ -62,6 +62,18 @@ The candidate establishes a useful target shape:
 - internal reusable code is kept out of a public `Common` or `Utils` package.
 
 These design decisions should be preserved unless executable evidence disproves them.
+
+## V2 resolution status
+
+The historical defects below explain why the first one-shot was not sufficient. Their structural remedies are now present:
+
+- stale split-assembly Conversion assertions were replaced by member-level Verify/PublicApiGenerator snapshots;
+- `Pocok.Core.slnx` isolates the initial release graph from experimental Modularity;
+- package closure is catalog-resolved and drives candidate packing, local-feed smoke, publication smoke, and audit;
+- AppDefaults duplicate, options, provider, and override semantics are deliberate rather than accidental;
+- Modularity remains non-releasable and has a separate Wave E proof gate.
+
+The remaining task is executable verification of the latest edits, not another broad architectural rewrite.
 
 ## What went wrong in the one-shot
 
@@ -138,20 +150,20 @@ The implementation report calls five packages “release-ready” while also ack
 - **Prefer a smaller proven release.** It is better to ship Conversion, Readiness, and the AppDefaults base after complete package validation than to carry an unverified plugin framework through every release path.
 - **Keep evidence in the repository.** Record command output, first failing commit, deviations, and final green checks in the implementation ledger so another agent does not repeat the same investigation.
 
-## Next 1-step improvement session
+## Next executable acceptance session
 
-The next agent should **stabilize the current local state** and finalize the consolidation.
+The next agent should verify the V2 implementation rather than redesign it speculatively.
 
 ### Mandatory order
 
-1. Verify the .NET 10.0 and PowerShell 7 environment.
-2. Run restore, build, test, pack, catalog validation, smoke tests, and release audit locally.
-3. Fix any remaining test failures or inconsistencies with focused edits.
-4. Replace the stale and duplicated API-baseline approach.
-5. Separate the initial release graph from experimental Modularity.
-6. Prove local-closure and publication-shaped package restoration.
-7. Run Linux and Windows CI.
-8. Only then reconsider Modularity release eligibility or add more package content.
+1. Verify the .NET 10 and PowerShell 7 environment.
+2. Run restore, formatting, build, focused tests, full tests, and samples on the exact HEAD.
+3. Pack the full repository once and run catalog validation, local-closure smoke, and full package audit.
+4. Rehearse each initial release candidate with generated release versions, exact closure packing, both smoke modes, and candidate-scoped audit.
+5. Fix only factual failures exposed by those commands and preserve the documented package boundaries.
+6. Run Linux and Windows CI.
+7. Release the five initial packages in dependency order.
+8. Treat Wave E as a separate task before reconsidering Modularity release eligibility.
 
 ### First commands
 
@@ -172,7 +184,7 @@ dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/pac
 ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
 ```
 
-Do not start by editing the known stale test blindly. Compilation may expose more fundamental problems first.
+Do not add more package content before this matrix is green. Compilation, PowerShell parsing, package restore, and runner behavior remain the authoritative evidence.
 
 ## Recommended stabilization waves
 

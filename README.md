@@ -1,6 +1,6 @@
 # Pocok
 
-> **Current status:** Consolidated repository. Initial formatting and build fixes applied. Ready for stabilization and verification of tests. See the [consolidation plan](docs/plans/repository-consolidation.md).
+> **Current status:** Consolidated implementation candidate. The previous .NET 10 baseline passed 182 tests; the latest package-closure and AppDefaults policy changes require one fresh executable acceptance run before release tags are created. See the [consolidation plan](docs/plans/repository-consolidation.md).
 
 Pocok is a deliberately small .NET package portfolio extracted from repeated application needs. It contains focused runtime capabilities and transparent application-default configurators. The repository is also maintained as a reference for package boundaries, compatibility, testing, plugin isolation, and release engineering.
 
