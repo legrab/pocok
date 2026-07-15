@@ -57,6 +57,13 @@ Act as a senior library engineer. Prefer correctness, explicit contracts, mainta
 - Original hand-authored source uses `SPDX-License-Identifier: Apache-2.0` and `Copyright 2026 Pocok contributors`; generated files, snapshots, project/configuration files, and ordinary documentation do not need repetitive headers.
 - Preserve `LICENSE`, `NOTICE`, third-party notices, and provenance when moving or adapting code. A stewardship request is nonbinding and never narrows Apache-2.0 permissions.
 
+## Current handoff
+
+- Read `docs/plans/repository-consolidation.md` before changing code or release configuration.
+- Treat the repository as an unverified implementation candidate.
+- Establish an executable .NET 10 and PowerShell 7 baseline before extending packages.
+- Do not create release tags until the revised stabilization acceptance sequence passes.
+
 ## Workflow
 
 - Read `prompts/agent-base.prompt.md` before executing a plan.
