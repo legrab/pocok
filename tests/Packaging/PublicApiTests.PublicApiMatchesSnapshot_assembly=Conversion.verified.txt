@@ -1,0 +1,133 @@
+﻿namespace Pocok.Conversion
+{
+    public sealed class ConversionContext : System.IEquatable<Pocok.Conversion.ConversionContext>
+    {
+        public ConversionContext(System.Globalization.CultureInfo culture, Pocok.Conversion.OverflowPolicy overflow = 0, Pocok.Conversion.NullPolicy nulls = 0, Pocok.Conversion.EnumPolicy enums = 1, Pocok.Conversion.NumericLossPolicy numericLoss = 0, Pocok.Conversion.NumericBooleanPolicy numericBooleans = 0, Pocok.Conversion.TemporalTextPolicy temporalText = 0, int maximumDepth = 32, int maximumCollectionItems = 10000) { }
+        public System.Globalization.CultureInfo Culture { get; }
+        public Pocok.Conversion.EnumPolicy Enums { get; }
+        public int MaximumCollectionItems { get; }
+        public int MaximumDepth { get; }
+        public Pocok.Conversion.NullPolicy Nulls { get; }
+        public Pocok.Conversion.NumericBooleanPolicy NumericBooleans { get; }
+        public Pocok.Conversion.NumericLossPolicy NumericLoss { get; }
+        public Pocok.Conversion.OverflowPolicy Overflow { get; }
+        public Pocok.Conversion.TemporalTextPolicy TemporalText { get; }
+        public static Pocok.Conversion.ConversionContext Strict { get; }
+    }
+    public static class ConversionErrorCodes
+    {
+        public const string CollectionItem = "conversion.collection-item";
+        public const string DuplicateKey = "conversion.duplicate-key";
+        public const string InvalidEnum = "conversion.invalid-enum";
+        public const string InvalidFormat = "conversion.invalid-format";
+        public const string Lossy = "conversion.lossy";
+        public const string NullNotAllowed = "conversion.null-not-allowed";
+        public const string Overflow = "conversion.overflow";
+        public const string ResourceLimit = "conversion.resource-limit";
+        public const string Unsupported = "conversion.unsupported";
+    }
+    public sealed class ConversionFailure : System.IEquatable<Pocok.Conversion.ConversionFailure>
+    {
+        public ConversionFailure(string code, string message, string path = "$", System.Exception? exception = null) { }
+        public string Code { get; }
+        public System.Exception? Exception { get; }
+        public string Message { get; }
+        public string Path { get; init; }
+        public Pocok.Conversion.ConversionFailure AtPath(string path) { }
+        public static Pocok.Conversion.ConversionFailure FromException(string code, string message, System.Exception exception, string path = "$") { }
+    }
+    public sealed class ConversionResult<T> : System.IEquatable<Pocok.Conversion.ConversionResult<T>>
+    {
+        public Pocok.Conversion.ConversionFailure? Error { get; }
+        public bool IsFailure { get; }
+        public bool IsSuccess { get; }
+        public T Value { get; }
+        public bool TryGetValue([System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out T value) { }
+        public static Pocok.Conversion.ConversionResult<T> Failure(Pocok.Conversion.ConversionFailure error) { }
+        public static Pocok.Conversion.ConversionResult<T> Success(T value) { }
+    }
+    public sealed class ConversionStrategyContext
+    {
+        public string Path { get; }
+        public Pocok.Conversion.ConversionContext Policies { get; }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Conversion uses runtime type inspection and reflective collection construction. T" +
+            "rimming and NativeAOT are not generally supported.")]
+        public Pocok.Conversion.ConversionResult<object?> ConvertNested(object? value, System.Type targetType, string pathSegment) { }
+    }
+    public enum ConversionStrategyPrecedence
+    {
+        AfterBuiltIns = 0,
+        BeforeBuiltIns = 1,
+    }
+    public sealed class ConversionStrategyResult : System.IEquatable<Pocok.Conversion.ConversionStrategyResult>
+    {
+        public Pocok.Conversion.ConversionFailure? Failure { get; }
+        public Pocok.Conversion.ConversionStrategyStatus Status { get; }
+        public object? Value { get; }
+        public static Pocok.Conversion.ConversionStrategyResult Failed(Pocok.Conversion.ConversionFailure failure) { }
+        public static Pocok.Conversion.ConversionStrategyResult NotApplicable() { }
+        public static Pocok.Conversion.ConversionStrategyResult Success(object? value) { }
+    }
+    public enum ConversionStrategyStatus
+    {
+        NotApplicable = 0,
+        Success = 1,
+        Failed = 2,
+    }
+    public enum EnumPolicy
+    {
+        DefinedValuesOnly = 0,
+        DefinedValuesAndFlags = 1,
+    }
+    public interface IConversionStrategy
+    {
+        Pocok.Conversion.ConversionStrategyResult TryConvert(object? value, System.Type targetType, Pocok.Conversion.ConversionStrategyContext context);
+    }
+    public interface IValueConverter
+    {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Conversion uses runtime type inspection and reflective collection construction. T" +
+            "rimming and NativeAOT are not generally supported.")]
+        Pocok.Conversion.ConversionResult<object?> Convert(object? value, System.Type targetType, Pocok.Conversion.ConversionContext? context = null);
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Conversion uses runtime type inspection and reflective collection construction. T" +
+            "rimming and NativeAOT are not generally supported.")]
+        Pocok.Conversion.ConversionResult<TTarget> Convert<TTarget>(object? value, Pocok.Conversion.ConversionContext? context = null);
+    }
+    public enum NullPolicy
+    {
+        Preserve = 0,
+        UseDefault = 1,
+        Reject = 2,
+    }
+    public enum NumericBooleanPolicy
+    {
+        Reject = 0,
+        ZeroOrOne = 1,
+        NonZeroIsTrue = 2,
+    }
+    public enum NumericLossPolicy
+    {
+        Reject = 0,
+        RoundToNearest = 1,
+    }
+    public enum OverflowPolicy
+    {
+        Fail = 0,
+        Saturate = 1,
+    }
+    public enum TemporalTextPolicy
+    {
+        RoundTrip = 0,
+        CultureAware = 1,
+    }
+    public sealed class ValueConverter : Pocok.Conversion.IValueConverter
+    {
+        public ValueConverter(System.Collections.Generic.IEnumerable<Pocok.Conversion.IConversionStrategy>? additionalStrategies = null, Pocok.Conversion.ConversionStrategyPrecedence precedence = 0) { }
+        public static Pocok.Conversion.ValueConverter Default { get; }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Conversion uses runtime type inspection and reflective collection construction. T" +
+            "rimming and NativeAOT are not generally supported.")]
+        public Pocok.Conversion.ConversionResult<object?> Convert(object? value, System.Type targetType, Pocok.Conversion.ConversionContext? context = null) { }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Conversion uses runtime type inspection and reflective collection construction. T" +
+            "rimming and NativeAOT are not generally supported.")]
+        public Pocok.Conversion.ConversionResult<TTarget> Convert<TTarget>(object? value, Pocok.Conversion.ConversionContext? context = null) { }
+    }
+}

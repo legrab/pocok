@@ -61,6 +61,7 @@ public sealed class ValueConverter : IValueConverter
         return session.Convert(value, targetType);
     }
 
+    [RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
     internal ConversionResult<object?> ConvertCore(
         object? value,
         Type targetType,
@@ -82,6 +83,7 @@ public sealed class ValueConverter : IValueConverter
         return TryCustomStrategies(value, targetType, session, path, depth) ?? builtIn;
     }
 
+    [RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
     private ConversionResult<object?>? TryCustomStrategies(
         object? value,
         Type targetType,
@@ -132,6 +134,7 @@ public sealed class ValueConverter : IValueConverter
         return null;
     }
 
+    [RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
     private static ConversionResult<object?> ConvertBuiltIn(
         object? value,
         Type targetType,
@@ -177,6 +180,7 @@ public sealed class ValueConverter : IValueConverter
         return ConversionFailures.Unsupported(value.GetType(), effectiveTargetType, path);
     }
 
+    [RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
     private static ConversionResult<object?> ConvertNull(Type targetType, NullPolicy nullPolicy, string path)
     {
         if (nullPolicy == NullPolicy.Reject) return ConversionFailures.Null(targetType, path);

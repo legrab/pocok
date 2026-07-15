@@ -1,0 +1,63 @@
+﻿namespace Pocok.Readiness
+{
+    public interface IReadinessSignal
+    {
+        Pocok.Readiness.ReadinessFailure? Failure { get; }
+        Pocok.Readiness.ReadinessSnapshot Snapshot { get; }
+        Pocok.Readiness.ReadinessState State { get; }
+        System.Threading.Tasks.Task WaitUntilReadyAsync(System.Threading.CancellationToken cancellationToken = default);
+    }
+    public sealed class ReadinessCycle
+    {
+        public long Sequence { get; }
+    }
+    public sealed class ReadinessFailedException : System.Exception
+    {
+        public ReadinessFailedException(Pocok.Readiness.ReadinessFailure failure) { }
+        public Pocok.Readiness.ReadinessFailure Failure { get; }
+    }
+    public sealed class ReadinessFailure : System.IEquatable<Pocok.Readiness.ReadinessFailure>
+    {
+        public ReadinessFailure(string code, string message, System.Exception? exception = null) { }
+        public string Code { get; }
+        public System.Exception? Exception { get; }
+        public string Message { get; }
+        public static Pocok.Readiness.ReadinessFailure FromException(string code, string message, System.Exception exception) { }
+    }
+    public readonly struct ReadinessSnapshot : System.IEquatable<Pocok.Readiness.ReadinessSnapshot>
+    {
+        public ReadinessSnapshot(Pocok.Readiness.ReadinessState State, long Sequence, Pocok.Readiness.ReadinessFailure? Failure) { }
+        public Pocok.Readiness.ReadinessFailure? Failure { get; init; }
+        public bool IsReady { get; }
+        public long Sequence { get; init; }
+        public Pocok.Readiness.ReadinessState State { get; init; }
+    }
+    public sealed class ReadinessSource : Pocok.Readiness.IReadinessSignal
+    {
+        public ReadinessSource() { }
+        public Pocok.Readiness.ReadinessFailure? Failure { get; }
+        public Pocok.Readiness.ReadinessSnapshot Snapshot { get; }
+        public Pocok.Readiness.ReadinessState State { get; }
+        public void BeginShutdown() { }
+        public Pocok.Readiness.ReadinessCycle BeginStartup() { }
+        public void CancelStartup(Pocok.Readiness.ReadinessCycle cycle, System.Threading.CancellationToken cancellationToken) { }
+        public void MarkFailed(Pocok.Readiness.ReadinessCycle cycle, Pocok.Readiness.ReadinessFailure failure) { }
+        public void MarkReady(Pocok.Readiness.ReadinessCycle cycle) { }
+        public void MarkShutdownFailed(Pocok.Readiness.ReadinessFailure failure) { }
+        public void MarkStopped() { }
+        public System.Threading.Tasks.Task WaitUntilReadyAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task WaitUntilReadyAsync(Pocok.Readiness.ReadinessCycle cycle, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public enum ReadinessState
+    {
+        Stopped = 0,
+        Starting = 1,
+        Ready = 2,
+        Stopping = 3,
+        Failed = 4,
+    }
+    public sealed class ReadinessStoppedException : System.Exception
+    {
+        public ReadinessStoppedException() { }
+    }
+}

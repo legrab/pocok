@@ -68,11 +68,22 @@ function Invoke-Consumer {
         $template.Replace('__PACKAGE_VERSION__', $version),
         [System.Text.UTF8Encoding]::new($false))
 
-    $restoreArguments = @('restore', (Join-Path $consumerRoot 'Pocok.Consumer.csproj'), '--packages', $packagesRoot, '--no-cache')
-    foreach ($source in $Sources) {
-        $restoreArguments += @('--source', $source)
+    $configContent = @"
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+"@
+    for ($i = 0; $i -lt $Sources.Count; $i++) {
+        $configContent += "`n    <add key=""source_$i"" value=""$($Sources[$i])"" />"
     }
+    $configContent += @"
+`n  </packageSources>
+</configuration>
+"@
+    [System.IO.File]::WriteAllText((Join-Path $consumerRoot 'NuGet.Config'), $configContent, [System.Text.UTF8Encoding]::new($false))
 
+    $restoreArguments = @('restore', (Join-Path $consumerRoot 'Pocok.Consumer.csproj'), '--packages', $packagesRoot, '--no-cache')
     & dotnet @restoreArguments
     if ($LASTEXITCODE -ne 0) {
         throw "$PackageId $FeedMode external consumer restore failed with exit code $LASTEXITCODE."
@@ -131,7 +142,7 @@ try {
         Copy-Item -LiteralPath $package.FullName -Destination $candidateFeed
 
         if ($Mode -in @('LocalClosure', 'Both')) {
-            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'local-closure' -Sources @($closureFeed) -WorkRoot $workRoot
+            Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'local-closure' -Sources @($closureFeed, 'https://api.nuget.org/v3/index.json') -WorkRoot $workRoot
         }
 
         if ($Mode -in @('Publication', 'Both')) {

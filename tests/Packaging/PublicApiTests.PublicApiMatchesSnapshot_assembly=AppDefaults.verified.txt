@@ -1,0 +1,12 @@
+﻿namespace Pocok.AppDefaults
+{
+    public static class ApplicationConfiguratorExtensions
+    {
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder ConfigureWith(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, params Pocok.AppDefaults.IApplicationConfigurator[] configurators) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder ConfigureWith(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Collections.Generic.IEnumerable<Pocok.AppDefaults.IApplicationConfigurator> configurators) { }
+    }
+    public interface IApplicationConfigurator
+    {
+        void Configure(Microsoft.Extensions.Hosting.IHostApplicationBuilder builder);
+    }
+}

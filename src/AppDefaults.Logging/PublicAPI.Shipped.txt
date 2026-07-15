@@ -1,3 +1,0 @@
-Pocok.AppDefaults.Logging.LoggingDefaultsConfigurator
-Pocok.AppDefaults.Logging.LoggingDefaultsExtensions
-Pocok.AppDefaults.Logging.LoggingDefaultsOptions

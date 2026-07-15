@@ -1,2 +1,0 @@
-Pocok.AppDefaults.ApplicationConfiguratorExtensions
-Pocok.AppDefaults.IApplicationConfigurator

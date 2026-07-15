@@ -24,6 +24,11 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnablePackageValidation>true</EnablePackageValidation>
     <MinVerIgnoreHeight>true</MinVerIgnoreHeight>
+    <IncludeExperimental Condition="'$(IncludeExperimental)' == ''">true</IncludeExperimental>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IncludeExperimental)' == 'true'">
+    <DefineConstants>$(DefineConstants);INCLUDE_EXPERIMENTAL</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsPackable)' == 'true'">

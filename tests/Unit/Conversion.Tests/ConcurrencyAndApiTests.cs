@@ -100,6 +100,11 @@ public sealed class ConcurrencyAndApiTests
             method.GetCustomAttribute<RequiresUnreferencedCodeAttribute>() is not null).ShouldBeTrue();
         implementationMethods.All(method =>
             method.GetCustomAttribute<RequiresUnreferencedCodeAttribute>() is not null).ShouldBeTrue();
+
+        typeof(ConversionStrategyContext)
+            .GetMethod(nameof(ConversionStrategyContext.ConvertNested))!
+            .GetCustomAttribute<RequiresUnreferencedCodeAttribute>()
+            .ShouldNotBeNull();
     }
 
     [Test]

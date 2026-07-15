@@ -2,11 +2,13 @@
 // Copyright 2026 Pocok contributors
 
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 
 namespace Pocok.Conversion;
 
+[RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
 internal static class CollectionConversion
 {
     internal static bool IsPairOrCollectionTarget(Type targetType)

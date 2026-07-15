@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Pocok.Conversion;
 
 internal sealed class ConversionSession
@@ -17,6 +19,7 @@ internal sealed class ConversionSession
 
     internal ConversionContext Context { get; }
 
+    [RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
     internal ConversionResult<object?> Convert(object? value, Type targetType, string path = "$", int depth = 0)
     {
         if (depth > Context.MaximumDepth)
@@ -30,6 +33,7 @@ internal sealed class ConversionSession
         return result;
     }
 
+    [RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
     internal ConversionResult<object?> ConvertNested(object? value, Type targetType, string path, int depth)
     {
         return Convert(value, targetType, path, depth + 1);

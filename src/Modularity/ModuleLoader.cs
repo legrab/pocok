@@ -67,10 +67,7 @@ public static partial class ModuleLoader
                     $"Module id '{candidate.Identity.Id}' is declared by more than one manifest.");
                 descriptors.Add(candidate.ToFailedDescriptor(diagnostic));
                 if (candidate.Required || options.ThrowOnOptionalFailure)
-                {
                     hasFatalFailure = true;
-                    fatalException ??= diagnostic.Exception;
-                }
 
                 continue;
             }
@@ -326,24 +323,31 @@ public static partial class ModuleLoader
         {
             try
             {
+                if (manifest.ManifestVersion != 1)
+                    throw new InvalidDataException(
+                        $"Manifest version {manifest.ManifestVersion} is not supported. Expected version 1.");
+
+                if (string.IsNullOrWhiteSpace(manifest.Id))
+                    throw new InvalidDataException("Module id is missing or empty.");
+
+                if (!ModuleIdPattern().IsMatch(manifest.Id))
+                    throw new InvalidDataException(
+                        $"Module id '{manifest.Id}' may contain only letters, digits, dots, underscores, and hyphens.");
+
+                if (string.IsNullOrWhiteSpace(manifest.Version))
+                    throw new InvalidDataException("Module version is missing or empty.");
+
+                if (!Version.TryParse(manifest.Version, out Version? version))
+                    throw new InvalidDataException($"Module version '{manifest.Version}' is not a valid System.Version value.");
+
+                if (string.IsNullOrWhiteSpace(manifest.EntryAssembly))
+                    throw new InvalidDataException("Module entry assembly is missing or empty.");
+
                 manifest.SupportedOperatingSystems ??= new List<string>();
                 manifest.SupportedArchitectures ??= new List<string>();
                 manifest.SharedAssemblies ??= new List<string>();
                 manifest.Metadata ??= new Dictionary<string, string>(StringComparer.Ordinal);
 
-                if (manifest.ManifestVersion != 1)
-                    throw new InvalidDataException(
-                        $"Manifest version {manifest.ManifestVersion} is not supported. Expected version 1.");
-
-                ArgumentException.ThrowIfNullOrWhiteSpace(manifest.Id);
-                if (!ModuleIdPattern().IsMatch(manifest.Id))
-                    throw new InvalidDataException(
-                        "Module id may contain only letters, digits, dots, underscores, and hyphens.");
-
-                if (!Version.TryParse(manifest.Version, out Version? version))
-                    throw new InvalidDataException("Module version is not a valid System.Version value.");
-
-                ArgumentException.ThrowIfNullOrWhiteSpace(manifest.EntryAssembly);
                 var pluginDirectory = Path.GetFullPath(Path.GetDirectoryName(manifestPath)!);
                 var entryAssemblyPath = Path.GetFullPath(Path.Combine(pluginDirectory, manifest.EntryAssembly));
                 var relativeEntryPath = Path.GetRelativePath(pluginDirectory, entryAssemblyPath);

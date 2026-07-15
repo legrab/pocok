@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Pocok.Conversion;
 
 /// <summary>
@@ -32,6 +34,7 @@ public sealed class ConversionStrategyContext
     /// <param name="value">The nested source value.</param>
     /// <param name="targetType">The nested target type.</param>
     /// <param name="pathSegment">A caller-owned path segment such as <c>.value</c> or <c>[0]</c>.</param>
+    [RequiresUnreferencedCode(ConversionTrimming.IncompatibleMessage)]
     public ConversionResult<object?> ConvertNested(object? value, Type targetType, string pathSegment)
     {
         ArgumentNullException.ThrowIfNull(targetType);

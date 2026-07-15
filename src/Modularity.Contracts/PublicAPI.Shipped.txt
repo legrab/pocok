@@ -1,3 +1,0 @@
-Pocok.Modularity.IServiceModule
-Pocok.Modularity.ModuleContext
-Pocok.Modularity.ModuleIdentity
