@@ -51,15 +51,15 @@ jobs:
         shell: bash
         run: |
           release_props="$PWD/artifacts/release-versions.props"
-          dotnet restore Pocok.slnx -p:PocokReleaseVersionsFile="$release_props"
-          dotnet build Pocok.slnx --configuration Release --no-restore -p:PocokReleaseVersionsFile="$release_props"
-          dotnet test Pocok.slnx --configuration Release --no-build -p:PocokReleaseVersionsFile="$release_props"
+          dotnet restore Pocok.Core.slnx -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
+          dotnet build Pocok.Core.slnx --configuration Release --no-restore -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
+          dotnet test Pocok.Core.slnx --configuration Release --no-build -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
       - name: Pack local package closure
         shell: bash
         run: |
           rm -rf artifacts/packages
           release_props="$PWD/artifacts/release-versions.props"
-          dotnet pack Pocok.slnx --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile="$release_props"
+          dotnet pack Pocok.Core.slnx --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
       - name: Verify exact candidate
         shell: bash
         run: |

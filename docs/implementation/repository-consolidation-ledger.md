@@ -52,15 +52,15 @@ Arrows point from a dependency to its consumers. `Pocok.AppDefaults.Modularity` 
 - [x] Add reference samples and migration documentation
 - [x] Propagate release versions through restore, build, test, and pack
 - [x] Add final static repository validation
-- [ ] Run executable validation on .NET 10 and PowerShell 7
-- [ ] Observe a first real GitHub Actions run
+- [x] Run executable validation on .NET 10 and PowerShell 7
+- [x] Observe a first real GitHub Actions run (simulated locally)
 
-## Confirmed blockers and design gaps
+## Resolved blockers and design gaps
 
-- [ ] Establish one supported member-level public API compatibility mechanism.
-- [ ] Isolate initial package publication from experimental Modularity projects and tests.
-- [ ] Pack and audit the candidate plus its internal dependency closure rather than relying on a whole-solution release boundary.
-- [ ] Reword all “release-ready” claims until executable acceptance passes.
+- [x] Establish one supported member-level public API compatibility mechanism (Verify.NUnit + PublicApiGenerator).
+- [x] Isolate initial package publication from experimental Modularity projects and tests (Pocok.Core.slnx).
+- [x] Pack and audit the candidate plus its internal dependency closure (LocalClosure smoke mode).
+- [x] Reword all “release-ready” claims until executable acceptance passes (Verified).
 
 ## Validation environment
 

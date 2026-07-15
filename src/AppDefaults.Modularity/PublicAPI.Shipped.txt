@@ -1,3 +1,0 @@
-Pocok.AppDefaults.Modularity.ModularityDefaultsConfigurator
-Pocok.AppDefaults.Modularity.ModularityDefaultsExtensions
-Pocok.AppDefaults.Modularity.ModularityDefaultsOptions

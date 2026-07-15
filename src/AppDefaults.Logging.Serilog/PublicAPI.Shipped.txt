@@ -1,3 +1,0 @@
-Pocok.AppDefaults.Logging.Serilog.SerilogDefaultsConfigurator
-Pocok.AppDefaults.Logging.Serilog.SerilogDefaultsExtensions
-Pocok.AppDefaults.Logging.Serilog.SerilogDefaultsOptions

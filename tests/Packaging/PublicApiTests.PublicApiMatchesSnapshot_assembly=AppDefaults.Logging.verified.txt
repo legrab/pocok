@@ -1,0 +1,27 @@
+﻿namespace Pocok.AppDefaults.Logging
+{
+    public sealed class LoggingDefaultsConfigurator : Pocok.AppDefaults.IApplicationConfigurator
+    {
+        public LoggingDefaultsConfigurator(System.Action<Pocok.AppDefaults.Logging.LoggingDefaultsOptions>? configure = null) { }
+        public LoggingDefaultsConfigurator(string sectionName, System.Action<Pocok.AppDefaults.Logging.LoggingDefaultsOptions>? configure = null) { }
+        public void Configure(Microsoft.Extensions.Hosting.IHostApplicationBuilder builder) { }
+    }
+    public static class LoggingDefaultsExtensions
+    {
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddPocokLoggingDefaults(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Pocok.AppDefaults.Logging.LoggingDefaultsOptions>? configure = null) { }
+    }
+    public sealed class LoggingDefaultsOptions
+    {
+        public const string DefaultSectionName = "Pocok:Logging";
+        public LoggingDefaultsOptions() { }
+        public Microsoft.Extensions.Logging.ActivityTrackingOptions ActivityTrackingOptions { get; set; }
+        public bool AddSimpleConsole { get; set; }
+        public System.Collections.Generic.IDictionary<string, Microsoft.Extensions.Logging.LogLevel> CategoryMinimumLevels { get; }
+        public bool ClearProviders { get; set; }
+        public bool IncludeScopes { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel? MinimumLevel { get; set; }
+        public bool SingleLine { get; set; }
+        public string TimestampFormat { get; set; }
+        public bool UseUtcTimestamp { get; set; }
+    }
+}
