@@ -24,27 +24,27 @@ public sealed class LoggingDefaultsConfiguratorTests
 
         builder.AddPocokLoggingDefaults(options => options.MinimumLevel = LogLevel.Debug);
         using IHost host = builder.Build();
-        LoggingDefaultsOptions options = host.Services.GetRequiredService<LoggingDefaultsOptions>();
+        LoggingDefaultsOptions options = host.Services.GetRequiredService<IOptions<LoggingDefaultsOptions>>().Value;
         LoggerFilterOptions filters = host.Services.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;
 
         options.AddSimpleConsole.ShouldBeFalse();
         options.MinimumLevel.ShouldBe(LogLevel.Debug);
         options.CategoryMinimumLevels["Microsoft"].ShouldBe(LogLevel.Error);
+        host.Services.GetService<LoggingDefaultsOptions>().ShouldBeNull();
         filters.MinLevel.ShouldBe(LogLevel.Debug);
         filters.Rules.ShouldContain(rule => rule.CategoryName == "Microsoft" && rule.LogLevel == LogLevel.Error);
     }
 
     [Test]
-    public void DuplicateApplicationKeepsFirstConfiguration()
+    public void DuplicateApplicationIsRejected()
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
-
         builder.AddPocokLoggingDefaults(options => options.MinimumLevel = LogLevel.Warning);
-        builder.AddPocokLoggingDefaults(options => options.MinimumLevel = LogLevel.Trace);
-        using IHost host = builder.Build();
 
-        host.Services.GetServices<LoggingDefaultsOptions>().ShouldHaveSingleItem()
-            .MinimumLevel.ShouldBe(LogLevel.Warning);
+        InvalidOperationException exception = Should.Throw<InvalidOperationException>(() =>
+            builder.AddPocokLoggingDefaults(options => options.MinimumLevel = LogLevel.Trace));
+
+        exception.Message.ShouldContain("already been applied");
     }
 
     [Test]
@@ -59,6 +59,21 @@ public sealed class LoggingDefaultsConfiguratorTests
     }
 
     [Test]
+    public void DefaultPolicyDoesNotRegisterAnotherConsoleProvider()
+    {
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+        int providerRegistrationsBefore = builder.Services.Count(descriptor => descriptor.ServiceType == typeof(ILoggerProvider));
+
+        builder.AddPocokLoggingDefaults();
+
+        int providerRegistrationsAfter = builder.Services.Count(descriptor => descriptor.ServiceType == typeof(ILoggerProvider));
+        providerRegistrationsAfter.ShouldBe(providerRegistrationsBefore);
+
+        using IHost host = builder.Build();
+        host.Services.GetRequiredService<IOptions<LoggingDefaultsOptions>>().Value.AddSimpleConsole.ShouldBeFalse();
+    }
+
+    [Test]
     public void ExistingProvidersArePreservedByDefault()
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
@@ -69,6 +84,35 @@ public sealed class LoggingDefaultsConfiguratorTests
         using IHost host = builder.Build();
 
         host.Services.GetServices<ILoggerProvider>().ShouldContain(provider);
+    }
+
+    [Test]
+    public void ExistingProvidersAreClearedOnlyWhenExplicitlyRequested()
+    {
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+        var provider = new NullLoggerProvider();
+        builder.Logging.AddProvider(provider);
+
+        builder.AddPocokLoggingDefaults(options =>
+        {
+            options.AddSimpleConsole = false;
+            options.ClearProviders = true;
+        });
+        using IHost host = builder.Build();
+
+        host.Services.GetServices<ILoggerProvider>().ShouldNotContain(provider);
+    }
+
+    [Test]
+    public void ConsoleOnlySettingsAreIgnoredWhenConsoleRegistrationIsDisabled()
+    {
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+
+        Should.NotThrow(() => builder.AddPocokLoggingDefaults(options =>
+        {
+            options.AddSimpleConsole = false;
+            options.TimestampFormat = string.Empty;
+        }));
     }
 
     private sealed class NullLoggerProvider : ILoggerProvider

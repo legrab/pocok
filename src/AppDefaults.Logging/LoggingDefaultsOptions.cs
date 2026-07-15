@@ -14,8 +14,8 @@ public sealed class LoggingDefaultsOptions
     /// <summary>Gets or sets whether existing providers are removed. The default is false.</summary>
     public bool ClearProviders { get; set; }
 
-    /// <summary>Gets or sets whether the simple console formatter is registered.</summary>
-    public bool AddSimpleConsole { get; set; } = true;
+    /// <summary>Gets or sets whether the simple console formatter is registered. The default is false.</summary>
+    public bool AddSimpleConsole { get; set; }
 
     /// <summary>Gets or sets whether scopes are included in simple-console output.</summary>
     public bool IncludeScopes { get; set; } = true;

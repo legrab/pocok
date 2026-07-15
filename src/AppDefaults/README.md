@@ -7,15 +7,13 @@ while the underlying implementation remains owned by standard .NET or a focused 
 ```csharp
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.ConfigureWith(
-    new LoggingDefaultsConfigurator(),
-    new SerilogDefaultsConfigurator());
+builder.ConfigureWith(new LoggingDefaultsConfigurator());
 ```
 
 The package does not scan assemblies, discover configurators, construct service providers, own configuration files, or
-impose a dependency graph. Order is the order written at the composition root. Concern packages are responsible for
-making duplicate application harmless where practical and for documenting how later application registrations override
-their defaults.
+impose a dependency graph. Order is the order written at the composition root. Concern packages must document duplicate
+application behavior and override order. The Pocok logging configurators reject duplicate application because silently
+ignoring a second call with different options would hide a composition error.
 
 Use the package for policy composition, not as a new foundation dependency. Capability libraries such as Conversion and
 Readiness do not reference it.

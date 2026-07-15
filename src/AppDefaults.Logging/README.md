@@ -12,12 +12,19 @@ builder.AddPocokLoggingDefaults(options =>
 });
 ```
 
-Configuration is read first from `Pocok:Logging`, then the optional delegate is applied. Defaults add trace and span
-correlation, scope-friendly single-line console output, and no global filtering. Existing providers are preserved unless
-`ClearProviders` is explicitly enabled. Applying the configurator more than once is a no-op after the first application.
+Configuration is read first from `Pocok:Logging`, then the optional delegate is applied. The resolved startup policy is
+available through `IOptions<LoggingDefaultsOptions>`. Defaults add trace and span correlation and no global filtering.
+Existing providers are preserved unless `ClearProviders` is explicitly enabled.
 
-Applications remain in control. Registrations and logging configuration added after this configurator run later and can
-override its settings. Serilog-specific integration belongs to `Pocok.AppDefaults.Logging.Serilog`.
+Simple-console registration is disabled by default because the standard application host already registers logging
+providers. Enable `AddSimpleConsole` only when the composition root deliberately owns that provider, commonly together
+with `ClearProviders`. The package never chooses a file, network endpoint, or third-party sink.
+
+Applying the configurator more than once to the same builder throws `InvalidOperationException`. This makes conflicting
+composition visible instead of silently ignoring the later options. Application registrations made after these defaults
+remain authoritative where the standard logging builder uses last-registration or ordered-filter semantics.
+
+Serilog-specific integration belongs to `Pocok.AppDefaults.Logging.Serilog`.
 
 Example configuration:
 
@@ -25,7 +32,7 @@ Example configuration:
 {
   "Pocok": {
     "Logging": {
-      "AddSimpleConsole": true,
+      "AddSimpleConsole": false,
       "MinimumLevel": "Information",
       "CategoryMinimumLevels": {
         "Microsoft": "Warning"

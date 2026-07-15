@@ -9,7 +9,8 @@ namespace Pocok.AppDefaults.Logging.Serilog;
 /// <summary>Provides composition-root syntax for Serilog defaults.</summary>
 public static class SerilogDefaultsExtensions
 {
-    /// <summary>Applies Serilog hosting integration once and returns the same builder.</summary>
+    /// <summary>Applies Serilog hosting integration and returns the same builder.</summary>
+    /// <exception cref="InvalidOperationException">The defaults were already applied to this builder.</exception>
     public static IHostApplicationBuilder AddPocokSerilogDefaults(
         this IHostApplicationBuilder builder,
         Action<SerilogDefaultsOptions>? configureOptions = null,

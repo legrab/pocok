@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Pocok.Modularity;
 
 namespace Pocok.AppDefaults.Modularity;
@@ -21,7 +22,8 @@ public sealed class ModularityDefaultsConfigurator(
     public void Configure(IHostApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        if (builder.Services.Any(descriptor => descriptor.ServiceType == typeof(ModularityDefaultsOptions))) return;
+        if (builder.Services.Any(descriptor => descriptor.ServiceType == typeof(ModularityDefaultsMarker)))
+            throw new InvalidOperationException("Pocok modularity defaults have already been applied to this builder.");
 
         ModularityDefaultsOptions defaults = builder.Configuration
             .GetSection(ModularityDefaultsOptions.DefaultSectionName)
@@ -33,7 +35,7 @@ public sealed class ModularityDefaultsConfigurator(
             ? defaults.PluginDirectory
             : Path.Combine(builder.Environment.ContentRootPath, defaults.PluginDirectory);
 
-        builder.Services.AddSingleton(defaults);
+        builder.Services.AddSingleton<IOptions<ModularityDefaultsOptions>>(Options.Create(defaults));
         builder.Services.AddPocokModules(builder.Configuration, options =>
         {
             options.AddDirectory(pluginDirectory);
@@ -45,5 +47,8 @@ public sealed class ModularityDefaultsConfigurator(
 
             _configureLoader?.Invoke(options);
         });
+        builder.Services.AddSingleton<ModularityDefaultsMarker>();
     }
+
+    private sealed class ModularityDefaultsMarker;
 }

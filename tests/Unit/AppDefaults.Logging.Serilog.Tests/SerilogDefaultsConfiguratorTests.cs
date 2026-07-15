@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Pocok.AppDefaults.Logging.Serilog.Tests;
@@ -22,23 +23,24 @@ public sealed class SerilogDefaultsConfiguratorTests
 
         builder.AddPocokSerilogDefaults(options => options.WriteToProviders = true);
         using IHost host = builder.Build();
-        SerilogDefaultsOptions options = host.Services.GetRequiredService<SerilogDefaultsOptions>();
+        SerilogDefaultsOptions options = host.Services.GetRequiredService<IOptions<SerilogDefaultsOptions>>().Value;
 
         options.PreserveStaticLogger.ShouldBeTrue();
         options.WriteToProviders.ShouldBeTrue();
+        host.Services.GetService<SerilogDefaultsOptions>().ShouldBeNull();
         host.Services.GetRequiredService<ILogger>().ShouldNotBeNull();
     }
 
     [Test]
-    public void DuplicateApplicationKeepsFirstPolicy()
+    public void DuplicateApplicationIsRejected()
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
         builder.AddPocokSerilogDefaults(options => options.EnrichFromLogContext = false);
-        builder.AddPocokSerilogDefaults(options => options.EnrichFromLogContext = true);
 
-        using IHost host = builder.Build();
-        host.Services.GetServices<SerilogDefaultsOptions>().ShouldHaveSingleItem()
-            .EnrichFromLogContext.ShouldBeFalse();
+        InvalidOperationException exception = Should.Throw<InvalidOperationException>(() =>
+            builder.AddPocokSerilogDefaults(options => options.EnrichFromLogContext = true));
+
+        exception.Message.ShouldContain("already been applied");
     }
 
     [Test]

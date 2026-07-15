@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Pocok.AppDefaults.Logging;
 
@@ -34,15 +35,15 @@ public sealed class LoggingDefaultsConfigurator : IApplicationConfigurator
     public void Configure(IHostApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        if (builder.Services.Any(descriptor => descriptor.ServiceType == typeof(LoggingDefaultsMarker))) return;
+        if (builder.Services.Any(descriptor => descriptor.ServiceType == typeof(LoggingDefaultsMarker)))
+            throw new InvalidOperationException("Pocok logging defaults have already been applied to this builder.");
 
         LoggingDefaultsOptions options = builder.Configuration.GetSection(_sectionName).Get<LoggingDefaultsOptions>() ??
                                          new LoggingDefaultsOptions();
         _configure?.Invoke(options);
         Validate(options);
 
-        builder.Services.AddSingleton<LoggingDefaultsMarker>();
-        builder.Services.AddSingleton(options);
+        builder.Services.AddSingleton<IOptions<LoggingDefaultsOptions>>(Options.Create(options));
 
         if (options.ClearProviders) builder.Logging.ClearProviders();
 
@@ -61,11 +62,13 @@ public sealed class LoggingDefaultsConfigurator : IApplicationConfigurator
                 console.UseUtcTimestamp = options.UseUtcTimestamp;
                 console.TimestampFormat = options.TimestampFormat;
             });
+
+        builder.Services.AddSingleton<LoggingDefaultsMarker>();
     }
 
     private static void Validate(LoggingDefaultsOptions options)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(options.TimestampFormat);
+        if (options.AddSimpleConsole) ArgumentException.ThrowIfNullOrWhiteSpace(options.TimestampFormat);
         foreach (var category in options.CategoryMinimumLevels.Keys)
             ArgumentException.ThrowIfNullOrWhiteSpace(category);
     }

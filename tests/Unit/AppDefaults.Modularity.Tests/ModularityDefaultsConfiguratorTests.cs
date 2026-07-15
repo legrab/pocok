@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Pocok.Modularity;
 
 namespace Pocok.AppDefaults.Modularity.Tests;
@@ -36,21 +37,22 @@ public sealed class ModularityDefaultsConfiguratorTests
 
         builder.AddPocokModularityDefaults(defaults => defaults.PluginDirectory = "delegate-plugins");
         using IHost host = builder.Build();
-        ModularityDefaultsOptions defaults = host.Services.GetRequiredService<ModularityDefaultsOptions>();
+        ModularityDefaultsOptions defaults = host.Services.GetRequiredService<IOptions<ModularityDefaultsOptions>>().Value;
 
         defaults.PluginDirectory.ShouldBe("delegate-plugins");
         defaults.SearchRecursively.ShouldBeFalse();
+        host.Services.GetService<ModularityDefaultsOptions>().ShouldBeNull();
     }
 
     [Test]
-    public void DuplicateApplicationKeepsOneCatalog()
+    public void DuplicateApplicationIsRejected()
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
         builder.AddPocokModularityDefaults();
-        builder.AddPocokModularityDefaults();
 
-        using IHost host = builder.Build();
-        host.Services.GetServices<IModuleCatalog>().ShouldHaveSingleItem();
-        host.Services.GetServices<ModularityDefaultsOptions>().ShouldHaveSingleItem();
+        InvalidOperationException exception = Should.Throw<InvalidOperationException>(() =>
+            builder.AddPocokModularityDefaults(defaults => defaults.SearchRecursively = false));
+
+        exception.Message.ShouldContain("already been applied");
     }
 }
