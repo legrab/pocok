@@ -18,8 +18,8 @@ if (-not $NoPack) {
 
 $consumerSpecs = @{
     'Pocok.Primitives' = @{
-        Template = 'ExternalConsumer/Pocok.Primitives.Consumer.csproj.template'
-        Program = 'ExternalConsumer/Program.cs'
+        Template = 'PrimitivesConsumer/Pocok.Primitives.Consumer.csproj.template'
+        Program = 'PrimitivesConsumer/Program.cs'
     }
     'Pocok.Conversion.Abstractions' = @{
         Template = 'ConversionAbstractionsConsumer/Pocok.Conversion.Abstractions.Consumer.csproj.template'
