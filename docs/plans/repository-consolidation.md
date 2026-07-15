@@ -1,105 +1,273 @@
-# Pocok repository evaluation and implementation-ready consolidation plan
+# Pocok repository evaluation, implementation retrospective, and stabilization plan
 
-**Baseline date:** 2026-07-15  
-**Implementation baseline:** the repository contained in `pocok.zip`  
-**Extraction evidence:** the legacy source contained in `origin.zip`  
+**Original evaluation date:** 2026-07-15
+**Current handoff baseline:** `pocok-initial-release.zip`
+**Implementation code baseline:** `d0da4dc` (`docs(showcase): finalize package portfolio and samples`)
+**Historical inputs:** `pocok.zip` and `origin.zip`
 **Primary objective:** turn Pocok into a small, credible portfolio of reusable .NET packages and public application-default configurators without preserving low-value abstractions or copying application-specific legacy code.
 
-## Evidence and execution limits
+> **Status correction:** the current ZIP is an implementation candidate, not a release-ready repository. It was produced without a working .NET SDK or PowerShell runtime. Static repository checks passed, but compilation, tests, package creation, clean-feed restoration, and release scripts were not executed. Do not create release tags from this baseline.
 
-The current repository was inspected statically, including source, tests, project files, package metadata, release workflows, smoke consumers, audits, documentation, and the legacy origin. The current repository contains about 2,023 lines of production C# and 1,752 lines of test C#, with 135 NUnit test declarations across four packable projects.
+## Evidence levels
 
-The user reports that the implementation and tests work. That report is accepted as the behavioral baseline. The inspection environment did not contain the .NET SDK or PowerShell, so this review could not execute `dotnet restore`, `dotnet test`, `dotnet pack`, or the PowerShell release scripts. Every implementation phase below requires the agent to execute those checks in its environment.
+Use these labels when reviewing this document:
 
-The origin repository contains proprietary copyright headers. It is architectural and behavioral evidence only. Do not copy source, comments, identifiers, templates, product names, or application-specific conventions from it. Reimplement only independently justified generic behavior from the public problem statement and tests created in Pocok.
+- **Confirmed structurally:** visible directly from files, project references, package metadata, Git history, and workflow definitions.
+- **Confirmed defect by source inspection:** contradictory code or tests that do not require execution to prove the problem.
+- **Plausible but unverified:** implementation appears coherent but requires compilation or runtime tests.
+- **Not evaluated:** behavior that depends on GitHub Actions, nuget.org trusted publishing, operating-system-specific loading, trimming, or package installation.
+
+The legacy origin remains architectural and behavioral evidence only. Its source contains proprietary headers and must not be copied. Reimplement only independently justified generic behavior.
 
 ---
 
 # Executive note
 
-## Current baseline
+## Current implementation candidate
 
-The repository now has four implemented packages:
+The generated repository contains eight active packable projects:
 
-| Current package | Current role | Current internal dependency |
+| Package | Intended status | Current confidence |
 |---|---|---|
-| `Pocok.Primitives` | Generic `Error`, `Result`, and `Result<T>` | None |
-| `Pocok.Hosting` | Restartable readiness lifecycle coordination | `Pocok.Primitives` |
-| `Pocok.Conversion.Abstractions` | Conversion policies, context, errors, and interface | `Pocok.Primitives` |
-| `Pocok.Conversion` | Strict serializer-free runtime conversion | `Pocok.Conversion.Abstractions` |
+| `Pocok.Conversion` | Initial public release | **Not release-ready.** Structure is promising, but one retained test is provably stale after the abstractions merge. |
+| `Pocok.Readiness` | Initial public release | Plausible, unverified. Requires executable lifecycle and concurrency tests. |
+| `Pocok.AppDefaults` | Initial public release | Plausible, unverified. The base contract is intentionally small. |
+| `Pocok.AppDefaults.Logging` | Initial public release after `Pocok.AppDefaults` | Plausible, unverified. Duplicate-call and override semantics need deliberate confirmation. |
+| `Pocok.AppDefaults.Logging.Serilog` | Initial public release after `Pocok.AppDefaults` | Plausible, unverified. Requires real host construction and configuration tests. |
+| `Pocok.Modularity.Contracts` | Experimental, non-releasable | Implemented for evaluation, not proven. |
+| `Pocok.Modularity` | Experimental, non-releasable | Highest-risk area. Requires real cross-platform plugin fixtures. |
+| `Pocok.AppDefaults.Modularity` | Experimental, non-releasable | Depends on the unproven Modularity runtime. |
 
-The repository also has strong baseline engineering for its size: central package management, lock files, strict compilation, deterministic packaging, symbols, Source Link metadata, package smoke consumers, release audits, SPDX headers, release tags, and trusted NuGet publishing workflows.
+The following package shapes were removed from the active repository:
 
-The immediate release failure is caused by the release rehearsal, not by NuGet behaving incorrectly. Each package workflow packs only the tagged package. The resulting package correctly declares project references as NuGet dependencies. The smoke consumer restores from only `artifacts/packages`, where those dependency packages are missing. NuGet therefore cannot resolve `Pocok.Primitives` or `Pocok.Conversion.Abstractions`.
+- `Pocok.Primitives`
+- `Pocok.Hosting`
+- `Pocok.Conversion.Abstractions`
 
-The proper fix is to model both things a release must prove:
+`Pocok.Primitives` was already published and should be deprecated on nuget.org with a migration link. Do not publish a forwarding package.
 
-1. **Closure correctness:** the candidate works against a clean feed containing the full locally built transitive package closure.
-2. **Publishability correctness:** the candidate works when only the candidate is local and its already released dependencies come from nuget.org.
+## What the generated implementation got right
 
-Simply adding nuget.org to the current smoke test would unblock some releases but weaken the local clean-room test. Simply packing the whole solution would pass locally but could hide an unpublished or stale internal dependency. The release pipeline should test both modes.
+The candidate establishes a useful target shape:
 
-## Portfolio verdict
+- package-owned failures replace the generic Primitives dependency;
+- Conversion contracts and implementation are consolidated;
+- Hosting is renamed to the more accurate Readiness identity;
+- AppDefaults is separated from capability packages;
+- provider-neutral logging and Serilog policy are separate;
+- Modularity is startup-only, trusted, manifest-led, and explicitly non-releasable;
+- package metadata is catalog-driven;
+- smoke testing distinguishes local closure from publication-shaped restore;
+- release workflows select an exact candidate package;
+- the repository contains migrations, ADRs, samples, package consumers, and organized Git history;
+- internal reusable code is kept out of a public `Common` or `Utils` package.
 
-| Area | Verdict | Required action |
-|---|---|---|
-| Repository and release harness | **Stabilize first** | Fix dependency-aware package staging, centralize package metadata, remove duplicated workflow knowledge, strengthen API compatibility checks, and align documentation. |
-| `Pocok.Primitives` | **Retire** | Replace with package-specific failures/results, remove from the dependency graph, deprecate the NuGet package if already published, and remove it from the active solution. |
-| `Pocok.Hosting` | **Stabilize and rename** | Rename to `Pocok.Readiness`, own its failure model, make lifecycle state atomic and observable, and retain its focused restartable coordination behavior. |
-| `Pocok.Conversion.Abstractions` | **Merge** | Move its useful public contract into `Pocok.Conversion`; a separate abstractions package is not justified without multiple independent implementations. |
-| `Pocok.Conversion` | **Invest and extend** | This is the strongest public capability. Add bounded recursive conversion, path-aware failures, a narrow extension mechanism, modern numeric behavior, tests, benchmarks, and compatibility baselines. |
-| Internal reusable minicode | **Allow under strict rules** | Use package-local internal code or linked internal source. Never publish a `Common`, `Utils`, `Foundation`, or `Primitives` junk-drawer package. |
-| `Pocok.AppDefaults.*` | **Implement** | Public, opinionated configurators are valuable for keeping 10 to 20 applications consistent. They configure standard or third-party infrastructure rather than replacing it. |
-| `Pocok.Modularity.*` | **Implement** | The origin validates a real need for deployable plugin modules and dependency registration. Build a trusted startup-only plugin system around standard DI and established assembly-loading infrastructure. |
-| Generic JSON contract/schema package | **Do not implement now** | `System.Text.Json.Schema.JsonSchemaExporter` already covers the commodity schema-export need in modern .NET. Only revisit a differentiated allowlisted contract manifest after a concrete consumer exists. |
-| Generic numerics package | **Never implement as planned** | Modern generic math covers the commodity operations. Keep domain-specific numeric policy inside Conversion. |
-| Generic reflection extensions package | **Never implement** | Keep only narrow internal reflection utilities needed by Modularity, with explicit diagnostics and tests. |
-| Localization compositor | **Defer** | The origin contains useful evidence, but standard localization covers most needs. Revisit only after two applications need deterministic provider precedence and diagnostics. |
+These design decisions should be preserved unless executable evidence disproves them.
 
-## Target identity
+## What went wrong in the one-shot
 
-Pocok should contain two clearly documented public package families, both published to nuget.org:
+The one-shot failed as a release implementation because implementation breadth exceeded available verification.
 
-### Capability packages
+### 1. No compiler or test runner was available
 
-These own meaningful runtime behavior:
+The environment had neither .NET 10 nor PowerShell 7 and could not obtain them. The repository was therefore synthesized from source inspection alone. Static checking cannot validate:
 
-- `Pocok.Conversion`
-- `Pocok.Readiness`
-- `Pocok.Modularity.Contracts`
-- `Pocok.Modularity`
+- C# compilation and analyzers;
+- MSBuild project graph behavior;
+- test semantics;
+- `dotnet pack` output;
+- MinVer and package-validation behavior;
+- PowerShell syntax and runtime semantics;
+- clean NuGet restore;
+- GitHub Actions or trusted publishing.
 
-### Maintainer-default packages
+The process should have stopped calling packages “releasable” once executable validation became impossible. The correct label was “intended initial release set.”
 
-These are opinionated, public application baselines:
+### 2. A stale Conversion test survived the assembly merge
 
-- `Pocok.AppDefaults`
-- `Pocok.AppDefaults.Logging`
-- `Pocok.AppDefaults.Logging.Serilog`
-- `Pocok.AppDefaults.Modularity`
+`tests/Unit/Conversion.Tests/ConcurrencyAndApiTests.cs` still assumes that `IValueConverter` and `ValueConverter` live in separate assemblies.
 
-They remain public so any personal or company repository can reference them without a custom authenticated feed. Their package metadata and documentation must state that they are opinionated defaults, not new logging, DI, configuration, or plugin frameworks.
+After consolidation, both types are in `Pocok.Conversion`. The test simultaneously expects:
 
-A second repository or feed is not required. Split repositories only when ownership, license, security boundary, contribution permissions, or release cadence genuinely diverge.
+- the assembly containing `IValueConverter` to expose only the old abstraction types; and
+- the same assembly containing `ValueConverter` to expose only `ValueConverter`.
 
-## Recommended final active package set
+Both expectations cannot be true. The same test also omits the newly added `MaximumDepth` and `MaximumCollectionItems` properties from its `ConversionContext` member expectation.
 
-The consolidation action should finish with these active packages:
+This is a confirmed failing test, not merely a risk.
+
+### 3. Release isolation is incomplete
+
+`.github/workflows/publish.yml` restores, builds, tests, and packs `Pocok.slnx`, which includes every experimental Modularity project and fixture. The packaging test project also references every active package.
+
+Consequences:
+
+- a compile or test failure in non-releasable Modularity blocks `Pocok.Conversion`, `Pocok.Readiness`, and AppDefaults releases;
+- the promise that Modularity can remain gated while the initial set ships is not operationally true;
+- the workflow packs the whole solution even though the original plan explicitly preferred the candidate and its transitive internal closure.
+
+This does not make the package graph concept wrong, but the workflow boundary must be redesigned.
+
+### 4. API compatibility enforcement is weaker than planned
+
+The current `PublicAPI.Shipped.txt` tests compare exported type names only. They do not protect:
+
+- methods and overloads;
+- parameter names and default values;
+- return types;
+- generic constraints;
+- accessibility of members;
+- nullability annotations;
+- enum values;
+- constructors and properties.
+
+The stale Conversion test attempted to cover a few members manually and immediately drifted. Replace this mixture with one supported member-level API compatibility mechanism, then keep small semantic tests only for intentional behavioral contracts.
+
+### 5. Completion records overstate certainty
+
+The implementation report calls five packages “release-ready” while also acknowledging that no executable command ran. The Git history is useful, but commit count is not evidence of correctness. The next agent must treat all checked implementation phases as “source changes applied,” not “validated complete.”
+
+## Process rules learned from this attempt
+
+- **Toolchain first.** Verify the exact SDK, PowerShell, restore access, and basic baseline commands before changing architecture.
+- **Green checkpoints, not decorative commits.** Every consolidation phase should compile and run its focused tests before the next phase begins. A clean Git history cannot compensate for an unbuilt repository.
+- **Search for invalidated assumptions after merges.** When projects, assemblies, namespaces, or public contracts are merged, inspect every test, reflection assertion, smoke consumer, package ID, migration guide, and workflow that encoded the old boundary.
+- **Release eligibility is an observed state.** A catalog boolean or missing tag trigger only prevents publication. It does not prove the package can build, pack, restore, or run.
+- **Experimental code needs a separate failure domain.** Keeping a package non-releasable is insufficient if its projects are still mandatory dependencies of every release job.
+- **Use one API compatibility system.** Parallel handwritten inventories and ad hoc reflection tests drift quickly. Adopt one supported member-level mechanism and use ordinary tests only for semantics.
+- **Reduce claims when execution is blocked.** When the environment cannot compile, stop at an explicitly labeled implementation spike. Do not convert static plausibility into “release-ready” language.
+- **Prefer a smaller proven release.** It is better to ship Conversion, Readiness, and the AppDefaults base after complete package validation than to carry an unverified plugin framework through every release path.
+- **Keep evidence in the repository.** Record command output, first failing commit, deviations, and final green checks in the implementation ledger so another agent does not repeat the same investigation.
+
+## Immediate next-agent mission
+
+The next agent should **stabilize this exact ZIP before adding features**.
+
+### Mandatory order
+
+1. Establish a .NET 10.0.100 and PowerShell 7 environment.
+2. Record raw outputs for restore, build, test, pack, catalog validation, smoke tests, and release audit.
+3. Fix compilation and test failures with the smallest possible commits.
+4. Replace the stale and duplicated API-baseline approach.
+5. Separate the initial release graph from experimental Modularity.
+6. Prove local-closure and publication-shaped package restoration.
+7. Run Linux and Windows CI.
+8. Only then reconsider Modularity release eligibility or add more package content.
+
+### First commands
+
+Run each separately so the first factual failure is preserved:
+
+```pwsh
+dotnet --info
+$PSVersionTable
+
+dotnet restore Pocok.slnx
+dotnet build Pocok.slnx --configuration Release --no-restore
+dotnet test Pocok.slnx --configuration Release --no-build
+dotnet format Pocok.slnx --verify-no-changes --no-restore
+dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
+
+./tools/PackageCatalog/Test-PackageCatalog.ps1
+./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode LocalClosure
+./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
+```
+
+Do not start by editing the known stale test blindly. Compilation may expose more fundamental problems first.
+
+## Recommended stabilization waves
+
+### Wave A: make the complete repository compile
+
+Expected first repair:
+
+- update or remove the obsolete split-assembly assertions in `ConcurrencyAndApiTests`;
+- retain one authoritative exported API baseline;
+- update `ConversionContext` member expectations if semantic tests remain.
+
+Then address every compiler and analyzer failure without broad refactoring.
+
+### Wave B: make the initial release set independently verifiable
+
+Create an explicit core release boundary. Either:
+
+- introduce a small release solution containing the five intended packages, their focused tests, architecture checks, and candidate-scoped packaging checks; or
+- make the catalog generate the exact project and test closure for the candidate.
+
+The first option is simpler and more reliable for this repository size.
+
+Do not let experimental Modularity block these releases:
 
 ```text
 Pocok.Conversion
 Pocok.Readiness
-
 Pocok.AppDefaults
 Pocok.AppDefaults.Logging
 Pocok.AppDefaults.Logging.Serilog
-
-Pocok.Modularity.Contracts
-Pocok.Modularity
-Pocok.AppDefaults.Modularity
 ```
 
-`Pocok.Primitives`, `Pocok.Hosting`, and `Pocok.Conversion.Abstractions` should no longer be active package projects after their behavior and useful API have been migrated. Because the current packages are pre-1.0, make the cleanup now rather than preserving a bad graph indefinitely.
+Pack only the candidate and the internal package closure required for local-feed testing. Audit only that closure. Publication mode should place only the candidate in the local feed and resolve already released internal dependencies from nuget.org.
+
+### Wave C: validate package semantics
+
+For each initial package:
+
+- install it into a clean consumer from a local feed;
+- compile and run the sample;
+- inspect the `.nupkg` and `.snupkg`;
+- verify repository metadata and Source Link;
+- prove no project reference or retired package leaks;
+- verify exact dependency versions;
+- verify package README rendering outside the repository.
+
+### Wave D: review AppDefaults behavior
+
+Keep the current conservative direction, but explicitly decide and test:
+
+- whether duplicate application is first-call-wins, last-call-wins, merged, or rejected;
+- whether a second configurator with different options should be silently ignored;
+- how application registrations after defaults override filters and providers;
+- whether option objects should be registered directly or through standard options abstractions;
+- whether the default simple-console registration is appropriate for libraries named “defaults.”
+
+Do not turn AppDefaults into a second host framework.
+
+### Wave E: prove Modularity separately
+
+Keep all three packages non-releasable until:
+
+- plugin dependencies load from plugin-local directories;
+- shared contract identity is preserved;
+- required and optional failures are deterministic;
+- staged registration is atomic;
+- duplicate IDs are diagnosed;
+- Windows-only plugins are skipped on Linux and vice versa;
+- unmanaged dependency behavior is tested where relevant;
+- samples produce a deployable plugin directory automatically;
+- Linux and Windows fixture tests pass;
+- trimming and NativeAOT limitations are documented;
+- trusted-code security boundaries are explicit.
+
+The existing implementation is a useful spike, not a proven public contract.
+
+## Plan-status mapping
+
+The remainder of this document is the original architectural evaluation and implementation plan. Read it as a design record. The generated baseline applied much of it, but no section is considered complete until its acceptance checks execute.
+
+| Original section | Generated state | Next action |
+|---|---|---|
+| 1.4 to 1.6 global consolidation | Mostly applied structurally | Verify project graph, package boundaries, docs, and tests. |
+| 2 release redesign | Concept implemented | Decouple releases from experimental projects and execute both smoke modes. |
+| 3 internal reusable code | Policy and architecture tests added | Verify no linked source leaks and avoid adding helpers without repeated use. |
+| 4 Primitives | Removed | Deprecate published package and verify no dependency remains. |
+| 5 Readiness | Renamed and expanded | Compile, stress test, review state semantics, then package-smoke. |
+| 6 Conversion abstractions | Merged | Remove stale split-assembly assumptions and validate migration docs. |
+| 7 Conversion | Expanded significantly | Highest immediate test-repair priority; benchmark and trim checks remain unexecuted. |
+| 8 AppDefaults | Implemented | Validate host behavior, duplicate semantics, overrides, package consumers. |
+| 9 Modularity | Implemented as experimental spike | Keep non-releasable; run full fixture matrix and reconsider public API after evidence. |
+| 10 to 12 extraction and target layout | Applied selectively | Confirm no origin source or proprietary naming leaked. |
+| 13 to 15 implementation contract and acceptance | Source changes applied | Re-run as executable acceptance, not checklist review. |
+| 16 to 18 future questions and references | Still valid | Revisit only after the repository is green. |
 
 ---
 
