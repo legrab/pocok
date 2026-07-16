@@ -181,6 +181,23 @@
         "Microsoft.Extensions.Options"
       ],
       "versionProperty": "PocokAppDefaultsModularityPackageVersion"
+    },
+    {
+      "id": "Pocok.Scripting",
+      "project": "src/Scripting/Pocok.Scripting.csproj",
+      "tagPrefix": "scripting-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "ScriptingConsumer",
+      "internalDependencies": [
+        "Pocok.Conversion"
+      ],
+      "allowedExternalDependencies": [
+        "Jint"
+      ],
+      "versionProperty": "PocokScriptingPackageVersion"
     }
   ]
 }

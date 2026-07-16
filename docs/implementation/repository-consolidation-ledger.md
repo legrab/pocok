@@ -7,6 +7,7 @@
 ```text
 Pocok.Conversion
 Pocok.Readiness
+Pocok.Scripting
 
 Pocok.AppDefaults
 ├── Pocok.AppDefaults.Logging
@@ -43,6 +44,7 @@ Arrows point from a dependency to its consumers. `Pocok.AppDefaults.Modularity` 
 - [x] Add AppDefaults composition, provider-neutral logging, and Serilog policy packages.
 - [x] Add experimental Modularity contracts, loader, diagnostics, fixtures, and defaults.
 - [x] Keep Modularity publication-gated.
+- [x] Extract the neutral, bounded Scripting execution and import vertical slice as experimental alpha.
 - [x] Add package catalog, API snapshots, samples, migration guides, and release-version propagation.
 - [x] Isolate the five initial packages in `Pocok.Core.slnx`.
 
@@ -79,9 +81,11 @@ Arrows point from a dependency to its consumers. `Pocok.AppDefaults.Modularity` 
 
 ## Validation evidence
 
-A prior stabilization session recorded .NET 10.0.102 and PowerShell 7 execution with 182 passing tests, successful formatting, packing, package smoke, release audit, and sample execution. That evidence applies to the baseline before the latest Wave C and Wave D edits.
+Windows acceptance evidence on 2026-07-16, using .NET SDK 10.0.102 and PowerShell 7.3.6, passed formatting, solution build, 183 tests, core sample execution, package catalog validation, local-closure smoke, and public release audit on the current working tree. The Operations worker sample also passed both `dotnet run` and direct built-executable launch after its Windows provider and readiness-shutdown fixes.
 
-The current environment used for the V2 edits did not contain .NET or PowerShell and could not obtain them. The latest changes therefore have static validation only and must not be tagged until the commands below pass on the exact HEAD.
+The Scripting alpha slice was subsequently restored and validated in isolation: the package builds with zero warnings, ten focused tests pass, its public API snapshot passes, and the console sample returns script-result=42. Source-size and engine-memory bounds are explicit, and its package smoke consumer is wired into the catalog-driven local closure and passes from the installed package. It remains experimental and non-releasable while the extraction boundary is evaluated.
+
+Packing succeeded and produced packages and symbols. It emitted `MINVER1001` warnings locally because the sandbox Git identity cannot treat the parent repository as a valid working directory; this environment-specific warning must not be confused with a build error.
 
 ## Required executable validation
 
@@ -115,6 +119,6 @@ The first three are independent. Steps 4 and 5 require step 3 and may then be re
 ## Remaining gate
 
 - [ ] Run the complete executable acceptance matrix on Linux and Windows.
-- [ ] Fix only factual failures found by that run.
+- [x] Fix only factual failures found by that run.
 - [ ] Verify real debugger Source Link behavior from an installed candidate package.
 - [ ] Complete Wave E before changing any Modularity package to releasable.
