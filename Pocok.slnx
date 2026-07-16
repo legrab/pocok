@@ -7,6 +7,7 @@
     <Project Path="samples/Conversion.Trimmed/Conversion.Trimmed.csproj"/>
     <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
     <Project Path="samples/Readiness.Console/Readiness.Console.csproj"/>
+    <Project Path="samples/Operations.Worker/Pocok.Operations.Worker.csproj"/>
     <Project Path="samples/ModularCommunicator.Contracts/Pocok.ModularCommunicator.Contracts.csproj"/>
     <Project Path="samples/ModularCommunicator.EchoPlugin/Pocok.ModularCommunicator.EchoPlugin.csproj"/>
     <Project Path="samples/ModularCommunicator.Host/Pocok.ModularCommunicator.Host.csproj"/>

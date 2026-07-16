@@ -12,6 +12,7 @@ $requiredFiles = @('LICENSE', 'NOTICE', 'README.md', 'STEWARDSHIP.md', 'SECURITY
 $catalogPath = Join-Path $repositoryRoot 'eng/packages.json'
 $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
 $closureResolver = Join-Path $repositoryRoot 'tools/PackageCatalog/Resolve-PackageClosure.ps1'
+Import-Module (Join-Path $repositoryRoot 'tools/PackageMetadata/Pocok.PackageMetadata.psm1') -Force
 $activePackages = @($catalog.packages | Where-Object { $_.state -ne 'Retired' })
 $packagePolicies = @{}
 foreach ($catalogPackage in $activePackages) {
@@ -65,7 +66,7 @@ if ($PackageIds.Count -eq 0) {
 }
 else {
     foreach ($packageId in $PackageIds) {
-        foreach ($closureId in @(& $closureResolver -CandidatePackageId $packageId | ForEach-Object { [string]$_.id })) {
+        foreach ($closureId in @(& $closureResolver -CandidatePackageId $packageId | ForEach-Object { [string]$_.Id })) {
             $expectedPackageIds.Add($closureId) | Out-Null
         }
     }
@@ -138,10 +139,10 @@ foreach ($package in $artifacts) {
         finally {
             $reader.Dispose()
         }
-
-        $metadata = $nuspec.package.metadata
-        $packageId = [string]$metadata.id
-        $packageVersion = [string]$metadata.version
+        $packageMetadata = Get-PocokNuspecMetadata -Nuspec $nuspec
+        $metadata = $packageMetadata.MetadataNode
+        $packageId = $packageMetadata.Id
+        $packageVersion = $packageMetadata.Version
         if (-not $packagePolicies.ContainsKey($packageId) -or -not $expectedPackageIds.Contains($packageId)) {
             throw "$($package.Name) has no expected active package catalog policy."
         }
@@ -191,21 +192,8 @@ foreach ($package in $artifacts) {
         }
 
         $packagePolicy = $packagePolicies[$packageId]
-
-        $dependencies = @(
-            $nuspec.SelectNodes(
-                "/*[local-name()='package']" +
-                "/*[local-name()='metadata']" +
-                "/*[local-name()='dependencies']" +
-                "//*[local-name()='dependency']"
-            )
-        ) | Sort-Object { [string]$_.id }
-
-        $dependencyIds = @(
-            $dependencies |
-                ForEach-Object { [string]$_.id }
-        )
-
+        $dependencies = @($packageMetadata.Dependencies)
+        $dependencyIds = @($dependencies | ForEach-Object { [string]$_.Id })
         $expectedDependencies = @(
             @($packagePolicy.internalDependencies)
             @($packagePolicy.allowedExternalDependencies)
@@ -219,8 +207,8 @@ foreach ($package in $artifacts) {
         }
 
         foreach ($dependency in $dependencies) {
-            $dependencyId = [string]$dependency.id
-            $dependencyVersion = [string]$dependency.version
+            $dependencyId = [string]$dependency.Id
+            $dependencyVersion = [string]$dependency.Version
             if ([string]::IsNullOrWhiteSpace($dependencyVersion) -or $dependencyVersion.Contains('*')) {
                 throw "$($package.Name) has an invalid dependency version for ${dependencyId}: '$dependencyVersion'."
             }

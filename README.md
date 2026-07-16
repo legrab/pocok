@@ -1,6 +1,6 @@
 # Pocok
 
-> **Current status:** Consolidated implementation candidate. The previous .NET 10 baseline passed 182 tests; the latest package-closure and AppDefaults policy changes require one fresh executable acceptance run before release tags are created. See the [consolidation plan](docs/plans/repository-consolidation.md).
+> **Current status:** The initial Conversion, Readiness, AppDefaults, AppDefaults.Logging, and AppDefaults.Logging.Serilog packages are published. Modularity remains experimental until its deployment fixture matrix and public API review are complete.
 
 Pocok is a deliberately small .NET package portfolio extracted from repeated application needs. It contains focused runtime capabilities and transparent application-default configurators. The repository is also maintained as a reference for package boundaries, compatibility, testing, plugin isolation, and release engineering.
 
@@ -8,11 +8,11 @@ Pocok is a deliberately small .NET package portfolio extracted from repeated app
 
 | Package | Family | State | Purpose |
 |---|---|---|---|
-| `Pocok.Conversion` | Capability | Intended initial release | Strict, serializer-free, policy-driven runtime value conversion |
-| `Pocok.Readiness` | Capability | Intended initial release | Observable and restartable readiness lifecycle coordination |
-| `Pocok.AppDefaults` | Maintainer defaults | Intended initial release | Explicit ordered application configurators |
-| `Pocok.AppDefaults.Logging` | Maintainer defaults | Intended initial release | Conservative provider-neutral logging defaults |
-| `Pocok.AppDefaults.Logging.Serilog` | Maintainer defaults | Intended initial release | Configuration-driven Serilog hosting defaults |
+| `Pocok.Conversion` | Capability | Published alpha | Strict, serializer-free, policy-driven runtime value conversion |
+| `Pocok.Readiness` | Capability | Published alpha | Observable and restartable readiness lifecycle coordination |
+| `Pocok.AppDefaults` | Maintainer defaults | Published alpha | Explicit ordered application configurators |
+| `Pocok.AppDefaults.Logging` | Maintainer defaults | Published alpha | Conservative provider-neutral logging defaults |
+| `Pocok.AppDefaults.Logging.Serilog` | Maintainer defaults | Published alpha | Configuration-driven Serilog hosting defaults |
 | `Pocok.Modularity.Contracts` | Capability | Experimental | Stable startup module contracts shared by host and plugin |
 | `Pocok.Modularity` | Capability | Experimental | Trusted startup-time plugin discovery and DI registration |
 | `Pocok.AppDefaults.Modularity` | Maintainer defaults | Experimental | Conventional host policy for `Pocok.Modularity` |
@@ -46,14 +46,15 @@ using Pocok.Conversion;
 var result = ValueConverter.Default.Convert<int>("42");
 ```
 
-See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, an explicit trimmed-array smoke test, and independently deployed modules.
+See the projects under [`samples`](samples). The small console samples demonstrate one feature at a time, while [`Operations.Worker`](samples/Operations.Worker) combines AppDefaults, Conversion, Readiness, logging, hosting, and failure handling in a realistic application-shaped example. The ModularCommunicator sample demonstrates independently deployed trusted plugins.
 
 ## Build and verify
 
 The repository targets .NET 10 and uses PowerShell 7 for release tooling.
 
 ```pwsh
-dotnet restore Pocok.slnx
+./tools/PackageMetadata/Test-PackageMetadata.ps1
+dotnet restore Pocok.slnx --locked-mode
 dotnet format Pocok.slnx --verify-no-changes --no-restore
 dotnet build Pocok.slnx --configuration Release --no-restore
 dotnet test Pocok.slnx --configuration Release --no-build
