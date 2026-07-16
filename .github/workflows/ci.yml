@@ -65,6 +65,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Scripting sample failed.' }
           dotnet run --project samples/Signals.Console/Signals.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Signals sample failed.' }
+          dotnet run --project samples/Localization.Console/Localization.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Localization sample failed.' }
 
       - name: Publish trimmed Conversion sample
         shell: pwsh

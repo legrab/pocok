@@ -1417,7 +1417,8 @@ This capability is more valuable than a generic reflection library because it ow
 | `ImplementationLoader` | Implementations are discovered repeatedly | Need for type discovery and structured diagnostics | calling-assembly behavior, naming heuristics, direct Activator construction | Modularity internals |
 | `SeedingServiceRegistrar` | Optional assemblies and service registration need orchestration | External plugin folder requirement and ordered registration scenarios | loaded-AppDomain scanning, hardcoded assembly forcing, intermediate provider | `Pocok.Modularity` |
 | Platform-specific registrars | Cross-platform host must avoid incompatible implementations | Pre-load runtime filtering requirements | compile-time references from host to every platform implementation | Modularity manifest/runtime filter |
-| Localization compositor and tests | Deterministic multi-source localization may have value | Test ideas for duplicates, fallback, precedence, missing resources | database/domain resource integration and project resources | deferred `Pocok.Localization` |
+| Localization compositor and resource culture resolver | Deterministic multi-source localization and resource-file culture selection may have value | Test ideas for duplicates, fallback, precedence, missing resources, and valid culture tags | database/domain resource integration, project resources, and global culture mutation | `Pocok.Localization` experimental alpha |
+| Keyed subscription registry | Multiple consumers need keyed typed listeners with filtering | Thread-safe listener ownership, typed mapping, and disposal scenarios | transport lifecycle, retry timers, logging, and network adapters | `Pocok.Subscriptions` experimental alpha |
 | JSON DTO schema generator | Contract artifacts can aid integrations | Concrete consumer requirement and documentation linkage idea | app-specific DTO paths and generic schema package | use BCL `JsonSchemaExporter`; defer differentiated manifest |
 | `Reflections` and Common.Utils | Small helpers accumulate in a monolith | A few narrow internal behaviors after repeated use | catch-all extensions, swallowed failures, generic invocation helpers | linked internal source only |
 | Seeding, scripting, signals, activation, UI | Large independent domains exist | Future problem inventory | importing application frameworks into Pocok | separate future repositories or reject |
@@ -1462,9 +1463,15 @@ Reflection is an implementation mechanism, not the public capability. Put narrow
 
 ## 11.4 Localization
 
-**Decision: defer.**
+**Decision: extract the neutral compositor as experimental alpha; defer providers.**
 
-Only implement after two independent applications need a deterministic composite of standard `IStringLocalizer` providers and standard localization alone is insufficient. Keep database and file-system providers separate from the compositor.
+The requested extraction now carries deterministic composition of standard `IStringLocalizer` providers and caller-selected culture resolution from resource-file names. Database, filesystem, resource-assembly discovery, caching, global culture mutation, and application-specific registration remain deferred until an independent requirement justifies them.
+
+## 11.5 Keyed subscriptions
+
+**Decision: extract the neutral listener registry as experimental alpha; defer retry orchestration.**
+
+The requested extraction carries the reusable keyed subscription behavior from the origin: multiple listeners per key, typed mapping, filtering, synchronous delivery, snapshots before handler invocation, and idempotent disposal. Timer-based retry and network lifecycle remain deferred because they need explicit cancellation, time, ownership, and failure-isolation contracts rather than a direct copy of the legacy implementation.
 
 ## 11.5 General logging package
 

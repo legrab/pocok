@@ -1,0 +1,15 @@
+namespace Pocok.Localization
+{
+    public sealed class CompositeStringLocalizer : Microsoft.Extensions.Localization.IStringLocalizer
+    {
+        public CompositeStringLocalizer(System.Collections.Generic.IEnumerable<Microsoft.Extensions.Localization.IStringLocalizer> localizers) { }
+        public Microsoft.Extensions.Localization.LocalizedString this[string name] { get; }
+        public Microsoft.Extensions.Localization.LocalizedString this[string name, object[] arguments] { get; }
+        public System.Collections.Generic.IEnumerable<Microsoft.Extensions.Localization.LocalizedString> GetAllStrings(bool includeParentCultures) { }
+    }
+    public static class ResourceCulture
+    {
+        public static System.Globalization.CultureInfo GetCultureFromFileName(string path, System.Globalization.CultureInfo fallback) { }
+        public static bool TryGetCultureFromFileName(string path, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out System.Globalization.CultureInfo? culture) { }
+    }
+}

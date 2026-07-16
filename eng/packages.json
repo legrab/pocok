@@ -200,6 +200,21 @@
       "versionProperty": "PocokScriptingPackageVersion"
     },
     {
+      "id": "Pocok.Localization",
+      "project": "src/Localization/Pocok.Localization.csproj",
+      "tagPrefix": "localization-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "LocalizationConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Localization.Abstractions"
+      ],
+      "versionProperty": "PocokLocalizationPackageVersion"
+    },
+    {
       "id": "Pocok.Signals",
       "project": "src/Signals/Pocok.Signals.csproj",
       "tagPrefix": "signals-v",

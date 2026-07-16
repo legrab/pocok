@@ -29,7 +29,8 @@ namespace Pocok.Signals
         public Pocok.Signals.SignalAddress Address { get; }
         public long DroppedSampleCount { get; }
         public System.Threading.Tasks.ValueTask DisposeAsync() { }
-        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(Pocok.Signals.SignalConnection<T>.<Samples>d__11))]
+        public System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.SignalSample<T>>> ReadAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(Pocok.Signals.SignalConnection<T>.<Samples>d__12))]
         public System.Collections.Generic.IAsyncEnumerable<Pocok.Signals.SignalSample<T>> Samples([System.Runtime.CompilerServices.EnumeratorCancellation] System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.SignalWriteResult<T>>> WriteAsync(T? value, Pocok.Signals.SignalWriteConsistency consistency, System.Threading.CancellationToken cancellationToken = default) { }
     }
@@ -69,6 +70,8 @@ namespace Pocok.Signals
     public static class SignalRuntimeErrorCodes
     {
         public const string ConversionFailed = "signals.runtime.conversion-failed";
+        public const string ReadFailed = "signals.runtime.read-failed";
+        public const string ReadUnsupported = "signals.runtime.read-unsupported";
         public const string SourceMismatch = "signals.runtime.source-mismatch";
         public const string SourceUnavailable = "signals.runtime.source-unavailable";
         public const string SubscribeUnsupported = "signals.runtime.subscribe-unsupported";
