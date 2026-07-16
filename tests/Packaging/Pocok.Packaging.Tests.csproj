@@ -29,6 +29,7 @@
    <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
     <ProjectReference Include="../../src/Signals/Pocok.Signals.csproj"/>
     <ProjectReference Include="../../src/Localization/Pocok.Localization.csproj"/>
+    <ProjectReference Include="../../src/Subscriptions/Pocok.Subscriptions.csproj"/>
  </ItemGroup>
 
 </Project>

@@ -34,6 +34,7 @@ $consumerSpecs = @{
     'Pocok.Scripting' = @{ Template = 'ScriptingConsumer/Pocok.Scripting.Consumer.csproj.template'; Program = 'ScriptingConsumer/Program.cs' }
     'Pocok.Signals' = @{ Template = 'SignalsConsumer/Pocok.Signals.Consumer.csproj.template'; Program = 'SignalsConsumer/Program.cs' }
     'Pocok.Localization' = @{ Template = 'LocalizationConsumer/Pocok.Localization.Consumer.csproj.template'; Program = 'LocalizationConsumer/Program.cs' }
+    'Pocok.Subscriptions' = @{ Template = 'SubscriptionsConsumer/Pocok.Subscriptions.Consumer.csproj.template'; Program = 'SubscriptionsConsumer/Program.cs' }
 }
 
 function Get-PackageArtifact {

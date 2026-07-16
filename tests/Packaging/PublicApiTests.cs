@@ -25,6 +25,7 @@ public class PublicApiTests
         yield return Case(typeof(Pocok.Scripting.ScriptRunner).Assembly, "Scripting");
         yield return Case(typeof(Pocok.Signals.SignalAddress).Assembly, "Signals");
         yield return Case(typeof(Pocok.Localization.CompositeStringLocalizer).Assembly, "Localization");
+        yield return Case(typeof(Pocok.Subscriptions.KeyedSubscriptionHub<>).Assembly, "Subscriptions");
 #endif
     }
 

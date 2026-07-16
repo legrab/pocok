@@ -228,6 +228,19 @@
       ],
       "allowedExternalDependencies": [],
       "versionProperty": "PocokSignalsPackageVersion"
+    },
+    {
+      "id": "Pocok.Subscriptions",
+      "project": "src/Subscriptions/Pocok.Subscriptions.csproj",
+      "tagPrefix": "subscriptions-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "SubscriptionsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokSubscriptionsPackageVersion"
     }
   ]
 }
