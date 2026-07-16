@@ -1,0 +1,22 @@
+namespace Pocok.Subscriptions
+{
+    public sealed class KeyedSubscriptionHub<TKey> : System.IDisposable
+        where TKey :  notnull
+    {
+        public KeyedSubscriptionHub(System.Collections.Generic.IEqualityComparer<TKey>? comparer = null) { }
+        public System.Collections.Generic.IReadOnlyList<TKey> Keys { get; }
+        public void Dispose() { }
+        public int Publish(TKey key, object? value) { }
+        public System.IDisposable Subscribe<T>(TKey key, System.EventHandler<T?> handler, System.Action<Pocok.Subscriptions.SubscriptionOptions<T>>? configure = null) { }
+    }
+    public sealed class SubscriptionOptions<T>
+    {
+        public SubscriptionOptions() { }
+        public System.Func<object?, bool> ObjectFilter { get; }
+        public System.Func<T?, bool> ValueFilter { get; }
+        public System.Func<object?, T?> ValueMapper { get; }
+        public Pocok.Subscriptions.SubscriptionOptions<T> WithObjectFilter(System.Func<object?, bool> filter) { }
+        public Pocok.Subscriptions.SubscriptionOptions<T> WithValueFilter(System.Func<T?, bool> filter) { }
+        public Pocok.Subscriptions.SubscriptionOptions<T> WithValueMapper(System.Func<object?, T?> mapper) { }
+    }
+}

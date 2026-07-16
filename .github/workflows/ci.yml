@@ -61,6 +61,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'AppDefaults sample failed.' }
           dotnet run --project samples/Operations.Worker/Pocok.Operations.Worker.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Operations worker sample failed.' }
+          dotnet run --project samples/Scripting.Console/Scripting.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Scripting sample failed.' }
+          dotnet run --project samples/Signals.Console/Signals.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Signals sample failed.' }
+          dotnet run --project samples/Localization.Console/Localization.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Localization sample failed.' }
+          dotnet run --project samples/Subscriptions.Console/Subscriptions.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Subscriptions sample failed.' }
 
       - name: Publish trimmed Conversion sample
         shell: pwsh

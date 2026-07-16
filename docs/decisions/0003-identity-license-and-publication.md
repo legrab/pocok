@@ -9,7 +9,7 @@ The repository family uses `Pocok` as its public namespace and NuGet package pre
 
 - `legrab/pocok` contains small foundational `Pocok.*` packages;
 - `legrab/pocok-scripting` contains `Pocok.Scripting.*` packages;
-- `legrab/pocok-signals` contains `Pocok.Signals.*` packages.
+- `legrab/pocok-signals` remains the standalone signals family; this repository may carry experimental `Pocok.Signals` contract slices while the broader consolidation is evaluated.
 
 All repositories are public from their first standalone commit. NuGet publication is separately gated by package-content, API, dependency, and consumer audits.
 

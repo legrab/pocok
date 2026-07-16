@@ -1,20 +1,25 @@
 # Current repository handoff
 
-Status revision: `cdfb8bfaec5dcc74c62e5f6d5d401222c82dc45a`
+Status revision: working tree based on `d94c3ed` (post-squash extraction and review state)
 
 Refresh owner: any change that alters release eligibility, acceptance evidence, package closure, or the Modularity gate must update this file or remove obsolete claims.
 
 ## Current state
 
 - Waves C and D are structurally implemented.
-- A previous .NET 10.0.102 and PowerShell 7 run recorded 182 passing tests plus successful formatting, packing, smoke, audit, and samples for the earlier baseline.
-- The latest package-closure and AppDefaults policy edits require a fresh executable acceptance run on the exact current HEAD.
+- A Windows .NET 10.0.102 and PowerShell 7.3.6 acceptance run passed formatting, solution build, 236 tests, core samples, package catalog validation, local-closure smoke, and public release audit on the current working tree. Scripting has a tracked public API snapshot, ten focused behavior tests, source-size and memory bounds, and an installed-package consumer check; Signals has a tracked public API snapshot, twenty-two focused contract/runtime tests, shared subscription lifecycle, point-in-time reads, and structured typed-read conversion failures, plus an installed-package consumer check; Localization has a tracked public API snapshot, twelve focused composition, culture-resolution, and enum-localization tests, a sample, and an installed-package consumer check; Subscriptions has a tracked public API snapshot, five focused registry tests, a sample, and an installed-package consumer check.
+- Packing succeeded and produced the expected packages and symbols; local MinVer emitted `MINVER1001` warnings because the sandbox Git identity cannot treat the parent repository as a valid working directory.
+- The Operations worker sample explicitly owns a console-only logging provider set and does not cancel an already-ready startup cycle during shutdown.
 - Modularity remains experimental and non-releasable until its separate Linux and Windows proof gate passes.
-- Do not create release tags until candidate-scoped closure, publication-shaped restore, audit, and CI evidence are current.
+- Pocok.Scripting is now an experimental, non-releasable alpha package containing the neutral bounded execution/import slice; product-specific providers and UI/persistence integrations remain outside the extraction.
+- Pocok.Signals is now an experimental, non-releasable alpha package containing the neutral live-value contracts and shared runtime, including point-in-time reads; protocol adapters, persistence, caching backends, and product-specific integrations remain outside this extraction.
+- Pocok.Localization is now an experimental, non-releasable alpha package containing deterministic composition over standard .NET string-localizer providers, enum translation fallback, and explicit resource-file culture resolution; database, filesystem, resource-assembly discovery, caching, global culture mutation, and application-specific integrations remain outside this extraction.
+- Pocok.Subscriptions is now an experimental, non-releasable alpha package containing a thread-safe keyed listener registry with typed filtering and mapping; transport connections, retry timers, logging, persistence, and network lifecycle remain outside this extraction.
+- Do not create release tags until Linux CI, candidate-scoped publication-shaped restore, audit, and debugger Source Link evidence are current.
 
 ## Next action
 
-Run the acceptance matrix on the exact HEAD, fix only factual failures found by that evidence, and update the implementation ledger and this handoff with the results.
+Obtain Linux CI evidence, verify real debugger Source Link behavior from an installed candidate package, and run candidate-scoped publication smoke before release eligibility changes.
 
 <details>
 <summary>Acceptance matrix</summary>

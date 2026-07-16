@@ -1,0 +1,135 @@
+namespace Pocok.Signals
+{
+    public interface ISignalReader : Pocok.Signals.ISignalSource
+    {
+        System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.SignalSample<object?>>> ReadAsync(Pocok.Signals.SignalAddress address, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface ISignalSource
+    {
+        Pocok.Signals.SignalSourceCapabilities Capabilities { get; }
+        Pocok.Signals.SourceId Id { get; }
+    }
+    public interface ISignalSubscriber : Pocok.Signals.ISignalSource
+    {
+        System.Collections.Generic.IAsyncEnumerable<Pocok.Signals.SignalSample<object?>> SubscribeAsync(Pocok.Signals.SignalAddress address, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface ISignalWriter : Pocok.Signals.ISignalSource
+    {
+        System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.SignalWriteResult>> WriteAsync(Pocok.Signals.SignalAddress address, object? value, Pocok.Signals.SignalWriteConsistency consistency, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public sealed class SignalAddress : System.IEquatable<Pocok.Signals.SignalAddress>
+    {
+        public SignalAddress(Pocok.Signals.SourceId source, string path) { }
+        public string Path { get; }
+        public Pocok.Signals.SourceId Source { get; }
+        public override string ToString() { }
+    }
+    public sealed class SignalConnection<T> : System.IAsyncDisposable
+    {
+        public Pocok.Signals.SignalAddress Address { get; }
+        public long DroppedSampleCount { get; }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.SignalSample<T>>> ReadAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Runtime.CompilerServices.AsyncIteratorStateMachine(typeof(Pocok.Signals.SignalConnection<T>.<Samples>d__12))]
+        public System.Collections.Generic.IAsyncEnumerable<Pocok.Signals.SignalSample<T>> Samples([System.Runtime.CompilerServices.EnumeratorCancellation] System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.SignalWriteResult<T>>> WriteAsync(T? value, Pocok.Signals.SignalWriteConsistency consistency, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class SignalFailure : System.IEquatable<Pocok.Signals.SignalFailure>
+    {
+        public SignalFailure(string code, string message, System.Exception? exception = null) { }
+        public string Code { get; }
+        public System.Exception? Exception { get; }
+        public string Message { get; }
+    }
+    public enum SignalQuality
+    {
+        Unknown = 0,
+        Good = 1,
+        Stale = 2,
+        Bad = 3,
+        Disconnected = 4,
+        Failed = 5,
+    }
+    public static class SignalResult
+    {
+        public static Pocok.Signals.SignalResult<T> Failed<T>(Pocok.Signals.SignalFailure failure) { }
+        public static Pocok.Signals.SignalResult<T> Success<T>(T? value = default) { }
+    }
+    public sealed class SignalResult<T>
+    {
+        public Pocok.Signals.SignalFailure? Failure { get; }
+        public bool IsSuccess { get; }
+        public T Value { get; }
+    }
+    public sealed class SignalRuntime : System.IAsyncDisposable
+    {
+        public SignalRuntime(Pocok.Signals.SignalSourceFactory sourceFactory, Pocok.Signals.SignalRuntimeOptions? options = null, System.TimeProvider? timeProvider = null, Pocok.Conversion.IValueConverter? converter = null) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.SignalConnection<T>>> ConnectAsync<T>(Pocok.Signals.SignalAddress address, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+    }
+    public static class SignalRuntimeErrorCodes
+    {
+        public const string ConversionFailed = "signals.runtime.conversion-failed";
+        public const string ReadFailed = "signals.runtime.read-failed";
+        public const string ReadUnsupported = "signals.runtime.read-unsupported";
+        public const string SourceMismatch = "signals.runtime.source-mismatch";
+        public const string SourceUnavailable = "signals.runtime.source-unavailable";
+        public const string SubscribeUnsupported = "signals.runtime.subscribe-unsupported";
+        public const string SubscriptionFailed = "signals.runtime.subscription-failed";
+        public const string WriteConsistencyNotMet = "signals.runtime.write-consistency-not-met";
+        public const string WriteFailed = "signals.runtime.write-failed";
+        public const string WriteUnsupported = "signals.runtime.write-unsupported";
+    }
+    public sealed class SignalRuntimeOptions : System.IEquatable<Pocok.Signals.SignalRuntimeOptions>
+    {
+        public SignalRuntimeOptions(int subscriberCapacity = 64, System.TimeSpan? reconnectDelay = default, System.TimeSpan? staleAfter = default) { }
+        public System.TimeSpan ReconnectDelay { get; }
+        public System.TimeSpan? StaleAfter { get; }
+        public int SubscriberCapacity { get; }
+    }
+    public sealed class SignalSample<T> : System.IEquatable<Pocok.Signals.SignalSample<T>>
+    {
+        public SignalSample(T? value, bool hasValue, System.DateTimeOffset? sourceTimestamp, System.DateTimeOffset observedAt, Pocok.Signals.SignalQuality quality, long sequence, Pocok.Signals.SignalFailure? failure = null) { }
+        public Pocok.Signals.SignalFailure? Failure { get; }
+        public bool HasValue { get; }
+        public System.DateTimeOffset ObservedAt { get; }
+        public Pocok.Signals.SignalQuality Quality { get; }
+        public long Sequence { get; }
+        public System.DateTimeOffset? SourceTimestamp { get; }
+        public T Value { get; }
+    }
+    [System.Flags]
+    public enum SignalSourceCapabilities
+    {
+        None = 0,
+        Read = 1,
+        Write = 2,
+        Subscribe = 4,
+    }
+    public delegate System.Threading.Tasks.ValueTask<Pocok.Signals.SignalResult<Pocok.Signals.ISignalSource>> SignalSourceFactory(Pocok.Signals.SourceId sourceId, System.Threading.CancellationToken cancellationToken);
+    public enum SignalWriteConsistency
+    {
+        Acknowledged = 0,
+        Confirmed = 1,
+        ReadAfterWrite = 2,
+    }
+    public sealed class SignalWriteResult : System.IEquatable<Pocok.Signals.SignalWriteResult>
+    {
+        public SignalWriteResult(Pocok.Signals.SignalWriteConsistency consistency, Pocok.Signals.SignalSample<object?>? sample) { }
+        public Pocok.Signals.SignalWriteConsistency Consistency { get; }
+        public Pocok.Signals.SignalSample<object?>? Sample { get; }
+    }
+    public sealed class SignalWriteResult<T> : System.IEquatable<Pocok.Signals.SignalWriteResult<T>>
+    {
+        public SignalWriteResult(Pocok.Signals.SignalWriteConsistency consistency, Pocok.Signals.SignalSample<T>? sample) { }
+        public Pocok.Signals.SignalWriteConsistency Consistency { get; }
+        public Pocok.Signals.SignalSample<T>? Sample { get; }
+    }
+    public readonly struct SourceId : System.IEquatable<Pocok.Signals.SourceId>
+    {
+        public SourceId(string value) { }
+        public bool IsEmpty { get; }
+        public string Value { get; }
+        public override string ToString() { }
+    }
+}

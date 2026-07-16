@@ -1,6 +1,6 @@
 # Pocok
 
-> **Current status:** Consolidated implementation candidate. The previous .NET 10 baseline passed 182 tests; the latest package-closure and AppDefaults policy changes require one fresh executable acceptance run before release tags are created. See the [current handoff](docs/current-handoff.md) and [consolidation plan](docs/plans/repository-consolidation.md).
+> **Current status:** Consolidated implementation candidate. The current .NET 10 and PowerShell 7 acceptance run passed formatting, the Release build, 236 tests, samples, package catalog validation, local-closure smoke, and public release audit. The four newly extracted capability packages remain experimental and non-releasable until their documented Linux and Windows gates pass. See the [current handoff](docs/current-handoff.md) and [consolidation plan](docs/plans/repository-consolidation.md).
 
 Pocok is a deliberately small .NET package portfolio extracted from repeated application needs. It contains focused runtime capabilities and transparent application-default configurators. The repository is also maintained as a reference for package boundaries, compatibility, testing, plugin isolation, and release engineering.
 
@@ -16,6 +16,10 @@ Pocok is a deliberately small .NET package portfolio extracted from repeated app
 | `Pocok.Modularity.Contracts` | Capability | Experimental | Stable startup module contracts shared by host and plugin |
 | `Pocok.Modularity` | Capability | Experimental | Trusted startup-time plugin discovery and DI registration |
 | `Pocok.AppDefaults.Modularity` | Maintainer defaults | Experimental | Conventional host policy for `Pocok.Modularity` |
+| `Pocok.Scripting` | Capability | Experimental, alpha | Bounded JavaScript execution with explicit bindings and deterministic imports |
+| `Pocok.Signals` | Capability | Experimental, alpha | Quality-aware live-value contracts and shared subscription runtime |
+| `Pocok.Localization` | Capability | Experimental, alpha | Deterministic string-localizer composition, enum translation, and resource culture resolution |
+| `Pocok.Subscriptions` | Capability | Experimental, alpha | Thread-safe keyed subscriptions with typed filtering and mapping |
 
 Experimental packages remain packable and tested but have no publication tag trigger. Their catalog entries must be changed explicitly after the documented release gate passes on Linux and Windows.
 
@@ -46,7 +50,7 @@ using Pocok.Conversion;
 var result = ValueConverter.Default.Convert<int>("42");
 ```
 
-See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, an explicit trimmed-array smoke test, and independently deployed modules.
+See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
 
 ## Build and verify
 

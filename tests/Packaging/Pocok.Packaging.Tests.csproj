@@ -11,6 +11,7 @@
     <PackageReference Include="Shouldly"/>
     <PackageReference Include="PublicApiGenerator"/>
     <PackageReference Include="Verify.NUnit"/>
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +26,10 @@
     <ProjectReference Include="../../src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj"/>
     <ProjectReference Include="../../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
     <ProjectReference Include="../../src/Modularity/Pocok.Modularity.csproj"/>
-  </ItemGroup>
+   <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
+    <ProjectReference Include="../../src/Signals/Pocok.Signals.csproj"/>
+    <ProjectReference Include="../../src/Localization/Pocok.Localization.csproj"/>
+    <ProjectReference Include="../../src/Subscriptions/Pocok.Subscriptions.csproj"/>
+ </ItemGroup>
 
 </Project>

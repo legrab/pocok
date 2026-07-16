@@ -181,6 +181,66 @@
         "Microsoft.Extensions.Options"
       ],
       "versionProperty": "PocokAppDefaultsModularityPackageVersion"
+    },
+    {
+      "id": "Pocok.Scripting",
+      "project": "src/Scripting/Pocok.Scripting.csproj",
+      "tagPrefix": "scripting-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "ScriptingConsumer",
+      "internalDependencies": [
+        "Pocok.Conversion"
+      ],
+      "allowedExternalDependencies": [
+        "Jint"
+      ],
+      "versionProperty": "PocokScriptingPackageVersion"
+    },
+    {
+      "id": "Pocok.Localization",
+      "project": "src/Localization/Pocok.Localization.csproj",
+      "tagPrefix": "localization-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "LocalizationConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Localization.Abstractions"
+      ],
+      "versionProperty": "PocokLocalizationPackageVersion"
+    },
+    {
+      "id": "Pocok.Signals",
+      "project": "src/Signals/Pocok.Signals.csproj",
+      "tagPrefix": "signals-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "SignalsConsumer",
+      "internalDependencies": [
+        "Pocok.Conversion"
+      ],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokSignalsPackageVersion"
+    },
+    {
+      "id": "Pocok.Subscriptions",
+      "project": "src/Subscriptions/Pocok.Subscriptions.csproj",
+      "tagPrefix": "subscriptions-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "SubscriptionsConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokSubscriptionsPackageVersion"
     }
   ]
 }

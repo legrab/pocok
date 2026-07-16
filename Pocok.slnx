@@ -8,6 +8,10 @@
     <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
     <Project Path="samples/Readiness.Console/Readiness.Console.csproj"/>
     <Project Path="samples/Operations.Worker/Pocok.Operations.Worker.csproj"/>
+    <Project Path="samples/Scripting.Console/Scripting.Console.csproj"/>
+    <Project Path="samples/Signals.Console/Signals.Console.csproj"/>
+    <Project Path="samples/Localization.Console/Localization.Console.csproj"/>
+    <Project Path="samples/Subscriptions.Console/Subscriptions.Console.csproj"/>
     <Project Path="samples/ModularCommunicator.Contracts/Pocok.ModularCommunicator.Contracts.csproj"/>
     <Project Path="samples/ModularCommunicator.EchoPlugin/Pocok.ModularCommunicator.EchoPlugin.csproj"/>
     <Project Path="samples/ModularCommunicator.Host/Pocok.ModularCommunicator.Host.csproj"/>
@@ -19,6 +23,10 @@
     <Project Path="src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj"/>
     <Project Path="src/Conversion/Pocok.Conversion.csproj"/>
     <Project Path="src/Readiness/Pocok.Readiness.csproj"/>
+    <Project Path="src/Scripting/Pocok.Scripting.csproj"/>
+    <Project Path="src/Signals/Pocok.Signals.csproj"/>
+    <Project Path="src/Localization/Pocok.Localization.csproj"/>
+    <Project Path="src/Subscriptions/Pocok.Subscriptions.csproj"/>
     <Project Path="src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
     <Project Path="src/Modularity/Pocok.Modularity.csproj"/>
   </Folder>
@@ -36,5 +44,9 @@
     <Project Path="tests/Unit/Conversion.Tests/Pocok.Conversion.Tests.csproj"/>
     <Project Path="tests/Unit/Readiness.Tests/Pocok.Readiness.Tests.csproj"/>
     <Project Path="tests/Unit/Modularity.Contracts.Tests/Pocok.Modularity.Contracts.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.Tests/Pocok.Scripting.Tests.csproj"/>
+    <Project Path="tests/Unit/Signals.Tests/Pocok.Signals.Tests.csproj"/>
+    <Project Path="tests/Unit/Localization.Tests/Pocok.Localization.Tests.csproj"/>
+    <Project Path="tests/Unit/Subscriptions.Tests/Pocok.Subscriptions.Tests.csproj"/>
   </Folder>
 </Solution>

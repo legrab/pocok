@@ -13,6 +13,8 @@ using Pocok.Readiness;
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.ConfigureWith(new LoggingDefaultsConfigurator(options =>
 {
+    options.ClearProviders = true;
+    options.AddSimpleConsole = true;
     options.MinimumLevel = LogLevel.Information;
     options.CategoryMinimumLevels["Microsoft.Hosting.Lifetime"] = LogLevel.Warning;
 }));
@@ -65,7 +67,10 @@ internal sealed class ImportWorker(
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            readiness.CancelStartup(cycle, stoppingToken);
+            if (readiness.State is ReadinessState.Starting)
+            {
+                readiness.CancelStartup(cycle, stoppingToken);
+            }
         }
         catch (Exception exception)
         {

@@ -31,6 +31,10 @@ $consumerSpecs = @{
     'Pocok.AppDefaults' = @{ Template = 'AppDefaultsConsumer/Pocok.AppDefaults.Consumer.csproj.template'; Program = 'AppDefaultsConsumer/Program.cs' }
     'Pocok.Conversion' = @{ Template = 'ConversionConsumer/Pocok.Conversion.Consumer.csproj.template'; Program = 'ConversionConsumer/Program.cs' }
     'Pocok.Readiness' = @{ Template = 'ReadinessConsumer/Pocok.Readiness.Consumer.csproj.template'; Program = 'ReadinessConsumer/Program.cs' }
+    'Pocok.Scripting' = @{ Template = 'ScriptingConsumer/Pocok.Scripting.Consumer.csproj.template'; Program = 'ScriptingConsumer/Program.cs' }
+    'Pocok.Signals' = @{ Template = 'SignalsConsumer/Pocok.Signals.Consumer.csproj.template'; Program = 'SignalsConsumer/Program.cs' }
+    'Pocok.Localization' = @{ Template = 'LocalizationConsumer/Pocok.Localization.Consumer.csproj.template'; Program = 'LocalizationConsumer/Program.cs' }
+    'Pocok.Subscriptions' = @{ Template = 'SubscriptionsConsumer/Pocok.Subscriptions.Consumer.csproj.template'; Program = 'SubscriptionsConsumer/Program.cs' }
 }
 
 function Get-PackageArtifact {
@@ -207,7 +211,7 @@ try {
             )
             $mappings = @{
                 'pocok-local' = @('Pocok.*')
-                'nuget-org' = @('Microsoft.*', 'System.*', 'Serilog*', 'NETStandard.Library')
+                'nuget-org' = @('Acornima', 'Jint', 'Microsoft.*', 'System.*', 'Serilog*', 'NETStandard.Library')
             }
             Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'local-closure' -Sources $sources -Mappings $mappings -WorkRoot $workRoot
         }
@@ -220,7 +224,7 @@ try {
             )
             $mappings = @{
                 'candidate-local' = @($packageId)
-                'nuget-org' = @($publishedInternalDependencies + @('Microsoft.*', 'System.*', 'Serilog*', 'NETStandard.Library'))
+                'nuget-org' = @($publishedInternalDependencies + @('Acornima', 'Jint', 'Microsoft.*', 'System.*', 'Serilog*', 'NETStandard.Library'))
             }
             Invoke-Consumer -PackageId $packageId -Package $package -FeedMode 'publication' -Sources $sources -Mappings $mappings -WorkRoot $workRoot
         }
