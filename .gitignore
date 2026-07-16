@@ -11,3 +11,4 @@ artifacts/
 TestResults/
 *.received.*
 *.private.md
+.local/

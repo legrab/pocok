@@ -44,3 +44,11 @@ dotnet_diagnostic.CA1848.severity = none
 [tests/Unit/Conversion.Tests/*.cs]
 dotnet_diagnostic.CA1859.severity = none
 dotnet_diagnostic.CA1861.severity = none
+
+[src/Licensing/LicenseException.cs]
+dotnet_diagnostic.CA1032.severity = none
+
+[src/Licensing/LicenseOptions.cs]
+dotnet_diagnostic.CA1819.severity = none
+dotnet_diagnostic.CA2227.severity = none
+

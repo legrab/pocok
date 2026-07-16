@@ -23,6 +23,8 @@ foreach ($package in $catalog.packages) {
 }
 
 $consumerSpecs = @{
+    'Pocok.AppDefaults.Licensing' = @{ Template = 'AppDefaultsLicensingConsumer/Pocok.AppDefaults.Licensing.Consumer.csproj.template'; Program = 'AppDefaultsLicensingConsumer/Program.cs' }
+    'Pocok.Licensing' = @{ Template = 'LicensingConsumer/Pocok.Licensing.Consumer.csproj.template'; Program = 'LicensingConsumer/Program.cs' }
     'Pocok.AppDefaults.Modularity' = @{ Template = 'AppDefaultsModularityConsumer/Pocok.AppDefaults.Modularity.Consumer.csproj.template'; Program = 'AppDefaultsModularityConsumer/Program.cs' }
     'Pocok.Modularity' = @{ Template = 'ModularityConsumer/Pocok.Modularity.Consumer.csproj.template'; Program = 'ModularityConsumer/Program.cs' }
     'Pocok.Modularity.Contracts' = @{ Template = 'ModularityContractsConsumer/Pocok.Modularity.Contracts.Consumer.csproj.template'; Program = 'ModularityContractsConsumer/Program.cs' }

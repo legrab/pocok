@@ -188,6 +188,7 @@ public sealed class SignalRuntimeTests
         failure.Quality.ShouldBe(SignalQuality.Failed);
         failure.Failure!.Code.ShouldBe(SignalRuntimeErrorCodes.SubscriptionFailed);
 
+        await TestAsync.UntilAsync(() => time.ScheduledTimerCount == 1);
         time.Advance(TimeSpan.FromMinutes(1));
         await TestAsync.UntilAsync(() => source.SubscriptionCount == 2);
         source.Emit(9);
@@ -405,6 +406,17 @@ internal sealed class ManualTimeProvider(DateTimeOffset initialTime) : TimeProvi
     public override DateTimeOffset GetUtcNow() { lock (_sync) return _utcNow; }
     public override long GetTimestamp() { lock (_sync) return _utcNow.UtcTicks; }
 
+    internal int ScheduledTimerCount
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _timers.Count;
+            }
+        }
+    }
+
     public override ITimer CreateTimer(TimerCallback callback, object? state, TimeSpan dueTime, TimeSpan period)
     {
         var timer = new ManualTimer(this, callback, state, dueTime, period);
@@ -488,8 +500,14 @@ internal static class TestAsync
 {
     internal static async Task UntilAsync(Func<bool> condition)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        while (!condition()) await Task.Delay(10, timeout.Token);
+        ArgumentNullException.ThrowIfNull(condition);
+        var startedAt = TimeProvider.System.GetTimestamp();
+        while (!condition())
+        {
+            if (TimeProvider.System.GetElapsedTime(startedAt) >= TimeSpan.FromSeconds(5))
+                throw new TimeoutException("The asynchronous test condition was not met within five seconds.");
+            await Task.Delay(10);
+        }
     }
 
     internal static async Task<SignalSample<T>> NextAsync<T>(IAsyncEnumerator<SignalSample<T>> enumerator)

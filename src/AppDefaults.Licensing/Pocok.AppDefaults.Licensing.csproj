@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageVersion Condition="'$(PocokAppDefaultsLicensingPackageVersion)' != ''">$(PocokAppDefaultsLicensingPackageVersion)</PackageVersion>
+    <PackageId>Pocok.AppDefaults.Licensing</PackageId>
+    <MinVerTagPrefix>appdefaults.licensing-v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
+    <Description>Configuration-driven startup and periodic enforcement defaults for Pocok.Licensing.</Description>
+    <PackageTags>licensing;hosting;appdefaults;dependency-injection</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../AppDefaults/Pocok.AppDefaults.csproj"/>
+    <ProjectReference Include="../Licensing/Pocok.Licensing.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+    <PackageReference Include="Microsoft.Extensions.Options"/>
+  </ItemGroup>
+</Project>
