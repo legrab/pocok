@@ -1,7 +1,30 @@
-# Sessions
+# Session records
 
-Session files are lightweight handoff records for substantial work. They help a later engineer or agent continue without reconstructing every decision from terminal history.
+Existing session files are historical evidence. New session records are optional and should be created only when they materially improve handoff or reproducibility.
 
-Create `YYYY-MM-DD-<topic>.md` from `session-template.md`. Update it while the work is active. Keep it concise, factual, and free of secrets, personal data, internal endpoints, customer material, and obsolete task-system references.
+Use a session record when work:
 
-Completed session files may remain as engineering history when they explain lasting decisions. Delete purely transient notes before a public release.
+- spans agents, environments, or days;
+- captures a release or acceptance matrix;
+- contains important decisions or deviations not owned by an ADR;
+- ends with blocked executable proof that another environment must continue;
+- would be expensive to reconstruct from commits and current documentation.
+
+Do not create one for a routine edit, short investigation, or ordinary review.
+
+## Compact format
+
+```markdown
+# Session: Topic
+
+- Date and revision
+- Objective
+- Starting evidence and constraints
+- Decisions or deviations
+- Changes or inspected surfaces
+- Validation and exact results
+- Remaining uncertainty
+- Next action, only when one exists
+```
+
+Keep secrets, customer data, internal endpoints, personal data, and copied task transcripts out of session files. A session record never proves success by itself; executable results must be stated explicitly.
