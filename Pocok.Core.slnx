@@ -1,4 +1,4 @@
-﻿<Solution>
+<Solution>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Conversion.Benchmarks/Conversion.Benchmarks.csproj"/>
   </Folder>
@@ -7,8 +7,13 @@
     <Project Path="samples/Conversion.Trimmed/Conversion.Trimmed.csproj"/>
     <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
     <Project Path="samples/Readiness.Console/Readiness.Console.csproj"/>
+    <Project Path="samples/Licensing.Console/Pocok.Licensing.Console.csproj"/>
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Licensing/Pocok.Licensing.csproj"/>
+    <Project Path="src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj"/>
+    <Project Path="src/Licensing.Keygen/Pocok.Licensing.Keygen.csproj"/>
+    <Project Path="src/Licensing.LicenseChecker/Pocok.Licensing.LicenseChecker.csproj"/>
     <Project Path="src/AppDefaults/Pocok.AppDefaults.csproj"/>
     <Project Path="src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj"/>
     <Project Path="src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj"/>
@@ -16,6 +21,8 @@
     <Project Path="src/Readiness/Pocok.Readiness.csproj"/>
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Unit/Licensing.Tests/Pocok.Licensing.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Licensing.Tests/Pocok.AppDefaults.Licensing.Tests.csproj"/>
     <Project Path="tests/Unit/AppDefaults.Tests/Pocok.AppDefaults.Tests.csproj"/>
     <Project Path="tests/Unit/AppDefaults.Logging.Tests/Pocok.AppDefaults.Logging.Tests.csproj"/>
     <Project Path="tests/Unit/AppDefaults.Logging.Serilog.Tests/Pocok.AppDefaults.Logging.Serilog.Tests.csproj"/>

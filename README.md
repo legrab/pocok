@@ -1,6 +1,6 @@
 # Pocok
 
-> **Current status:** Consolidated implementation candidate. The current .NET 10 and PowerShell 7 acceptance run passed formatting, the Release build, 236 tests, samples, package catalog validation, local-closure smoke, and public release audit. The four newly extracted capability packages remain experimental and non-releasable until their documented Linux and Windows gates pass. See the [current handoff](docs/current-handoff.md) and [consolidation plan](docs/plans/repository-consolidation.md).
+> **Current status:** Consolidated implementation candidate. The baseline passed its .NET 10 and PowerShell 7 acceptance run with formatting, a Release build, 236 tests, samples, package catalog validation, local-closure smoke, and public release audit. The licensing additions are experimental and have static review only until the documented local and CI acceptance run succeeds. See the [current handoff](docs/current-handoff.md), [licensing guide](docs/licensing.md), and [consolidation plan](docs/plans/repository-consolidation.md).
 
 Pocok is a deliberately small .NET package portfolio extracted from repeated application needs. It contains focused runtime capabilities and transparent application-default configurators. The repository is also maintained as a reference for package boundaries, compatibility, testing, plugin isolation, and release engineering.
 
@@ -20,6 +20,8 @@ Pocok is a deliberately small .NET package portfolio extracted from repeated app
 | `Pocok.Signals` | Capability | Experimental, alpha | Quality-aware live-value contracts and shared subscription runtime |
 | `Pocok.Localization` | Capability | Experimental, alpha | Deterministic string-localizer composition, enum translation, and resource culture resolution |
 | `Pocok.Subscriptions` | Capability | Experimental, alpha | Thread-safe keyed subscriptions with typed filtering and mapping |
+| `Pocok.Licensing` | Capability | Experimental, alpha | Signed offline licenses with module, time, runtime, machine and pre-shared-key constraints |
+| `Pocok.AppDefaults.Licensing` | Maintainer defaults | Experimental, alpha | Startup and periodic host enforcement for Pocok licensing |
 
 Experimental packages remain packable and tested but have no publication tag trigger. Their catalog entries must be changed explicitly after the documented release gate passes on Linux and Windows.
 
@@ -50,7 +52,9 @@ using Pocok.Conversion;
 var result = ValueConverter.Default.Convert<int>("42");
 ```
 
-See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
+See [the licensing guide](docs/licensing.md) for key generation, checking, host integration, threat model and hardening guidance.
+
+See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, Licensing host enforcement, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
 
 ## Build and verify
 

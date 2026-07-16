@@ -241,6 +241,45 @@
       "internalDependencies": [],
       "allowedExternalDependencies": [],
       "versionProperty": "PocokSubscriptionsPackageVersion"
+    },
+    {
+      "id": "Pocok.Licensing",
+      "project": "src/Licensing/Pocok.Licensing.csproj",
+      "tagPrefix": "licensing-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "LicensingConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Logging.Abstractions",
+        "Microsoft.Extensions.Options"
+      ],
+      "versionProperty": "PocokLicensingPackageVersion"
+    },
+    {
+      "id": "Pocok.AppDefaults.Licensing",
+      "project": "src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj",
+      "tagPrefix": "appdefaults.licensing-v",
+      "family": "MaintainerDefaults",
+      "releaseTier": 3,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "AppDefaultsLicensingConsumer",
+      "internalDependencies": [
+        "Pocok.AppDefaults",
+        "Pocok.Licensing"
+      ],
+      "allowedExternalDependencies": [
+        "Microsoft.Extensions.Configuration.Binder",
+        "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "Microsoft.Extensions.Hosting.Abstractions",
+        "Microsoft.Extensions.Logging.Abstractions",
+        "Microsoft.Extensions.Options"
+      ],
+      "versionProperty": "PocokAppDefaultsLicensingPackageVersion"
     }
   ]
 }

@@ -6,6 +6,9 @@
     "packages"
   ],
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "schemaVersion": {
       "const": 1
     },
