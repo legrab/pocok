@@ -198,6 +198,21 @@
         "Jint"
       ],
       "versionProperty": "PocokScriptingPackageVersion"
+    },
+    {
+      "id": "Pocok.Signals",
+      "project": "src/Signals/Pocok.Signals.csproj",
+      "tagPrefix": "signals-v",
+      "family": "Capability",
+      "releaseTier": 2,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "SignalsConsumer",
+      "internalDependencies": [
+        "Pocok.Conversion"
+      ],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokSignalsPackageVersion"
     }
   ]
 }

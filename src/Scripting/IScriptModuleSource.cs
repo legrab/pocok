@@ -7,5 +7,5 @@ namespace Pocok.Scripting;
 public interface IScriptModuleSource
 {
     /// <summary>Finds one module or returns null when it is not available.</summary>
-    ValueTask<ScriptModule?> FindAsync(ScriptReference reference, CancellationToken cancellationToken = default);
+    public ValueTask<ScriptModule?> FindAsync(ScriptReference reference, CancellationToken cancellationToken = default);
 }

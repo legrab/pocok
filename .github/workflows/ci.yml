@@ -63,6 +63,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Operations worker sample failed.' }
           dotnet run --project samples/Scripting.Console/Scripting.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Scripting sample failed.' }
+          dotnet run --project samples/Signals.Console/Signals.Console.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Signals sample failed.' }
 
       - name: Publish trimmed Conversion sample
         shell: pwsh

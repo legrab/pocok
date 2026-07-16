@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Pocok.Signals</PackageId>
+    <PackageVersion Condition="'$(PocokSignalsPackageVersion)' != ''">$(PocokSignalsPackageVersion)</PackageVersion>
+    <MinVerTagPrefix>signals-v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
+    <Description>Product-neutral quality-aware live-value contracts and shared subscription runtime.</Description>
+    <PackageTags>signals;live-values;quality;subscriptions;runtime;contracts</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Conversion/Pocok.Conversion.csproj" />
+  </ItemGroup>
+</Project>

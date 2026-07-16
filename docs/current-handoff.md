@@ -1,17 +1,18 @@
 # Current repository handoff
 
-Status revision: `5b7fe8b` plus the current uncommitted acceptance fixes
+Status revision: `a60c731` plus the Signals-read and Localization extraction slices
 
 Refresh owner: any change that alters release eligibility, acceptance evidence, package closure, or the Modularity gate must update this file or remove obsolete claims.
 
 ## Current state
 
 - Waves C and D are structurally implemented.
-- A Windows .NET 10.0.102 and PowerShell 7.3.6 acceptance run passed formatting, solution build, 192 tests, core samples, package catalog validation, local-closure smoke, and public release audit on the current working tree. Scripting now also has a tracked public API snapshot, ten focused behavior tests, source-size and memory bounds, and an installed-package consumer check.
+- A Windows .NET 10.0.102 and PowerShell 7.3.6 acceptance run passed formatting, solution build, 221 tests, core samples, package catalog validation, local-closure smoke, and public release audit on the current working tree. Scripting has a tracked public API snapshot, ten focused behavior tests, source-size and memory bounds, and an installed-package consumer check; Signals has a tracked public API snapshot, twenty-one focused contract/runtime tests, shared subscription lifecycle and point-in-time read behavior, and an installed-package consumer check; Localization has a tracked public API snapshot, four focused composition tests, a sample, and an installed-package consumer check.
 - Packing succeeded and produced the expected packages and symbols; local MinVer emitted `MINVER1001` warnings because the sandbox Git identity cannot treat the parent repository as a valid working directory.
 - The Operations worker sample explicitly owns a console-only logging provider set and does not cancel an already-ready startup cycle during shutdown.
 - Modularity remains experimental and non-releasable until its separate Linux and Windows proof gate passes.
 - Pocok.Scripting is now an experimental, non-releasable alpha package containing the neutral bounded execution/import slice; product-specific providers and UI/persistence integrations remain outside the extraction.
+- Pocok.Signals is now an experimental, non-releasable alpha package containing the neutral live-value contracts and shared runtime, including point-in-time reads; protocol adapters, persistence, caching backends, and product-specific integrations remain outside this extraction.
 - Do not create release tags until Linux CI, candidate-scoped publication-shaped restore, audit, and debugger Source Link evidence are current.
 
 ## Next action

@@ -6,8 +6,9 @@
 
 ```text
 Pocok.Conversion
+├── Pocok.Scripting
+└── Pocok.Signals
 Pocok.Readiness
-Pocok.Scripting
 
 Pocok.AppDefaults
 ├── Pocok.AppDefaults.Logging
@@ -45,6 +46,8 @@ Arrows point from a dependency to its consumers. `Pocok.AppDefaults.Modularity` 
 - [x] Add experimental Modularity contracts, loader, diagnostics, fixtures, and defaults.
 - [x] Keep Modularity publication-gated.
 - [x] Extract the neutral, bounded Scripting execution and import vertical slice as experimental alpha.
+- [x] Extract the neutral Signals identity, quality-aware sample, and source-operation contract slice as experimental alpha.
+- [x] Extract the Signals shared runtime with replay, bounded buffering, reconnect, staleness, point-in-time reads, typed conversion, writes, and lease cleanup as experimental alpha.
 - [x] Add package catalog, API snapshots, samples, migration guides, and release-version propagation.
 - [x] Isolate the five initial packages in `Pocok.Core.slnx`.
 
@@ -81,9 +84,11 @@ Arrows point from a dependency to its consumers. `Pocok.AppDefaults.Modularity` 
 
 ## Validation evidence
 
-Windows acceptance evidence on 2026-07-16, using .NET SDK 10.0.102 and PowerShell 7.3.6, passed formatting, solution build, 183 tests, core sample execution, package catalog validation, local-closure smoke, and public release audit on the current working tree. The Operations worker sample also passed both `dotnet run` and direct built-executable launch after its Windows provider and readiness-shutdown fixes.
+Windows acceptance evidence on 2026-07-16, using .NET SDK 10.0.102 and PowerShell 7.3.6, passed formatting, solution build, 213 tests, core sample execution, package catalog validation, local-closure smoke, and public release audit on the current working tree. The Operations worker sample also passed both `dotnet run` and direct built-executable launch after its Windows provider and readiness-shutdown fixes.
 
 The Scripting alpha slice was subsequently restored and validated in isolation: the package builds with zero warnings, ten focused tests pass, its public API snapshot passes, and the console sample returns script-result=42. Source-size and engine-memory bounds are explicit, and its package smoke consumer is wired into the catalog-driven local closure and passes from the installed package. It remains experimental and non-releasable while the extraction boundary is evaluated.
+
+The Signals slice is independently packageable, has twenty-one focused contract and runtime tests and a public API snapshot, and contains no protocol adapter, persistence, cache backend, UI, logging, serializer, or service-provider dependency. Its runtime shares source subscriptions by address, replays the latest sample, bounds slow consumers, handles reconnect/staleness transitions, exposes point-in-time reads, typed conversion, and write evidence.
 
 Packing succeeded and produced packages and symbols. It emitted `MINVER1001` warnings locally because the sandbox Git identity cannot treat the parent repository as a valid working directory; this environment-specific warning must not be confused with a build error.
 

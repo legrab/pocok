@@ -23,6 +23,7 @@ public class PublicApiTests
         yield return Case(typeof(Modularity.ModuleLoader).Assembly, "Modularity");
         yield return Case(typeof(Pocok.AppDefaults.Modularity.ModularityDefaultsOptions).Assembly, "AppDefaults.Modularity");
         yield return Case(typeof(Pocok.Scripting.ScriptRunner).Assembly, "Scripting");
+        yield return Case(typeof(Pocok.Signals.SignalAddress).Assembly, "Signals");
 #endif
     }
 

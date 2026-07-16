@@ -17,6 +17,7 @@ Pocok is a deliberately small .NET package portfolio extracted from repeated app
 | `Pocok.Modularity` | Capability | Experimental | Trusted startup-time plugin discovery and DI registration |
 | `Pocok.AppDefaults.Modularity` | Maintainer defaults | Experimental | Conventional host policy for `Pocok.Modularity` |
 | `Pocok.Scripting` | Capability | Experimental, alpha | Bounded JavaScript execution with explicit bindings and deterministic imports |
+| `Pocok.Signals` | Capability | Experimental, alpha | Quality-aware live-value contracts and shared subscription runtime |
 
 Experimental packages remain packable and tested but have no publication tag trigger. Their catalog entries must be changed explicitly after the documented release gate passes on Linux and Windows.
 
@@ -47,7 +48,7 @@ using Pocok.Conversion;
 var result = ValueConverter.Default.Convert<int>("42");
 ```
 
-See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, bounded Scripting, an explicit trimmed-array smoke test, and independently deployed modules.
+See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, bounded Scripting, Signals contracts and runtime, an explicit trimmed-array smoke test, and independently deployed modules.
 
 ## Build and verify
 

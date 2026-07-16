@@ -25,7 +25,8 @@
     <ProjectReference Include="../../src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj"/>
     <ProjectReference Include="../../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
     <ProjectReference Include="../../src/Modularity/Pocok.Modularity.csproj"/>
-    <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
-  </ItemGroup>
+   <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
+    <ProjectReference Include="../../src/Signals/Pocok.Signals.csproj"/>
+ </ItemGroup>
 
 </Project>
