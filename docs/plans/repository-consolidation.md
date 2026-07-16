@@ -1,11 +1,11 @@
 # Pocok repository evaluation, implementation retrospective, and stabilization plan
 
 **Original evaluation date:** 2026-07-15
-**Current state:** V2 implementation candidate on `dev/bg/est` with consolidation Waves A through D applied.
+**Current state:** V2 implementation candidate on `dev/bg/wave4` with consolidation Waves A through D and four experimental capability slices applied.
 **Historical inputs:** `origin.zip` (reference only).
 **Primary objective:** turn Pocok into a small, credible portfolio of reusable .NET packages and public application-default configurators without preserving low-value abstractions or copying application-specific legacy code.
 
-> **Status update:** A previous .NET 10 and PowerShell 7 stabilization run recorded 182 passing tests. The V2 follow-up finalized pending Modularity WIP and implemented package-semantic Wave C and AppDefaults-policy Wave D. The environment used for those latest edits had no .NET or PowerShell runtime, so the exact HEAD remains an implementation candidate until the acceptance matrix is rerun.
+> **Status update:** The current .NET 10 and PowerShell 7 acceptance run passed formatting, the Release build, 231 tests, core samples, package catalog validation, local-closure smoke, and public release audit. The four extracted capability packages remain experimental and non-releasable until their documented Linux and Windows proof gates pass.
 
 ## Evidence levels
 
@@ -24,7 +24,7 @@ The legacy origin remains architectural and behavioral evidence only. Its source
 
 ## Current implementation candidate
 
-The generated repository contains eight active packable projects:
+The generated repository contains twelve active packable projects:
 
 | Package | Intended status | Current confidence |
 |---|---|---|
@@ -36,6 +36,10 @@ The generated repository contains eight active packable projects:
 | `Pocok.Modularity.Contracts` | Experimental, non-releasable | Implemented for evaluation. Keep gated until Wave E passes on Linux and Windows. |
 | `Pocok.Modularity` | Experimental, non-releasable | Pending WIP contradictions were corrected. Highest-risk runtime area and still not a release candidate. |
 | `Pocok.AppDefaults.Modularity` | Experimental, non-releasable | Configurator policy is aligned with other AppDefaults packages, but release depends on Wave E. |
+| `Pocok.Scripting` | Experimental, non-releasable | Bounded execution and deterministic import resolution are implemented, tested, and package-smoke verified. |
+| `Pocok.Signals` | Experimental, non-releasable | Quality-aware live-value contracts and shared runtime are implemented, tested, and package-smoke verified. |
+| `Pocok.Localization` | Experimental, non-releasable | Deterministic localization composition and explicit resource culture resolution are implemented, tested, and package-smoke verified. |
+| `Pocok.Subscriptions` | Experimental, non-releasable | Thread-safe keyed listener registration, filtering, mapping, and disposal are implemented, tested, and package-smoke verified. |
 
 The following package shapes were removed from the active repository:
 
@@ -73,7 +77,7 @@ The historical defects below explain why the first one-shot was not sufficient. 
 - AppDefaults duplicate, options, provider, and override semantics are deliberate rather than accidental;
 - Modularity remains non-releasable and has a separate Wave E proof gate.
 
-The remaining task is executable verification of the latest edits, not another broad architectural rewrite.
+The remaining task is the documented cross-platform and publication-shaped release proof, not another broad architectural rewrite.
 
 ## What went wrong in the one-shot
 
@@ -1417,7 +1421,7 @@ This capability is more valuable than a generic reflection library because it ow
 | `ImplementationLoader` | Implementations are discovered repeatedly | Need for type discovery and structured diagnostics | calling-assembly behavior, naming heuristics, direct Activator construction | Modularity internals |
 | `SeedingServiceRegistrar` | Optional assemblies and service registration need orchestration | External plugin folder requirement and ordered registration scenarios | loaded-AppDomain scanning, hardcoded assembly forcing, intermediate provider | `Pocok.Modularity` |
 | Platform-specific registrars | Cross-platform host must avoid incompatible implementations | Pre-load runtime filtering requirements | compile-time references from host to every platform implementation | Modularity manifest/runtime filter |
-| Localization compositor and tests | Deterministic multi-source localization may have value | Test ideas for duplicates, fallback, precedence, missing resources | database/domain resource integration and project resources | `Pocok.Localization` experimental alpha |
+| Localization compositor and resource culture resolver | Deterministic multi-source localization and resource-file culture selection may have value | Test ideas for duplicates, fallback, precedence, missing resources, and valid culture tags | database/domain resource integration, project resources, and global culture mutation | `Pocok.Localization` experimental alpha |
 | Keyed subscription registry | Multiple consumers need keyed typed listeners with filtering | Thread-safe listener ownership, typed mapping, and disposal scenarios | transport lifecycle, retry timers, logging, and network adapters | `Pocok.Subscriptions` experimental alpha |
 | JSON DTO schema generator | Contract artifacts can aid integrations | Concrete consumer requirement and documentation linkage idea | app-specific DTO paths and generic schema package | use BCL `JsonSchemaExporter`; defer differentiated manifest |
 | `Reflections` and Common.Utils | Small helpers accumulate in a monolith | A few narrow internal behaviors after repeated use | catch-all extensions, swallowed failures, generic invocation helpers | linked internal source only |
@@ -1465,7 +1469,7 @@ Reflection is an implementation mechanism, not the public capability. Put narrow
 
 **Decision: extract the neutral compositor as experimental alpha; defer providers.**
 
-The requested extraction now carries only deterministic composition of standard `IStringLocalizer` providers. Database, filesystem, resource-assembly discovery, caching, and application-specific registration remain deferred until an independent requirement justifies them.
+The requested extraction now carries deterministic composition of standard `IStringLocalizer` providers and caller-selected culture resolution from resource-file names. Database, filesystem, resource-assembly discovery, caching, global culture mutation, and application-specific registration remain deferred until an independent requirement justifies them.
 
 ## 11.5 Keyed subscriptions
 
@@ -1473,13 +1477,13 @@ The requested extraction now carries only deterministic composition of standard 
 
 The requested extraction carries the reusable keyed subscription behavior from the origin: multiple listeners per key, typed mapping, filtering, synchronous delivery, snapshots before handler invocation, and idempotent disposal. Timer-based retry and network lifecycle remain deferred because they need explicit cancellation, time, ownership, and failure-isolation contracts rather than a direct copy of the legacy implementation.
 
-## 11.5 General logging package
+## 11.6 General logging package
 
 **Decision: never implement.**
 
 Do not build a logging framework. Implement AppDefaults packages that configure Microsoft logging and explicit providers.
 
-## 11.6 General seeding package
+## 11.7 General seeding package
 
 **Decision: do not extract from origin.**
 
@@ -1619,7 +1623,7 @@ Use these without stopping for clarification:
 8. Implement Serilog as an optional provider-specific defaults package.
 9. Implement trusted startup-only plugins.
 10. Spike McMaster.NETCore.Plugins first and fall back to a minimal BCL adapter only with documented reasons.
-11. Defer Localization and generic Contracts.
+11. Keep the extracted Localization compositor and resource-culture resolver experimental; defer provider integrations and generic Contracts.
 12. Do not implement Numerics or Reflection packages.
 
 ## 13.5 Required agent output
@@ -2084,8 +2088,8 @@ These are not blockers. The implementation defaults above should be used now.
 4. **Should Modularity support unload or hot reload?**
    Recommended answer: no. Startup-only registration is the stable and useful first boundary.
 
-5. **Should a Localization package be the next addition?**
-   Recommended answer: only after AppDefaults and Modularity are used in real applications and two independent localization consumers demonstrate the same compositor requirement.
+5. **Should Localization gain provider integrations?**
+   Recommended answer: only after two independent consumers justify the same database, filesystem, or resource-assembly integration. Keep the current compositor and resource-culture resolver neutral.
 
 6. **Should AppDefaults have one aggregate package?**
    Recommended answer: not initially. Add `Pocok.AppDefaults.Standard` only after at least three applications use the exact same composition.
@@ -2094,7 +2098,7 @@ These are not blockers. The implementation defaults above should be used now.
 
 # 17. Final recommendation
 
-Do not treat the current four packages as four assets that all need polishing. Treat them as evidence from which two strong capability packages should emerge:
+Do not treat the experimental extraction slices as release-ready merely because they build. Treat them as evidence that should be hardened against independent consumer requirements while the strongest stable package boundaries remain:
 
 - Conversion;
 - Readiness.

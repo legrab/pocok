@@ -2,7 +2,7 @@
 
 ## Current result
 
-The repository is a coherent implementation candidate for five initial public packages and three experimental Modularity packages. The previous executable baseline passed 182 tests. The V2 follow-up finalized pending Modularity WIP, implemented package-semantic Wave C, and made AppDefaults policy Wave D explicit. Those latest changes still require a fresh .NET 10 and PowerShell 7 acceptance run before release.
+The repository is a coherent implementation candidate for five intended initial public packages, three experimental Modularity packages, and four additional experimental capability packages. The current .NET 10 and PowerShell 7 acceptance run passed formatting, the Release build, 231 tests, core samples, package catalog validation, local-closure smoke, and public release audit. The experimental packages remain non-releasable pending their documented cross-platform and publication-shaped gates.
 
 ### Intended initial release set
 
@@ -17,6 +17,10 @@ The repository is a coherent implementation candidate for five initial public pa
 - `Pocok.Modularity.Contracts`
 - `Pocok.Modularity`
 - `Pocok.AppDefaults.Modularity`
+- `Pocok.Scripting`
+- `Pocok.Signals`
+- `Pocok.Localization`
+- `Pocok.Subscriptions`
 
 ### Retired shapes
 
@@ -35,6 +39,7 @@ The repository is a coherent implementation candidate for five initial public pa
 - Public package dependencies, tags, versions, consumers, and release tiers are governed by one catalog.
 - Member-level public API snapshots use Verify and PublicApiGenerator.
 - The five initial packages are isolated from experimental Modularity through `Pocok.Core.slnx`.
+- Four neutral capability slices are independently packageable, tested, documented, and covered by installed-package smoke consumers while remaining experimental.
 
 ## V2 improvements
 
@@ -77,6 +82,4 @@ The repository is a coherent implementation candidate for five initial public pa
 
 ## Validation status
 
-The repository passed static checks for JSON, XML, workflow YAML, project paths, package catalog consistency, dependency acyclicity, package closure ordering, source headers, retired references, documentation links, and Git cleanliness.
-
-The V2 environment had no .NET SDK or PowerShell runtime. The latest C#, MSBuild, PowerShell, package, and workflow changes have not been executed here. This is the only release-blocking uncertainty for the initial package set. See the implementation ledger and `PUBLICATION.md` for the exact acceptance commands.
+The repository passed static checks for JSON, XML, workflow YAML, project paths, package catalog consistency, dependency acyclicity, package closure ordering, source headers, retired references, documentation links, and Git cleanliness. The current Windows acceptance run also passed the executable build, tests, samples, package catalog validation, local-closure smoke, and public release audit. Cross-platform CI, debugger Source Link verification from an installed candidate package, and publication-shaped restore remain release gates.
