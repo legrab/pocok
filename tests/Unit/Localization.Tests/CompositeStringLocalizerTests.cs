@@ -9,6 +9,12 @@ namespace Pocok.Localization.Tests;
 
 public sealed class CompositeStringLocalizerTests
 {
+    private enum Sample
+    {
+        Unknown,
+        Known
+    }
+
     [Test]
     public void FirstProviderWinsAndMissingKeysFallBackToTheKey()
     {
@@ -93,6 +99,44 @@ public sealed class CompositeStringLocalizerTests
         ResourceCulture.GetCultureFromFileName("messages.txt", fallback).ShouldBeSameAs(fallback);
         ResourceCulture.GetCultureFromFileName("messages.zzzz.txt", fallback).ShouldBeSameAs(fallback);
         ResourceCulture.GetCultureFromFileName("messages.de", fallback).ShouldBeSameAs(fallback);
+    }
+
+    [Test]
+    public void EnumTranslationPrefersTypeQualifiedKey()
+    {
+        var localizer = new DictionaryStringLocalizer(("Sample.Known", "Known (translated)"));
+
+        Sample.Known.Translate(localizer).ShouldBe("Known (translated)");
+    }
+
+    [Test]
+    public void EnumTranslationFallsBackToBareMemberKey()
+    {
+        var localizer = new DictionaryStringLocalizer(("Known", "Known (bare)"));
+
+        Sample.Known.Translate(localizer).ShouldBe("Known (bare)");
+    }
+
+    [Test]
+    public void EnumTranslationReturnsBareMemberWhenBothKeysAreMissing()
+    {
+        Sample.Known.Translate(new DictionaryStringLocalizer()).ShouldBe("Known");
+    }
+
+    [Test]
+    public void BoxedEnumTranslationUsesTheSameLookupPolicy()
+    {
+        Enum value = Sample.Known;
+
+        value.Translate(new DictionaryStringLocalizer(("Sample.Known", "Known (boxed)")))
+            .ShouldBe("Known (boxed)");
+    }
+
+    [Test]
+    public void EnumTranslationUsesMemberNameForExplicitZeroValue()
+    {
+        Sample.Unknown.Translate(new DictionaryStringLocalizer(("Sample.Unknown", "Unknown (translated)")))
+            .ShouldBe("Unknown (translated)");
     }
 
     private sealed class DictionaryStringLocalizer(params (string Name, string Value)[] entries) : IStringLocalizer

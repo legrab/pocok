@@ -6,4 +6,6 @@ Compatibility tier: experimental alpha. This package is a neutral composition bo
 
 `ResourceCulture` resolves a valid two- or three-letter language tag, or a language tag with a region/script suffix, from the final resource-file name segment. Callers provide the fallback culture explicitly; the package never mutates process or thread culture.
 
+`EnumLocalizationExtensions.Translate` looks up an enum value using the deterministic `EnumType.Member` key first and the bare member name second. If neither resource exists, the standard localizer's missing-resource value is returned, which normally echoes the member name.
+
 The package owns no database, filesystem, resource assembly, caching, dependency-injection, logging, or application-specific localization policy. Providers own their resource loading and lifetime. The composite is immutable after construction and safe for concurrent reads when its providers are safe for concurrent reads.

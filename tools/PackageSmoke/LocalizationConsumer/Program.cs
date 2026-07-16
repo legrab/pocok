@@ -10,7 +10,13 @@ var localizer = new CompositeStringLocalizer([
 ]);
 var result = localizer["consumer.missing"];
 CultureInfo culture = ResourceCulture.GetCultureFromFileName("messages.de-DE.json", CultureInfo.InvariantCulture);
-return result.ResourceNotFound && result.Value == "consumer.missing" && culture.Name == "de-DE" ? 0 : 1;
+var status = ConsumerStatus.Ready.Translate(localizer);
+return result.ResourceNotFound && result.Value == "consumer.missing" && culture.Name == "de-DE" && status == "Ready" ? 0 : 1;
+
+enum ConsumerStatus
+{
+    Ready
+}
 
 sealed class EmptyStringLocalizer : IStringLocalizer
 {

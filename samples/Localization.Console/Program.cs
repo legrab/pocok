@@ -14,6 +14,12 @@ var localizer = new CompositeStringLocalizer([
 var greeting = localizer["Greeting", "Pocok"];
 var fallback = localizer["Missing"];
 var culture = ResourceCulture.GetCultureFromFileName("messages.de-DE.json", CultureInfo.InvariantCulture);
-Console.WriteLine($"greeting={greeting.Value} fallback={fallback.Value} missing={fallback.ResourceNotFound} culture={culture.Name}");
+var status = SampleStatus.Ready.Translate(localizer);
+Console.WriteLine($"greeting={greeting.Value} fallback={fallback.Value} missing={fallback.ResourceNotFound} culture={culture.Name} status={status}");
 
-return greeting.Value == "Hello Pocok" && fallback.ResourceNotFound && culture.Name == "de-DE" ? 0 : 1;
+return greeting.Value == "Hello Pocok" && fallback.ResourceNotFound && culture.Name == "de-DE" && status == "Ready" ? 0 : 1;
+
+internal enum SampleStatus
+{
+    Ready
+}

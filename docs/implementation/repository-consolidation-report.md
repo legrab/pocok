@@ -2,7 +2,7 @@
 
 ## Current result
 
-The repository is a coherent implementation candidate for five intended initial public packages, three experimental Modularity packages, and four additional experimental capability packages. The current .NET 10 and PowerShell 7 acceptance run passed formatting, the Release build, 231 tests, core samples, package catalog validation, local-closure smoke, and public release audit. The experimental packages remain non-releasable pending their documented cross-platform and publication-shaped gates.
+The repository is a coherent implementation candidate for five intended initial public packages, three experimental Modularity packages, and four additional experimental capability packages. The current .NET 10 and PowerShell 7 acceptance run passed formatting, the Release build, 236 tests, core samples, package catalog validation, local-closure smoke, and public release audit. The experimental packages remain non-releasable pending their documented cross-platform and publication-shaped gates.
 
 ### Intended initial release set
 

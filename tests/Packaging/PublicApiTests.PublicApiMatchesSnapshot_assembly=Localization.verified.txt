@@ -7,6 +7,12 @@ namespace Pocok.Localization
         public Microsoft.Extensions.Localization.LocalizedString this[string name, object[] arguments] { get; }
         public System.Collections.Generic.IEnumerable<Microsoft.Extensions.Localization.LocalizedString> GetAllStrings(bool includeParentCultures) { }
     }
+    public static class EnumLocalizationExtensions
+    {
+        public static string Translate(this System.Enum value, Microsoft.Extensions.Localization.IStringLocalizer localizer) { }
+        public static string Translate<TEnum>(this TEnum value, Microsoft.Extensions.Localization.IStringLocalizer localizer)
+            where TEnum :  struct, System.Enum { }
+    }
     public static class ResourceCulture
     {
         public static System.Globalization.CultureInfo GetCultureFromFileName(string path, System.Globalization.CultureInfo fallback) { }
