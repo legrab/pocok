@@ -1,51 +1,40 @@
-# Agent Plan Format
+# Agent plan guidance
 
-Create multi-step plans at `prompts/<topic>/plan-<topic>.prompt.md`. Plans are passive until explicitly started.
+Use a durable plan at `prompts/<topic>/plan-<topic>.prompt.md` only when work is high-risk, spans sessions or agents, changes public package contracts, affects release behavior, or is too large to coordinate safely in chat.
 
-## Required sections
+A normal multi-step task needs only a brief in-chat plan.
 
-1. **Goal and success criteria** — the outcome, non-goals, and observable completion conditions.
-2. **Architecture** — current contracts and target dependency direction with small code or tree examples.
-3. **Impacted scope** — exact projects, files, consumers, tests, generated artifacts, fixtures, and package surfaces.
-4. **Risks and decisions** — behavior, compatibility, security, concurrency, persistence, invalidation, identifiers, and dependencies.
-5. **Steps** — independently compilable commits grouped by phase and review gates.
+## Durable plan content
 
-## Step template
+Include the smallest useful set:
+
+1. **Goal and success criteria**
+2. **Current evidence and uncertainty**
+3. **Target behavior and non-goals**
+4. **Impacted packages, consumers, tests, generated artifacts, and package surfaces**
+5. **Material risks and unresolved decisions**
+6. **Coherent implementation slices and validation**
+7. **Handoff or review gates only where a real decision or external action exists**
+
+## Optional slice template
 
 ```markdown
-### Step N: Short outcome
+### Slice N: Short outcome
 
-- **Status**: Pending
-- **Commit title**: `vibe(AREA): imperative summary`
-- **Why**: concise reason
-- **Files**: exact paths
-
-Current:
-
-```text
-Relevant current signature, behavior, or tree.
+- Why this slice exists
+- Relevant files and consumers
+- Behavior or contract preserved or introduced
+- Validation required
+- Decision gate, only when needed
 ```
 
-Target:
+Current and target examples are useful when they clarify a contract, but are not mandatory boilerplate for every slice.
 
-```text
-Precise desired signature, behavior, or tree.
-```
+## Rules
 
-Validation:
-
-- focused checks
-- affected tests
-- package and consumer checks
-```
-
-End every phase with a review gate. End every plan with a follow-up review that resolves completed items and promotes genuine future work into a new passive plan.
-
-## Planning rules
-
-- One commit per step.
-- Current and Target are always present.
-- List exclusions explicitly when scope sounds broad.
-- Do not hide an unresolved product decision inside implementation detail.
-- Prefer the smallest dependency cone and independently usable vertical slices.
-- Public packages require provenance, threat/security notes where relevant, README/sample, API review, and local-feed installation tests.
+- Current source and executable evidence outrank the plan.
+- Keep the dependency cone small and slices independently reviewable.
+- Do not hide product or architecture decisions inside implementation detail.
+- Do not require one commit per slice. Commit boundaries are chosen only when a commit is requested.
+- Public packages still require provenance, compatibility and security notes where relevant, README and sample review, API proof, package inspection, and local-feed installation tests.
+- End with evidence status and genuine follow-ups, not a ceremonial phase gate.

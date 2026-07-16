@@ -1,6 +1,6 @@
 # Pocok
 
-> **Current status:** Consolidated implementation candidate. The previous .NET 10 baseline passed 182 tests; the latest package-closure and AppDefaults policy changes require one fresh executable acceptance run before release tags are created. See the [consolidation plan](docs/plans/repository-consolidation.md).
+> **Current status:** Consolidated implementation candidate. The previous .NET 10 baseline passed 182 tests; the latest package-closure and AppDefaults policy changes require one fresh executable acceptance run before release tags are created. See the [current handoff](docs/current-handoff.md) and [consolidation plan](docs/plans/repository-consolidation.md).
 
 Pocok is a deliberately small .NET package portfolio extracted from repeated application needs. It contains focused runtime capabilities and transparent application-default configurators. The repository is also maintained as a reference for package boundaries, compatibility, testing, plugin isolation, and release engineering.
 
@@ -66,12 +66,22 @@ dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/pac
 
 Publication uses package-specific tags, generated release-version overrides, complete local-closure restoration, and a candidate-plus-nuget.org rehearsal. See [PUBLICATION.md](PUBLICATION.md).
 
+## Agentic collaboration
+
+- [Stable repository rules](AGENTS.md)
+- [Agentic workflow](docs/agentic-workflow.md)
+- [Learning the repository and its harness](docs/agentic-learning.md)
+- [Current handoff](docs/current-handoff.md)
+- [Prompt compatibility entry points](prompts/README.md)
+- [Session record policy](sessions/README.md)
+
 ## Design and implementation record
 
 - [Repository evaluation and consolidation plan](docs/plans/repository-consolidation.md)
 - [Implementation ledger](docs/implementation/repository-consolidation-ledger.md)
 - [Implementation report](docs/implementation/repository-consolidation-report.md)
 - [Architectural decisions](docs/decisions)
+- [Agentic workflow documentation change log](docs/agentic-workflow-change-log.md)
 
 ## License and stewardship
 

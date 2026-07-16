@@ -16,6 +16,7 @@ jobs:
   validate:
     name: Build and test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -33,8 +34,12 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Test package metadata tooling
+        shell: pwsh
+        run: ./tools/PackageMetadata/Test-PackageMetadata.ps1
+
       - name: Restore
-        run: dotnet restore Pocok.slnx
+        run: dotnet restore Pocok.slnx --locked-mode
 
       - name: Verify formatting
         run: dotnet format Pocok.slnx --verify-no-changes --no-restore
@@ -54,6 +59,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Readiness sample failed.' }
           dotnet run --project samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'AppDefaults sample failed.' }
+          dotnet run --project samples/Operations.Worker/Pocok.Operations.Worker.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Operations worker sample failed.' }
 
       - name: Publish trimmed Conversion sample
         shell: pwsh
