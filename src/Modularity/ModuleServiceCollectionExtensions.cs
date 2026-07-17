@@ -3,6 +3,8 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Pocok.Modularity.Catalog;
+using Pocok.Modularity.Loading;
 
 namespace Pocok.Modularity;
 

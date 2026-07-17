@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Pocok.Modularity;
+using Pocok.Modularity.Catalog;
 
 namespace Pocok.AppDefaults.Modularity.Tests;
 
@@ -37,7 +37,8 @@ public sealed class ModularityDefaultsConfiguratorTests
 
         builder.AddPocokModularityDefaults(defaults => defaults.PluginDirectory = "delegate-plugins");
         using IHost host = builder.Build();
-        ModularityDefaultsOptions defaults = host.Services.GetRequiredService<IOptions<ModularityDefaultsOptions>>().Value;
+        ModularityDefaultsOptions defaults =
+            host.Services.GetRequiredService<IOptions<ModularityDefaultsOptions>>().Value;
 
         defaults.PluginDirectory.ShouldBe("delegate-plugins");
         defaults.SearchRecursively.ShouldBeFalse();

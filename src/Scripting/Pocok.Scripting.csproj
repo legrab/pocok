@@ -12,10 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jint" />
+    <PackageReference Include="Jint"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Conversion/Pocok.Conversion.csproj" />
+    <ProjectReference Include="../Conversion/Pocok.Conversion.csproj"/>
   </ItemGroup>
 </Project>

@@ -4,10 +4,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pocok.AppDefaults.Licensing;
-using Pocok.Licensing;
+using Pocok.Licensing.Documents;
+using Pocok.Licensing.Runtime;
 
 // Demo only. Production issuers must keep private signing keys outside application deployments.
-(var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
+var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
 var license = LicenseCryptography.Sign(new LicenseDocument
 {
     LicenseId = "sample-license",

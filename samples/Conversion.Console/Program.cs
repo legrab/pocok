@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using Pocok.Conversion;
+using FileAccess = Pocok.Conversion.Console.FileAccess;
 
 var converter = new ValueConverter();
 string[] values = ["1", "2", "3"];
@@ -22,10 +23,13 @@ Console.WriteLine($"saturated={saturated.Value}");
 Console.WriteLine($"flags={flags.Value}");
 Console.WriteLine($"collection={string.Join(',', collection.Value)}");
 
-[Flags]
-internal enum FileAccess
+namespace Pocok.Conversion.Console
 {
-    None = 0,
-    Read = 1,
-    Write = 2
+    [Flags]
+    internal enum FileAccess
+    {
+        None = 0,
+        Read = 1,
+        Write = 2
+    }
 }

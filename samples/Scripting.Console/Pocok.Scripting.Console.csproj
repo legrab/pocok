@@ -5,6 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj" />
+    <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
   </ItemGroup>
 </Project>

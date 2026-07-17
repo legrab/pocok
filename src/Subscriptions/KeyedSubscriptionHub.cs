@@ -29,6 +29,20 @@ public sealed class KeyedSubscriptionHub<TKey> : IDisposable where TKey : notnul
         }
     }
 
+    /// <summary>Removes all subscriptions and releases the hub.</summary>
+    public void Dispose()
+    {
+        lock (_gate)
+        {
+            if (_disposed) return;
+
+            _disposed = true;
+            _listeners.Clear();
+        }
+
+        GC.SuppressFinalize(this);
+    }
+
     /// <summary>Adds a typed listener for a key and returns its idempotent removal handle.</summary>
     public IDisposable Subscribe<T>(
         TKey key,
@@ -59,49 +73,22 @@ public sealed class KeyedSubscriptionHub<TKey> : IDisposable where TKey : notnul
         lock (_gate)
         {
             ThrowIfDisposed();
-            if (!_listeners.TryGetValue(key, out List<IListener>? registered))
-            {
-                return 0;
-            }
+            if (!_listeners.TryGetValue(key, out List<IListener>? registered)) return 0;
 
             listeners = registered.ToArray();
         }
 
         var delivered = 0;
         foreach (IListener listener in listeners)
-        {
             if (listener.Publish(this, value))
-            {
                 delivered++;
-            }
-        }
 
         return delivered;
     }
 
-    /// <summary>Removes all subscriptions and releases the hub.</summary>
-    public void Dispose()
-    {
-        lock (_gate)
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            _listeners.Clear();
-        }
-
-        GC.SuppressFinalize(this);
-    }
-
     private List<IListener> GetOrCreateListeners(TKey key)
     {
-        if (_listeners.TryGetValue(key, out List<IListener>? listeners))
-        {
-            return listeners;
-        }
+        if (_listeners.TryGetValue(key, out List<IListener>? listeners)) return listeners;
 
         listeners = [];
         _listeners.Add(key, listeners);
@@ -112,20 +99,17 @@ public sealed class KeyedSubscriptionHub<TKey> : IDisposable where TKey : notnul
     {
         lock (_gate)
         {
-            if (_disposed || !_listeners.TryGetValue(key, out List<IListener>? listeners))
-            {
-                return;
-            }
+            if (_disposed || !_listeners.TryGetValue(key, out List<IListener>? listeners)) return;
 
             listeners.Remove(listener);
-            if (listeners.Count == 0)
-            {
-                _listeners.Remove(key);
-            }
+            if (listeners.Count == 0) _listeners.Remove(key);
         }
     }
 
-    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(_disposed, this);
+    private void ThrowIfDisposed()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+    }
 
     private interface IListener
     {
@@ -136,20 +120,11 @@ public sealed class KeyedSubscriptionHub<TKey> : IDisposable where TKey : notnul
     {
         public bool Publish(KeyedSubscriptionHub<TKey> hub, object? value)
         {
-            if (!options.ObjectFilter(value))
-            {
-                return false;
-            }
+            if (!options.ObjectFilter(value)) return false;
 
-            if (!options.TryMap(value, out T? mapped))
-            {
-                return false;
-            }
+            if (!options.TryMap(value, out T? mapped)) return false;
 
-            if (!options.ValueFilter(mapped))
-            {
-                return false;
-            }
+            if (!options.ValueFilter(mapped)) return false;
 
             handler.Invoke(hub, mapped);
             return true;
@@ -162,10 +137,7 @@ public sealed class KeyedSubscriptionHub<TKey> : IDisposable where TKey : notnul
 
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _disposed, 1) == 0)
-            {
-                remove();
-            }
+            if (Interlocked.Exchange(ref _disposed, 1) == 0) remove();
         }
     }
 }

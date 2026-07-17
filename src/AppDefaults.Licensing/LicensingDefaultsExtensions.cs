@@ -2,7 +2,7 @@
 // Copyright 2026 Pocok contributors
 
 using Microsoft.Extensions.Hosting;
-using Pocok.Licensing;
+using Pocok.Licensing.Runtime;
 
 namespace Pocok.AppDefaults.Licensing;
 

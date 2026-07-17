@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
-namespace Pocok.Modularity.Fixtures;
+namespace Pocok.Modularity.FixtureContracts;
 
 public interface IGreetingProvider
 {

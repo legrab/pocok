@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Localization/Pocok.Localization.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" />
+    <ProjectReference Include="../../src/Localization/Pocok.Localization.csproj"/>
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions"/>
   </ItemGroup>
 </Project>

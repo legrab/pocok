@@ -2,11 +2,11 @@
 {
     public sealed class LicensingApplicationConfigurator : Pocok.AppDefaults.IApplicationConfigurator
     {
-        public LicensingApplicationConfigurator(string sectionName = "Pocok:Licensing", System.Action<Pocok.Licensing.LicenseOptions>? configure = null) { }
+        public LicensingApplicationConfigurator(string sectionName = "Pocok:Licensing", System.Action<Pocok.Licensing.Runtime.LicenseOptions>? configure = null) { }
         public void Configure(Microsoft.Extensions.Hosting.IHostApplicationBuilder builder) { }
     }
     public static class LicensingDefaultsExtensions
     {
-        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddPocokLicensingDefaults(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Pocok.Licensing.LicenseOptions>? configure = null) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddPocokLicensingDefaults(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Pocok.Licensing.Runtime.LicenseOptions>? configure = null) { }
     }
 }

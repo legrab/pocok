@@ -2,8 +2,9 @@
 // Copyright 2026 Pocok contributors
 
 using Microsoft.Extensions.DependencyInjection;
+using Pocok.Modularity.Contracts;
+using Pocok.Modularity.FixtureContracts;
 using Pocok.Modularity.FixtureDependency;
-using Pocok.Modularity.Fixtures;
 
 namespace Pocok.Modularity.FixturePlugin;
 

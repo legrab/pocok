@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pocok.Modularity;
+using Pocok.Modularity.Catalog;
 
 var services = new ServiceCollection();
 services.AddPocokModules(new ConfigurationBuilder().Build(), options =>

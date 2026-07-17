@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
-using Pocok.Signals;
+using Pocok.Signals.Runtime;
+using Pocok.Signals.Sources;
 
 SourceId source = new("demo");
 SignalAddress address = new(source, "temperature/outlet");

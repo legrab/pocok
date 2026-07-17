@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Pocok.Modularity;
+namespace Pocok.Modularity.Contracts;
 
 /// <summary>
 ///     Defines a trusted startup module that registers ordinary services before the host is built.

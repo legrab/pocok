@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Pocok.Licensing;
+using Pocok.Licensing.Documents;
+using Pocok.Licensing.Runtime;
+using Pocok.Licensing.Validation;
 using Shouldly;
 
 namespace Pocok.AppDefaults.Licensing.Tests;
@@ -17,7 +20,7 @@ public sealed class LicensingDefaultsTests
     [Test]
     public async Task ValidLicenseAllowsHostStartup()
     {
-        (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
+        var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
         var license = LicenseCryptography.Sign(new LicenseDocument
         {
             LicenseId = "host-test",

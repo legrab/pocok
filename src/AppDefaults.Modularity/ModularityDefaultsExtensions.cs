@@ -2,7 +2,7 @@
 // Copyright 2026 Pocok contributors
 
 using Microsoft.Extensions.Hosting;
-using Pocok.Modularity;
+using Pocok.Modularity.Loading;
 
 namespace Pocok.AppDefaults.Modularity;
 

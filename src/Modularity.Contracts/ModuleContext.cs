@@ -4,7 +4,7 @@
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Configuration;
 
-namespace Pocok.Modularity;
+namespace Pocok.Modularity.Contracts;
 
 /// <summary>Supplies validated host information to a module during service registration.</summary>
 public sealed class ModuleContext

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Pocok.Modularity;
+using Pocok.Modularity.Loading;
 
 namespace Pocok.AppDefaults.Modularity;
 

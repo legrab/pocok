@@ -62,11 +62,13 @@ public sealed class LoggingDefaultsConfiguratorTests
     public void DefaultPolicyDoesNotRegisterAnotherConsoleProvider()
     {
         HostApplicationBuilder builder = Host.CreateApplicationBuilder();
-        var providerRegistrationsBefore = builder.Services.Count(descriptor => descriptor.ServiceType == typeof(ILoggerProvider));
+        var providerRegistrationsBefore =
+            builder.Services.Count(descriptor => descriptor.ServiceType == typeof(ILoggerProvider));
 
         builder.AddPocokLoggingDefaults();
 
-        var providerRegistrationsAfter = builder.Services.Count(descriptor => descriptor.ServiceType == typeof(ILoggerProvider));
+        var providerRegistrationsAfter =
+            builder.Services.Count(descriptor => descriptor.ServiceType == typeof(ILoggerProvider));
         providerRegistrationsAfter.ShouldBe(providerRegistrationsBefore);
 
         using IHost host = builder.Build();

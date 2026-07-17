@@ -2,12 +2,12 @@
 {
     public sealed class ModularityDefaultsConfigurator : Pocok.AppDefaults.IApplicationConfigurator
     {
-        public ModularityDefaultsConfigurator(System.Action<Pocok.AppDefaults.Modularity.ModularityDefaultsOptions>? configureDefaults = null, System.Action<Pocok.Modularity.ModuleLoadOptions>? configureLoader = null) { }
+        public ModularityDefaultsConfigurator(System.Action<Pocok.AppDefaults.Modularity.ModularityDefaultsOptions>? configureDefaults = null, System.Action<Pocok.Modularity.Loading.ModuleLoadOptions>? configureLoader = null) { }
         public void Configure(Microsoft.Extensions.Hosting.IHostApplicationBuilder builder) { }
     }
     public static class ModularityDefaultsExtensions
     {
-        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddPocokModularityDefaults(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Pocok.AppDefaults.Modularity.ModularityDefaultsOptions>? configureDefaults = null, System.Action<Pocok.Modularity.ModuleLoadOptions>? configureLoader = null) { }
+        public static Microsoft.Extensions.Hosting.IHostApplicationBuilder AddPocokModularityDefaults(this Microsoft.Extensions.Hosting.IHostApplicationBuilder builder, System.Action<Pocok.AppDefaults.Modularity.ModularityDefaultsOptions>? configureDefaults = null, System.Action<Pocok.Modularity.Loading.ModuleLoadOptions>? configureLoader = null) { }
     }
     public sealed class ModularityDefaultsOptions
     {

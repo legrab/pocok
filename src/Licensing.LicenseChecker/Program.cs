@@ -4,7 +4,10 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
-using Pocok.Licensing;
+using Pocok.Licensing.Documents;
+using Pocok.Licensing.LicenseChecker;
+using Pocok.Licensing.Runtime;
+using Pocok.Licensing.Validation;
 
 return await RunAsync(args).ConfigureAwait(false);
 
@@ -21,7 +24,7 @@ static async Task<int> RunAsync(string[] args)
         if (publicKeys.Length == 0) throw new ArgumentException("At least one --public argument is required.");
         foreach (var publicKey in publicKeys)
         {
-            (var keyId, var path) = SplitKeyReference(publicKey, parsed.One("key-id", "default"));
+            var (keyId, path) = SplitKeyReference(publicKey, parsed.One("key-id", "default"));
             trusted.Add(keyId, await File.ReadAllTextAsync(path).ConfigureAwait(false));
         }
 
@@ -99,96 +102,99 @@ static int PrintHelp(int exitCode)
     return exitCode;
 }
 
-internal sealed class Arguments
+namespace Pocok.Licensing.LicenseChecker
 {
-    private readonly Dictionary<string, List<string>> _values;
-
-    private Arguments(Dictionary<string, List<string>> values)
+    internal sealed class Arguments
     {
-        _values = values;
-    }
+        private readonly Dictionary<string, List<string>> _values;
 
-    public static Arguments Parse(string[] args)
-    {
-        var values = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        var flags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "help", "json" };
-        for (var index = 0; index < args.Length; index++)
+        private Arguments(Dictionary<string, List<string>> values)
         {
-            var token = args[index];
-            if (!token.StartsWith("--", StringComparison.Ordinal) || token.Length == 2)
-                throw new ArgumentException($"Unexpected argument '{token}'. Options must start with --.");
-
-            var key = token[2..];
-            string value;
-            if (index + 1 < args.Length && !args[index + 1].StartsWith("--", StringComparison.Ordinal))
-                value = args[++index];
-            else if (flags.Contains(key))
-                value = "true";
-            else
-                throw new ArgumentException($"--{key} requires a value.");
-
-            if (!values.TryGetValue(key, out List<string>? entries)) values[key] = entries = [];
-            entries.Add(value);
+            _values = values;
         }
 
-        var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        public static Arguments Parse(string[] args)
         {
-            "help", "license", "public", "key-id", "module", "machine", "psk", "psk-file",
-            "decrypt-secret", "decrypt-secret-file", "utc-now", "runtime", "json"
-        };
-        foreach (var key in values.Keys)
-            if (!allowed.Contains(key))
-                throw new ArgumentException($"Unknown option '--{key}'.");
+            var values = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            var flags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "help", "json" };
+            for (var index = 0; index < args.Length; index++)
+            {
+                var token = args[index];
+                if (!token.StartsWith("--", StringComparison.Ordinal) || token.Length == 2)
+                    throw new ArgumentException($"Unexpected argument '{token}'. Options must start with --.");
 
-        return new Arguments(values);
-    }
+                var key = token[2..];
+                string value;
+                if (index + 1 < args.Length && !args[index + 1].StartsWith("--", StringComparison.Ordinal))
+                    value = args[++index];
+                else if (flags.Contains(key))
+                    value = "true";
+                else
+                    throw new ArgumentException($"--{key} requires a value.");
 
-    public string Required(string key)
-    {
-        return Optional(key) ?? throw new ArgumentException($"--{key} is required.");
-    }
+                if (!values.TryGetValue(key, out List<string>? entries)) values[key] = entries = [];
+                entries.Add(value);
+            }
 
-    public string One(string key, string defaultValue)
-    {
-        return Optional(key) ?? defaultValue;
-    }
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "help", "license", "public", "key-id", "module", "machine", "psk", "psk-file",
+                "decrypt-secret", "decrypt-secret-file", "utc-now", "runtime", "json"
+            };
+            foreach (var key in values.Keys)
+                if (!allowed.Contains(key))
+                    throw new ArgumentException($"Unknown option '--{key}'.");
 
-    public string? Optional(string key)
-    {
-        return _values.TryGetValue(key, out List<string>? values) ? values[^1] : null;
-    }
+            return new Arguments(values);
+        }
 
-    public string[] Many(string key)
-    {
-        return _values.TryGetValue(key, out List<string>? values) ? values.ToArray() : [];
-    }
+        public string Required(string key)
+        {
+            return Optional(key) ?? throw new ArgumentException($"--{key} is required.");
+        }
 
-    public bool Flag(string key)
-    {
-        return Optional(key) is { } value && bool.TryParse(value, out var parsed) && parsed;
-    }
+        public string One(string key, string defaultValue)
+        {
+            return Optional(key) ?? defaultValue;
+        }
 
-    public DateTimeOffset? Date(string key)
-    {
-        return Optional(key) is { } value
-            ? DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
-                .ToUniversalTime()
-            : null;
-    }
+        public string? Optional(string key)
+        {
+            return _values.TryGetValue(key, out List<string>? values) ? values[^1] : null;
+        }
 
-    public TimeSpan? Duration(string key)
-    {
-        return Optional(key) is { } value
-            ? TimeSpan.Parse(value, CultureInfo.InvariantCulture)
-            : null;
-    }
+        public string[] Many(string key)
+        {
+            return _values.TryGetValue(key, out List<string>? values) ? values.ToArray() : [];
+        }
 
-    public async Task<string?> SecretAsync(string inlineKey, string fileKey)
-    {
-        var inline = Optional(inlineKey);
-        var path = Optional(fileKey);
-        if (inline is not null && path is not null)
-            throw new ArgumentException($"Use either --{inlineKey} or --{fileKey}, not both.");
-        return path is null ? inline : (await File.ReadAllTextAsync(path).ConfigureAwait(false)).Trim();
+        public bool Flag(string key)
+        {
+            return Optional(key) is { } value && bool.TryParse(value, out var parsed) && parsed;
+        }
+
+        public DateTimeOffset? Date(string key)
+        {
+            return Optional(key) is { } value
+                ? DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal)
+                    .ToUniversalTime()
+                : null;
+        }
+
+        public TimeSpan? Duration(string key)
+        {
+            return Optional(key) is { } value
+                ? TimeSpan.Parse(value, CultureInfo.InvariantCulture)
+                : null;
+        }
+
+        public async Task<string?> SecretAsync(string inlineKey, string fileKey)
+        {
+            var inline = Optional(inlineKey);
+            var path = Optional(fileKey);
+            if (inline is not null && path is not null)
+                throw new ArgumentException($"Use either --{inlineKey} or --{fileKey}, not both.");
+            return path is null ? inline : (await File.ReadAllTextAsync(path).ConfigureAwait(false)).Trim();
+        }
     }
 }

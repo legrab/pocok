@@ -1,18 +1,18 @@
-﻿namespace Pocok.Modularity
+﻿namespace Pocok.Modularity.Contracts
 {
     public interface IServiceModule
     {
-        void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services, Pocok.Modularity.ModuleContext context);
+        void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services, Pocok.Modularity.Contracts.ModuleContext context);
     }
     public sealed class ModuleContext
     {
-        public ModuleContext(Pocok.Modularity.ModuleIdentity identity, string baseDirectory, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Collections.Generic.IReadOnlyDictionary<string, string>? metadata = null) { }
+        public ModuleContext(Pocok.Modularity.Contracts.ModuleIdentity identity, string baseDirectory, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Collections.Generic.IReadOnlyDictionary<string, string>? metadata = null) { }
         public string BaseDirectory { get; }
         public Microsoft.Extensions.Configuration.IConfiguration Configuration { get; }
-        public Pocok.Modularity.ModuleIdentity Identity { get; }
+        public Pocok.Modularity.Contracts.ModuleIdentity Identity { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> Metadata { get; }
     }
-    public sealed class ModuleIdentity : System.IEquatable<Pocok.Modularity.ModuleIdentity>
+    public sealed class ModuleIdentity : System.IEquatable<Pocok.Modularity.Contracts.ModuleIdentity>
     {
         public ModuleIdentity(string id, System.Version version) { }
         public string Id { get; }

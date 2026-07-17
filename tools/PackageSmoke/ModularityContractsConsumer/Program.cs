@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Pocok.Modularity;
+using Pocok.Modularity.Contracts;
 
 var services = new ServiceCollection();
 var module = new SmokeModule();

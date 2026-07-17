@@ -4,7 +4,9 @@
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Localization;
-using Pocok.Localization;
+using Pocok.Localization.Composition;
+using Pocok.Localization.Cultures;
+using Pocok.Localization.FileResources;
 
 string directory = Path.Combine(Path.GetTempPath(), $"pocok-localization-consumer-{Guid.NewGuid():N}");
 Directory.CreateDirectory(directory);

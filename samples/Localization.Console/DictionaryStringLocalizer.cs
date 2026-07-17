@@ -4,7 +4,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Localization;
 
-namespace Pocok.Localization.Sample;
+namespace Pocok.Localization.Console;
 
 internal sealed class DictionaryStringLocalizer(params (string Name, string Value)[] entries) : IStringLocalizer
 {
@@ -20,15 +20,20 @@ internal sealed class DictionaryStringLocalizer(params (string Name, string Valu
             LocalizedString result = Find(name);
             return result.ResourceNotFound
                 ? result
-                : new LocalizedString(name, string.Format(CultureInfo.InvariantCulture, result.Value, arguments), false);
+                : new LocalizedString(name, string.Format(CultureInfo.InvariantCulture, result.Value, arguments),
+                    false);
         }
     }
 
-    public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures) =>
-        _entries.Select(entry => new LocalizedString(entry.Key, entry.Value, false));
+    public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
+    {
+        return _entries.Select(entry => new LocalizedString(entry.Key, entry.Value, false));
+    }
 
-    private LocalizedString Find(string name) =>
-        _entries.TryGetValue(name, out var value)
+    private LocalizedString Find(string name)
+    {
+        return _entries.TryGetValue(name, out var value)
             ? new LocalizedString(name, value, false)
             : new LocalizedString(name, name, true);
+    }
 }
