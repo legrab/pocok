@@ -4,6 +4,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
+using Pocok.Conversion.Strategies;
 
 namespace Pocok.Conversion.Tests;
 
@@ -46,15 +47,22 @@ public sealed class ConcurrencyAndApiTests
 
         abstractionsTypes.ShouldBe(
         [
-            "Pocok.Conversion.ConversionContext", "Pocok.Conversion.ConversionErrorCodes",
-            "Pocok.Conversion.ConversionFailure", "Pocok.Conversion.ConversionResult`1",
-            "Pocok.Conversion.ConversionStrategyContext",
-            "Pocok.Conversion.ConversionStrategyPrecedence", "Pocok.Conversion.ConversionStrategyResult",
-            "Pocok.Conversion.ConversionStrategyStatus",
-            "Pocok.Conversion.EnumPolicy", "Pocok.Conversion.IConversionStrategy", "Pocok.Conversion.IValueConverter",
+            "Pocok.Conversion.ConversionContext",
+            "Pocok.Conversion.ConversionErrorCodes",
+            "Pocok.Conversion.ConversionFailure",
+            "Pocok.Conversion.ConversionResult`1", "Pocok.Conversion.EnumPolicy",
+            "Pocok.Conversion.IValueConverter",
             "Pocok.Conversion.NullPolicy",
-            "Pocok.Conversion.NumericBooleanPolicy", "Pocok.Conversion.NumericLossPolicy",
-            "Pocok.Conversion.OverflowPolicy", "Pocok.Conversion.TemporalTextPolicy", "Pocok.Conversion.ValueConverter"
+            "Pocok.Conversion.NumericBooleanPolicy",
+            "Pocok.Conversion.NumericLossPolicy",
+            "Pocok.Conversion.OverflowPolicy",
+            "Pocok.Conversion.Strategies.ConversionStrategyContext",
+            "Pocok.Conversion.Strategies.ConversionStrategyPrecedence",
+            "Pocok.Conversion.Strategies.ConversionStrategyResult",
+            "Pocok.Conversion.Strategies.ConversionStrategyStatus",
+            "Pocok.Conversion.Strategies.IConversionStrategy",
+            "Pocok.Conversion.TemporalTextPolicy",
+            "Pocok.Conversion.ValueConverter"
         ]);
     }
 

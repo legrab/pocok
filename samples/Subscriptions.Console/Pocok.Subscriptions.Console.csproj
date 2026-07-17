@@ -9,6 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Subscriptions/Pocok.Subscriptions.csproj" />
+    <ProjectReference Include="../../src/Subscriptions/Pocok.Subscriptions.csproj"/>
   </ItemGroup>
 </Project>

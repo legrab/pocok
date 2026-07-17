@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
-namespace Pocok.Modularity;
+namespace Pocok.Modularity.Contracts;
 
 /// <summary>Identifies one discovered module independently from its implementation assembly.</summary>
 public sealed record ModuleIdentity

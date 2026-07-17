@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
+using Pocok.Licensing.Validation;
+
 namespace Pocok.Licensing;
 
 /// <summary>Represents a blocking license requirement failure.</summary>

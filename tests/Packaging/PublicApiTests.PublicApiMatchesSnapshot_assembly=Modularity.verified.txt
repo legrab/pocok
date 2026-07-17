@@ -1,33 +1,33 @@
-﻿namespace Pocok.Modularity
+﻿namespace Pocok.Modularity.Catalog
 {
     public interface IModuleCatalog
     {
-        System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDiagnostic> Diagnostics { get; }
-        System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDescriptor> Modules { get; }
+        System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDiagnostic> Diagnostics { get; }
+        System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDescriptor> Modules { get; }
     }
-    public sealed class ModuleCatalog : Pocok.Modularity.IModuleCatalog
+    public sealed class ModuleCatalog : Pocok.Modularity.Catalog.IModuleCatalog
     {
-        public ModuleCatalog(System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDescriptor> modules, System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDiagnostic>? diagnostics = null) { }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDiagnostic> Diagnostics { get; }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDescriptor> Modules { get; }
+        public ModuleCatalog(System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDescriptor> modules, System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDiagnostic>? diagnostics = null) { }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDiagnostic> Diagnostics { get; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDescriptor> Modules { get; }
     }
     public sealed class ModuleDescriptor
     {
-        public ModuleDescriptor(Pocok.Modularity.ModuleIdentity? identity, string manifestPath, string? entryAssemblyPath, bool required, Pocok.Modularity.ModuleStatus status, System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDiagnostic> diagnostics) { }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Modularity.ModuleDiagnostic> Diagnostics { get; }
+        public ModuleDescriptor(Pocok.Modularity.Contracts.ModuleIdentity? identity, string manifestPath, string? entryAssemblyPath, bool required, Pocok.Modularity.Catalog.ModuleStatus status, System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDiagnostic> diagnostics) { }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Modularity.Catalog.ModuleDiagnostic> Diagnostics { get; }
         public string? EntryAssemblyPath { get; }
-        public Pocok.Modularity.ModuleIdentity? Identity { get; }
+        public Pocok.Modularity.Contracts.ModuleIdentity? Identity { get; }
         public string ManifestPath { get; }
         public bool Required { get; }
-        public Pocok.Modularity.ModuleStatus Status { get; }
+        public Pocok.Modularity.Catalog.ModuleStatus Status { get; }
     }
-    public sealed class ModuleDiagnostic : System.IEquatable<Pocok.Modularity.ModuleDiagnostic>
+    public sealed class ModuleDiagnostic : System.IEquatable<Pocok.Modularity.Catalog.ModuleDiagnostic>
     {
-        public ModuleDiagnostic(string code, string message, Pocok.Modularity.ModuleDiagnosticSeverity severity, System.Exception? exception = null) { }
+        public ModuleDiagnostic(string code, string message, Pocok.Modularity.Catalog.ModuleDiagnosticSeverity severity, System.Exception? exception = null) { }
         public string Code { get; }
         public System.Exception? Exception { get; }
         public string Message { get; }
-        public Pocok.Modularity.ModuleDiagnosticSeverity Severity { get; }
+        public Pocok.Modularity.Catalog.ModuleDiagnosticSeverity Severity { get; }
     }
     public enum ModuleDiagnosticSeverity
     {
@@ -35,10 +35,19 @@
         Warning = 1,
         Error = 2,
     }
+    public enum ModuleStatus
+    {
+        Skipped = 0,
+        Registered = 1,
+        Failed = 2,
+    }
+}
+namespace Pocok.Modularity.Loading
+{
     public sealed class ModuleLoadException : System.Exception
     {
-        public ModuleLoadException(string message, Pocok.Modularity.ModuleCatalog catalog, System.Exception? innerException = null) { }
-        public Pocok.Modularity.ModuleCatalog Catalog { get; }
+        public ModuleLoadException(string message, Pocok.Modularity.Catalog.ModuleCatalog catalog, System.Exception? innerException = null) { }
+        public Pocok.Modularity.Catalog.ModuleCatalog Catalog { get; }
     }
     public sealed class ModuleLoadOptions
     {
@@ -49,13 +58,13 @@
         public bool SearchRecursively { get; set; }
         public System.Collections.Generic.ISet<string> SharedAssemblyNames { get; }
         public bool ThrowOnOptionalFailure { get; set; }
-        public Pocok.Modularity.ModuleLoadOptions AddDirectory(string path) { }
-        public Pocok.Modularity.ModuleLoadOptions ShareAssembly(string assemblyName) { }
-        public Pocok.Modularity.ModuleLoadOptions ShareAssemblyContaining<T>() { }
+        public Pocok.Modularity.Loading.ModuleLoadOptions AddDirectory(string path) { }
+        public Pocok.Modularity.Loading.ModuleLoadOptions ShareAssembly(string assemblyName) { }
+        public Pocok.Modularity.Loading.ModuleLoadOptions ShareAssemblyContaining<T>() { }
     }
     public static class ModuleLoader
     {
-        public static Pocok.Modularity.ModuleCatalog Load(Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration, Pocok.Modularity.ModuleLoadOptions options) { }
+        public static Pocok.Modularity.Catalog.ModuleCatalog Load(Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration, Pocok.Modularity.Loading.ModuleLoadOptions options) { }
     }
     public sealed class ModuleManifest
     {
@@ -71,14 +80,11 @@
         public System.Collections.Generic.IList<string> SupportedOperatingSystems { get; set; }
         public string Version { get; set; }
     }
+}
+namespace Pocok.Modularity
+{
     public static class ModuleServiceCollectionExtensions
     {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPocokModules(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Action<Pocok.Modularity.ModuleLoadOptions> configure) { }
-    }
-    public enum ModuleStatus
-    {
-        Skipped = 0,
-        Registered = 1,
-        Failed = 2,
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPocokModules(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Action<Pocok.Modularity.Loading.ModuleLoadOptions> configure) { }
     }
 }

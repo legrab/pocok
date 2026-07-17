@@ -4,8 +4,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Pocok.AppDefaults;
-using Pocok.Licensing;
+using Pocok.Licensing.Runtime;
 
 namespace Pocok.AppDefaults.Licensing;
 

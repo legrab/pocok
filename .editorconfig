@@ -32,10 +32,10 @@ dotnet_diagnostic.CA1032.severity = none
 [src/Readiness/ReadinessStoppedException.cs]
 dotnet_diagnostic.CA1032.severity = none
 
-[src/Modularity/ModuleLoadException.cs]
+[src/Modularity/Loading/ModuleLoadException.cs]
 dotnet_diagnostic.CA1032.severity = none
 
-[src/Modularity/ModuleManifest.cs]
+[src/Modularity/Loading/ModuleManifest.cs]
 dotnet_diagnostic.CA2227.severity = none
 
 [samples/**/*.cs]
@@ -48,11 +48,11 @@ dotnet_diagnostic.CA1861.severity = none
 [src/Licensing/LicenseException.cs]
 dotnet_diagnostic.CA1032.severity = none
 
-[src/Licensing/LicenseOptions.cs]
+[src/Licensing/Runtime/LicenseOptions.cs]
 dotnet_diagnostic.CA1819.severity = none
 dotnet_diagnostic.CA2227.severity = none
 
 # The semaphore is intentionally kept alive so reload callers queued just before disposal are not raced by Dispose.
-[src/Localization/FileStringLocalizer.cs]
+[src/Localization/FileResources/FileStringLocalizer.cs]
 dotnet_diagnostic.CA2213.severity = none
 

@@ -4,7 +4,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pocok.AppDefaults.Licensing;
-using Pocok.Licensing;
+using Pocok.Licensing.Documents;
+using Pocok.Licensing.Runtime;
 
 (string privateKey, string publicKey) = LicenseCryptography.CreateSigningKeyPair();
 string license = LicenseCryptography.Sign(new LicenseDocument

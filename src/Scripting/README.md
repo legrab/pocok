@@ -1,6 +1,7 @@
 # Pocok.Scripting
 
-Compatibility tier: experimental alpha. This package is an extraction of the reusable scripting boundary from the original application and is not release-eligible yet.
+Compatibility tier: experimental alpha. This package is an extraction of the reusable scripting boundary from the
+original application and is not release-eligible yet.
 
 The package provides:
 
@@ -13,9 +14,12 @@ The package provides:
 - an in-memory source for tests and small tools;
 - typed result conversion through Pocok.Conversion.
 
-The original application's persistence, domain objects, notifications, UI editor bindings, and product-specific script APIs are deliberately excluded. A host must expose each capability explicitly and remains responsible for authenticating and authorizing that capability.
+The original application's persistence, domain objects, notifications, UI editor bindings, and product-specific script
+APIs are deliberately excluded. A host must expose each capability explicitly and remains responsible for authenticating
+and authorizing that capability.
 
-ScriptRunner is instance-based and safe for concurrent use because each request creates a fresh Jint engine. The runner does not retain script state. Cancellation is propagated; expected script failures are returned as ScriptResult<T>.
+ScriptRunner is instance-based and safe for concurrent use because each request creates a fresh Jint engine. The runner
+does not retain script state. Cancellation is propagated; expected script failures are returned as ScriptResult<T>.
 
 Example:
 

@@ -2,9 +2,10 @@
 // Copyright 2026 Pocok contributors
 
 using Microsoft.Extensions.DependencyInjection;
-using Pocok.Modularity;
+using Pocok.ModularCommunicator.Contracts;
+using Pocok.Modularity.Contracts;
 
-namespace Pocok.Samples.ModularCommunicator.EchoPlugin;
+namespace Pocok.ModularCommunicator.EchoPlugin;
 
 public sealed class EchoCommunicatorModule : IServiceModule
 {

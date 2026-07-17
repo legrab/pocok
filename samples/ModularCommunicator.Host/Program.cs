@@ -3,8 +3,9 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pocok.ModularCommunicator.Contracts;
 using Pocok.Modularity;
-using Pocok.Samples.ModularCommunicator;
+using Pocok.Modularity.Catalog;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 var pluginDirectory = args.Length > 0

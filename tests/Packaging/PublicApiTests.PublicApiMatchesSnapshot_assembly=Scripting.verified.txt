@@ -1,36 +1,14 @@
-namespace Pocok.Scripting
+namespace Pocok.Scripting.Execution
 {
-    public interface IScriptModuleSource
-    {
-        System.Threading.Tasks.ValueTask<Pocok.Scripting.ScriptModule?> FindAsync(Pocok.Scripting.ScriptReference reference, System.Threading.CancellationToken cancellationToken = default);
-    }
-    public sealed class ImportedScriptContent : System.IEquatable<Pocok.Scripting.ImportedScriptContent>
-    {
-        public ImportedScriptContent(Pocok.Scripting.ScriptReference Reference, string Content) { }
-        public string Content { get; init; }
-        public Pocok.Scripting.ScriptReference Reference { get; init; }
-    }
-    public sealed class InMemoryScriptModuleSource : Pocok.Scripting.IScriptModuleSource
-    {
-        public InMemoryScriptModuleSource(System.Collections.Generic.IEnumerable<Pocok.Scripting.ScriptModule> modules) { }
-        public System.Threading.Tasks.ValueTask<Pocok.Scripting.ScriptModule?> FindAsync(Pocok.Scripting.ScriptReference reference, System.Threading.CancellationToken cancellationToken = default) { }
-    }
-    public sealed class InjectedScript : System.IEquatable<Pocok.Scripting.InjectedScript>
-    {
-        public InjectedScript(string Content, System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptReference> Imports, System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptImportDiagnostic> Diagnostics) { }
-        public string Content { get; init; }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptImportDiagnostic> Diagnostics { get; init; }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptReference> Imports { get; init; }
-    }
-    public sealed class ScriptBinding : System.IEquatable<Pocok.Scripting.ScriptBinding>
+    public sealed class ScriptBinding : System.IEquatable<Pocok.Scripting.Execution.ScriptBinding>
     {
         public System.Delegate? Function { get; }
         public string Name { get; }
         public object? Value { get; }
-        public static Pocok.Scripting.ScriptBinding ForFunction(string name, System.Delegate function) { }
-        public static Pocok.Scripting.ScriptBinding ForValue(string name, object? value) { }
+        public static Pocok.Scripting.Execution.ScriptBinding ForFunction(string name, System.Delegate function) { }
+        public static Pocok.Scripting.Execution.ScriptBinding ForValue(string name, object? value) { }
     }
-    public sealed class ScriptExecutionOptions : System.IEquatable<Pocok.Scripting.ScriptExecutionOptions>
+    public sealed class ScriptExecutionOptions : System.IEquatable<Pocok.Scripting.Execution.ScriptExecutionOptions>
     {
         public ScriptExecutionOptions() { }
         public long MaxMemoryBytes { get; init; }
@@ -39,15 +17,15 @@ namespace Pocok.Scripting
         public int MaxStatements { get; init; }
         public System.TimeSpan Timeout { get; init; }
     }
-    public sealed class ScriptExecutionRequest : System.IEquatable<Pocok.Scripting.ScriptExecutionRequest>
+    public sealed class ScriptExecutionRequest : System.IEquatable<Pocok.Scripting.Execution.ScriptExecutionRequest>
     {
         public ScriptExecutionRequest(string identifier, string script) { }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptBinding> Bindings { get; init; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Execution.ScriptBinding> Bindings { get; init; }
         public bool ExpectResult { get; init; }
         public string Identifier { get; }
         public string Script { get; }
     }
-    public sealed class ScriptFailure : System.IEquatable<Pocok.Scripting.ScriptFailure>
+    public sealed class ScriptFailure : System.IEquatable<Pocok.Scripting.Execution.ScriptFailure>
     {
         public ScriptFailure(string Code, string Message, int? Line = default, int? Column = default, System.Exception? Exception = null) { }
         public string Code { get; init; }
@@ -56,62 +34,90 @@ namespace Pocok.Scripting
         public int? Line { get; init; }
         public string Message { get; init; }
     }
-    public sealed class ScriptImportDiagnostic : System.IEquatable<Pocok.Scripting.ScriptImportDiagnostic>
-    {
-        public ScriptImportDiagnostic(Pocok.Scripting.ScriptReference Reference, string Code, string Message) { }
-        public string Code { get; init; }
-        public string Message { get; init; }
-        public Pocok.Scripting.ScriptReference Reference { get; init; }
-    }
-    public sealed class ScriptImportInjector
-    {
-        public ScriptImportInjector(Pocok.Scripting.ScriptModuleResolver resolver) { }
-        public System.Threading.Tasks.ValueTask<Pocok.Scripting.InjectedScript> InjectAsync(string script, System.Threading.CancellationToken cancellationToken = default) { }
-    }
-    public static class ScriptImportParser
-    {
-        public const string EditorExportCompletionPrefixPattern = "//\\s*#import\\s+\\w*$";
-        public const string EditorModuleCompletionPrefixPattern = "//\\s*#import\\s+(?<Name>[A-Za-z0-9_]+)\\s+from\\s+\\w*$";
-        public static System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptReference> FindImports(string? content) { }
-    }
-    public sealed class ScriptImportResolution : System.IEquatable<Pocok.Scripting.ScriptImportResolution>
-    {
-        public ScriptImportResolution(System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ImportedScriptContent> Scripts, System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptImportDiagnostic> Diagnostics) { }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ScriptImportDiagnostic> Diagnostics { get; init; }
-        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.ImportedScriptContent> Scripts { get; init; }
-    }
-    public sealed class ScriptModule : System.IEquatable<Pocok.Scripting.ScriptModule>
-    {
-        public ScriptModule(string name, string module, string content) { }
-        public string Content { get; }
-        public Pocok.Scripting.ScriptReference Reference { get; }
-    }
-    public sealed class ScriptModuleResolver
-    {
-        public ScriptModuleResolver(Pocok.Scripting.IScriptModuleSource source) { }
-        public System.Threading.Tasks.ValueTask<Pocok.Scripting.ScriptImportResolution> ResolveAsync(Pocok.Scripting.ScriptReference root, System.Threading.CancellationToken cancellationToken = default) { }
-    }
-    public sealed class ScriptReference : System.IEquatable<Pocok.Scripting.ScriptReference>
-    {
-        public ScriptReference(string name, string module) { }
-        public string Module { get; }
-        public string Name { get; }
-    }
     public static class ScriptResult
     {
-        public static Pocok.Scripting.ScriptResult<T> Failed<T>(Pocok.Scripting.ScriptFailure failure) { }
-        public static Pocok.Scripting.ScriptResult<T> Success<T>(T? value = default) { }
+        public static Pocok.Scripting.Execution.ScriptResult<T> Failed<T>(Pocok.Scripting.Execution.ScriptFailure failure) { }
+        public static Pocok.Scripting.Execution.ScriptResult<T> Success<T>(T? value = default) { }
     }
     public sealed class ScriptResult<T>
     {
-        public Pocok.Scripting.ScriptFailure? Failure { get; }
+        public Pocok.Scripting.Execution.ScriptFailure? Failure { get; }
         public bool IsSuccess { get; }
         public T Value { get; }
     }
     public sealed class ScriptRunner
     {
         public ScriptRunner(Pocok.Conversion.IValueConverter? converter = null) { }
-        public System.Threading.Tasks.Task<Pocok.Scripting.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.ScriptExecutionRequest request, Pocok.Scripting.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
-        public System.Threading.Tasks.Task<Pocok.Scripting.ScriptResult<T>> ExecuteAsync<T>(Pocok.Scripting.ScriptExecutionRequest request, Pocok.Scripting.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task<Pocok.Scripting.Execution.ScriptResult<T>> ExecuteAsync<T>(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+}
+namespace Pocok.Scripting.Import
+{
+    public sealed class ImportedScriptContent : System.IEquatable<Pocok.Scripting.Import.ImportedScriptContent>
+    {
+        public ImportedScriptContent(Pocok.Scripting.Import.ScriptReference Reference, string Content) { }
+        public string Content { get; init; }
+        public Pocok.Scripting.Import.ScriptReference Reference { get; init; }
+    }
+    public sealed class InjectedScript : System.IEquatable<Pocok.Scripting.Import.InjectedScript>
+    {
+        public InjectedScript(string Content, System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptReference> Imports, System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptImportDiagnostic> Diagnostics) { }
+        public string Content { get; init; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptImportDiagnostic> Diagnostics { get; init; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptReference> Imports { get; init; }
+    }
+    public sealed class ScriptImportDiagnostic : System.IEquatable<Pocok.Scripting.Import.ScriptImportDiagnostic>
+    {
+        public ScriptImportDiagnostic(Pocok.Scripting.Import.ScriptReference Reference, string Code, string Message) { }
+        public string Code { get; init; }
+        public string Message { get; init; }
+        public Pocok.Scripting.Import.ScriptReference Reference { get; init; }
+    }
+    public sealed class ScriptImportInjector
+    {
+        public ScriptImportInjector(Pocok.Scripting.Modules.ScriptModuleResolver resolver) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Import.InjectedScript> InjectAsync(string script, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public static class ScriptImportParser
+    {
+        public const string EditorExportCompletionPrefixPattern = "//\\s*#import\\s+\\w*$";
+        public const string EditorModuleCompletionPrefixPattern = "//\\s*#import\\s+(?<Name>[A-Za-z0-9_]+)\\s+from\\s+\\w*$";
+        public static System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptReference> FindImports(string? content) { }
+    }
+    public sealed class ScriptImportResolution : System.IEquatable<Pocok.Scripting.Import.ScriptImportResolution>
+    {
+        public ScriptImportResolution(System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ImportedScriptContent> Scripts, System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptImportDiagnostic> Diagnostics) { }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptImportDiagnostic> Diagnostics { get; init; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ImportedScriptContent> Scripts { get; init; }
+    }
+    public sealed class ScriptReference : System.IEquatable<Pocok.Scripting.Import.ScriptReference>
+    {
+        public ScriptReference(string name, string module) { }
+        public string Module { get; }
+        public string Name { get; }
+    }
+}
+namespace Pocok.Scripting.Modules
+{
+    public interface IScriptModuleSource
+    {
+        System.Threading.Tasks.ValueTask<Pocok.Scripting.Modules.ScriptModule?> FindAsync(Pocok.Scripting.Import.ScriptReference reference, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public sealed class InMemoryScriptModuleSource : Pocok.Scripting.Modules.IScriptModuleSource
+    {
+        public InMemoryScriptModuleSource(System.Collections.Generic.IEnumerable<Pocok.Scripting.Modules.ScriptModule> modules) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Modules.ScriptModule?> FindAsync(Pocok.Scripting.Import.ScriptReference reference, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class ScriptModule : System.IEquatable<Pocok.Scripting.Modules.ScriptModule>
+    {
+        public ScriptModule(string name, string module, string content) { }
+        public string Content { get; }
+        public Pocok.Scripting.Import.ScriptReference Reference { get; }
+    }
+    public sealed class ScriptModuleResolver
+    {
+        public ScriptModuleResolver(Pocok.Scripting.Modules.IScriptModuleSource source) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Import.ScriptImportResolution> ResolveAsync(Pocok.Scripting.Import.ScriptReference root, System.Threading.CancellationToken cancellationToken = default) { }
     }
 }

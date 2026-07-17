@@ -1,6 +1,7 @@
 # Pocok.BackgroundWork
 
-Compatibility tier: experimental alpha. This package is packable and tested but is not release-eligible until its Windows and Ubuntu acceptance gate passes.
+Compatibility tier: experimental alpha. This package is packable and tested but is not release-eligible until its
+Windows and Ubuntu acceptance gate passes.
 
 `Pocok.BackgroundWork` provides small lifecycle primitives for event-driven .NET services:
 
@@ -9,11 +10,14 @@ Compatibility tier: experimental alpha. This package is packable and tested but 
 - quiet-period debounce without overlapping operations;
 - awaited, non-overlapping repeated work.
 
-It is not a retry library, durable scheduler, distributed queue, cron implementation, or hosted-service framework. Polly may be used inside an operation when resilience policies are required.
+It is not a retry library, durable scheduler, distributed queue, cron implementation, or hosted-service framework. Polly
+may be used inside an operation when resilience policies are required.
 
 ## Guarded task observation
 
-A source task may be detached from the caller only when a general fault handler is supplied. Filtered handlers run in registration order before the fallback. The returned `TaskObservation` keeps the outcome observable during tests and controlled shutdown.
+A source task may be detached from the caller only when a general fault handler is supplied. Filtered handlers run in
+registration order before the fallback. The returned `TaskObservation` keeps the outcome observable during tests and
+controlled shutdown.
 
 ```csharp
 TaskObservation observation = ReadDeviceAsync(cancellationToken).Observe(
@@ -26,9 +30,11 @@ TaskObservation observation = ReadDeviceAsync(cancellationToken).Observe(
 TaskObservationResult result = await observation.Completion;
 ```
 
-`Completion` never faults. Source faults and cancellations are exposed through `SourceException`. Predicate and callback failures, including observation-token cancellation, are exposed through `ObserverException`.
+`Completion` never faults. Source faults and cancellations are exposed through `SourceException`. Predicate and callback
+failures, including observation-token cancellation, are exposed through `ObserverException`.
 
-The observation token controls callback dispatch and callback waiting. It cannot cancel a source task that was not created with that token.
+The observation token controls callback dispatch and callback waiting. It cannot cancel a source task that was not
+created with that token.
 
 ## Coalescing
 
@@ -45,7 +51,8 @@ await using var refresh = new CoalescingTaskRunner(
 await refresh.RequestAsync(cancellationToken);
 ```
 
-All requests in one drain cycle share its completion task. Caller cancellation cancels only that caller's wait. `StopAsync` cancels shared work and permanently closes the runner.
+All requests in one drain cycle share its completion task. Caller cancellation cancels only that caller's wait.
+`StopAsync` cancels shared work and permanently closes the runner.
 
 ## Debounce
 
@@ -62,11 +69,14 @@ await using var reload = new DebouncedTaskRunner(
 _ = reload.RequestAsync().Observe(ReportReloadFailure);
 ```
 
-Requests received while the operation is running schedule one later execution. The quiet period is measured from the latest request, so the rerun starts immediately when that period has already elapsed by the time the current operation completes.
+Requests received while the operation is running schedule one later execution. The quiet period is measured from the
+latest request, so the rerun starts immediately when that period has already elapsed by the time the current operation
+completes.
 
 ## Repetition
 
-`TaskRepeater.RepeatAsync` returns the complete repeat lifecycle and never overlaps iterations. The interval is measured from one operation completion to the next operation start.
+`TaskRepeater.RepeatAsync` returns the complete repeat lifecycle and never overlaps iterations. The interval is measured
+from one operation completion to the next operation start.
 
 ```csharp
 await TaskRepeater.RepeatAsync(
@@ -83,6 +93,9 @@ All timing primitives accept `TimeProvider`, allowing deterministic tests withou
 
 ## Failure policy
 
-Coalescing, debounce, and repetition stop on the first failure by default. `BackgroundWorkFailurePolicy.Continue` requires an explicit `OnFailure` callback. If that callback fails, the operation and callback failures are combined in an `AggregateException` and execution stops.
+Coalescing, debounce, and repetition stop on the first failure by default. `BackgroundWorkFailurePolicy.Continue`
+requires an explicit `OnFailure` callback. If that callback fails, the operation and callback failures are combined in
+an `AggregateException` and execution stops.
 
-All runners are safe for concurrent requests. Operations are awaited and never overlap. Dispose runners asynchronously to cancel pending work and release lifecycle resources.
+All runners are safe for concurrent requests. Operations are awaited and never overlap. Dispose runners asynchronously
+to cancel pending work and release lifecycle resources.

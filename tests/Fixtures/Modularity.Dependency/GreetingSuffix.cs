@@ -6,5 +6,9 @@ namespace Pocok.Modularity.FixtureDependency;
 public sealed class GreetingSuffix
 {
     public static string Value => "!";
-    public override string ToString() => Value;
+
+    public override string ToString()
+    {
+        return Value;
+    }
 }

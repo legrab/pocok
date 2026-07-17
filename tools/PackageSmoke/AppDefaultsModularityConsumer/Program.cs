@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Pocok.AppDefaults.Modularity;
-using Pocok.Modularity;
+using Pocok.Modularity.Catalog;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.AddPocokModularityDefaults(defaults => defaults.PluginDirectory = "missing-plugins");

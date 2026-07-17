@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
-using Pocok.Scripting;
+using Pocok.Scripting.Execution;
+using Pocok.Scripting.Import;
+using Pocok.Scripting.Modules;
 
 var modules = new InMemoryScriptModuleSource([
     new ScriptModule("Arithmetic", "Samples", "function add(left, right) { return left + right; }")

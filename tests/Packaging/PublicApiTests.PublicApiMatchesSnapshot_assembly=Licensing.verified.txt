@@ -1,27 +1,5 @@
-﻿namespace Pocok.Licensing
+﻿namespace Pocok.Licensing.Documents
 {
-    public sealed class DefaultMachineFingerprintProvider : Pocok.Licensing.IMachineFingerprintProvider
-    {
-        public DefaultMachineFingerprintProvider() { }
-        public string GetFingerprint() { }
-    }
-    public interface ILicenseClock
-    {
-        System.TimeSpan ProcessRuntime { get; }
-        System.DateTimeOffset UtcNow { get; }
-    }
-    public interface ILicenseService
-    {
-        Pocok.Licensing.LicenseValidationResult Current { get; }
-        void Demand(string moduleIdentifier);
-        bool HasModule(string moduleIdentifier);
-        System.Threading.Tasks.ValueTask<Pocok.Licensing.LicenseValidationResult> RefreshAsync(string? requiredModule = null, System.Threading.CancellationToken cancellationToken = default);
-        Pocok.Licensing.LicenseValidationResult Validate(string? requiredModule = null);
-    }
-    public interface IMachineFingerprintProvider
-    {
-        string GetFingerprint();
-    }
     public static class LicenseCryptography
     {
         public static string CreatePresharedKeyHash(string presharedKey, string licenseId) { }
@@ -31,9 +9,9 @@
                 "PublicKeyPem"})]
         public static System.ValueTuple<string, string> CreateSigningKeyPair() { }
         public static string Encrypt(string signedLicense, string secret) { }
-        public static string Sign(Pocok.Licensing.LicenseDocument license, string keyId, string privateKeyPem) { }
+        public static string Sign(Pocok.Licensing.Documents.LicenseDocument license, string keyId, string privateKeyPem) { }
     }
-    public sealed class LicenseDocument : System.IEquatable<Pocok.Licensing.LicenseDocument>
+    public sealed class LicenseDocument : System.IEquatable<Pocok.Licensing.Documents.LicenseDocument>
     {
         public LicenseDocument() { }
         public bool AllModules { get; init; }
@@ -48,19 +26,47 @@
         public System.DateTimeOffset? ValidFromUtc { get; init; }
         public System.DateTimeOffset? ValidUntilUtc { get; init; }
     }
+    public static class LicenseReader
+    {
+        public static Pocok.Licensing.Validation.LicenseValidationResult ReadAndVerify(string licenseText, System.Collections.Generic.IReadOnlyDictionary<string, string> trustedPublicKeys, string? decryptionSecret = null) { }
+    }
+}
+namespace Pocok.Licensing
+{
     public sealed class LicenseException : System.InvalidOperationException
     {
-        public LicenseException(Pocok.Licensing.LicenseValidationResult result) { }
-        public Pocok.Licensing.LicenseValidationResult Result { get; }
+        public LicenseException(Pocok.Licensing.Validation.LicenseValidationResult result) { }
+        public Pocok.Licensing.Validation.LicenseValidationResult Result { get; }
+    }
+}
+namespace Pocok.Licensing.Runtime
+{
+    public sealed class DefaultMachineFingerprintProvider : Pocok.Licensing.Runtime.IMachineFingerprintProvider
+    {
+        public DefaultMachineFingerprintProvider() { }
+        public string GetFingerprint() { }
+    }
+    public interface ILicenseClock
+    {
+        System.TimeSpan ProcessRuntime { get; }
+        System.DateTimeOffset UtcNow { get; }
+    }
+    public interface ILicenseService
+    {
+        Pocok.Licensing.Validation.LicenseValidationResult Current { get; }
+        void Demand(string moduleIdentifier);
+        bool HasModule(string moduleIdentifier);
+        System.Threading.Tasks.ValueTask<Pocok.Licensing.Validation.LicenseValidationResult> RefreshAsync(string? requiredModule = null, System.Threading.CancellationToken cancellationToken = default);
+        Pocok.Licensing.Validation.LicenseValidationResult Validate(string? requiredModule = null);
+    }
+    public interface IMachineFingerprintProvider
+    {
+        string GetFingerprint();
     }
     public enum LicenseFailureBehavior
     {
         Warn = 0,
         Block = 1,
-    }
-    public static class LicenseGuard
-    {
-        public static void DemandFor(this Pocok.Licensing.ILicenseService licenses, System.Reflection.MemberInfo member) { }
     }
     public sealed class LicenseOptions
     {
@@ -68,7 +74,7 @@
         public LicenseOptions() { }
         public int BlockingExitCode { get; set; }
         public string? DecryptionSecret { get; set; }
-        public Pocok.Licensing.LicenseFailureBehavior FailureBehavior { get; set; }
+        public Pocok.Licensing.Runtime.LicenseFailureBehavior FailureBehavior { get; set; }
         public string LicensePath { get; set; }
         public string? LicenseText { get; set; }
         public string? PresharedKey { get; set; }
@@ -77,9 +83,23 @@
         public System.Collections.Generic.Dictionary<string, string> TrustedPublicKeyFiles { get; set; }
         public System.Collections.Generic.Dictionary<string, string> TrustedPublicKeys { get; set; }
     }
-    public static class LicenseReader
+    public static class ServiceCollectionExtensions
     {
-        public static Pocok.Licensing.LicenseValidationResult ReadAndVerify(string licenseText, System.Collections.Generic.IReadOnlyDictionary<string, string> trustedPublicKeys, string? decryptionSecret = null) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPocokLicensing(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Pocok.Licensing.Runtime.LicenseOptions options) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPocokLicensing(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Pocok.Licensing.Runtime.LicenseOptions> configure) { }
+    }
+    public sealed class SystemLicenseClock : Pocok.Licensing.Runtime.ILicenseClock
+    {
+        public SystemLicenseClock(System.TimeProvider timeProvider) { }
+        public System.TimeSpan ProcessRuntime { get; }
+        public System.DateTimeOffset UtcNow { get; }
+    }
+}
+namespace Pocok.Licensing.Validation
+{
+    public static class LicenseGuard
+    {
+        public static void DemandFor(this Pocok.Licensing.Runtime.ILicenseService licenses, System.Reflection.MemberInfo member) { }
     }
     public enum LicenseValidationCode
     {
@@ -98,7 +118,7 @@
         PresharedKeyMismatch = 12,
         ModuleMissing = 13,
     }
-    public sealed class LicenseValidationContext : System.IEquatable<Pocok.Licensing.LicenseValidationContext>
+    public sealed class LicenseValidationContext : System.IEquatable<Pocok.Licensing.Validation.LicenseValidationContext>
     {
         public LicenseValidationContext() { }
         public string? MachineFingerprint { get; init; }
@@ -107,34 +127,23 @@
         public string? RequiredModule { get; init; }
         public System.DateTimeOffset UtcNow { get; init; }
     }
-    public sealed class LicenseValidationResult : System.IEquatable<Pocok.Licensing.LicenseValidationResult>
+    public sealed class LicenseValidationResult : System.IEquatable<Pocok.Licensing.Validation.LicenseValidationResult>
     {
-        public LicenseValidationResult(bool IsValid, Pocok.Licensing.LicenseValidationCode Code, string Message, Pocok.Licensing.LicenseDocument? License = null, string? Module = null) { }
-        public Pocok.Licensing.LicenseValidationCode Code { get; init; }
+        public LicenseValidationResult(bool IsValid, Pocok.Licensing.Validation.LicenseValidationCode Code, string Message, Pocok.Licensing.Documents.LicenseDocument? License = null, string? Module = null) { }
+        public Pocok.Licensing.Validation.LicenseValidationCode Code { get; init; }
         public bool IsValid { get; init; }
-        public Pocok.Licensing.LicenseDocument? License { get; init; }
+        public Pocok.Licensing.Documents.LicenseDocument? License { get; init; }
         public string Message { get; init; }
         public string? Module { get; init; }
     }
     public static class LicenseValidator
     {
-        public static Pocok.Licensing.LicenseValidationResult Validate(Pocok.Licensing.LicenseDocument license, Pocok.Licensing.LicenseValidationContext context) { }
+        public static Pocok.Licensing.Validation.LicenseValidationResult Validate(Pocok.Licensing.Documents.LicenseDocument license, Pocok.Licensing.Validation.LicenseValidationContext context) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple=true)]
     public sealed class RequiresLicenseAttribute : System.Attribute
     {
         public RequiresLicenseAttribute(string module) { }
         public string Module { get; }
-    }
-    public static class ServiceCollectionExtensions
-    {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPocokLicensing(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Pocok.Licensing.LicenseOptions options) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPocokLicensing(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Pocok.Licensing.LicenseOptions> configure) { }
-    }
-    public sealed class SystemLicenseClock : Pocok.Licensing.ILicenseClock
-    {
-        public SystemLicenseClock(System.TimeProvider timeProvider) { }
-        public System.TimeSpan ProcessRuntime { get; }
-        public System.DateTimeOffset UtcNow { get; }
     }
 }

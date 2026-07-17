@@ -44,12 +44,14 @@ converter internals.
 
 ## Trimming and NativeAOT
 
-The general conversion APIs use runtime type inspection and reflective collection construction. They are therefore marked
+The general conversion APIs use runtime type inspection and reflective collection construction. They are therefore
+marked
 with `RequiresUnreferencedCode`, and `Pocok.Conversion` does not claim general trimming or NativeAOT compatibility.
 Consumers publishing trimmed applications receive one explicit warning at the conversion call site rather than linker
 warnings leaking from internal implementation details.
 
-The `Conversion.Trimmed` fixture deliberately suppresses that warning for one known array-conversion path and then executes
+The `Conversion.Trimmed` fixture deliberately suppresses that warning for one known array-conversion path and then
+executes
 the published output. It is a narrow regression smoke test, not a guarantee for arbitrary runtime-selected types,
 dictionaries, custom collections, or custom strategies. Do not suppress the warning in production without testing the
 complete published application graph.

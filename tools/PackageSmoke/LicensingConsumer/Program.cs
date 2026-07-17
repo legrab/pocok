@@ -2,7 +2,8 @@
 // Copyright 2026 Pocok contributors
 
 using Microsoft.Extensions.DependencyInjection;
-using Pocok.Licensing;
+using Pocok.Licensing.Documents;
+using Pocok.Licensing.Runtime;
 
 (string privateKey, string publicKey) = LicenseCryptography.CreateSigningKeyPair();
 string license = LicenseCryptography.Sign(new LicenseDocument

@@ -11,6 +11,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Conversion/Pocok.Conversion.csproj" />
+    <ProjectReference Include="../Conversion/Pocok.Conversion.csproj"/>
   </ItemGroup>
 </Project>

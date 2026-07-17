@@ -5,6 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/BackgroundWork/Pocok.BackgroundWork.csproj" />
+    <ProjectReference Include="../../src/BackgroundWork/Pocok.BackgroundWork.csproj"/>
   </ItemGroup>
 </Project>

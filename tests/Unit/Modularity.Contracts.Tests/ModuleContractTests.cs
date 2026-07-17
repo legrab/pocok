@@ -3,7 +3,7 @@
 
 using Microsoft.Extensions.Configuration;
 
-namespace Pocok.Modularity.Tests;
+namespace Pocok.Modularity.Contracts.Tests;
 
 public sealed class ModuleContractTests
 {
