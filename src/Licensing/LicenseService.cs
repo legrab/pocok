@@ -163,7 +163,7 @@ internal sealed class LicenseService : ILicenseService, IDisposable
             }
 
             var trustedKeys = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (var (keyId, path) in _options.TrustedPublicKeyFiles.OrderBy(pair => pair.Key,
+            foreach ((var keyId, var path) in _options.TrustedPublicKeyFiles.OrderBy(pair => pair.Key,
                          StringComparer.Ordinal))
             {
                 if (!File.Exists(path))
@@ -173,7 +173,7 @@ internal sealed class LicenseService : ILicenseService, IDisposable
                 trustedKeys[keyId] = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
             }
 
-            foreach (var (keyId, publicKey) in _options.TrustedPublicKeys)
+            foreach ((var keyId, var publicKey) in _options.TrustedPublicKeys)
                 trustedKeys[keyId] = publicKey;
 
             return LicenseReader.ReadAndVerify(text, trustedKeys, _options.DecryptionSecret);

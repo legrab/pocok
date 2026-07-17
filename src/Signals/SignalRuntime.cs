@@ -143,7 +143,7 @@ public sealed class SignalRuntime : IAsyncDisposable
             {
                 _disposed = 1;
                 creations = _entries.Values.ToArray();
-                foreach (var creation in creations)
+                foreach (EntryCreation creation in creations)
                 {
                     creation.Retire();
                 }
@@ -162,11 +162,11 @@ public sealed class SignalRuntime : IAsyncDisposable
         {
             await _lifetime.CancelAsync().ConfigureAwait(false);
 
-            foreach (var creation in creations)
+            foreach (EntryCreation creation in creations)
             {
                 try
                 {
-                    var created = await creation.Task.Value.ConfigureAwait(false);
+                    SignalResult<SharedSignalEntry> created = await creation.Task.Value.ConfigureAwait(false);
                     if (created.IsSuccess)
                     {
                         await created.Value!.CloseAsync().ConfigureAwait(false);
@@ -215,7 +215,7 @@ public sealed class SignalRuntime : IAsyncDisposable
             return SignalResult.Failed<SharedSignalEntry>(resolved.Failure!);
         }
 
-        var source = resolved.Value!;
+        ISignalSource? source = resolved.Value!;
         if (source is null)
         {
             return SignalResult.Failed<SharedSignalEntry>(new SignalFailure(
@@ -253,7 +253,7 @@ public sealed class SignalRuntime : IAsyncDisposable
     {
         try
         {
-            var created = await creation.Task.Value.ConfigureAwait(false);
+            SignalResult<SharedSignalEntry> created = await creation.Task.Value.ConfigureAwait(false);
             if (created.IsSuccess)
             {
                 await created.Value!.CloseIfUnusedAsync().ConfigureAwait(false);
@@ -273,7 +273,7 @@ public sealed class SignalRuntime : IAsyncDisposable
 
     private void RemoveEntry(SignalAddress address, SharedSignalEntry entry)
     {
-        if (_entries.TryGetValue(address, out var creation) &&
+        if (_entries.TryGetValue(address, out EntryCreation? creation) &&
             creation.Task.IsValueCreated &&
             creation.Task.Value.IsCompletedSuccessfully &&
             creation.Task.Value.Result.IsSuccess &&

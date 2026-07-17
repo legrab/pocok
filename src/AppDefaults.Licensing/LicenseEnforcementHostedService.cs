@@ -100,7 +100,7 @@ internal sealed class LicenseEnforcementHostedService : BackgroundService
         LicenseValidationResult result = await _licenses.RefreshAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         if (!result.IsValid) return result;
 
-        foreach (string module in _settings.RequiredModules)
+        foreach (var module in _settings.RequiredModules)
         {
             result = _licenses.Validate(module);
             if (!result.IsValid) return result;

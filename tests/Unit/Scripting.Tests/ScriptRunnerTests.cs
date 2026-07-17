@@ -75,7 +75,7 @@ public sealed class ScriptRunnerTests
     public async Task RunnerPropagatesCancellation()
     {
         using CancellationTokenSource cancellation = new();
-        cancellation.Cancel();
+        await cancellation.CancelAsync();
 
         await Should.ThrowAsync<OperationCanceledException>(() =>
             new ScriptRunner().ExecuteAsync(new ScriptExecutionRequest("cancelled", "1;"),

@@ -74,8 +74,8 @@ public sealed class ModuleLoaderDeploymentContractTests
 
         public static Fixture Create()
         {
-            string source = Path.Combine(TestContext.CurrentContext.TestDirectory, "plugin-fixture");
-            string root = Path.Combine(Path.GetTempPath(), $"pocok-deployment-{Guid.NewGuid():N}");
+            var source = Path.Combine(TestContext.CurrentContext.TestDirectory, "plugin-fixture");
+            var root = Path.Combine(Path.GetTempPath(), $"pocok-deployment-{Guid.NewGuid():N}");
             CopyDirectory(source, root);
             return new Fixture(root);
         }
@@ -88,9 +88,9 @@ public sealed class ModuleLoaderDeploymentContractTests
         private static void CopyDirectory(string source, string destination)
         {
             Directory.CreateDirectory(destination);
-            foreach (string file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories))
+            foreach (var file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories))
             {
-                string target = Path.Combine(destination, Path.GetRelativePath(source, file));
+                var target = Path.Combine(destination, Path.GetRelativePath(source, file));
                 Directory.CreateDirectory(Path.GetDirectoryName(target)!);
                 File.Copy(file, target, true);
             }

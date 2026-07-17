@@ -108,7 +108,7 @@ internal sealed class SharedSignalEntry
             return result;
         }
 
-        var evidence = result.Value!;
+        SignalWriteResult evidence = result.Value!;
         if (evidence.Consistency < consistency)
         {
             return SignalResult.Failed<SignalWriteResult>(new SignalFailure(
@@ -121,7 +121,7 @@ internal sealed class SharedSignalEntry
             return result;
         }
 
-        var normalized = _subscription.Publish(evidence.Sample);
+        SignalSample<object?>? normalized = _subscription.Publish(evidence.Sample);
         return normalized is null
             ? SignalResult.Failed<SignalWriteResult>(new SignalFailure(
                 SignalRuntimeErrorCodes.WriteFailed,
@@ -166,7 +166,7 @@ internal sealed class SharedSignalEntry
             return result;
         }
 
-        var sample = result.Value;
+        SignalSample<object?>? sample = result.Value;
         if (sample is null)
         {
             return SignalResult.Failed<SignalSample<object?>>(new SignalFailure(
@@ -174,7 +174,7 @@ internal sealed class SharedSignalEntry
                 "The signal source returned no sample."));
         }
 
-        var normalized = _subscription.Publish(sample);
+        SignalSample<object?>? normalized = _subscription.Publish(sample);
         return normalized is null
             ? SignalResult.Failed<SignalSample<object?>>(new SignalFailure(
                 SignalRuntimeErrorCodes.ReadFailed,

@@ -67,7 +67,7 @@ public sealed class KeyedSubscriptionHub<TKey> : IDisposable where TKey : notnul
             listeners = registered.ToArray();
         }
 
-        int delivered = 0;
+        var delivered = 0;
         foreach (IListener listener in listeners)
         {
             if (listener.Publish(this, value))

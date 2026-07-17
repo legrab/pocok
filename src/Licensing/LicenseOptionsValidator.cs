@@ -38,7 +38,7 @@ internal static class LicenseOptionsValidator
     private static void ValidateMap(IReadOnlyDictionary<string, string> values, string description)
     {
         ArgumentNullException.ThrowIfNull(values);
-        foreach (var (key, value) in values)
+        foreach ((var key, var value) in values)
             if (!LicenseClaimsValidator.IsIdentifier(key, 256) || string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException(
                     $"Configured {description} must use non-empty identifiers of at most 256 non-control characters without surrounding whitespace and non-empty values.");
