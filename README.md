@@ -19,7 +19,7 @@ Pocok is a deliberately small .NET package portfolio extracted from repeated app
 | `Pocok.BackgroundWork` | Capability | Experimental, alpha | Guarded task observation, coalesced and debounced work, and non-overlapping repetition |
 | `Pocok.Scripting` | Capability | Experimental, alpha | Bounded JavaScript execution with explicit bindings and deterministic imports |
 | `Pocok.Signals` | Capability | Experimental, alpha | Quality-aware live-value contracts and shared subscription runtime |
-| `Pocok.Localization` | Capability | Experimental, alpha | Deterministic string-localizer composition, enum translation, and resource culture resolution |
+| `Pocok.Localization` | Capability | Experimental, alpha | Deterministic composition plus external JSON and string-only RESX resources |
 | `Pocok.Subscriptions` | Capability | Experimental, alpha | Thread-safe keyed subscriptions with typed filtering and mapping |
 | `Pocok.Licensing` | Capability | Experimental, alpha | Signed offline licenses with module, time, runtime, machine and pre-shared-key constraints |
 | `Pocok.AppDefaults.Licensing` | Maintainer defaults | Experimental, alpha | Startup and periodic host enforcement for Pocok licensing |
@@ -55,7 +55,7 @@ var result = ValueConverter.Default.Convert<int>("42");
 
 See [the licensing guide](docs/licensing.md) for key generation, checking, host integration, threat model and hardening guidance.
 
-See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, Licensing host enforcement, owned BackgroundWork coordination, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
+See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, Licensing host enforcement, owned BackgroundWork coordination, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, external JSON and RESX resources, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
 
 ## Build and verify
 

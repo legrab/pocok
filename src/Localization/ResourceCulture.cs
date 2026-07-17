@@ -17,8 +17,8 @@ public static partial class ResourceCulture
     {
         ArgumentNullException.ThrowIfNull(path);
 
-        string fileName = path[(path.LastIndexOfAny(['/', '\\']) + 1)..];
-        string stem = Path.GetFileNameWithoutExtension(fileName);
+        var fileName = path[(path.LastIndexOfAny(['/', '\\']) + 1)..];
+        var stem = Path.GetFileNameWithoutExtension(fileName);
         Match match = CultureTagRegex().Match(stem);
         if (!match.Success)
         {

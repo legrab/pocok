@@ -221,7 +221,9 @@
       "state": "Experimental",
       "releasable": false,
       "consumer": "LocalizationConsumer",
-      "internalDependencies": [],
+      "internalDependencies": [
+        "Pocok.BackgroundWork"
+      ],
       "allowedExternalDependencies": [
         "Microsoft.Extensions.Localization.Abstractions"
       ],

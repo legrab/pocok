@@ -17,7 +17,7 @@ internal sealed class DictionaryStringLocalizer(params (string Name, string Valu
     {
         get
         {
-            var result = Find(name);
+            LocalizedString result = Find(name);
             return result.ResourceNotFound
                 ? result
                 : new LocalizedString(name, string.Format(CultureInfo.InvariantCulture, result.Value, arguments), false);
