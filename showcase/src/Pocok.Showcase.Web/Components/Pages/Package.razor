@@ -1,0 +1,94 @@
+@page "/packages/{Slug}"
+@inject ShowcaseSliceCatalog SliceCatalog
+@inject ShowcasePackageCatalog PackageCatalog
+@inject IShowcaseText Text
+@inject IShowcaseRunClient RunClient
+@inject Microsoft.Extensions.Options.IOptions<ShowcaseOptions> Options
+
+@if (_slice is not null)
+{
+    <PageTitle>@_slice.Descriptor.PackageId · @Text.GetText("shell", "App.Title")</PageTitle>
+    <DynamicComponent Type="_slice.PageComponentType" Parameters="_parameters" />
+}
+else if (_package is not null)
+{
+    <PageTitle>@_package.Id · @Text.GetText("shell", "App.Title")</PageTitle>
+    <ShowcaseEmptyPlannedPackage Package="@ToFact(_package)"
+                                 Summary="@PackageSummary(_package)"
+                                 PlannedLabel="@Text.GetText("shell", "Package.Planned")"
+                                 Heading="@Text.GetText("shell", "Package.PlannedTitle")"
+                                 Message="@Text.GetText("shell", "Package.PlannedMessage")"
+                                 ContributorGuidance="@Text.GetText("shell", "Package.ContributorGuidance")"
+                                 ContributorGuideLabel="@Text.GetText("shell", "Package.ContributorGuide")"
+                                 ContributorGuideHref="@RepositoryHref("showcase/docs/ADDING_A_SLICE.md")"
+                                 FactsHeading="@Text.GetText("shell", "Package.Facts")"
+                                 FamilyLabel="@Text.GetText("shell", "Package.Family")"
+                                 PackageStateLabel="@Text.GetText("shell", "Package.PackageState")"
+                                 SandboxLabel="@Text.GetText("shell", "Package.Sandbox")"
+                                 NoSandboxLabel="@Text.GetText("shell", "Package.NoSandbox")"
+                                 DocumentationLabel="@Text.GetText("shell", "Package.Documentation")"
+                                 DocumentationLinkLabel="@Text.GetText("shell", "Package.DocumentationLink")"
+                                 DocumentationHref="@RepositoryHref(_package.DocumentationPath)" />
+}
+else
+{
+    <PageTitle>@Text.GetText("shell", "Package.NotFoundTitle") · @Text.GetText("shell", "App.Title")</PageTitle>
+    <section class="panel">
+        <h1>@Text.GetText("shell", "Package.NotFoundTitle")</h1>
+        <p>@Text.GetText("shell", "Package.NotFoundText")</p>
+        <a class="button-link" href="/">@Text.GetText("shell", "Actions.Home")</a>
+    </section>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+
+    private IShowcaseSlice? _slice;
+    private ShowcasePackageCatalogEntry? _package;
+    private IDictionary<string, object> _parameters = new Dictionary<string, object>();
+
+    protected override void OnParametersSet()
+    {
+        _slice = SliceCatalog.FindBySlug(Slug);
+        _package = PackageCatalog.FindBySlug(Slug);
+
+        if (_slice is null)
+        {
+            _parameters = new Dictionary<string, object>();
+            return;
+        }
+
+        var context = new ShowcasePageContext(
+            _slice.Descriptor,
+            Text,
+            _slice.Samples,
+            RunClient,
+            CultureInfo.CurrentCulture,
+            SliceCatalog.CreateFacts(PackageCatalog),
+            _slice.CodeAssist,
+            _slice);
+        _parameters = new Dictionary<string, object> { ["Context"] = context };
+    }
+
+    private ShowcasePackageFact ToFact(ShowcasePackageCatalogEntry package) => new(
+        package.Id,
+        package.Family,
+        package.State,
+        package.Summary,
+        package.DocumentationPath,
+        package.SortOrder,
+        ShowcaseImplementationStatus.Planned,
+        package.Slug);
+
+    private string PackageSummary(ShowcasePackageCatalogEntry package) =>
+        Text.GetText("shell", $"Packages.{package.Id.Replace('.', '_')}.Summary");
+
+    private string? RepositoryHref(string path)
+    {
+        string? baseUrl = Options.Value.PublicRepositoryBaseUrl;
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            return null;
+
+        return $"{baseUrl.TrimEnd('/')}/blob/main/{path.TrimStart('/')}";
+    }
+}

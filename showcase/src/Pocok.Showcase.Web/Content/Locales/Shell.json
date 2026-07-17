@@ -1,0 +1,177 @@
+{
+  "App": {
+    "Title": "Pocok Showcase",
+    "Subtitle": "Small .NET packages, exercised against their real APIs."
+  },
+  "Navigation": {
+    "Home": "Packages",
+    "System": "System"
+  },
+  "Language": {
+    "Label": "Language",
+    "English": "English",
+    "Hungarian": "Hungarian"
+  },
+  "Home": {
+    "Eyebrow": ".NET 10 · Interactive Server",
+    "Title": "Small packages, real behavior",
+    "Intro": "Pocok is a focused .NET package set for explicit infrastructure behavior. This showcase runs trusted repository slices through bounded, per-user sandboxes.",
+    "Known": "known packages",
+    "Available": "available slices",
+    "Planned": "planned slices",
+    "Loaded": "plugin slices loaded",
+    "States": "Package states",
+    "Families": "Filter by family",
+    "AllFamilies": "All families",
+    "Capability": "Capability",
+    "MaintainerDefaults": "Maintainer defaults",
+    "StartTitle": "Try an implemented sandbox",
+    "StartText": "Each available slice exercises the real package API with editable inputs, bounded execution, and structured results. Start with the first installed slice or choose any available package below.",
+    "StartAction": "Open featured sandbox",
+    "SystemAction": "Inspect runtime system",
+    "SandboxYes": "Interactive sandbox",
+    "SandboxNo": "No sandbox yet",
+    "Version": "Module version",
+    "FilterCount": "packages shown"
+  },
+  "Actions": {
+    "Open": "Open package",
+    "Run": "Run",
+    "Cancel": "Cancel",
+    "Copy": "Copy",
+    "Home": "Return home",
+    "System": "System details"
+  },
+  "Package": {
+    "Planned": "Planned",
+    "Available": "Available",
+    "Failed": "Failed",
+    "Active": "Active",
+    "Experimental": "Experimental",
+    "Purpose": "Purpose",
+    "Family": "Family",
+    "PackageState": "Package state",
+    "Sandbox": "Sandbox",
+    "NoSandbox": "Not installed in this deployment",
+    "Documentation": "Source documentation",
+    "DocumentationLink": "Open documentation",
+    "Facts": "Package facts",
+    "PlannedTitle": "This slice is not implemented yet",
+    "PlannedMessage": "The package is part of the current catalog, but this deployment does not install an executable slice for it yet. No placeholder output is fabricated.",
+    "ContributorGuidance": "A contributor can add the slice under samples/Showcase using the established shared contracts, components, localization, and publish discovery.",
+    "ContributorGuide": "Read the slice contributor guide",
+    "NotFoundTitle": "Package not found",
+    "NotFoundText": "The requested package is not part of the current deployment catalog."
+  },
+  "Footer": {
+    "Tagline": "Trusted in-process demos with bounded per-user execution."
+  },
+  "Result": {
+    "Success": "Success",
+    "ExpectedFailure": "Expected failure",
+    "Rejected": "Rejected",
+    "Cancelled": "Cancelled",
+    "TimedOut": "Timed out",
+    "InternalFailure": "Internal failure",
+    "Truncated": "Output was truncated"
+  },
+  "System": {
+    "Eyebrow": "Runtime",
+    "Title": "System status",
+    "Intro": "Safe runtime facts for the startup-discovered modules and immutable deployment catalog.",
+    "Application": "Application",
+    "ApplicationVersion": "Application version",
+    "OperatingSystem": "Operating system",
+    "Architecture": "Architecture",
+    "Environment": "Environment",
+    "CatalogPolicy": "Catalog policy",
+    "Partial": "Partial catalog",
+    "Strict": "Strict catalog",
+    "KnownPackages": "Known packages",
+    "InstalledSlices": "Installed slices",
+    "PlannedSlices": "Planned slices",
+    "QueueDepth": "Queue depth",
+    "QueueCapacity": "Queue capacity",
+    "Readiness": "Readiness",
+    "ReadinessState": "State",
+    "ReadinessSequence": "Sequence",
+    "Uptime": "Uptime",
+    "Culture": "Current culture",
+    "Modules": "Modules",
+    "NoModules": "No modules were discovered.",
+    "Diagnostics": "Safe diagnostics",
+    "NoDiagnostics": "No module diagnostics.",
+    "Required": "Required",
+    "Optional": "Optional",
+    "Version": "Version",
+    "Status": "Status",
+    "DotNet": ".NET runtime"
+  },
+  "Errors": {
+    "Eyebrow": "Safe failure",
+    "Title": "The request could not be completed",
+    "Text": "No internal details were exposed. Return to the package catalog and try again.",
+    "NotFoundTitle": "Page not found",
+    "NotFoundText": "The requested showcase page does not exist."
+  },
+  "Health": {
+    "Live": "Live",
+    "Ready": "Ready",
+    "NotReady": "Not ready"
+  },
+  "Packages": {
+    "Pocok_Conversion": {
+      "Summary": "Policy-driven value conversion with explicit failures, collection support, and bounded behavior."
+    },
+    "Pocok_Readiness": {
+      "Summary": "Explicit startup, readiness, failure, cancellation, shutdown, and restart coordination."
+    },
+    "Pocok_AppDefaults": {
+      "Summary": "Composable application configurators for consistent host setup."
+    },
+    "Pocok_AppDefaults_Logging": {
+      "Summary": "Configuration-driven Microsoft.Extensions.Logging defaults."
+    },
+    "Pocok_AppDefaults_Logging_Serilog": {
+      "Summary": "Serilog defaults integrated through the Pocok application configurator model."
+    },
+    "Pocok_Modularity_Contracts": {
+      "Summary": "Stable service-module contracts shared between hosts and trusted plugins."
+    },
+    "Pocok_Modularity": {
+      "Summary": "Manifest-driven startup discovery and registration for trusted in-process modules."
+    },
+    "Pocok_AppDefaults_Modularity": {
+      "Summary": "Maintainer defaults for Pocok modularity configuration."
+    },
+    "Pocok_BackgroundWork": {
+      "Summary": "Small concurrency helpers for coalescing, debouncing, repetition, and observation."
+    },
+    "Pocok_Scripting": {
+      "Summary": "Bounded JavaScript execution with imports, modules, bindings, and structured failures."
+    },
+    "Pocok_Localization": {
+      "Summary": "Deterministic file-backed localization and provider composition."
+    },
+    "Pocok_Signals": {
+      "Summary": "Typed signal runtime abstractions for reading, writing, subscribing, and connection state."
+    },
+    "Pocok_Subscriptions": {
+      "Summary": "Concurrency-safe keyed subscription lifecycle management."
+    },
+    "Pocok_Licensing": {
+      "Summary": "Signed and encrypted license documents, validation, runtime enforcement, and CLI workflows."
+    },
+    "Pocok_AppDefaults_Licensing": {
+      "Summary": "Application defaults for configuring and enforcing Pocok licensing."
+    }
+  },
+  "RunStatus": {
+    "Success": "Success",
+    "ExpectedFailure": "Expected failure",
+    "Rejected": "Rejected",
+    "Cancelled": "Cancelled",
+    "TimedOut": "Timed out",
+    "InternalFailure": "Internal failure"
+  }
+}

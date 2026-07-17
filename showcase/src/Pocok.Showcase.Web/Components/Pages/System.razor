@@ -1,0 +1,104 @@
+@page "/system"
+@inject ShowcaseSliceCatalog SliceCatalog
+@inject ShowcasePackageCatalog PackageCatalog
+@inject Pocok.Modularity.Catalog.IModuleCatalog ModuleCatalog
+@inject Pocok.Readiness.ReadinessSource Readiness
+@inject IWebHostEnvironment Environment
+@inject ShowcaseRunBuffer RunQueue
+@inject ShowcaseRuntimeInfo Runtime
+@inject Microsoft.Extensions.Options.IOptions<ShowcaseOptions> Options
+@inject IShowcaseText Text
+
+<PageTitle>@Text.GetText("shell", "System.Title") · @Text.GetText("shell", "App.Title")</PageTitle>
+
+<section class="page-heading">
+    <p class="eyebrow">@Text.GetText("shell", "System.Eyebrow")</p>
+    <h1>@Text.GetText("shell", "System.Title")</h1>
+    <p>@Text.GetText("shell", "System.Intro")</p>
+</section>
+
+<div class="system-grid">
+    <section class="panel">
+        <h2>@Text.GetText("shell", "System.Application")</h2>
+        <dl>
+            <dt>@Text.GetText("shell", "System.ApplicationVersion")</dt><dd class="mono">@Runtime.ApplicationVersion</dd>
+            <dt>@Text.GetText("shell", "System.DotNet")</dt><dd>@Runtime.FrameworkDescription</dd>
+            <dt>@Text.GetText("shell", "System.OperatingSystem")</dt><dd>@Runtime.OperatingSystem</dd>
+            <dt>@Text.GetText("shell", "System.Architecture")</dt><dd>@Runtime.Architecture</dd>
+            <dt>@Text.GetText("shell", "System.Environment")</dt><dd>@Environment.EnvironmentName</dd>
+            <dt>@Text.GetText("shell", "System.Uptime")</dt><dd>@FormatUptime(Runtime.Uptime)</dd>
+            <dt>@Text.GetText("shell", "System.Culture")</dt><dd class="mono">@CultureInfo.CurrentUICulture.Name</dd>
+        </dl>
+    </section>
+
+    <section class="panel">
+        <h2>@Text.GetText("shell", "System.Readiness")</h2>
+        <dl>
+            <dt>@Text.GetText("shell", "System.ReadinessState")</dt><dd>@Readiness.State</dd>
+            <dt>@Text.GetText("shell", "System.ReadinessSequence")</dt><dd>@Readiness.Snapshot.Sequence</dd>
+            <dt>@Text.GetText("shell", "System.CatalogPolicy")</dt><dd>@Text.GetText("shell", Options.Value.RequireCompleteCatalog ? "System.Strict" : "System.Partial")</dd>
+            <dt>@Text.GetText("shell", "System.KnownPackages")</dt><dd>@PackageCatalog.Packages.Count</dd>
+            <dt>@Text.GetText("shell", "System.InstalledSlices")</dt><dd>@SliceCatalog.Installed.Count</dd>
+            <dt>@Text.GetText("shell", "System.PlannedSlices")</dt><dd>@(PackageCatalog.Packages.Count - SliceCatalog.Installed.Count)</dd>
+            <dt>@Text.GetText("shell", "System.QueueDepth")</dt><dd>@RunQueue.Depth</dd>
+            <dt>@Text.GetText("shell", "System.QueueCapacity")</dt><dd>@RunQueue.Capacity</dd>
+        </dl>
+    </section>
+
+    <section class="panel system-wide">
+        <h2>@Text.GetText("shell", "System.Modules")</h2>
+        @if (ModuleCatalog.Modules.Count == 0)
+        {
+            <p class="muted">@Text.GetText("shell", "System.NoModules")</p>
+        }
+        else
+        {
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>@Text.GetText("shell", "Package.Purpose")</th>
+                        <th>@Text.GetText("shell", "System.Version")</th>
+                        <th>@Text.GetText("shell", "System.Required")</th>
+                        <th>@Text.GetText("shell", "System.Status")</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var module in ModuleCatalog.Modules)
+                    {
+                        <tr>
+                            <td class="mono">@(module.Identity?.Id ?? "invalid-module")</td>
+                            <td class="mono">@(module.Identity?.Version.ToString() ?? "unknown")</td>
+                            <td>@(module.Required ? Text.GetText("shell", "System.Required") : Text.GetText("shell", "System.Optional"))</td>
+                            <td>@module.Status</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <h3>@Text.GetText("shell", "System.Diagnostics")</h3>
+        @if (ModuleCatalog.Diagnostics.Count == 0)
+        {
+            <p class="muted">@Text.GetText("shell", "System.NoDiagnostics")</p>
+        }
+        else
+        {
+            @foreach (var diagnostic in ModuleCatalog.Diagnostics)
+            {
+                <p class="diagnostic">@diagnostic.Message</p>
+            }
+        }
+    </section>
+</div>
+
+@code {
+    private static string FormatUptime(TimeSpan uptime)
+    {
+        string clock = uptime.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
+        return uptime.TotalDays >= 1
+            ? $"{(int)uptime.TotalDays}d {clock}"
+            : clock;
+    }
+}

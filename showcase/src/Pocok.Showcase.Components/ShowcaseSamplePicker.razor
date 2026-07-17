@@ -1,0 +1,26 @@
+<section class="panel sample-picker" aria-labelledby="sample-picker-title">
+    <div class="panel-heading">
+        <h2 id="sample-picker-title">@Title</h2>
+        <span class="muted mono">@Samples.Count</span>
+    </div>
+    <div class="sample-grid">
+        @foreach (IShowcaseSample sample in Samples)
+        {
+            <button type="button"
+                    class="sample-option @(sample.Id == SelectedId ? "is-selected" : null)"
+                    @onclick="() => SelectedIdChanged.InvokeAsync(sample.Id)">
+                <strong>@Text.GetText(ResourceNamespace, sample.NameKey)</strong>
+                <span>@Text.GetText(ResourceNamespace, sample.DescriptionKey)</span>
+            </button>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Samples";
+    [Parameter, EditorRequired] public IReadOnlyList<IShowcaseSample> Samples { get; set; } = Array.Empty<IShowcaseSample>();
+    [Parameter] public string? SelectedId { get; set; }
+    [Parameter] public EventCallback<string> SelectedIdChanged { get; set; }
+    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
+    [Parameter, EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
+}

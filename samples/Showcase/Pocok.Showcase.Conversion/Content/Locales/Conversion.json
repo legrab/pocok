@@ -1,0 +1,206 @@
+{
+  "Package": {
+    "Name": "Conversion",
+    "Summary": "Explore explicit conversion policies, structured failures, collections, enums, temporal values, and fixed runtime target selection.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Samples",
+    "Title": "Conversion sandbox",
+    "Running": "Running",
+    "Ready": "Ready",
+    "Mode": "Editor mode",
+    "Fields": "Builder",
+    "Code": "Constrained code",
+    "CodeLabel": "Constrained C#-like conversion expression",
+    "GeneratedCode": "Generated public API call",
+    "Run": "Run conversion",
+    "Cancel": "Cancel"
+  },
+  "Fields": {
+    "SourceKind": "Source kind",
+    "Target": "Target alias",
+    "Value": "Source value",
+    "ValueHelp": "Arrays use JSON array syntax here; the code editor renders them as safe C#-like literals.",
+    "Culture": "Culture",
+    "Overflow": "Overflow",
+    "Nulls": "Null policy",
+    "Enums": "Enum policy",
+    "NumericLoss": "Numeric loss",
+    "NumericBooleans": "Numeric booleans",
+    "TemporalText": "Temporal text",
+    "MaximumDepth": "Maximum depth",
+    "MaximumItems": "Maximum collection items",
+    "MaximumItemsHelp": "The explicit sandbox limit is 1–500; ConversionContext.Strict keeps the package default of 10,000."
+  },
+  "SourceKinds": {
+    "Text": "Text",
+    "Integer": "Signed integer",
+    "UnsignedInteger": "Unsigned integer",
+    "Decimal": "Decimal",
+    "FloatingPoint": "Floating point",
+    "Boolean": "Boolean",
+    "Null": "Null",
+    "TextArray": "String array",
+    "ObjectArray": "Safe object array"
+  },
+  "Result": {
+    "Title": "Result",
+    "Empty": "Run a sample to see the structured conversion result.",
+    "CodePreview": "Code preview",
+    "Truncated": "truncated",
+    "Fields": {
+      "Value": "Value",
+      "Target": "Target",
+      "SourceType": "Source runtime type",
+      "Policies": "Policies",
+      "FailurePath": "Failure path"
+    }
+  },
+  "Tips": {
+    "Title": "Why this matters",
+    "Parser": "The editor parses a deliberately small grammar. It never compiles or evaluates arbitrary code.",
+    "Allowlist": "Runtime target types come from a fixed dictionary, not arbitrary reflection.",
+    "Bounds": "Depth, input, output, and collection limits are explicit sandbox boundaries.",
+    "Source": "Source literals are parsed into a small set of safe scalar and array values before conversion.",
+    "Failures": "Expected conversion failures preserve stable package codes and value paths.",
+    "Policies": "Make culture and loss policies explicit at application boundaries.",
+    "Strict": "Strict defaults are invariant and reject data loss.",
+    "Saturation": "Saturation is explicit; ordinary overflow fails.",
+    "Culture": "Culture changes textual parsing, not deterministic result formatting.",
+    "NumericBoolean": "Numeric-to-boolean conversion is opt-in.",
+    "Collection": "Collection conversion stops at the first failed element.",
+    "FailurePath": "Failure paths identify the exact item or member that failed.",
+    "NoSerializer": "The converter has no object or JSON serializer fallback."
+  },
+  "Guide": {
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Pocok.Conversion replaces scattered Convert.ChangeType calls and serializer tricks with immutable policy and explicit result objects."
+    },
+    "QuickStart": {
+      "Title": "Quick start",
+      "Body": "Select a sample, inspect the generated call, change a policy, and run it. The sandbox calls ValueConverter.Default from the repository."
+    },
+    "Targets": {
+      "Title": "Supported targets",
+      "Body": "The fixed demo allowlist covers scalars, signed and unsigned numbers, Guid, temporal types, local enums and flags, plus selected arrays."
+    },
+    "Context": {
+      "Title": "ConversionContext",
+      "Body": "ConversionContext captures culture, loss, overflow, null, enum, boolean, temporal, depth, and collection policies in one immutable value."
+    },
+    "Policies": {
+      "Title": "Policies",
+      "Body": "Strict rejects overflow, fractions, numeric booleans, undefined enums, and non-round-trip temporal text unless a policy explicitly allows them."
+    },
+    "Failures": {
+      "Title": "Failures are data",
+      "Body": "ConversionFailure carries a stable code, safe message, and path. Expected failures are not converted into internal showcase errors."
+    },
+    "Collections": {
+      "Title": "Collections",
+      "Body": "Selected enumerable sources convert item by item, stop at the first failure, and report an indexed path. Strings are treated as scalar text."
+    },
+    "Enums": {
+      "Title": "Enums and flags",
+      "Body": "Named values are validated. Flags combinations are accepted only when every bit is declared and the selected enum policy permits flags."
+    },
+    "Temporal": {
+      "Title": "Temporal values",
+      "Body": "RoundTrip accepts invariant round-trip text. CultureAware delegates textual parsing to the selected culture."
+    },
+    "Concurrency": {
+      "Title": "Concurrency",
+      "Body": "ValueConverter.Default and immutable contexts are safe to reuse. Each showcase input, result, and cancellation source remains circuit-scoped."
+    },
+    "Boundaries": {
+      "Title": "Boundaries",
+      "Body": "The general conversion API does not claim trimming or NativeAOT support, does not resolve arbitrary types, and has no serializer fallback."
+    },
+    "Production": {
+      "Title": "Production notes",
+      "Body": "Choose policies at trusted boundaries, preserve failure codes, cap collections, and never map untrusted target names without an allowlist."
+    },
+    "Snippet": {
+      "TypedTitle": "Typed conversion",
+      "RuntimeTitle": "Runtime target conversion"
+    }
+  },
+  "Assist": {
+    "Converter": "The fixed local converter variable.",
+    "Convert": "Insert an approved generic Convert call.",
+    "Typeof": "Select a runtime target from the fixed type allowlist.",
+    "Strict": "Use invariant, loss-rejecting strict defaults.",
+    "Context": "Construct an explicit immutable context.",
+    "Culture": "Use an approved cached culture.",
+    "NamedArgument": "Insert an approved named context argument.",
+    "Target": "Insert a supported target type alias.",
+    "Policy": "Insert a supported policy enum value.",
+    "Snippet": "Insert a complete approved example.",
+    "Runtime": "Runtime target selection remains fixed and allowlisted."
+  },
+  "Boundaries": {
+    "Title": "Boundaries",
+    "NoCompilation": "No C# compilation or expression evaluation.",
+    "FixedTargets": "Only fixed target types and policy enums.",
+    "BoundedInput": "Bounded code, input, output, depth, and collection size.",
+    "NoSerializer": "No object or JSON serializer fallback."
+  },
+  "Source": {
+    "Title": "Source documentation",
+    "Body": "Repository documentation for the package public contract and boundaries."
+  },
+  "Samples": {
+    "strict-integer": {
+      "Name": "Strict integer",
+      "Description": "Convert text to an integer with strict invariant policies."
+    },
+    "saturating-byte": {
+      "Name": "Saturating byte",
+      "Description": "Clamp 300 to the byte maximum with an explicit overflow policy."
+    },
+    "german-decimal": {
+      "Name": "German decimal",
+      "Description": "Parse 1.234,5 with the German culture and display the result invariantly."
+    },
+    "flags": {
+      "Name": "Flags enum",
+      "Description": "Convert comma-separated names into a validated flags combination."
+    },
+    "collection-success": {
+      "Name": "Collection success",
+      "Description": "Convert a string array into an integer array."
+    },
+    "collection-failure": {
+      "Name": "Collection failure path",
+      "Description": "Stop at the first invalid item and preserve its indexed failure path."
+    },
+    "fraction-rejected": {
+      "Name": "Fraction rejected",
+      "Description": "Reject fractional loss when converting 12.7 to an integer."
+    },
+    "fraction-rounded": {
+      "Name": "Fraction rounded",
+      "Description": "Round 12.7 with the explicit nearest policy."
+    },
+    "numeric-boolean": {
+      "Name": "Numeric boolean",
+      "Description": "Opt into zero-or-one conversion from numbers to booleans."
+    },
+    "null-default": {
+      "Name": "Null policy",
+      "Description": "Use the target default for null, then compare Preserve and Reject in the builder."
+    },
+    "temporal-roundtrip": {
+      "Name": "Temporal round trip",
+      "Description": "Parse a DateTimeOffset with the invariant round-trip policy and preserve its offset."
+    },
+    "undefined-enum": {
+      "Name": "Undefined enum",
+      "Description": "Reject a numeric value that is not declared by the target enum."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+<section class="sandbox-frame">
+    <div class="panel-heading">
+        <h2>@Title</h2>
+        @if (!string.IsNullOrWhiteSpace(Status))
+        {
+            <span class="mono muted">@Status</span>
+        }
+    </div>
+    @ChildContent
+</section>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Sandbox";
+    [Parameter] public string? Status { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

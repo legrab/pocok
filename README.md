@@ -57,6 +57,8 @@ See [the licensing guide](docs/licensing.md) for key generation, checking, host 
 
 See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, Licensing host enforcement, owned BackgroundWork coordination, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, external JSON and RESX resources, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
 
+Explore the deployable Interactive Server application in the [Pocok Showcase](showcase/README.md). Stage 1 includes the permanent host framework and the complete `Pocok.Conversion` slice.
+
 ## Build and verify
 
 The repository targets .NET 10 and uses PowerShell 7 for release tooling.

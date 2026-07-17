@@ -1,0 +1,10 @@
+@page "/error"
+@inject IShowcaseText Text
+
+<PageTitle>@Text.GetText("shell", "Errors.Title") · @Text.GetText("shell", "App.Title")</PageTitle>
+<section class="panel">
+    <p class="eyebrow">@Text.GetText("shell", "Errors.Eyebrow")</p>
+    <h1>@Text.GetText("shell", "Errors.Title")</h1>
+    <p>@Text.GetText("shell", "Errors.Text")</p>
+    <a class="button-link" href="/">@Text.GetText("shell", "Actions.Home")</a>
+</section>

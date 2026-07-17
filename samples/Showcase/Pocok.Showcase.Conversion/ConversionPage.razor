@@ -1,0 +1,299 @@
+<ShowcasePackageHeader Descriptor="Context.Descriptor" Text="Context.Text" ImplementationStatusText="@T("Package.Status.Available")" />
+<div class="package-layout">
+    <div class="stack">
+        <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
+                              Samples="Context.Samples"
+                              SelectedId="_selectedId"
+                              SelectedIdChanged="SelectSampleAsync"
+                              Text="Context.Text"
+                              ResourceNamespace="conversion" />
+
+        <ShowcaseSandboxFrame Title="@T("Sandbox.Title")" Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
+            <div class="mode-switch" role="group" aria-label="@T("Sandbox.Mode")">
+                <button type="button" class="secondary" aria-pressed="@(_input.EditorMode == ConversionEditorMode.Fields)" @onclick="() => SetMode(ConversionEditorMode.Fields)">@T("Sandbox.Fields")</button>
+                <button type="button" class="secondary" aria-pressed="@(_input.EditorMode == ConversionEditorMode.Code)" @onclick="() => SetMode(ConversionEditorMode.Code)">@T("Sandbox.Code")</button>
+            </div>
+
+            @if (_input.EditorMode == ConversionEditorMode.Fields)
+            {
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="source-kind">@T("Fields.SourceKind")</label>
+                        <select id="source-kind" value="@_input.SourceKind" @onchange="ChangeSourceKind">
+                            @foreach (ConversionSourceKind item in Enum.GetValues<ConversionSourceKind>())
+                            {
+                                <option value="@item">@T($"SourceKinds.{item}")</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="target-type">@T("Fields.Target")</label>
+                        <select id="target-type" value="@_input.TargetType" @onchange="ChangeTarget">
+                            @foreach (string item in ConversionShowcaseSlice.TargetAliases)
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field full">
+                        <label for="source-value">@T("Fields.Value")</label>
+                        <textarea id="source-value" class="compact-editor" value="@_input.SourceValue" @oninput="ChangeValue" disabled="@(_input.SourceKind == ConversionSourceKind.Null)"></textarea>
+                        <small>@T("Fields.ValueHelp")</small>
+                    </div>
+                    <div class="field">
+                        <label for="culture">@T("Fields.Culture")</label>
+                        <select id="culture" value="@_input.Culture" @onchange="ChangeCulture">
+                            <option value="invariant">Invariant</option>
+                            <option value="en-US">en-US</option>
+                            <option value="de-DE">de-DE</option>
+                            <option value="hu-HU">hu-HU</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="overflow">@T("Fields.Overflow")</label>
+                        <select id="overflow" value="@_input.Overflow" @onchange="ChangeOverflow">
+                            @foreach (OverflowPolicy item in Enum.GetValues<OverflowPolicy>())
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="nulls">@T("Fields.Nulls")</label>
+                        <select id="nulls" value="@_input.Nulls" @onchange="ChangeNulls">
+                            @foreach (NullPolicy item in Enum.GetValues<NullPolicy>())
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="enums">@T("Fields.Enums")</label>
+                        <select id="enums" value="@_input.Enums" @onchange="ChangeEnums">
+                            @foreach (EnumPolicy item in Enum.GetValues<EnumPolicy>())
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="numeric-loss">@T("Fields.NumericLoss")</label>
+                        <select id="numeric-loss" value="@_input.NumericLoss" @onchange="ChangeNumericLoss">
+                            @foreach (NumericLossPolicy item in Enum.GetValues<NumericLossPolicy>())
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="numeric-booleans">@T("Fields.NumericBooleans")</label>
+                        <select id="numeric-booleans" value="@_input.NumericBooleans" @onchange="ChangeNumericBoolean">
+                            @foreach (NumericBooleanPolicy item in Enum.GetValues<NumericBooleanPolicy>())
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="temporal-text">@T("Fields.TemporalText")</label>
+                        <select id="temporal-text" value="@_input.TemporalText" @onchange="ChangeTemporalText">
+                            @foreach (TemporalTextPolicy item in Enum.GetValues<TemporalTextPolicy>())
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="maximum-depth">@T("Fields.MaximumDepth")</label>
+                        <input id="maximum-depth" type="number" min="1" max="64" value="@_input.MaximumDepth" @onchange="ChangeMaximumDepth" />
+                    </div>
+                    <div class="field">
+                        <label for="maximum-items">@T("Fields.MaximumItems")</label>
+                        <input id="maximum-items" type="number" min="1" max="500" value="@DisplayedMaximumItems" @onchange="ChangeMaximumItems" />
+                        <small>@T("Fields.MaximumItemsHelp")</small>
+                    </div>
+                </div>
+                <ShowcaseCodeBlock Title="@T("Sandbox.GeneratedCode")" Code="@_input.Code" Language="csharp" />
+            }
+            else
+            {
+                <div class="completion-wrap">
+                    <ShowcaseCodeAssistEditor Label="@T("Sandbox.CodeLabel")"
+                                              Value="_input.Code"
+                                              ValueChanged="ChangeCodeAsync"
+                                              Catalog="Context.CodeAssist"
+                                              Text="Context.Text"
+                                              ResourceNamespace="conversion" />
+                </div>
+            }
+
+            <ShowcaseExecutionControls Slice="Context.Slice"
+                                       Input="_input"
+                                       RunClient="Context.RunClient"
+                                       Culture="Context.Culture"
+                                       RunLabel="@T("Sandbox.Run")"
+                                       CancelLabel="@T("Sandbox.Cancel")"
+                                       ResetKey="_selectedId"
+                                       ResultChanged="SetResultAsync"
+                                       RunningChanged="SetRunningAsync" />
+        </ShowcaseSandboxFrame>
+
+        @if (_result is not null)
+        {
+            <ShowcaseTipPanel Title="@T("Tips.Title")" TipKeys="_result.TipKeys" Text="Context.Text" ResourceNamespace="conversion" />
+        }
+        <ShowcaseResultPanel Title="@T("Result.Title")" EmptyText="@T("Result.Empty")" Result="_result" Text="Context.Text" ResourceNamespace="conversion" CodePreviewTitle="@T("Result.CodePreview")" CodePreviewLanguage="csharp" TruncatedLabel="@T("Result.Truncated")" />
+    </div>
+
+    <div class="stack facts-rail">
+        <ShowcaseGuideView Guide="Context.Slice.Guide" Text="Context.Text" ResourceNamespace="conversion" />
+        <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
+            <ul class="compact-list">
+                <li>@T("Boundaries.NoCompilation")</li>
+                <li>@T("Boundaries.FixedTargets")</li>
+                <li>@T("Boundaries.BoundedInput")</li>
+                <li>@T("Boundaries.NoSerializer")</li>
+            </ul>
+        </ShowcaseBoundariesPanel>
+        <section class="panel source-panel">
+            <h2>@T("Source.Title")</h2>
+            <p>@T("Source.Body")</p>
+            <span class="mono muted">@Context.Descriptor.SourceDocumentationPath</span>
+        </section>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ShowcasePageContext Context { get; set; } = default!;
+
+    private ConversionInput _input = new();
+    private string _selectedId = string.Empty;
+    private ShowcaseRunResult? _result;
+    private bool _running;
+    private int DisplayedMaximumItems => _input.MaximumCollectionItems == 10_000 ? 500 : _input.MaximumCollectionItems;
+
+    protected override void OnInitialized()
+    {
+        IShowcaseSample sample = Context.Samples.Single(static item => item.IsDefault);
+        _selectedId = sample.Id;
+        _input = (ConversionInput)sample.CreateInput();
+    }
+
+    private string T(string key) => Context.Text.GetText("conversion", key);
+
+    private Task SelectSampleAsync(string id)
+    {
+        IShowcaseSample sample = Context.Samples.Single(item => item.Id == id);
+        _selectedId = id;
+        _input = (ConversionInput)sample.CreateInput();
+        _result = null;
+        return Task.CompletedTask;
+    }
+
+    private void SetMode(ConversionEditorMode mode)
+    {
+        string code = _input.Code;
+        if (mode == ConversionEditorMode.Code)
+        {
+            try
+            {
+                code = ConversionCodeFormatter.Format(_input);
+            }
+            catch (FormatException)
+            {
+            }
+        }
+
+        _input = _input with { EditorMode = mode, Code = code };
+    }
+
+    private Task SetResultAsync(ShowcaseRunResult? result)
+    {
+        _result = result;
+        return Task.CompletedTask;
+    }
+
+    private Task SetRunningAsync(bool running)
+    {
+        _running = running;
+        return Task.CompletedTask;
+    }
+
+    private Task ChangeCodeAsync(string code)
+    {
+        _input = _input with { Code = code };
+        return Task.CompletedTask;
+    }
+
+    private void ChangeSourceKind(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out ConversionSourceKind value))
+            Update(_input with { SourceKind = value, SourceValue = value == ConversionSourceKind.Null ? string.Empty : _input.SourceValue });
+    }
+
+    private void ChangeTarget(ChangeEventArgs args) => Update(_input with { TargetType = args.Value?.ToString() ?? "int" });
+    private void ChangeValue(ChangeEventArgs args) => Update(_input with { SourceValue = args.Value?.ToString() ?? string.Empty });
+    private void ChangeCulture(ChangeEventArgs args) => Update(_input with { Culture = args.Value?.ToString() ?? "invariant" });
+
+    private void ChangeOverflow(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out OverflowPolicy value))
+            Update(_input with { Overflow = value });
+    }
+
+    private void ChangeNulls(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out NullPolicy value))
+            Update(_input with { Nulls = value });
+    }
+
+    private void ChangeEnums(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out EnumPolicy value))
+            Update(_input with { Enums = value });
+    }
+
+    private void ChangeNumericLoss(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out NumericLossPolicy value))
+            Update(_input with { NumericLoss = value });
+    }
+
+    private void ChangeNumericBoolean(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out NumericBooleanPolicy value))
+            Update(_input with { NumericBooleans = value });
+    }
+
+    private void ChangeTemporalText(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out TemporalTextPolicy value))
+            Update(_input with { TemporalText = value });
+    }
+
+    private void ChangeMaximumDepth(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out int value))
+            Update(_input with { MaximumDepth = Math.Clamp(value, 1, 64) });
+    }
+
+    private void ChangeMaximumItems(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), CultureInfo.InvariantCulture, out int value))
+            Update(_input with { MaximumCollectionItems = Math.Clamp(value, 1, 500) });
+    }
+
+    private void Update(ConversionInput input)
+    {
+        try
+        {
+            _input = input with { Code = ConversionCodeFormatter.Format(input) };
+        }
+        catch (FormatException)
+        {
+            _input = input with { Code = _input.Code };
+        }
+    }
+
+}

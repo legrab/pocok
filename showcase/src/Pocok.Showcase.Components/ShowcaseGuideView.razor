@@ -1,0 +1,25 @@
+<section class="guide" aria-label="Guide">
+    @foreach (ShowcaseGuideSection guideSection in Guide.Sections)
+    {
+        <article id="@guideSection.Id" class="guide-section">
+            <h2>@Text.GetText(ResourceNamespace, guideSection.TitleKey)</h2>
+            @foreach (string paragraph in guideSection.ParagraphKeys)
+            {
+                <p>@Text.GetText(ResourceNamespace, paragraph)</p>
+            }
+            @foreach (string snippetId in guideSection.SnippetIds)
+            {
+                @if (Guide.Snippets.FirstOrDefault(candidate => candidate.Id == snippetId) is { } snippet)
+                {
+                    <ShowcaseCodeBlock Title="@Text.GetText(ResourceNamespace, snippet.TitleKey)" Code="@snippet.Code" Language="@snippet.Language" />
+                }
+            }
+        </article>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public ShowcaseGuide Guide { get; set; } = ShowcaseGuide.Empty;
+    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
+    [Parameter, EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
+}

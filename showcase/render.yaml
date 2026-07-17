@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: pocok-showcase
+    runtime: docker
+    plan: free
+    dockerfilePath: ./showcase/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/ready
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Showcase__RequireCompleteCatalog
+        value: "false"

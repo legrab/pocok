@@ -1,0 +1,13 @@
+<section class="code-block">
+    @if (!string.IsNullOrWhiteSpace(Title))
+    {
+        <div class="code-title">@Title</div>
+    }
+    <pre><code data-language="@Language">@Code</code></pre>
+</section>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string Code { get; set; } = string.Empty;
+    [Parameter] public string Language { get; set; } = "text";
+}

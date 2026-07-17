@@ -1,0 +1,35 @@
+@inherits LayoutComponentBase
+@inject IShowcaseText Text
+@inject NavigationManager Navigation
+
+<div class="shell">
+    <aside class="shell-nav">
+        <a class="brand" href="/">
+            <span>Pocok</span>
+            <strong>@Text.GetText("shell", "App.Title")</strong>
+        </a>
+        <p class="nav-subtitle">@Text.GetText("shell", "App.Subtitle")</p>
+        <nav aria-label="@Text.GetText("shell", "Navigation.Home")">
+            <NavLink href="/" Match="NavLinkMatch.All">@Text.GetText("shell", "Navigation.Home")</NavLink>
+            <NavLink href="/system">@Text.GetText("shell", "Navigation.System")</NavLink>
+        </nav>
+        <div class="language-switch" aria-label="@Text.GetText("shell", "Language.Label")">
+            <a href="@CultureUrl("en")" lang="en">EN</a>
+            <a href="@CultureUrl("hu")" lang="hu">HU</a>
+        </div>
+        <p class="nav-footer">@Text.GetText("shell", "Footer.Tagline")</p>
+    </aside>
+    <div class="shell-content">
+        <main>@Body</main>
+        <footer><span>Apache-2.0</span><span>© 2026 Pocok contributors</span></footer>
+    </div>
+</div>
+
+@code {
+    private string CultureUrl(string culture)
+    {
+        string relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        string returnUrl = "/" + relative;
+        return $"/culture/set?culture={Uri.EscapeDataString(culture)}&returnUrl={Uri.EscapeDataString(returnUrl)}";
+    }
+}
