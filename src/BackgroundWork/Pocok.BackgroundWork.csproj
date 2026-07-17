@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Pocok.BackgroundWork</PackageId>
+    <PackageVersion Condition="'$(PocokBackgroundWorkPackageVersion)' != ''">$(PocokBackgroundWorkPackageVersion)</PackageVersion>
+    <MinVerTagPrefix>backgroundwork-v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
+    <Description>Guarded task observation, coalesced and debounced work, and non-overlapping repetition for .NET.</Description>
+    <PackageTags>tasks;async;background-work;coalescing;debounce;repeating;timeprovider</PackageTags>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

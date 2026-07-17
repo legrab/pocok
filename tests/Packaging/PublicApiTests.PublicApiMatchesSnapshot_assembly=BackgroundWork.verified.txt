@@ -1,0 +1,112 @@
+namespace Pocok.BackgroundWork
+{
+    public enum BackgroundWorkFailurePolicy
+    {
+        Stop = 0,
+        Continue = 1,
+    }
+    public sealed class CoalescingTaskRunner : System.IAsyncDisposable
+    {
+        public CoalescingTaskRunner(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> operation, Pocok.BackgroundWork.CoalescingTaskRunnerOptions? options = null) { }
+        public bool IsRunning { get; }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public System.Threading.Tasks.Task RequestAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task StopAsync(System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class CoalescingTaskRunnerOptions : System.IEquatable<Pocok.BackgroundWork.CoalescingTaskRunnerOptions>
+    {
+        public CoalescingTaskRunnerOptions() { }
+        public Pocok.BackgroundWork.BackgroundWorkFailurePolicy FailurePolicy { get; init; }
+        public System.TimeSpan MinimumInterval { get; init; }
+        public System.Func<System.Exception, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>? OnFailure { get; init; }
+        public System.TimeProvider TimeProvider { get; init; }
+    }
+    public sealed class DebouncedTaskRunner : System.IAsyncDisposable
+    {
+        public DebouncedTaskRunner(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> operation, Pocok.BackgroundWork.DebouncedTaskRunnerOptions options) { }
+        public bool IsRunning { get; }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public System.Threading.Tasks.Task RequestAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task StopAsync(System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class DebouncedTaskRunnerOptions : System.IEquatable<Pocok.BackgroundWork.DebouncedTaskRunnerOptions>
+    {
+        public DebouncedTaskRunnerOptions() { }
+        public Pocok.BackgroundWork.BackgroundWorkFailurePolicy FailurePolicy { get; init; }
+        public System.Func<System.Exception, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>? OnFailure { get; init; }
+        public System.TimeSpan QuietPeriod { get; init; }
+        public System.TimeProvider TimeProvider { get; init; }
+    }
+    public sealed class TaskObservation
+    {
+        public System.Threading.Tasks.Task<Pocok.BackgroundWork.TaskObservationResult> Completion { get; }
+    }
+    public static class TaskObservationExtensions
+    {
+        public static Pocok.BackgroundWork.TaskObservation Observe(this System.Threading.Tasks.Task task, System.Action<System.Exception> onFault, System.Action<Pocok.BackgroundWork.TaskObservationOptions>? configure = null) { }
+        public static Pocok.BackgroundWork.TaskObservation Observe(this System.Threading.Tasks.Task task, System.Func<System.Exception, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> onFault, System.Action<Pocok.BackgroundWork.TaskObservationOptions>? configure = null) { }
+        public static Pocok.BackgroundWork.TaskObservation Observe<T>(this System.Threading.Tasks.Task<T> task, System.Action<System.Exception> onFault, System.Action<Pocok.BackgroundWork.TaskObservationOptions<T>>? configure = null) { }
+        public static Pocok.BackgroundWork.TaskObservation Observe<T>(this System.Threading.Tasks.Task<T> task, System.Func<System.Exception, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> onFault, System.Action<Pocok.BackgroundWork.TaskObservationOptions<T>>? configure = null) { }
+    }
+    public sealed class TaskObservationOptions
+    {
+        public TaskObservationOptions() { }
+        public System.Threading.CancellationToken CancellationToken { get; set; }
+        public Pocok.BackgroundWork.TaskObservationOptions OnCanceled(System.Action<System.OperationCanceledException> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions OnCanceled(System.Func<System.OperationCanceledException, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions OnFault(System.Func<System.Exception, bool> predicate, System.Action<System.Exception> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions OnFault(System.Func<System.Exception, bool> predicate, System.Func<System.Exception, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions OnFault<TException>(System.Action<TException> handler)
+            where TException : System.Exception { }
+        public Pocok.BackgroundWork.TaskObservationOptions OnFault<TException>(System.Func<TException, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler)
+            where TException : System.Exception { }
+        public Pocok.BackgroundWork.TaskObservationOptions OnSuccess(System.Action handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions OnSuccess(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler) { }
+    }
+    public sealed class TaskObservationOptions<T>
+    {
+        public TaskObservationOptions() { }
+        public System.Threading.CancellationToken CancellationToken { get; set; }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnCanceled(System.Action<System.OperationCanceledException> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnCanceled(System.Func<System.OperationCanceledException, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnFault(System.Func<System.Exception, bool> predicate, System.Action<System.Exception> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnFault(System.Func<System.Exception, bool> predicate, System.Func<System.Exception, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnFault<TException>(System.Action<TException> handler)
+            where TException : System.Exception { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnFault<TException>(System.Func<TException, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler)
+            where TException : System.Exception { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnSuccess(System.Action<T> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnSuccess(System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnSuccess(System.Func<T, bool> predicate, System.Action<T> handler) { }
+        public Pocok.BackgroundWork.TaskObservationOptions<T> OnSuccess(System.Func<T, bool> predicate, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> handler) { }
+    }
+    public enum TaskObservationOutcome
+    {
+        Succeeded = 0,
+        Faulted = 1,
+        Canceled = 2,
+    }
+    public sealed class TaskObservationResult : System.IEquatable<Pocok.BackgroundWork.TaskObservationResult>
+    {
+        public TaskObservationResult(Pocok.BackgroundWork.TaskObservationOutcome Outcome, System.Exception? SourceException, System.Exception? ObserverException, bool CallbackInvoked) { }
+        public bool CallbackInvoked { get; init; }
+        public System.Exception? ObserverException { get; init; }
+        public Pocok.BackgroundWork.TaskObservationOutcome Outcome { get; init; }
+        public System.Exception? SourceException { get; init; }
+    }
+    public static class TaskRepeater
+    {
+        public static System.Threading.Tasks.Task RepeatAsync(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask> operation, Pocok.BackgroundWork.TaskRepeaterOptions options, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class TaskRepeaterOptions : System.IEquatable<Pocok.BackgroundWork.TaskRepeaterOptions>
+    {
+        public TaskRepeaterOptions() { }
+        public Pocok.BackgroundWork.BackgroundWorkFailurePolicy FailurePolicy { get; init; }
+        public System.TimeSpan InitialDelay { get; init; }
+        public System.TimeSpan Interval { get; init; }
+        public int? MaximumIterations { get; init; }
+        public System.Func<System.Exception, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>? OnFailure { get; init; }
+        public System.Func<bool>? ShouldContinue { get; init; }
+        public System.TimeProvider TimeProvider { get; init; }
+    }
+}

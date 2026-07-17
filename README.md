@@ -16,6 +16,7 @@ Pocok is a deliberately small .NET package portfolio extracted from repeated app
 | `Pocok.Modularity.Contracts` | Capability | Experimental | Stable startup module contracts shared by host and plugin |
 | `Pocok.Modularity` | Capability | Experimental | Trusted startup-time plugin discovery and DI registration |
 | `Pocok.AppDefaults.Modularity` | Maintainer defaults | Experimental | Conventional host policy for `Pocok.Modularity` |
+| `Pocok.BackgroundWork` | Capability | Experimental, alpha | Guarded task observation, coalesced and debounced work, and non-overlapping repetition |
 | `Pocok.Scripting` | Capability | Experimental, alpha | Bounded JavaScript execution with explicit bindings and deterministic imports |
 | `Pocok.Signals` | Capability | Experimental, alpha | Quality-aware live-value contracts and shared subscription runtime |
 | `Pocok.Localization` | Capability | Experimental, alpha | Deterministic string-localizer composition, enum translation, and resource culture resolution |
@@ -54,7 +55,7 @@ var result = ValueConverter.Default.Convert<int>("42");
 
 See [the licensing guide](docs/licensing.md) for key generation, checking, host integration, threat model and hardening guidance.
 
-See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, Licensing host enforcement, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
+See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, Licensing host enforcement, owned BackgroundWork coordination, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
 
 ## Build and verify
 

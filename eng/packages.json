@@ -183,6 +183,19 @@
       "versionProperty": "PocokAppDefaultsModularityPackageVersion"
     },
     {
+      "id": "Pocok.BackgroundWork",
+      "project": "src/BackgroundWork/Pocok.BackgroundWork.csproj",
+      "tagPrefix": "backgroundwork-v",
+      "family": "Capability",
+      "releaseTier": 0,
+      "state": "Experimental",
+      "releasable": false,
+      "consumer": "BackgroundWorkConsumer",
+      "internalDependencies": [],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokBackgroundWorkPackageVersion"
+    },
+    {
       "id": "Pocok.Scripting",
       "project": "src/Scripting/Pocok.Scripting.csproj",
       "tagPrefix": "scripting-v",
