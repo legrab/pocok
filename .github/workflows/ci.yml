@@ -4,6 +4,13 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run the complete repository validation
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -13,14 +20,15 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Build and test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+  plan:
+    name: Plan affected validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      mode: ${{ steps.impact.outputs.mode }}
+      run-linux: ${{ steps.impact.outputs.run-linux }}
+      run-windows: ${{ steps.impact.outputs.run-windows }}
+      run-coverage: ${{ steps.impact.outputs.run-coverage }}
 
     steps:
       - name: Check out source
@@ -34,57 +42,198 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Test CI tooling
+        shell: pwsh
+        run: ./tools/Ci/Test-CiTooling.ps1
+
       - name: Test package metadata tooling
         shell: pwsh
         run: ./tools/PackageMetadata/Test-PackageMetadata.ps1
 
-      - name: Restore
-        run: dotnet restore Pocok.slnx --locked-mode
-
-      - name: Verify formatting
-        run: dotnet format Pocok.slnx --verify-no-changes --no-restore
-
-      - name: Build
-        run: dotnet build Pocok.slnx --configuration Release --no-restore
-
-      - name: Test
-        run: dotnet test Pocok.slnx --configuration Release --no-build --logger trx --results-directory artifacts/test-results
-
-      - name: Run core samples
+      - name: Test package catalog tooling
         shell: pwsh
+        run: ./tools/PackageCatalog/Test-PackageCatalog.ps1
+
+      - name: Resolve affected validation
+        id: impact
+        shell: pwsh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+          FORCE_FULL: ${{ github.event_name == 'push' || inputs.full == true || contains(github.event.pull_request.labels.*.name, 'ci:full') }}
         run: |
-          dotnet run --project samples/Conversion.Console/Pocok.Conversion.Console.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'Conversion sample failed.' }
-          dotnet run --project samples/Readiness.Console/Pocok.Readiness.Console.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'Readiness sample failed.' }
-          dotnet run --project samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'AppDefaults sample failed.' }
-          dotnet run --project samples/Operations.Worker/Pocok.Operations.Worker.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'Operations worker sample failed.' }
-          dotnet run --project samples/Scripting.Console/Pocok.Scripting.Console.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'Scripting sample failed.' }
-          dotnet run --project samples/Signals.Console/Pocok.Signals.Console.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'Signals sample failed.' }
-          dotnet run --project samples/Localization.Console/Pocok.Localization.Console.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'Localization sample failed.' }
-          dotnet run --project samples/Subscriptions.Console/Pocok.Subscriptions.Console.csproj --configuration Release --no-build
-          if ($LASTEXITCODE -ne 0) { throw 'Subscriptions sample failed.' }
+          $forceFull = [bool]::Parse($env:FORCE_FULL)
+          ./tools/Ci/Resolve-CiImpact.ps1 `
+            -BaseSha $env:BASE_SHA `
+            -HeadSha $env:HEAD_SHA `
+            -EventName '${{ github.event_name }}' `
+            -ForceFull:$forceFull `
+            -OutputPath artifacts/ci/impact.json `
+            -GitHubOutput $env:GITHUB_OUTPUT
 
-      - name: Publish trimmed Conversion sample
+      - name: Upload impact plan
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-impact-plan
+          path: artifacts/ci
+          if-no-files-found: warn
+          retention-days: 14
+
+  linux:
+    name: Linux affected validation
+    needs: plan
+    if: needs.plan.outputs.run-linux == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+
+      - name: Download impact plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ci-impact-plan
+          path: artifacts/ci
+
+      - name: Validate affected slices
         shell: pwsh
+        run: ./tools/Ci/Invoke-AffectedValidation.ps1 -Platform Linux
+
+      - name: Upload Linux results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-linux-results
+          path: |
+            artifacts/test-results/**
+            artifacts/coverage/head/**
+            artifacts/packages/**
+            artifacts/package-smoke/**
+            artifacts/trimmed-conversion/**
+          if-no-files-found: warn
+          retention-days: 14
+
+  windows:
+    name: Windows affected validation
+    needs: plan
+    if: needs.plan.outputs.run-windows == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+
+      - name: Download impact plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ci-impact-plan
+          path: artifacts/ci
+
+      - name: Validate affected slices
+        shell: pwsh
+        run: ./tools/Ci/Invoke-AffectedValidation.ps1 -Platform Windows
+
+      - name: Upload Windows results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-windows-results
+          path: |
+            artifacts/test-results/**
+            artifacts/trimmed-conversion/**
+          if-no-files-found: warn
+          retention-days: 14
+
+  coverage:
+    name: Compare affected coverage
+    needs: [plan, linux]
+    if: github.event_name == 'pull_request' && needs.plan.outputs.run-coverage == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+
+      - name: Download impact plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ci-impact-plan
+          path: artifacts/ci
+
+      - name: Download head coverage
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ci-linux-results
+          path: artifacts
+
+      - name: Compare with exact base SHA
+        shell: pwsh
+        run: ./tools/Ci/Invoke-SliceCoverageComparison.ps1
+
+      - name: Upload coverage comparison
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-coverage
+          path: artifacts/coverage/**
+          if-no-files-found: warn
+          retention-days: 14
+
+  gate:
+    name: CI gate
+    if: always()
+    needs: [plan, linux, windows, coverage]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate required jobs
+        shell: pwsh
+        env:
+          PLAN_RESULT: ${{ needs.plan.result }}
+          LINUX_RESULT: ${{ needs.linux.result }}
+          WINDOWS_RESULT: ${{ needs.windows.result }}
+          COVERAGE_RESULT: ${{ needs.coverage.result }}
+          REQUIRE_LINUX: ${{ needs.plan.outputs.run-linux }}
+          REQUIRE_WINDOWS: ${{ needs.plan.outputs.run-windows }}
+          REQUIRE_COVERAGE: ${{ github.event_name == 'pull_request' && needs.plan.outputs.run-coverage == 'true' }}
         run: |
-          dotnet publish samples/Conversion.Trimmed/Pocok.Conversion.Trimmed.csproj --configuration Release --output artifacts/trimmed-conversion
-          if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample publish failed.' }
-          dotnet artifacts/trimmed-conversion/Pocok.Conversion.Trimmed.dll
-          if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample execution failed.' }
-
-      - name: Pack
-        run: dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
-
-      - name: Test package from local feed
-        shell: pwsh
-        run: ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack
-
-      - name: Audit public contents
-        shell: pwsh
-        run: ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
+          if ($env:PLAN_RESULT -ne 'success') {
+            throw "Planning did not succeed: $env:PLAN_RESULT"
+          }
+          if ($env:REQUIRE_LINUX -eq 'true' -and $env:LINUX_RESULT -ne 'success') {
+            throw "Required Linux validation did not succeed: $env:LINUX_RESULT"
+          }
+          if ($env:REQUIRE_WINDOWS -eq 'true' -and $env:WINDOWS_RESULT -ne 'success') {
+            throw "Required Windows validation did not succeed: $env:WINDOWS_RESULT"
+          }
+          if ($env:REQUIRE_COVERAGE -eq 'true' -and $env:COVERAGE_RESULT -ne 'success') {
+            throw "Required coverage comparison did not succeed: $env:COVERAGE_RESULT"
+          }
+          Write-Host 'All required CI jobs succeeded.'

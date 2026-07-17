@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[Pocok.*]*</Include>
+          <Exclude>[*.Tests]*,[NUnit*]*,[Shouldly*]*,[Microsoft.*]*,[System.*]*</Exclude>
+          <ExcludeByFile>**/bin/**,**/obj/**,**/*.g.cs,**/*.generated.cs</ExcludeByFile>
+          <DeterministicReport>true</DeterministicReport>
+          <UseSourceLink>false</UseSourceLink>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

@@ -128,6 +128,7 @@ public sealed class ConcurrencyAndApiTests
 
         var mutableStaticFields = assembly.GetTypes()
             .Where(type => !type.FullName!.Contains("+<>c"))
+            .Where(type => !IsCoverageInstrumentationType(type))
             .SelectMany(type => type.GetFields(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly))
             .Where(field => field is { IsLiteral: false, IsInitOnly: false })
@@ -135,5 +136,15 @@ public sealed class ConcurrencyAndApiTests
             .ToArray();
 
         mutableStaticFields.ShouldBeEmpty();
+    }
+
+    private static bool IsCoverageInstrumentationType(Type type)
+    {
+        // Coverlet temporarily injects a tracker type into the target assembly while collecting coverage.
+        // It is test infrastructure and is not present in the shipped package.
+        return string.Equals(
+            type.Namespace,
+            "Coverlet.Core.Instrumentation.Tracker",
+            StringComparison.Ordinal);
     }
 }
