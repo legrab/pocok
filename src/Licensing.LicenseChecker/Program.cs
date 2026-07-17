@@ -21,7 +21,7 @@ static async Task<int> RunAsync(string[] args)
         if (publicKeys.Length == 0) throw new ArgumentException("At least one --public argument is required.");
         foreach (var publicKey in publicKeys)
         {
-            var (keyId, path) = SplitKeyReference(publicKey, parsed.One("key-id", "default"));
+            (var keyId, var path) = SplitKeyReference(publicKey, parsed.One("key-id", "default"));
             trusted.Add(keyId, await File.ReadAllTextAsync(path).ConfigureAwait(false));
         }
 

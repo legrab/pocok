@@ -37,7 +37,7 @@ public sealed class CompositeStringLocalizerTests
             new DictionaryStringLocalizer(("Greeting", "Hallo {0}"))
         ]);
 
-        var result = localizer["Greeting", "Ada"];
+        LocalizedString result = localizer["Greeting", "Ada"];
 
         result.Value.ShouldBe("Hello Ada");
         result.ResourceNotFound.ShouldBeFalse();
@@ -51,7 +51,7 @@ public sealed class CompositeStringLocalizerTests
             new DictionaryStringLocalizer(("Shared", "second"), ("SecondOnly", "second-only"))
         ]);
 
-        var values = localizer.GetAllStrings(false).ToArray();
+        LocalizedString[] values = localizer.GetAllStrings(false).ToArray();
 
         values.Select(value => value.Name).ShouldBe(["Shared", "FirstOnly", "SecondOnly"]);
         values[0].Value.ShouldBe("first");
@@ -65,7 +65,7 @@ public sealed class CompositeStringLocalizerTests
             new DictionaryStringLocalizer(("Shared", "second"))
         ]);
 
-        var values = localizer.GetAllStrings(false).ToArray();
+        LocalizedString[] values = localizer.GetAllStrings(false).ToArray();
 
         values.ShouldHaveSingleItem();
         values[0].Name.ShouldBe("Shared");
@@ -150,7 +150,7 @@ public sealed class CompositeStringLocalizerTests
         {
             get
             {
-                var result = Find(name);
+                LocalizedString result = Find(name);
                 return result.ResourceNotFound
                     ? result
                     : new LocalizedString(name, string.Format(CultureInfo.InvariantCulture, result.Value, arguments), false);

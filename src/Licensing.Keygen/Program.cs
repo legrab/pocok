@@ -45,7 +45,7 @@ static async Task<int> CreateKeysAsync(CliArguments arguments)
     EnsureParentDirectory(privatePath);
     EnsureParentDirectory(publicPath);
 
-    var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
+    (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
     await File.WriteAllTextAsync(privatePath, privateKey, new UTF8Encoding(false)).ConfigureAwait(false);
     await File.WriteAllTextAsync(publicPath, publicKey, new UTF8Encoding(false)).ConfigureAwait(false);
     Console.WriteLine($"Created signing key pair. Private: {privatePath}; public: {publicPath}");

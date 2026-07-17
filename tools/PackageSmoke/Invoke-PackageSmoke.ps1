@@ -33,6 +33,7 @@ $consumerSpecs = @{
     'Pocok.AppDefaults' = @{ Template = 'AppDefaultsConsumer/Pocok.AppDefaults.Consumer.csproj.template'; Program = 'AppDefaultsConsumer/Program.cs' }
     'Pocok.Conversion' = @{ Template = 'ConversionConsumer/Pocok.Conversion.Consumer.csproj.template'; Program = 'ConversionConsumer/Program.cs' }
     'Pocok.Readiness' = @{ Template = 'ReadinessConsumer/Pocok.Readiness.Consumer.csproj.template'; Program = 'ReadinessConsumer/Program.cs' }
+    'Pocok.BackgroundWork' = @{ Template = 'BackgroundWorkConsumer/Pocok.BackgroundWork.Consumer.csproj.template'; Program = 'BackgroundWorkConsumer/Program.cs' }
     'Pocok.Scripting' = @{ Template = 'ScriptingConsumer/Pocok.Scripting.Consumer.csproj.template'; Program = 'ScriptingConsumer/Program.cs' }
     'Pocok.Signals' = @{ Template = 'SignalsConsumer/Pocok.Signals.Consumer.csproj.template'; Program = 'SignalsConsumer/Program.cs' }
     'Pocok.Localization' = @{ Template = 'LocalizationConsumer/Pocok.Localization.Consumer.csproj.template'; Program = 'LocalizationConsumer/Program.cs' }

@@ -54,10 +54,10 @@ public sealed class LicensingApplicationConfigurator : IApplicationConfigurator
                 options.LicensePath = Path.Combine(contentRoot, options.LicensePath);
         }
 
-        foreach (string keyId in options.TrustedPublicKeyFiles.Keys.ToArray())
+        foreach (var keyId in options.TrustedPublicKeyFiles.Keys.ToArray())
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(keyId);
-            string path = options.TrustedPublicKeyFiles[keyId];
+            var path = options.TrustedPublicKeyFiles[keyId];
             ArgumentException.ThrowIfNullOrWhiteSpace(path);
             if (!Path.IsPathFullyQualified(path))
                 options.TrustedPublicKeyFiles[keyId] = Path.Combine(contentRoot, path);

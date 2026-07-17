@@ -16,7 +16,7 @@ public sealed class LicenseTests
     [Test]
     public void SignedLicenseRoundTripsAndChecksModules()
     {
-        var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
+        (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
         LicenseDocument license = NewLicense(modules: ["Reporting"]);
 
         var text = LicenseCryptography.Sign(license, "test", privateKey);
@@ -31,7 +31,7 @@ public sealed class LicenseTests
     [Test]
     public void PayloadOrSignatureTamperingIsRejected()
     {
-        var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
+        (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
         var text = LicenseCryptography.Sign(NewLicense(true), "test", privateKey);
         JsonObject envelope = JsonNode.Parse(text)!.AsObject();
         var payload = envelope["payload"]!.GetValue<string>();
@@ -44,8 +44,8 @@ public sealed class LicenseTests
     [Test]
     public void WrongSigningKeyIsRejected()
     {
-        var (privateKey, _) = LicenseCryptography.CreateSigningKeyPair();
-        var (_, otherPublicKey) = LicenseCryptography.CreateSigningKeyPair();
+        (var privateKey, var _) = LicenseCryptography.CreateSigningKeyPair();
+        (var _, var otherPublicKey) = LicenseCryptography.CreateSigningKeyPair();
         var text = LicenseCryptography.Sign(NewLicense(true), "test", privateKey);
 
         LicenseReader.ReadAndVerify(text, Trusted(otherPublicKey)).Code
@@ -57,7 +57,7 @@ public sealed class LicenseTests
     [Test]
     public void EncryptedLicenseRequiresSecretAndDetectsWrongSecret()
     {
-        var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
+        (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
         var signed = LicenseCryptography.Sign(NewLicense(true), "test", privateKey);
         var encrypted = LicenseCryptography.Encrypt(signed, "a-high-entropy-encryption-secret");
 
@@ -117,7 +117,7 @@ public sealed class LicenseTests
         CultureInfo provider = CultureInfo.InvariantCulture;
         LicenseDocument license = NewLicense(validFrom: DateTimeOffset.Parse("2027-01-01T00:00:00Z", provider),
             validUntil: DateTimeOffset.Parse("2026-01-01T00:00:00Z", provider));
-        var (privateKey, _) = LicenseCryptography.CreateSigningKeyPair();
+        (var privateKey, var _) = LicenseCryptography.CreateSigningKeyPair();
 
         Should.Throw<ArgumentException>(() => LicenseCryptography.Sign(license, "test", privateKey));
     }
@@ -130,8 +130,8 @@ public sealed class LicenseTests
         try
         {
             var licensePath = Path.Combine(directory, "license.pocok");
-            var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
-            File.WriteAllText(licensePath,
+            (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
+            await File.WriteAllTextAsync(licensePath,
                 LicenseCryptography.Sign(NewLicense(modules: ["First"]), "test", privateKey));
 
             using ServiceProvider provider = new ServiceCollection()
@@ -145,7 +145,7 @@ public sealed class LicenseTests
             ILicenseService service = provider.GetRequiredService<ILicenseService>();
             (await service.RefreshAsync("First")).IsValid.ShouldBeTrue();
 
-            File.WriteAllText(licensePath,
+            await File.WriteAllTextAsync(licensePath,
                 LicenseCryptography.Sign(NewLicense(modules: ["Second"]), "test", privateKey));
             (await service.RefreshAsync("Second")).IsValid.ShouldBeTrue();
             service.Validate("First").Code.ShouldBe(LicenseValidationCode.ModuleMissing);
@@ -164,8 +164,8 @@ public sealed class LicenseTests
         try
         {
             var licensePath = Path.Combine(directory, "license.pocok");
-            var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
-            File.WriteAllText(
+            (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
+            await File.WriteAllTextAsync(
                 licensePath,
                 LicenseCryptography.Sign(NewLicense(modules: ["Reporting"]), "test", privateKey));
 
@@ -180,7 +180,7 @@ public sealed class LicenseTests
             ILicenseService service = provider.GetRequiredService<ILicenseService>();
             (await service.RefreshAsync("Reporting")).IsValid.ShouldBeTrue();
 
-            File.WriteAllText(licensePath, "not-a-license");
+            await File.WriteAllTextAsync(licensePath, "not-a-license");
             LicenseValidationResult refresh = await service.RefreshAsync("Reporting");
 
             refresh.Code.ShouldBe(LicenseValidationCode.Malformed);

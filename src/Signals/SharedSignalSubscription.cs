@@ -91,7 +91,7 @@ internal sealed class SharedSignalSubscription
                 _staleTimer?.Dispose();
                 _staleTimer = null;
 
-                foreach (var subscriber in _subscribers)
+                foreach (SignalSubscriberBuffer subscriber in _subscribers)
                 {
                     subscriber.Complete();
                 }
@@ -131,7 +131,7 @@ internal sealed class SharedSignalSubscription
             var completed = false;
             try
             {
-                await foreach (var sample in _source.SubscribeAsync(_address, _stop.Token)
+                await foreach (SignalSample<object?> sample in _source.SubscribeAsync(_address, _stop.Token)
                                    .WithCancellation(_stop.Token)
                                    .ConfigureAwait(false))
                 {
@@ -197,7 +197,7 @@ internal sealed class SharedSignalSubscription
             sample.Failure);
 
         _lastSample = normalized;
-        foreach (var subscriber in _subscribers)
+        foreach (SignalSubscriberBuffer subscriber in _subscribers)
         {
             subscriber.Enqueue(normalized);
         }
@@ -208,7 +208,7 @@ internal sealed class SharedSignalSubscription
 
     private void PublishDisconnected()
     {
-        var now = _timeProvider.GetUtcNow();
+        DateTimeOffset now = _timeProvider.GetUtcNow();
         Publish(new SignalSample<object?>(
             null,
             false,
@@ -220,7 +220,7 @@ internal sealed class SharedSignalSubscription
 
     private void PublishFailure(SignalFailure failure)
     {
-        var now = _timeProvider.GetUtcNow();
+        DateTimeOffset now = _timeProvider.GetUtcNow();
         Publish(new SignalSample<object?>(
             null,
             false,
@@ -272,7 +272,7 @@ internal sealed class SharedSignalSubscription
                 checked(++_sequence));
             _lastSample = stale;
 
-            foreach (var subscriber in _subscribers)
+            foreach (SignalSubscriberBuffer subscriber in _subscribers)
             {
                 subscriber.Enqueue(stale);
             }

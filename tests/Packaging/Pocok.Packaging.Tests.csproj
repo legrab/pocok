@@ -28,10 +28,11 @@
     <ProjectReference Include="../../src/Licensing/Pocok.Licensing.csproj"/>
     <ProjectReference Include="../../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
     <ProjectReference Include="../../src/Modularity/Pocok.Modularity.csproj"/>
-   <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
+    <ProjectReference Include="../../src/BackgroundWork/Pocok.BackgroundWork.csproj"/>
+    <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
     <ProjectReference Include="../../src/Signals/Pocok.Signals.csproj"/>
     <ProjectReference Include="../../src/Localization/Pocok.Localization.csproj"/>
     <ProjectReference Include="../../src/Subscriptions/Pocok.Subscriptions.csproj"/>
- </ItemGroup>
+  </ItemGroup>
 
 </Project>

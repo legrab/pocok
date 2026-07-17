@@ -44,9 +44,9 @@ internal sealed class ImportWorker(
             var context = new ConversionContext(CultureInfo.GetCultureInfo("de-DE"));
             var accepted = new List<Measurement>();
 
-            foreach (string row in rows)
+            foreach (var row in rows)
             {
-                string[] cells = row.Split(';');
+                var cells = row.Split(';');
                 ConversionResult<decimal> value = converter.Convert<decimal>(cells[1], context);
                 if (value.IsFailure)
                 {

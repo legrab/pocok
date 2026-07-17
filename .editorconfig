@@ -52,3 +52,7 @@ dotnet_diagnostic.CA1032.severity = none
 dotnet_diagnostic.CA1819.severity = none
 dotnet_diagnostic.CA2227.severity = none
 
+# The semaphore is intentionally kept alive so reload callers queued just before disposal are not raced by Dispose.
+[src/Localization/FileStringLocalizer.cs]
+dotnet_diagnostic.CA2213.severity = none
+

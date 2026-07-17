@@ -53,29 +53,29 @@ jobs:
       - name: Run core samples
         shell: pwsh
         run: |
-          dotnet run --project samples/Conversion.Console/Conversion.Console.csproj --configuration Release --no-build
+          dotnet run --project samples/Conversion.Console/Pocok.Conversion.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Conversion sample failed.' }
-          dotnet run --project samples/Readiness.Console/Readiness.Console.csproj --configuration Release --no-build
+          dotnet run --project samples/Readiness.Console/Pocok.Readiness.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Readiness sample failed.' }
           dotnet run --project samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'AppDefaults sample failed.' }
           dotnet run --project samples/Operations.Worker/Pocok.Operations.Worker.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Operations worker sample failed.' }
-          dotnet run --project samples/Scripting.Console/Scripting.Console.csproj --configuration Release --no-build
+          dotnet run --project samples/Scripting.Console/Pocok.Scripting.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Scripting sample failed.' }
-          dotnet run --project samples/Signals.Console/Signals.Console.csproj --configuration Release --no-build
+          dotnet run --project samples/Signals.Console/Pocok.Signals.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Signals sample failed.' }
-          dotnet run --project samples/Localization.Console/Localization.Console.csproj --configuration Release --no-build
+          dotnet run --project samples/Localization.Console/Pocok.Localization.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Localization sample failed.' }
-          dotnet run --project samples/Subscriptions.Console/Subscriptions.Console.csproj --configuration Release --no-build
+          dotnet run --project samples/Subscriptions.Console/Pocok.Subscriptions.Console.csproj --configuration Release --no-build
           if ($LASTEXITCODE -ne 0) { throw 'Subscriptions sample failed.' }
 
       - name: Publish trimmed Conversion sample
         shell: pwsh
         run: |
-          dotnet publish samples/Conversion.Trimmed/Conversion.Trimmed.csproj --configuration Release --output artifacts/trimmed-conversion
+          dotnet publish samples/Conversion.Trimmed/Pocok.Conversion.Trimmed.csproj --configuration Release --output artifacts/trimmed-conversion
           if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample publish failed.' }
-          dotnet artifacts/trimmed-conversion/Conversion.Trimmed.dll
+          dotnet artifacts/trimmed-conversion/Pocok.Conversion.Trimmed.dll
           if ($LASTEXITCODE -ne 0) { throw 'Trimmed Conversion sample execution failed.' }
 
       - name: Pack

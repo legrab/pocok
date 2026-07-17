@@ -36,7 +36,7 @@ public sealed class ScriptRunner(IValueConverter? converter = null)
         {
             Engine engine = CreateEngine(request, options, cancellationToken);
             JsValue value = await engine.EvaluateAsync(request.Script, request.Identifier, cancellationToken);
-            object? result = value.IsNull() || value.IsUndefined() ? null : value.ToObject();
+            var result = value.IsNull() || value.IsUndefined() ? null : value.ToObject();
             if (request.ExpectResult && result is null)
                 return ScriptResult.Failed<object?>(new ScriptFailure("scripting.result.missing",
                     "The script was expected to return a value."));
@@ -119,8 +119,8 @@ public sealed class ScriptRunner(IValueConverter? converter = null)
     {
         if (exception is Jint.Runtime.JavaScriptException javascript)
         {
-            int line = javascript.Location.Start.Line;
-            int column = javascript.Location.Start.Column;
+            var line = javascript.Location.Start.Line;
+            var column = javascript.Location.Start.Column;
             return new ScriptFailure("scripting.javascript.error", BuildMessage(javascript, script, line, column),
                 line, column, exception);
         }
@@ -134,8 +134,8 @@ public sealed class ScriptRunner(IValueConverter? converter = null)
 
     private static string BuildMessage(Exception exception, string script, int line, int column)
     {
-        string[] lines = script.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
-        int index = Math.Clamp(line - 1, 0, lines.Length - 1);
+        var lines = script.Split([Environment.NewLine, "\n"], StringSplitOptions.None);
+        var index = Math.Clamp(line - 1, 0, lines.Length - 1);
         return $"{exception.Message} at line {line}, column {column}: {lines[index].Trim()}";
     }
 }

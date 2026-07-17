@@ -129,7 +129,7 @@ internal static class NumericConversion
             integralValue = decimal.Round(value, 0, MidpointRounding.AwayFromZero);
         }
 
-        var (minimum, maximum) = GetIntegralBounds(targetType);
+        (var minimum, var maximum) = GetIntegralBounds(targetType);
         if (integralValue < minimum || integralValue > maximum)
         {
             if (context.Overflow == OverflowPolicy.Fail) return ConversionFailures.Overflow(targetType);

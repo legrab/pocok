@@ -7,8 +7,8 @@ using Pocok.AppDefaults.Licensing;
 using Pocok.Licensing;
 
 // Demo only. Production issuers must keep private signing keys outside application deployments.
-(string privateKey, string publicKey) = LicenseCryptography.CreateSigningKeyPair();
-string license = LicenseCryptography.Sign(new LicenseDocument
+(var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
+var license = LicenseCryptography.Sign(new LicenseDocument
 {
     LicenseId = "sample-license",
     Customer = "Pocok sample",

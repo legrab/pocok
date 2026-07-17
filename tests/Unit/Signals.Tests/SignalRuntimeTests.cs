@@ -15,17 +15,17 @@ public sealed class SignalRuntimeTests
     public async Task ConnectionsShareSubscriptionAndReplayLatestSample()
     {
         var source = new TestSignalSource();
-        await using var runtime = RuntimeFor(source);
-        await using var first = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var firstSamples = first.Samples().GetAsyncEnumerator();
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> first = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> firstSamples = first.Samples().GetAsyncEnumerator();
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
 
         source.Emit("42");
-        var initial = await TestAsync.NextAsync(firstSamples);
+        SignalSample<int> initial = await TestAsync.NextAsync(firstSamples);
 
-        await using var second = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var secondSamples = second.Samples().GetAsyncEnumerator();
-        var replay = await TestAsync.NextAsync(secondSamples);
+        await using SignalConnection<int> second = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> secondSamples = second.Samples().GetAsyncEnumerator();
+        SignalSample<int> replay = await TestAsync.NextAsync(secondSamples);
 
         replay.ShouldBe(initial);
         initial.Value.ShouldBe(42);
@@ -36,8 +36,8 @@ public sealed class SignalRuntimeTests
     public async Task BoundedConnectionDropsOldestPendingSamples()
     {
         var source = new TestSignalSource();
-        await using var runtime = RuntimeFor(source, new SignalRuntimeOptions(subscriberCapacity: 2));
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalRuntime runtime = RuntimeFor(source, new SignalRuntimeOptions(subscriberCapacity: 2));
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
 
         for (var value = 1; value <= 5; value++)
@@ -46,7 +46,7 @@ public sealed class SignalRuntimeTests
         }
 
         await TestAsync.UntilAsync(() => connection.DroppedSampleCount == 3);
-        await using var samples = connection.Samples().GetAsyncEnumerator();
+        await using IAsyncEnumerator<SignalSample<int>> samples = connection.Samples().GetAsyncEnumerator();
         (await TestAsync.NextAsync(samples)).Value.ShouldBe(4);
         (await TestAsync.NextAsync(samples)).Value.ShouldBe(5);
     }
@@ -56,24 +56,24 @@ public sealed class SignalRuntimeTests
     {
         var source = new TestSignalSource();
         var time = new ManualTimeProvider(Start);
-        await using var runtime = RuntimeFor(
+        await using SignalRuntime runtime = RuntimeFor(
             source,
             new SignalRuntimeOptions(
                 reconnectDelay: TimeSpan.FromMinutes(1),
                 staleAfter: TimeSpan.FromMinutes(5)),
             time);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var samples = connection.Samples().GetAsyncEnumerator();
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> samples = connection.Samples().GetAsyncEnumerator();
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
 
         source.Emit(7);
-        var good = await TestAsync.NextAsync(samples);
+        SignalSample<int> good = await TestAsync.NextAsync(samples);
         time.Advance(TimeSpan.FromMinutes(4));
         source.Emit(7);
         await TestAsync.UntilAsync(() => source.DeliveredSampleCount >= 2);
         time.Advance(TimeSpan.FromMinutes(4));
         time.Advance(TimeSpan.FromMinutes(1));
-        var stale = await TestAsync.NextAsync(samples);
+        SignalSample<int> stale = await TestAsync.NextAsync(samples);
 
         good.Quality.ShouldBe(SignalQuality.Good);
         stale.Quality.ShouldBe(SignalQuality.Stale);
@@ -91,13 +91,13 @@ public sealed class SignalRuntimeTests
                 SignalWriteConsistency.ReadAfterWrite,
                 new SignalSample<object?>("42", true, TestTimes.Source, TestTimes.Observed, SignalQuality.Good, 1)))
         };
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var samples = connection.Samples().GetAsyncEnumerator();
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> samples = connection.Samples().GetAsyncEnumerator();
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
 
-        var written = await connection.WriteAsync(42, SignalWriteConsistency.ReadAfterWrite);
-        var published = await TestAsync.NextAsync(samples);
+        SignalResult<SignalWriteResult<int>> written = await connection.WriteAsync(42, SignalWriteConsistency.ReadAfterWrite);
+        SignalSample<int> published = await TestAsync.NextAsync(samples);
 
         written.IsSuccess.ShouldBeTrue();
         written.Value!.Consistency.ShouldBe(SignalWriteConsistency.ReadAfterWrite);
@@ -114,13 +114,13 @@ public sealed class SignalRuntimeTests
             ReadHandler = _ => SignalResult.Success(new SignalSample<object?>(
                 "42", true, TestTimes.Source, TestTimes.Observed, SignalQuality.Good, 1))
         };
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var samples = connection.Samples().GetAsyncEnumerator();
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> samples = connection.Samples().GetAsyncEnumerator();
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
 
-        var read = await connection.ReadAsync();
-        var published = await TestAsync.NextAsync(samples);
+        SignalResult<SignalSample<int>> read = await connection.ReadAsync();
+        SignalSample<int> published = await TestAsync.NextAsync(samples);
 
         read.IsSuccess.ShouldBeTrue();
         read.Value!.Value.ShouldBe(42);
@@ -131,10 +131,10 @@ public sealed class SignalRuntimeTests
     public async Task PointReadRequiresReadCapabilityAndInterface()
     {
         var source = new TestSignalSource();
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
 
-        var read = await connection.ReadAsync();
+        SignalResult<SignalSample<int>> read = await connection.ReadAsync();
 
         read.Failure!.Code.ShouldBe(SignalRuntimeErrorCodes.ReadUnsupported);
     }
@@ -146,10 +146,10 @@ public sealed class SignalRuntimeTests
         {
             ReadHandler = _ => throw new InvalidOperationException("Synthetic reader failure.")
         };
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
 
-        var read = await connection.ReadAsync();
+        SignalResult<SignalSample<int>> read = await connection.ReadAsync();
 
         read.Failure!.Code.ShouldBe(SignalRuntimeErrorCodes.ReadFailed);
     }
@@ -163,10 +163,10 @@ public sealed class SignalRuntimeTests
             ReadHandler = _ => SignalResult.Success(new SignalSample<object?>(
                 "not-a-number", true, TestTimes.Source, TestTimes.Observed, SignalQuality.Good, 1))
         };
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
 
-        var read = await connection.ReadAsync();
+        SignalResult<SignalSample<int>> read = await connection.ReadAsync();
 
         read.IsSuccess.ShouldBeFalse();
         read.Failure!.Code.ShouldBe("conversion.invalid-format");
@@ -181,10 +181,10 @@ public sealed class SignalRuntimeTests
             (_, _) => ValueTask.FromResult(SignalResult.Success<ISignalSource>(source)),
             new SignalRuntimeOptions(reconnectDelay: TimeSpan.FromMinutes(1)),
             time);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var samples = connection.Samples().GetAsyncEnumerator();
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> samples = connection.Samples().GetAsyncEnumerator();
 
-        var failure = await TestAsync.NextAsync(samples);
+        SignalSample<int> failure = await TestAsync.NextAsync(samples);
         failure.Quality.ShouldBe(SignalQuality.Failed);
         failure.Failure!.Code.ShouldBe(SignalRuntimeErrorCodes.SubscriptionFailed);
 
@@ -192,7 +192,7 @@ public sealed class SignalRuntimeTests
         time.Advance(TimeSpan.FromMinutes(1));
         await TestAsync.UntilAsync(() => source.SubscriptionCount == 2);
         source.Emit(9);
-        var recovered = await TestAsync.NextAsync(samples);
+        SignalSample<int> recovered = await TestAsync.NextAsync(samples);
         recovered.Value.ShouldBe(9);
         recovered.Sequence.ShouldBe(2);
     }
@@ -201,16 +201,16 @@ public sealed class SignalRuntimeTests
     public async Task ConversionFailureIsLocalToTypedConnection()
     {
         var source = new TestSignalSource();
-        await using var runtime = RuntimeFor(source);
-        await using var numbers = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var text = (await runtime.ConnectAsync<string>(Address)).Value!;
-        await using var numberSamples = numbers.Samples().GetAsyncEnumerator();
-        await using var textSamples = text.Samples().GetAsyncEnumerator();
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> numbers = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalConnection<string> text = (await runtime.ConnectAsync<string>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> numberSamples = numbers.Samples().GetAsyncEnumerator();
+        await using IAsyncEnumerator<SignalSample<string>> textSamples = text.Samples().GetAsyncEnumerator();
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
 
         source.Emit("not-a-number");
-        var number = await TestAsync.NextAsync(numberSamples);
-        var textValue = await TestAsync.NextAsync(textSamples);
+        SignalSample<int> number = await TestAsync.NextAsync(numberSamples);
+        SignalSample<string> textValue = await TestAsync.NextAsync(textSamples);
 
         number.Quality.ShouldBe(SignalQuality.Failed);
         number.Failure!.Code.ShouldBe("conversion.invalid-format");
@@ -226,10 +226,10 @@ public sealed class SignalRuntimeTests
             WriteHandler = (_, _) => SignalResult.Success(
                 new SignalWriteResult(SignalWriteConsistency.Acknowledged, null))
         };
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
 
-        var result = await connection.WriteAsync(1, SignalWriteConsistency.Confirmed);
+        SignalResult<SignalWriteResult<int>> result = await connection.WriteAsync(1, SignalWriteConsistency.Confirmed);
 
         result.IsSuccess.ShouldBeFalse();
         result.Failure!.Code.ShouldBe(SignalRuntimeErrorCodes.WriteConsistencyNotMet);
@@ -239,10 +239,10 @@ public sealed class SignalRuntimeTests
     public async Task WriteRequiresBothCapabilityAndWriterInterface()
     {
         var source = new TestSignalSource(capabilities: SignalSourceCapabilities.Subscribe);
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
 
-        var result = await connection.WriteAsync(1, SignalWriteConsistency.Acknowledged);
+        SignalResult<SignalWriteResult<int>> result = await connection.WriteAsync(1, SignalWriteConsistency.Acknowledged);
 
         result.Failure!.Code.ShouldBe(SignalRuntimeErrorCodes.WriteUnsupported);
     }
@@ -251,14 +251,14 @@ public sealed class SignalRuntimeTests
     public async Task ConnectionAllowsOneSampleEnumeration()
     {
         var source = new TestSignalSource();
-        await using var runtime = RuntimeFor(source);
-        await using var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
-        await using var first = connection.Samples().GetAsyncEnumerator();
+        await using SignalRuntime runtime = RuntimeFor(source);
+        await using SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using IAsyncEnumerator<SignalSample<int>> first = connection.Samples().GetAsyncEnumerator();
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
         source.Emit(1);
         await TestAsync.NextAsync(first);
 
-        await using var second = connection.Samples().GetAsyncEnumerator();
+        await using IAsyncEnumerator<SignalSample<int>> second = connection.Samples().GetAsyncEnumerator();
         await Should.ThrowAsync<InvalidOperationException>(async () => await second.MoveNextAsync());
     }
 
@@ -266,8 +266,8 @@ public sealed class SignalRuntimeTests
     public async Task DisposingLastConnectionStopsSharedSubscription()
     {
         var source = new TestSignalSource();
-        await using var runtime = RuntimeFor(source);
-        var connection = (await runtime.ConnectAsync<int>(Address)).Value!;
+        await using SignalRuntime runtime = RuntimeFor(source);
+        SignalConnection<int> connection = (await runtime.ConnectAsync<int>(Address)).Value!;
         await TestAsync.UntilAsync(() => source.ActiveSubscriptions == 1);
 
         await connection.DisposeAsync();
@@ -304,7 +304,7 @@ public sealed class SignalRuntimeTests
                 throw new InvalidOperationException("Synthetic source failure.");
             }
 
-            await foreach (var sample in _samples.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+            await foreach (SignalSample<object?> sample in _samples.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
             {
                 yield return sample;
             }
@@ -348,7 +348,7 @@ internal sealed class TestSignalSource : ISignalSubscriber, ISignalReader, ISign
         Interlocked.Increment(ref _activeSubscriptions);
         try
         {
-            await foreach (var sample in _samples.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+            await foreach (SignalSample<object?> sample in _samples.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
             {
                 yield return sample;
                 Interlocked.Increment(ref _deliveredSampleCount);
@@ -367,7 +367,7 @@ internal sealed class TestSignalSource : ISignalSubscriber, ISignalReader, ISign
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var result = WriteHandler?.Invoke(value, consistency) ??
+        SignalResult<SignalWriteResult> result = WriteHandler?.Invoke(value, consistency) ??
                      SignalResult.Success(new SignalWriteResult(SignalWriteConsistency.Acknowledged, null));
         return ValueTask.FromResult(result);
     }
@@ -377,7 +377,7 @@ internal sealed class TestSignalSource : ISignalSubscriber, ISignalReader, ISign
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var result = ReadHandler?.Invoke(address) ??
+        SignalResult<SignalSample<object?>> result = ReadHandler?.Invoke(address) ??
                      SignalResult.Failed<SignalSample<object?>>(new SignalFailure(
                          "test.read-unconfigured",
                          "The synthetic reader is not configured."));
@@ -430,13 +430,13 @@ internal sealed class ManualTimeProvider(DateTimeOffset initialTime) : TimeProvi
         lock (_sync)
         {
             _utcNow += duration;
-            foreach (var timer in _timers)
+            foreach (ManualTimer timer in _timers)
             {
-                if (timer.TryTakeCallback(_utcNow, out var callback)) callbacks.Add(callback);
+                if (timer.TryTakeCallback(_utcNow, out (TimerCallback Callback, object? State) callback)) callbacks.Add(callback);
             }
         }
 
-        foreach (var (callback, state) in callbacks) callback(state);
+        foreach ((TimerCallback callback, var state) in callbacks) callback(state);
     }
 
     private void Remove(ManualTimer timer) { lock (_sync) _timers.Remove(timer); }

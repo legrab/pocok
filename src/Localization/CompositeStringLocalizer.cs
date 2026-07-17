@@ -19,7 +19,7 @@ public sealed class CompositeStringLocalizer : IStringLocalizer
     {
         ArgumentNullException.ThrowIfNull(localizers);
 
-        var materialized = localizers.ToArray();
+        IStringLocalizer[] materialized = localizers.ToArray();
         if (materialized.Any(localizer => localizer is null))
         {
             throw new ArgumentException("The localizer sequence cannot contain null entries.", nameof(localizers));
@@ -35,9 +35,9 @@ public sealed class CompositeStringLocalizer : IStringLocalizer
         {
             ArgumentNullException.ThrowIfNull(name);
 
-            foreach (var localizer in _localizers)
+            foreach (IStringLocalizer localizer in _localizers)
             {
-                var candidate = localizer[name];
+                LocalizedString candidate = localizer[name];
                 if (!candidate.ResourceNotFound)
                 {
                     return candidate;
@@ -56,9 +56,9 @@ public sealed class CompositeStringLocalizer : IStringLocalizer
             ArgumentNullException.ThrowIfNull(name);
             ArgumentNullException.ThrowIfNull(arguments);
 
-            foreach (var localizer in _localizers)
+            foreach (IStringLocalizer localizer in _localizers)
             {
-                var candidate = localizer[name, arguments];
+                LocalizedString candidate = localizer[name, arguments];
                 if (!candidate.ResourceNotFound)
                 {
                     return candidate;
@@ -73,9 +73,9 @@ public sealed class CompositeStringLocalizer : IStringLocalizer
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var localizer in _localizers)
+        foreach (IStringLocalizer localizer in _localizers)
         {
-            foreach (var candidate in localizer.GetAllStrings(includeParentCultures))
+            foreach (LocalizedString candidate in localizer.GetAllStrings(includeParentCultures))
             {
                 if (!candidate.ResourceNotFound && seen.Add(candidate.Name))
                 {

@@ -13,6 +13,51 @@ namespace Pocok.Localization
         public static string Translate<TEnum>(this TEnum value, Microsoft.Extensions.Localization.IStringLocalizer localizer)
             where TEnum :  struct, System.Enum { }
     }
+    public sealed class FileLocalizationStatus : System.IEquatable<Pocok.Localization.FileLocalizationStatus>
+    {
+        public FileLocalizationStatus(System.DateTimeOffset LastAttemptedAt, System.DateTimeOffset? LastSuccessfulAt, bool HasValidSnapshot, System.Exception? LastError) { }
+        public bool HasValidSnapshot { get; init; }
+        public System.DateTimeOffset LastAttemptedAt { get; init; }
+        public System.Exception? LastError { get; init; }
+        public System.DateTimeOffset? LastSuccessfulAt { get; init; }
+    }
+    public sealed class FileStringLocalizer : Microsoft.Extensions.Localization.IStringLocalizer, System.IAsyncDisposable
+    {
+        public FileStringLocalizer(Pocok.Localization.FileStringLocalizerOptions options) { }
+        public Microsoft.Extensions.Localization.LocalizedString this[string name] { get; }
+        public Microsoft.Extensions.Localization.LocalizedString this[string name, object[] arguments] { get; }
+        public Pocok.Localization.FileLocalizationStatus Status { get; }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public System.Collections.Generic.IEnumerable<Microsoft.Extensions.Localization.LocalizedString> GetAllStrings(bool includeParentCultures) { }
+        public System.Threading.Tasks.Task ReloadAsync(System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class FileStringLocalizerOptions : System.IEquatable<Pocok.Localization.FileStringLocalizerOptions>
+    {
+        public FileStringLocalizerOptions() { }
+        public bool AllowJsonComments { get; init; }
+        public bool AllowTrailingCommas { get; init; }
+        public string BaseName { get; init; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Localization.LocalizationFileFormat> FormatPrecedence { get; init; }
+        public long MaximumFileSizeBytes { get; init; }
+        public Pocok.Localization.MissingLocalizationFileBehavior MissingFileBehavior { get; init; }
+        public System.TimeSpan ReloadDebounce { get; init; }
+        public int ReloadRetryCount { get; init; }
+        public System.TimeSpan ReloadRetryDelay { get; init; }
+        public string RootDirectory { get; init; }
+        public System.Action<Pocok.Localization.FileLocalizationStatus>? StatusChanged { get; init; }
+        public System.TimeProvider TimeProvider { get; init; }
+        public bool WatchForChanges { get; init; }
+    }
+    public enum LocalizationFileFormat
+    {
+        Json = 0,
+        Resx = 1,
+    }
+    public enum MissingLocalizationFileBehavior
+    {
+        RetainLastKnownGood = 0,
+        RemoveMissingResources = 1,
+    }
     public static class ResourceCulture
     {
         public static System.Globalization.CultureInfo GetCultureFromFileName(string path, System.Globalization.CultureInfo fallback) { }

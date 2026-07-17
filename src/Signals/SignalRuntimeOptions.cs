@@ -18,7 +18,7 @@ public sealed record SignalRuntimeOptions
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(subscriberCapacity);
 
-        var effectiveReconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(1);
+        TimeSpan effectiveReconnectDelay = reconnectDelay ?? TimeSpan.FromSeconds(1);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(
             effectiveReconnectDelay,
             TimeSpan.Zero,

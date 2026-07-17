@@ -17,7 +17,7 @@ public sealed class LicensingDefaultsTests
     [Test]
     public async Task ValidLicenseAllowsHostStartup()
     {
-        var (privateKey, publicKey) = LicenseCryptography.CreateSigningKeyPair();
+        (var privateKey, var publicKey) = LicenseCryptography.CreateSigningKeyPair();
         var license = LicenseCryptography.Sign(new LicenseDocument
         {
             LicenseId = "host-test",

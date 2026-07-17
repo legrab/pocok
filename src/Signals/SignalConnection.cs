@@ -47,13 +47,13 @@ public sealed class SignalConnection<T> : IAsyncDisposable
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
 
-        var read = await _entry.ReadAsync(cancellationToken).ConfigureAwait(false);
+        SignalResult<SignalSample<object?>> read = await _entry.ReadAsync(cancellationToken).ConfigureAwait(false);
         if (!read.IsSuccess)
         {
             return SignalResult.Failed<SignalSample<T>>(read.Failure!);
         }
 
-        var converted = ConvertSample(read.Value!);
+        SignalSample<T> converted = ConvertSample(read.Value!);
         return converted.Quality == SignalQuality.Failed && read.Value!.Quality != SignalQuality.Failed
             ? SignalResult.Failed<SignalSample<T>>(converted.Failure!)
             : SignalResult.Success(converted);
@@ -71,7 +71,7 @@ public sealed class SignalConnection<T> : IAsyncDisposable
             throw new InvalidOperationException("A signal connection permits one sample enumeration.");
         }
 
-        await foreach (var sample in _buffer.ReadAllAsync(cancellationToken).ConfigureAwait(false))
+        await foreach (SignalSample<object?> sample in _buffer.ReadAllAsync(cancellationToken).ConfigureAwait(false))
         {
             yield return ConvertSample(sample);
         }
@@ -91,19 +91,19 @@ public sealed class SignalConnection<T> : IAsyncDisposable
             throw new ArgumentOutOfRangeException(nameof(consistency));
         }
 
-        var written = await _entry.WriteAsync(value, consistency, cancellationToken).ConfigureAwait(false);
+        SignalResult<SignalWriteResult> written = await _entry.WriteAsync(value, consistency, cancellationToken).ConfigureAwait(false);
         if (!written.IsSuccess)
         {
             return SignalResult.Failed<SignalWriteResult<T>>(written.Failure!);
         }
 
-        var raw = written.Value!;
+        SignalWriteResult raw = written.Value!;
         if (raw.Sample is null)
         {
             return SignalResult.Success(new SignalWriteResult<T>(raw.Consistency, null));
         }
 
-        var converted = ConvertSample(raw.Sample);
+        SignalSample<T> converted = ConvertSample(raw.Sample);
         if (converted.Quality == SignalQuality.Failed && raw.Sample.Quality != SignalQuality.Failed)
         {
             return SignalResult.Failed<SignalWriteResult<T>>(converted.Failure!);
