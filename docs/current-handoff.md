@@ -1,11 +1,13 @@
 # Current repository handoff
 
-Status revision: working tree based on `d94c3ed` (post-squash extraction and review state)
+Status revision: working tree based on `d94c3ed` with dependency-aware CI and slice coverage awaiting executable acceptance
 
 Refresh owner: any change that alters release eligibility, acceptance evidence, package closure, or the Modularity gate must update this file or remove obsolete claims.
 
 ## Current state
 
+- Pull-request CI now derives affected source, test, sample, benchmark, package, smoke, audit, and coverage work from changed paths plus reverse transitive project and package dependencies. Pushes to `main`, explicit full runs, global policy changes, and unsafe graph states retain complete validation through the stable `CI gate`.
+- Per-slice head coverage is collected during the Linux test run and compared with the exact pull-request base SHA when base tooling exists. The CI scripts, workflow structure, XML, JSON, and repository graph have received static validation in the current environment; a PowerShell 7 and .NET 10 Linux/Windows execution remains required.
 - Waves C and D are structurally implemented.
 - A Windows .NET 10.0.102 and PowerShell 7.3.6 acceptance run passed formatting, solution build, 236 tests, core samples, package catalog validation, local-closure smoke, and public release audit on the pre-licensing baseline. The licensing addition has not yet received executable proof. Scripting has a tracked public API snapshot, ten focused behavior tests, source-size and memory bounds, and an installed-package consumer check; Signals has a tracked public API snapshot, twenty-two focused contract/runtime tests, shared subscription lifecycle, point-in-time reads, and structured typed-read conversion failures, plus an installed-package consumer check; Localization has a tracked public API snapshot, focused composition, culture, JSON, RESX, reload, watcher and enum-localization tests, a sample, and an installed-package consumer check; Subscriptions has a tracked public API snapshot, five focused registry tests, a sample, and an installed-package consumer check.
 - The Ubuntu failure in `SourceFailurePublishesFailureAndReconnects` was a fake-time test race: the test could advance time before the reconnect timer was registered. The test now waits for timer registration before advancing time and reports a clear timeout when asynchronous conditions are not reached. A fresh Linux CI run remains required.
@@ -22,7 +24,7 @@ Refresh owner: any change that alters release eligibility, acceptance evidence, 
 
 ## Next action
 
-Run the complete licensing acceptance gate, then obtain Linux CI evidence, verify real debugger Source Link behavior from an installed candidate package, and run candidate-scoped publication smoke before release eligibility changes.
+Run `./tools/Ci/Test-CiTooling.ps1` and the complete Linux/Windows CI gate, then complete the licensing acceptance gate, verify real debugger Source Link behavior from an installed candidate package, and run candidate-scoped publication smoke before release eligibility changes.
 
 <details>
 <summary>Acceptance matrix</summary>
