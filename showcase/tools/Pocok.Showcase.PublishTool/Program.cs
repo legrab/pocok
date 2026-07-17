@@ -32,12 +32,7 @@ var inventory = new List<SliceInventoryItem>();
 var moduleIds = new HashSet<string>(StringComparer.Ordinal);
 var packageIds = new HashSet<string>(StringComparer.Ordinal);
 var slugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-IEnumerable<string> projects = Directory.Exists(samplesRoot)
-    ? Directory.EnumerateFiles(samplesRoot, "Pocok.Showcase.*.csproj", SearchOption.AllDirectories)
-        .Where(path => !Path.GetRelativePath(samplesRoot, path).Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-            .Any(static segment => segment.StartsWith('_')))
-        .Order(StringComparer.Ordinal)
-    : [];
+IEnumerable<string> projects = DiscoverPluginProjects(samplesRoot);
 
 foreach (string project in projects)
 {
@@ -52,7 +47,8 @@ foreach (string project in projects)
     Directory.CreateDirectory(pluginOutput);
     var publish = new List<string>
     {
-        "publish", project, "--configuration", "Release", "--output", pluginOutput, "--nologo", "--maxcpucount:1"
+        "publish", project, "--configuration", "Release", "--output", pluginOutput, "--nologo", "--maxcpucount:1",
+        "-p:StageShowcasePlugin=false"
     };
     if (arguments.NoRestore) publish.Add("--no-restore");
     Console.WriteLine($"Publishing slice {manifest.Metadata.PackageId}...");
@@ -77,6 +73,34 @@ if (arguments.RequireCompleteCatalog)
 await File.WriteAllTextAsync(Path.Combine(contentRoot, "showcase-slices.json"),
     JsonSerializer.Serialize(new SliceInventoryDocument(inventory), PublishJson.Options) + Environment.NewLine);
 Console.WriteLine($"Published Pocok Showcase to {outputRoot} with {inventory.Count} slice(s).");
+
+static IEnumerable<string> DiscoverPluginProjects(string samplesRoot)
+{
+    if (!Directory.Exists(samplesRoot)) return [];
+
+    var projects = new List<string>();
+    foreach (string manifest in Directory.EnumerateFiles(samplesRoot, "pocok.module.json", SearchOption.AllDirectories)
+                 .Order(StringComparer.Ordinal))
+    {
+        string relative = Path.GetRelativePath(samplesRoot, manifest);
+        if (relative.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            .Any(static segment =>
+                segment.StartsWith('_')
+                || segment.Equals("bin", StringComparison.OrdinalIgnoreCase)
+                || segment.Equals("obj", StringComparison.OrdinalIgnoreCase)))
+            continue;
+
+        string directory = Path.GetDirectoryName(manifest)!;
+        string[] candidates = Directory.EnumerateFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+        if (candidates.Length != 1)
+            throw new InvalidOperationException($"Plugin directory '{directory}' must contain exactly one project file.");
+        projects.Add(candidates[0]);
+    }
+
+    return projects;
+}
 
 static async Task RunAsync(string executable, IReadOnlyList<string> arguments, string workingDirectory)
 {

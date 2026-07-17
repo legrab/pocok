@@ -1,38 +1,50 @@
 {
   "App": {
     "Title": "Pocok Showcase",
-    "Subtitle": "Small .NET packages, exercised against their real APIs."
+    "Subtitle": "Package reference and runnable examples for Pocok."
   },
   "Navigation": {
-    "Home": "Packages",
-    "System": "System"
+    "Primary": "Primary navigation",
+    "Home": "Home",
+    "System": "System",
+    "Sandboxes": "Sandboxes"
   },
   "Language": {
     "Label": "Language",
     "English": "English",
     "Hungarian": "Hungarian"
   },
+  "Theme": {
+    "SwitchToLight": "Use light theme",
+    "SwitchToDark": "Use dark theme"
+  },
+  "Logs": {
+    "Title": "Live logs",
+    "Empty": "No visible records."
+  },
   "Home": {
     "Eyebrow": ".NET 10 · Interactive Server",
-    "Title": "Small packages, real behavior",
-    "Intro": "Pocok is a focused .NET package set for explicit infrastructure behavior. This showcase runs trusted repository slices through bounded, per-user sandboxes.",
+    "Title": "Pocok packages, with runnable examples",
+    "Intro": "Browse the package catalog or run bounded examples against installed packages. Each example uses the package's public API and runs in an isolated per-user scope.",
     "Known": "known packages",
-    "Available": "available slices",
-    "Planned": "planned slices",
-    "Loaded": "plugin slices loaded",
+    "Available": "installed examples",
+    "Planned": "packages without examples",
+    "Loaded": "loaded plugins",
     "States": "Package states",
     "Families": "Filter by family",
     "AllFamilies": "All families",
     "Capability": "Capability",
     "MaintainerDefaults": "Maintainer defaults",
-    "StartTitle": "Try an implemented sandbox",
-    "StartText": "Each available slice exercises the real package API with editable inputs, bounded execution, and structured results. Start with the first installed slice or choose any available package below.",
-    "StartAction": "Open featured sandbox",
-    "SystemAction": "Inspect runtime system",
-    "SandboxYes": "Interactive sandbox",
-    "SandboxNo": "No sandbox yet",
+    "StartTitle": "Run an installed example",
+    "StartText": "Installed examples call the package's public API with editable input and structured results. Open the featured example or choose another package below.",
+    "StartAction": "Open featured example",
+    "SystemAction": "View runtime details",
+    "SandboxYes": "Runnable example",
+    "SandboxNo": "No runnable example",
     "Version": "Module version",
-    "FilterCount": "packages shown"
+    "FilterCount": "packages shown",
+    "AvailableSandboxes": "Available sandboxes",
+    "ComingSoon": "Coming soon"
   },
   "Actions": {
     "Open": "Open package",
@@ -51,20 +63,21 @@
     "Purpose": "Purpose",
     "Family": "Family",
     "PackageState": "Package state",
-    "Sandbox": "Sandbox",
+    "Sandbox": "Example",
     "NoSandbox": "Not installed in this deployment",
     "Documentation": "Source documentation",
     "DocumentationLink": "Open documentation",
     "Facts": "Package facts",
-    "PlannedTitle": "This slice is not implemented yet",
-    "PlannedMessage": "The package is part of the current catalog, but this deployment does not install an executable slice for it yet. No placeholder output is fabricated.",
-    "ContributorGuidance": "A contributor can add the slice under samples/Showcase using the established shared contracts, components, localization, and publish discovery.",
-    "ContributorGuide": "Read the slice contributor guide",
+    "PlannedTitle": "No runnable example is installed",
+    "PlannedMessage": "This package is listed in the catalog, but this deployment does not include a Showcase plugin for it.",
+    "ContributorGuidance": "Add a plugin under samples/Showcase and reuse the shared contracts, components, localization, and manifest-based publishing.",
+    "ContributorGuide": "Read the plugin contributor guide",
     "NotFoundTitle": "Package not found",
     "NotFoundText": "The requested package is not part of the current deployment catalog."
   },
   "Footer": {
-    "Tagline": "Trusted in-process demos with bounded per-user execution."
+    "Tagline": "Bounded in-process examples using the packages' public APIs.",
+    "Repository": "View repository on GitHub"
   },
   "Result": {
     "Success": "Success",
@@ -78,7 +91,7 @@
   "System": {
     "Eyebrow": "Runtime",
     "Title": "System status",
-    "Intro": "Safe runtime facts for the startup-discovered modules and immutable deployment catalog.",
+    "Intro": "Runtime details for loaded modules and the deployment catalog.",
     "Application": "Application",
     "ApplicationVersion": "Application version",
     "OperatingSystem": "Operating system",
@@ -99,18 +112,21 @@
     "Culture": "Current culture",
     "Modules": "Modules",
     "NoModules": "No modules were discovered.",
-    "Diagnostics": "Safe diagnostics",
+    "Diagnostics": "Module diagnostics",
     "NoDiagnostics": "No module diagnostics.",
     "Required": "Required",
     "Optional": "Optional",
     "Version": "Version",
     "Status": "Status",
-    "DotNet": ".NET runtime"
+    "DotNet": ".NET runtime",
+    "FeatureToggles": "Feature toggles",
+    "LogConsole": "In-app log console",
+    "LogConsoleDescription": "Show the bounded synthetic Showcase log stream in the left rail."
   },
   "Errors": {
-    "Eyebrow": "Safe failure",
+    "Eyebrow": "Request failed",
     "Title": "The request could not be completed",
-    "Text": "No internal details were exposed. Return to the package catalog and try again.",
+    "Text": "The application did not expose internal error details. Return to the package catalog and try again.",
     "NotFoundTitle": "Page not found",
     "NotFoundText": "The requested showcase page does not exist."
   },
@@ -121,49 +137,49 @@
   },
   "Packages": {
     "Pocok_Conversion": {
-      "Summary": "Policy-driven value conversion with explicit failures, collection support, and bounded behavior."
+      "Summary": "Policy-driven conversion with explicit failures, collection handling, and bounded recursion."
     },
     "Pocok_Readiness": {
-      "Summary": "Explicit startup, readiness, failure, cancellation, shutdown, and restart coordination."
+      "Summary": "Restartable startup and readiness coordination with explicit failure and cancellation states."
     },
     "Pocok_AppDefaults": {
-      "Summary": "Composable application configurators for consistent host setup."
+      "Summary": "Ordered application configurators for repeatable host setup."
     },
     "Pocok_AppDefaults_Logging": {
-      "Summary": "Configuration-driven Microsoft.Extensions.Logging defaults."
+      "Summary": "Conservative Microsoft.Extensions.Logging defaults driven by configuration."
     },
     "Pocok_AppDefaults_Logging_Serilog": {
-      "Summary": "Serilog defaults integrated through the Pocok application configurator model."
+      "Summary": "Serilog host defaults through the Pocok application configurator model."
     },
     "Pocok_Modularity_Contracts": {
-      "Summary": "Stable service-module contracts shared between hosts and trusted plugins."
+      "Summary": "Shared contracts for hosts and trusted startup modules."
     },
     "Pocok_Modularity": {
-      "Summary": "Manifest-driven startup discovery and registration for trusted in-process modules."
+      "Summary": "Manifest-based discovery and registration of trusted in-process modules."
     },
     "Pocok_AppDefaults_Modularity": {
-      "Summary": "Maintainer defaults for Pocok modularity configuration."
+      "Summary": "Conventional host configuration for Pocok.Modularity."
     },
     "Pocok_BackgroundWork": {
-      "Summary": "Small concurrency helpers for coalescing, debouncing, repetition, and observation."
+      "Summary": "Concurrency helpers for coalescing, debouncing, repetition, and task observation."
     },
     "Pocok_Scripting": {
-      "Summary": "Bounded JavaScript execution with imports, modules, bindings, and structured failures."
+      "Summary": "Bounded JavaScript execution with explicit bindings, modules, and structured failures."
     },
     "Pocok_Localization": {
-      "Summary": "Deterministic file-backed localization and provider composition."
+      "Summary": "Deterministic JSON and RESX localization with ordered provider composition."
     },
     "Pocok_Signals": {
-      "Summary": "Typed signal runtime abstractions for reading, writing, subscribing, and connection state."
+      "Summary": "Typed signal reads, writes, subscriptions, quality, and connection state."
     },
     "Pocok_Subscriptions": {
-      "Summary": "Concurrency-safe keyed subscription lifecycle management."
+      "Summary": "Thread-safe keyed subscriptions with typed filtering and mapping."
     },
     "Pocok_Licensing": {
-      "Summary": "Signed and encrypted license documents, validation, runtime enforcement, and CLI workflows."
+      "Summary": "Signed offline licenses with validation, runtime enforcement, and CLI tools."
     },
     "Pocok_AppDefaults_Licensing": {
-      "Summary": "Application defaults for configuring and enforcing Pocok licensing."
+      "Summary": "Host configuration and enforcement defaults for Pocok.Licensing."
     }
   },
   "RunStatus": {

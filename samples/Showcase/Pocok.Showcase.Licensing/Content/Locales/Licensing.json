@@ -1,0 +1,129 @@
+{
+  "Package": {
+    "Name": "Licensing",
+    "Summary": "Evaluate license claims against time, runtime, module, machine, and pre-shared-key requirements.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Samples",
+    "Title": "License validation",
+    "Running": "Validating",
+    "Ready": "Ready",
+    "Run": "Validate license",
+    "Cancel": "Cancel",
+    "ExecutionSteps": "Execution steps"
+  },
+  "Editor": {
+    "Claims": "License claims",
+    "Runtime": "Runtime facts"
+  },
+  "Fields": {
+    "LicenseId": "License ID",
+    "Customer": "Customer label",
+    "IssuedAt": "Issued at (UTC, ISO-8601)",
+    "ValidFrom": "Valid from (optional)",
+    "ValidUntil": "Valid until (optional)",
+    "MaximumRuntime": "Maximum process runtime (minutes)",
+    "ZeroDisables": "Use 0 for no process-runtime limit.",
+    "AllModules": "License every module",
+    "LicensedModules": "Licensed modules",
+    "ModulesHelp": "Separate module identifiers with commas or new lines.",
+    "RequiredModule": "Module requested by the application",
+    "UtcNow": "Current UTC time (ISO-8601)",
+    "ProcessRuntime": "Current process runtime (minutes)",
+    "LicensedMachine": "Licensed machine fingerprint",
+    "CurrentMachine": "Current machine fingerprint",
+    "LicensePsk": "Pre-shared key stored by the issuer",
+    "SuppliedPsk": "Pre-shared key supplied at runtime"
+  },
+  "Result": {
+    "Title": "Validation result",
+    "Empty": "Validate the current claims to inspect the stable result code and diagnostic.",
+    "CodePreview": "Equivalent validation call",
+    "Truncated": "truncated",
+    "Fields": {
+      "Code": "Validation code",
+      "LicenseId": "License ID",
+      "RequiredModule": "Required module",
+      "Claims": "Claims summary",
+      "Runtime": "Runtime facts"
+    }
+  },
+  "Tips": {
+    "Title": "What to notice",
+    "Claims": "LicenseValidator evaluates already verified claims. Signature verification belongs to LicenseReader before this step.",
+    "Modules": "Module checks are case-insensitive and may be bypassed explicitly with AllModules.",
+    "Machines": "Machine restrictions use privacy-preserving 64-character SHA-256 fingerprints.",
+    "Psk": "The license stores a license-scoped digest, not the pre-shared key itself.",
+    "ExpectedFailures": "Expired, missing-module, machine, runtime, and key mismatches are normal validation results rather than host exceptions."
+  },
+  "Guide": {
+    "More": "More guidance",
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Pocok.Licensing provides offline license documents, signature verification, claim validation, and runtime enforcement for .NET applications."
+    },
+    "QuickStart": {
+      "Title": "Quick start",
+      "Body": "Choose an example, edit the signed claims and current runtime facts, then run LicenseValidator. The public sandbox keeps every value in memory."
+    },
+    "Claims": {
+      "Title": "Supported claims",
+      "Body": "Claims cover validity windows, maximum process runtime, modules, machine fingerprints, a license-scoped pre-shared-key digest, and non-secret metadata."
+    },
+    "Signatures": {
+      "Title": "Signature boundary",
+      "Body": "Applications receive public keys and verify signed ECDSA P-256 envelopes with LicenseReader. Private signing keys must remain outside client deployments."
+    },
+    "Runtime": {
+      "Title": "Runtime enforcement",
+      "Body": "LicenseValidator returns stable result codes. LicenseService caches the latest refresh and LicenseGuard converts failed checks into operation-level exceptions when required."
+    },
+    "Production": {
+      "Title": "Production notes",
+      "Body": "Licensing is an offline deterrent, not an unbreakable DRM boundary. Keep valuable checks close to protected work and exclude secrets from logs and diagnostics."
+    },
+    "Snippet": {
+      "ValidatorTitle": "Validate verified claims"
+    }
+  },
+  "Boundaries": {
+    "Title": "Sandbox boundaries",
+    "ClaimsOnly": "Builds and validates in-memory claims through the public API.",
+    "NoPrivateKeys": "Does not create, upload, or expose private signing keys.",
+    "NoFiles": "Does not read or write license files on the server.",
+    "ExpectedFailures": "Validation failures remain structured results and do not stop the host."
+  },
+  "Source": {
+    "Title": "Source documentation",
+    "Body": "Package documentation for signing, encryption, claim semantics, runtime services, and the threat model."
+  },
+  "Samples": {
+    "valid-module": {
+      "Name": "Licensed module",
+      "Description": "Validate a current license that includes the requested Reporting module."
+    },
+    "missing-module": {
+      "Name": "Missing module",
+      "Description": "Request Admin from a license that only includes Reporting and Export."
+    },
+    "expired": {
+      "Name": "Expired license",
+      "Description": "Move the current time to the exclusive end of the license window."
+    },
+    "runtime-exceeded": {
+      "Name": "Runtime exceeded",
+      "Description": "Exceed the license's maximum process runtime by one minute."
+    },
+    "machine-mismatch": {
+      "Name": "Machine mismatch",
+      "Description": "Validate a license bound to a different machine fingerprint."
+    },
+    "psk-mismatch": {
+      "Name": "Wrong pre-shared key",
+      "Description": "Supply a key that does not match the license-scoped digest."
+    }
+  }
+}

@@ -1,0 +1,24 @@
+<div class="package-workbench">
+    <aside class="package-samples-column">
+        @Samples
+    </aside>
+
+    <div class="stack package-sandbox-column">
+        @Main
+    </div>
+
+    <aside class="stack facts-rail package-guide-column">
+        @Guidance
+    </aside>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment Samples { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public RenderFragment Main { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public RenderFragment Guidance { get; set; } = default!;
+}

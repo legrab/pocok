@@ -1,0 +1,57 @@
+<ShowcaseCodeAssistEditor Label="@T("Sandbox.CodeLabel")"
+                          @bind-Value:get="Value.Script"
+                          @bind-Value:set="SetScriptAsync"
+                          ShowSuggestionsLabel="@T("Sandbox.ShowSuggestions")"
+                          HideSuggestionsLabel="@T("Sandbox.HideSuggestions")"
+                          Catalog="CodeAssist"
+                          Text="Text"
+                          ResourceNamespace="scripting" />
+
+<div class="field-grid scripting-options">
+    <div class="field checkbox-field">
+        <label for="expect-result">@T("Fields.ExpectResult")</label>
+        <input id="expect-result"
+               type="checkbox"
+               checked="@Value.ExpectResult"
+               @onchange="args => SetExpectResultAsync(ReadValue(args, Value.ExpectResult))" />
+        <small>@T("Fields.ExpectResultHelp")</small>
+    </div>
+    <div class="field">
+        <label for="timeout">@T("Fields.Timeout")</label>
+        <input id="timeout"
+               type="number"
+               min="50"
+               max="2000"
+               step="50"
+               value="@Value.TimeoutMilliseconds"
+               @onchange="args => SetTimeoutAsync(ReadValue(args, Value.TimeoutMilliseconds))" />
+    </div>
+    <div class="field">
+        <label for="statements">@T("Fields.MaxStatements")</label>
+        <input id="statements"
+               type="number"
+               min="100"
+               max="100000"
+               step="100"
+               value="@Value.MaxStatements"
+               @onchange="args => SetMaxStatementsAsync(ReadValue(args, Value.MaxStatements))" />
+    </div>
+    <div class="field">
+        <label for="recursion">@T("Fields.MaxRecursion")</label>
+        <input id="recursion"
+               type="number"
+               min="8"
+               max="128"
+               value="@Value.MaxRecursionDepth"
+               @onchange="args => SetMaxRecursionAsync(ReadValue(args, Value.MaxRecursionDepth))" />
+    </div>
+    <div class="field">
+        <label for="memory">@T("Fields.MaxMemory")</label>
+        <input id="memory"
+               type="number"
+               min="4"
+               max="64"
+               value="@Value.MaxMemoryMegabytes"
+               @onchange="args => SetMaxMemoryAsync(ReadValue(args, Value.MaxMemoryMegabytes))" />
+    </div>
+</div>

@@ -1,22 +1,27 @@
-<section class="panel sample-picker" aria-labelledby="sample-picker-title">
-    <div class="panel-heading">
-        <h2 id="sample-picker-title">@Title</h2>
+<details class="panel collapsible-support sample-picker" aria-labelledby="@_titleId" open>
+    <summary>
+        <h2 id="@_titleId">@Title</h2>
         <span class="muted mono">@Samples.Count</span>
+    </summary>
+    <div class="collapsible-support-content sample-picker-content">
+        <div class="sample-grid">
+            @foreach (IShowcaseSample sample in Samples)
+            {
+                <button type="button"
+                        class="sample-option @(sample.Id == SelectedId ? "is-selected" : null)"
+                        aria-pressed="@(sample.Id == SelectedId)"
+                        @onclick="() => SelectedIdChanged.InvokeAsync(sample.Id)">
+                    <strong>@Text.GetText(ResourceNamespace, sample.NameKey)</strong>
+                    <span>@Text.GetText(ResourceNamespace, sample.DescriptionKey)</span>
+                </button>
+            }
+        </div>
     </div>
-    <div class="sample-grid">
-        @foreach (IShowcaseSample sample in Samples)
-        {
-            <button type="button"
-                    class="sample-option @(sample.Id == SelectedId ? "is-selected" : null)"
-                    @onclick="() => SelectedIdChanged.InvokeAsync(sample.Id)">
-                <strong>@Text.GetText(ResourceNamespace, sample.NameKey)</strong>
-                <span>@Text.GetText(ResourceNamespace, sample.DescriptionKey)</span>
-            </button>
-        }
-    </div>
-</section>
+</details>
 
 @code {
+    private readonly string _titleId = $"sample-picker-{Guid.NewGuid():N}";
+
     [Parameter] public string Title { get; set; } = "Samples";
     [Parameter, EditorRequired] public IReadOnlyList<IShowcaseSample> Samples { get; set; } = Array.Empty<IShowcaseSample>();
     [Parameter] public string? SelectedId { get; set; }

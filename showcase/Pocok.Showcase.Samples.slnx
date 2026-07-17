@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/dependencies/">
+    <Project Path="../src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj" />
+    <Project Path="../src/AppDefaults/Pocok.AppDefaults.csproj" />
+    <Project Path="../src/BackgroundWork/Pocok.BackgroundWork.csproj" />
+    <Project Path="../src/Conversion/Pocok.Conversion.csproj" />
+    <Project Path="../src/Licensing/Pocok.Licensing.csproj" />
+    <Project Path="../src/Localization/Pocok.Localization.csproj" />
+    <Project Path="../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj" />
+    <Project Path="../src/Modularity/Pocok.Modularity.csproj" />
+    <Project Path="../src/Readiness/Pocok.Readiness.csproj" />
+    <Project Path="../src/Scripting/Pocok.Scripting.csproj" />
+    <Project Path="src/Pocok.Showcase.Components/Pocok.Showcase.Components.csproj" />
+    <Project Path="src/Pocok.Showcase.Contracts/Pocok.Showcase.Contracts.csproj" />
+    <Project Path="src/Pocok.Showcase.Web/Pocok.Showcase.Web.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="../samples/Showcase/Pocok.Showcase.Conversion/Pocok.Showcase.Conversion.csproj" />
+    <Project Path="../samples/Showcase/Pocok.Showcase.Licensing/Pocok.Showcase.Licensing.csproj" />
+    <Project Path="../samples/Showcase/Pocok.Showcase.Scripting/Pocok.Showcase.Scripting.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="../samples/Showcase/Pocok.Showcase.Samples.Tests/Pocok.Showcase.Samples.Tests.csproj" />
+  </Folder>
+</Solution>

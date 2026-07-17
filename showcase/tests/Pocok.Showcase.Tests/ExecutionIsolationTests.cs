@@ -281,7 +281,8 @@ public sealed class ExecutionIsolationTests
             var state = new ShowcaseRunnerState();
             var lifetime = new FakeLifetime();
             var worker = new ShowcaseRunnerService(queue, state, services.GetRequiredService<IServiceScopeFactory>(),
-                options, lifetime, TimeProvider.System, NullLogger<ShowcaseRunnerService>.Instance);
+                options, lifetime, TimeProvider.System, NullLogger<ShowcaseRunnerService>.Instance,
+                new ShowcasePublicLog(NullLoggerFactory.Instance));
             await worker.StartAsync(CancellationToken.None);
             return new RunnerFixture(services, lifetime, queue, state, options, worker);
         }

@@ -51,6 +51,11 @@ function Change {
 $plan = Get-Plan -Changes @(Change 'docs/ci.md')
 Assert-True ($plan.mode -eq 'DocumentationOnly') 'Documentation-only changes must skip .NET validation.'
 
+$showcasePlan = Get-Plan -Changes @(Change 'samples/Showcase/Pocok.Showcase.Conversion/ConversionShowcaseSlice.cs')
+Assert-True ($showcasePlan.mode -eq 'Partial') 'Showcase changes must remain delegated to the Showcase workflow without selecting core projects.'
+Assert-True ($showcasePlan.affectedTestProjects.Count -eq 0) 'Showcase-owned tests must not enter the core package validation plan.'
+Assert-True ($showcasePlan.affectedSampleProjects.Count -eq 0) 'Showcase plugins must not enter the core package-sample validation plan.'
+
 $plan = Get-Plan -Changes @(Change 'src/BackgroundWork/Coalescing/CoalescingTaskRunner.cs')
 Assert-SequenceEqual $plan.affectedPackageIds @('Pocok.BackgroundWork', 'Pocok.Localization') 'BackgroundWork must select its reverse package closure.'
 Assert-True ($plan.affectedTestProjects -contains 'tests/Unit/BackgroundWork.Tests/Pocok.BackgroundWork.Tests.csproj') 'BackgroundWork tests were not selected.'

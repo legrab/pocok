@@ -6,7 +6,7 @@ using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Scripting;
 using Pocok.Showcase.Scripting.Models;
 
-namespace Pocok.Showcase.Tests;
+namespace Pocok.Showcase.Samples.Tests;
 
 [TestFixture]
 public sealed class ScriptingShowcaseTests
@@ -102,5 +102,20 @@ public sealed class ScriptingShowcaseTests
         ScriptingShowcaseSlice.FormatResult(true).ShouldBe("true");
         ScriptingShowcaseSlice.FormatResult(12.5).ShouldBe("12.5");
         ScriptingShowcaseSlice.FormatResult("hello").ShouldBe("\"hello\"");
+    }
+
+    [Test]
+    public async Task RuntimeWarmupCompletesBeforeInteractiveRuns()
+    {
+        var runner = new ScriptRunner();
+        var warmup = new ScriptingRuntimeWarmupService(runner);
+
+        await warmup.StartAsync(CancellationToken.None);
+        ScriptResult<object?> result = await runner.ExecuteAsync(
+            new ScriptExecutionRequest("interactive", "21 * 2;") { ExpectResult = true },
+            new ScriptExecutionOptions { Timeout = TimeSpan.FromSeconds(1) });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(42d);
     }
 }

@@ -12,3 +12,4 @@ TestResults/
 *.received.*
 *.private.md
 .local/
+showcase/src/Pocok.Showcase.Web/plugins/

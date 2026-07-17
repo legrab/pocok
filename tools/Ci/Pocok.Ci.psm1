@@ -65,6 +65,8 @@ function Get-PocokProjectKind {
     param([Parameter(Mandatory)] [string]$Path)
 
     switch -Regex ($Path) {
+        '^showcase/' { return 'Showcase' }
+        '^samples/Showcase/' { return 'Showcase' }
         '^src/' { return 'Source' }
         '^tests/Fixtures/' { return 'Fixture' }
         '^tests/' { return 'Test' }
@@ -365,7 +367,7 @@ function Get-PocokTestOwnership {
         $packageByProject[$package.Project] = $package.Id
     }
     $ownership = [ordered]@{}
-    foreach ($project in $Projects.Values | Where-Object IsTestProject) {
+    foreach ($project in $Projects.Values | Where-Object { $_.IsTestProject -and $_.Kind -eq 'Test' }) {
         if ($project.Path -eq 'tests/Architecture/Pocok.Architecture.Tests.csproj') {
             $ownership[$project.Path] = [pscustomobject]@{ Kind = 'RepositoryWide'; PackageId = $null; SourceProject = $null }
             continue
@@ -519,7 +521,7 @@ function New-PocokEmergencyFullPlan {
         Write-Warning "[CI tooling] $catalogError"
     }
 
-    $tests = @($projectRecords | Where-Object IsTestProject | Sort-Object Path)
+    $tests = @($projectRecords | Where-Object { $_.IsTestProject -and $_.Kind -eq 'Test' } | Sort-Object Path)
     $samples = @($projectRecords | Where-Object Kind -eq 'Sample' | Sort-Object Path)
     $packageIds = @(
         $activePackages |
@@ -762,7 +764,7 @@ function New-PocokCiPlan {
 
     $selectedTests = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($test in $directTests) { $selectedTests.Add($test) | Out-Null }
-    foreach ($test in $projects.Values | Where-Object IsTestProject) {
+    foreach ($test in $projects.Values | Where-Object { $_.IsTestProject -and $_.Kind -eq 'Test' }) {
         if ($ownership[$test.Path].Kind -eq 'Slice' -and $affectedPackageIds -contains $ownership[$test.Path].PackageId) {
             $selectedTests.Add($test.Path) | Out-Null
             continue
@@ -885,7 +887,7 @@ function New-PocokFullPlan {
     if ($null -eq $Ownership) { $Ownership = Get-PocokTestOwnership -Projects $Projects -Packages $Packages }
     $activePackages = @($Packages.Values | Where-Object State -ne 'Retired' | Sort-Object Id)
     $packageIds = @($activePackages.Id)
-    $tests = @($Projects.Values | Where-Object IsTestProject | Sort-Object Path)
+    $tests = @($Projects.Values | Where-Object { $_.IsTestProject -and $_.Kind -eq 'Test' } | Sort-Object Path)
     $samples = @($Projects.Values | Where-Object Kind -eq 'Sample' | Sort-Object Path)
     $coverageSlices = @(
         foreach ($package in $activePackages) {

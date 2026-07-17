@@ -6,7 +6,7 @@ using Pocok.Showcase.Components;
 using Pocok.Showcase.Conversion;
 using Pocok.Showcase.Conversion.Models;
 
-namespace Pocok.Showcase.Tests;
+namespace Pocok.Showcase.Samples.Tests;
 
 [TestFixture]
 public sealed class ConversionCodeTests
@@ -59,6 +59,22 @@ public sealed class ConversionCodeTests
         ConversionParseResult parsed = ConversionCodeParser.Parse(code);
         parsed.IsSuccess.ShouldBeTrue(parsed.Error);
         parsed.Input!.NumericLoss.ShouldBe(NumericLossPolicy.RoundToNearest);
+    }
+
+    [Test]
+    public void FormatterUsesTheCurrentEditedSourceValue()
+    {
+        var input = new ConversionInput
+        {
+            SourceKind = ConversionSourceKind.Text,
+            SourceValue = "445476",
+            TargetType = "int"
+        };
+
+        string code = ConversionCodeFormatter.Format(input);
+
+        code.ShouldContain("\"445476\"");
+        code.ShouldNotContain("\"42\"");
     }
 
     [Test]

@@ -40,21 +40,25 @@ jobs:
         run: |
           Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
           dotnet restore showcase/Pocok.Showcase.slnx --verbosity minimal
+          dotnet restore showcase/Pocok.Showcase.Samples.slnx --verbosity minimal
       - name: Format
         shell: pwsh
         run: |
           Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
           dotnet format showcase/Pocok.Showcase.slnx --verify-no-changes --no-restore
+          dotnet format showcase/Pocok.Showcase.Samples.slnx --verify-no-changes --no-restore
       - name: Build
         shell: pwsh
         run: |
           Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
           dotnet build showcase/Pocok.Showcase.slnx --configuration Release --no-restore --verbosity minimal
+          dotnet build showcase/Pocok.Showcase.Samples.slnx --configuration Release --no-restore --verbosity minimal
       - name: Test
         shell: pwsh
         run: |
           Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
           dotnet test showcase/tests/Pocok.Showcase.Tests/Pocok.Showcase.Tests.csproj --configuration Release --no-build --verbosity minimal
+          dotnet test samples/Showcase/Pocok.Showcase.Samples.Tests/Pocok.Showcase.Samples.Tests.csproj --configuration Release --no-build --verbosity minimal
       - name: Publish with Bash
         if: runner.os == 'Linux'
         run: bash showcase/scripts/publish-showcase.sh "${{ runner.temp }}/pocok-showcase" --no-restore
@@ -94,6 +98,8 @@ jobs:
           curl --fail --silent http://127.0.0.1:8080/health/live >/dev/null
           curl --fail --silent http://127.0.0.1:8080/ >/dev/null
           curl --fail --silent http://127.0.0.1:8080/packages/conversion >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/packages/scripting >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/packages/licensing >/dev/null
           curl --fail --silent http://127.0.0.1:8080/packages/readiness >/dev/null
           curl --fail --silent http://127.0.0.1:8080/system >/dev/null
       - name: Non-default port

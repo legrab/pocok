@@ -1,5 +1,9 @@
 # Pocok
 
+> ### [Open the deployed Pocok Showcase](https://pocok-showcase.onrender.com/)
+>
+> Browse the complete package overview and use interactive, bounded sandboxes for implemented packages such as Conversion, Scripting, and Licensing.
+
 > **Current status:** Consolidated implementation candidate. The baseline passed its .NET 10 and PowerShell 7 acceptance run with formatting, a Release build, 236 tests, samples, package catalog validation, local-closure smoke, and public release audit. The licensing additions are experimental and have static review only until the documented local and CI acceptance run succeeds. See the [current handoff](docs/current-handoff.md), [licensing guide](docs/licensing.md), and [consolidation plan](docs/plans/repository-consolidation.md).
 
 Pocok is a deliberately small .NET package portfolio extracted from repeated application needs. It contains focused runtime capabilities and transparent application-default configurators. The repository is also maintained as a reference for package boundaries, compatibility, testing, plugin isolation, and release engineering.
@@ -57,7 +61,7 @@ See [the licensing guide](docs/licensing.md) for key generation, checking, host 
 
 See the projects under [`samples`](samples) for Conversion, Readiness, AppDefaults, Licensing host enforcement, owned BackgroundWork coordination, bounded Scripting, Signals contracts and runtime, deterministic Localization composition, external JSON and RESX resources, enum translation and resource culture resolution, keyed Subscriptions, an explicit trimmed-array smoke test, and independently deployed modules.
 
-Explore the deployable Interactive Server application in the [Pocok Showcase](showcase/README.md). Stage 1 includes the permanent host framework and the complete `Pocok.Conversion` slice.
+Explore the deployable Interactive Server application in the [Pocok Showcase](showcase/README.md). The framework is package-agnostic and currently loads complete `Pocok.Conversion`, `Pocok.Scripting`, and `Pocok.Licensing` sample plugins.
 
 ## Build and verify
 

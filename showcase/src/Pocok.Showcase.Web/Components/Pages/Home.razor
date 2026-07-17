@@ -6,14 +6,16 @@
 <PageTitle>@Text.GetText("shell", "App.Title")</PageTitle>
 
 <section class="hero">
-    <div>
-        <p class="eyebrow">@Text.GetText("shell", "Home.Eyebrow")</p>
-        <h1>@Text.GetText("shell", "Home.Title")</h1>
-        <p class="hero-copy">@Text.GetText("shell", "Home.Intro")</p>
-    </div>
-    <div class="hero-actions">
-        <a class="button-link" href="@FeaturedSlicePath">@Text.GetText("shell", "Home.StartAction")</a>
-        <a class="button-link secondary-link" href="/system">@Text.GetText("shell", "Home.SystemAction")</a>
+    <h1>@Text.GetText("shell", "Home.Title")</h1>
+    <div class="hero-details">
+        <div>
+            <p class="eyebrow">@Text.GetText("shell", "Home.Eyebrow")</p>
+            <p class="hero-copy">@Text.GetText("shell", "Home.Intro")</p>
+        </div>
+        <div class="hero-actions">
+            <a class="button-link" href="@FeaturedSlicePath">@Text.GetText("shell", "Home.StartAction")</a>
+            <a class="button-link secondary-link" href="/system">@Text.GetText("shell", "Home.SystemAction")</a>
+        </div>
     </div>
 </section>
 
@@ -33,49 +35,55 @@
     <a class="button-link" href="@FeaturedSlicePath">@Text.GetText("shell", "Home.StartAction")</a>
 </section>
 
-<section class="filter-bar" aria-label="@Text.GetText("shell", "Home.Families")">
-    <span>@Text.GetText("shell", "Home.Families")</span>
-    @foreach (string family in Families)
-    {
-        <button type="button"
-                class="filter-button @(_selectedFamily == family ? "is-selected" : null)"
-                aria-pressed="@(_selectedFamily == family)"
-                @onclick="() => _selectedFamily = family">
-            @FamilyLabel(family)
-        </button>
-    }
-    <span class="filter-count">@VisiblePackages.Count() @Text.GetText("shell", "Home.FilterCount")</span>
-</section>
+<section class="package-browser" aria-label="@Text.GetText("shell", "Navigation.Home")">
+    <div class="filter-bar" aria-label="@Text.GetText("shell", "Home.Families")">
+        <span>@Text.GetText("shell", "Home.Families")</span>
+        @foreach (string family in Families)
+        {
+            <button type="button"
+                    class="filter-button @(_selectedFamily == family ? "is-selected" : null)"
+                    aria-pressed="@(_selectedFamily == family)"
+                    @onclick="() => _selectedFamily = family">
+                @FamilyLabel(family)
+            </button>
+        }
+        <span class="filter-count">@VisiblePackages.Count() @Text.GetText("shell", "Home.FilterCount")</span>
+    </div>
 
-<section class="package-grid" aria-label="@Text.GetText("shell", "Navigation.Home")">
-@foreach (ShowcasePackageCatalogEntry package in VisiblePackages)
-{
-    IShowcaseSlice? slice = SliceCatalog.FindByPackageId(package.Id);
-    ShowcaseImplementationStatus implementation = slice is null
-        ? ShowcaseImplementationStatus.Planned
-        : ShowcaseImplementationStatus.Available;
-    <article class="package-card @(implementation == ShowcaseImplementationStatus.Available ? "available" : "planned")">
-        <div class="card-meta">
-            <span>@FamilyLabel(package.Family)</span>
-            <span class="mono">@StateLabel(package.State)</span>
-        </div>
-        <h2><a href="/packages/@package.Slug">@package.Id</a></h2>
-        <p>@PackageSummary(package)</p>
-        <dl class="card-facts">
-            <dt>@Text.GetText("shell", "Package.Sandbox")</dt>
-            <dd>@Text.GetText("shell", slice?.Descriptor.RuntimeSandboxAvailable == true ? "Home.SandboxYes" : "Home.SandboxNo")</dd>
-            @if (slice is not null)
-            {
-                <dt>@Text.GetText("shell", "Home.Version")</dt>
-                <dd class="mono">@slice.Descriptor.Version</dd>
-            }
-        </dl>
-        <div class="card-actions">
-            <ShowcaseStateBadge Status="@implementation" Text="@ImplementationLabel(implementation)" />
-            <a class="text-link" href="/packages/@package.Slug">@Text.GetText("shell", "Actions.Open")</a>
-        </div>
-    </article>
-}
+    <div class="package-list-scroll">
+        <section class="package-section available-package-section">
+            <div class="package-section-heading">
+                <h2>@Text.GetText("shell", "Home.AvailableSandboxes")</h2>
+                <span class="mono muted">@VisibleAvailablePackages.Count()</span>
+            </div>
+            <div class="package-grid">
+                @foreach (ShowcasePackageCatalogEntry package in VisibleAvailablePackages)
+                {
+                    <ShowcasePackageCard Package="package"
+                                         Slice="@SliceCatalog.FindByPackageId(package.Id)"
+                                         Text="Text" />
+                }
+            </div>
+        </section>
+
+        @if (VisiblePlannedPackages.Any())
+        {
+            <details class="coming-soon-section">
+                <summary>
+                    <span>@Text.GetText("shell", "Home.ComingSoon")</span>
+                    <span class="mono muted">@VisiblePlannedPackages.Count()</span>
+                </summary>
+                <div class="coming-soon-content">
+                    <div class="package-grid">
+                        @foreach (ShowcasePackageCatalogEntry package in VisiblePlannedPackages)
+                        {
+                            <ShowcasePackageCard Package="package" Text="Text" />
+                        }
+                    </div>
+                </div>
+            </details>
+        }
+    </div>
 </section>
 
 @code {
@@ -88,9 +96,14 @@
     private IEnumerable<ShowcasePackageCatalogEntry> VisiblePackages => _selectedFamily == "*"
         ? PackageCatalog.Packages
         : PackageCatalog.Packages.Where(package => package.Family == _selectedFamily);
-
-    private string PackageSummary(ShowcasePackageCatalogEntry package) =>
-        Text.GetText("shell", $"Packages.{package.Id.Replace('.', '_')}.Summary");
+    private IEnumerable<ShowcasePackageCatalogEntry> VisibleAvailablePackages => VisiblePackages
+        .Where(package => SliceCatalog.FindByPackageId(package.Id) is not null)
+        .OrderBy(package => SliceCatalog.FindByPackageId(package.Id)!.Descriptor.SortOrder)
+        .ThenBy(package => package.Id, StringComparer.Ordinal);
+    private IEnumerable<ShowcasePackageCatalogEntry> VisiblePlannedPackages => VisiblePackages
+        .Where(package => SliceCatalog.FindByPackageId(package.Id) is null)
+        .OrderBy(package => package.SortOrder)
+        .ThenBy(package => package.Id, StringComparer.Ordinal);
 
     private string FamilyLabel(string family) => family switch
     {
@@ -98,19 +111,5 @@
         "Capability" => Text.GetText("shell", "Home.Capability"),
         "MaintainerDefaults" => Text.GetText("shell", "Home.MaintainerDefaults"),
         _ => family
-    };
-
-    private string StateLabel(string state) => state switch
-    {
-        "Active" => Text.GetText("shell", "Package.Active"),
-        "Experimental" => Text.GetText("shell", "Package.Experimental"),
-        _ => state
-    };
-
-    private string ImplementationLabel(ShowcaseImplementationStatus status) => status switch
-    {
-        ShowcaseImplementationStatus.Available => Text.GetText("shell", "Package.Available"),
-        ShowcaseImplementationStatus.Failed => Text.GetText("shell", "Package.Failed"),
-        _ => Text.GetText("shell", "Package.Planned")
     };
 }

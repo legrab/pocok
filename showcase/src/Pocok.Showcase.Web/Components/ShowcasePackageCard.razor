@@ -1,0 +1,57 @@
+<article class="package-card @(Slice is null ? "planned" : "available")">
+    <div class="card-meta">
+        <span>@FamilyLabel(Package.Family)</span>
+        <span class="mono">@StateLabel(Package.State)</span>
+    </div>
+    <h2><a href="/packages/@Package.Slug">@Package.Id</a></h2>
+    <p>@Text.GetText("shell", $"Packages.{Package.Id.Replace('.', '_')}.Summary")</p>
+    <dl class="card-facts">
+        <dt>@Text.GetText("shell", "Package.Sandbox")</dt>
+        <dd>@Text.GetText("shell", Slice?.Descriptor.RuntimeSandboxAvailable == true ? "Home.SandboxYes" : "Home.SandboxNo")</dd>
+        @if (Slice is not null)
+        {
+            <dt>@Text.GetText("shell", "Home.Version")</dt>
+            <dd class="mono">@Slice.Descriptor.Version</dd>
+        }
+    </dl>
+    <div class="card-actions">
+        <ShowcaseStateBadge Status="@ImplementationStatus" Text="@ImplementationLabel" />
+        <a class="text-link" href="/packages/@Package.Slug">@Text.GetText("shell", "Actions.Open")</a>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public ShowcasePackageCatalogEntry Package { get; set; } = default!;
+
+    [Parameter]
+    public IShowcaseSlice? Slice { get; set; }
+
+    [Parameter, EditorRequired]
+    public IShowcaseText Text { get; set; } = default!;
+
+    private ShowcaseImplementationStatus ImplementationStatus => Slice is null
+        ? ShowcaseImplementationStatus.Planned
+        : ShowcaseImplementationStatus.Available;
+
+    private string ImplementationLabel => ImplementationStatus switch
+    {
+        ShowcaseImplementationStatus.Available => Text.GetText("shell", "Package.Available"),
+        ShowcaseImplementationStatus.Failed => Text.GetText("shell", "Package.Failed"),
+        _ => Text.GetText("shell", "Package.Planned")
+    };
+
+    private string FamilyLabel(string family) => family switch
+    {
+        "Capability" => Text.GetText("shell", "Home.Capability"),
+        "MaintainerDefaults" => Text.GetText("shell", "Home.MaintainerDefaults"),
+        _ => family
+    };
+
+    private string StateLabel(string state) => state switch
+    {
+        "Active" => Text.GetText("shell", "Package.Active"),
+        "Experimental" => Text.GetText("shell", "Package.Experimental"),
+        _ => state
+    };
+}

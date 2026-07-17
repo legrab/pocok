@@ -7,17 +7,20 @@
         <button type="button" class="secondary" @onclick="Cancel">@CancelLabel</button>
     }
 </div>
-<div aria-live="polite" aria-atomic="false">
-    @if (_progress.Count > 0)
-    {
-        <ol class="timeline progress-timeline">
-            @foreach (ShowcaseProgressEvent progress in _progress)
-            {
-                <li><span class="mono">@progress.Stage</span><span>@progress.Message</span></li>
-            }
-        </ol>
-    }
-</div>
+@if (!ProgressChanged.HasDelegate)
+{
+    <div aria-live="polite" aria-atomic="false">
+        @if (_progress.Count > 0)
+        {
+            <ol class="timeline progress-timeline">
+                @foreach (ShowcaseProgressEvent progress in _progress)
+                {
+                    <li><span class="mono">@progress.Stage</span><span>@progress.Message</span></li>
+                }
+            </ol>
+        }
+    </div>
+}
 
 @code {
     private readonly List<ShowcaseProgressEvent> _progress = [];
@@ -52,8 +55,10 @@
     [Parameter]
     public EventCallback<bool> RunningChanged { get; set; }
 
+    [Parameter]
+    public EventCallback<IReadOnlyList<ShowcaseProgressEvent>> ProgressChanged { get; set; }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         if (_lastResetKey is null)
         {
@@ -65,6 +70,7 @@
         {
             _progress.Clear();
             _lastResetKey = ResetKey;
+            await NotifyProgressChangedAsync();
         }
     }
 
@@ -75,6 +81,7 @@
 
         _running = true;
         _progress.Clear();
+        await NotifyProgressChangedAsync();
         await RunningChanged.InvokeAsync(true);
         await ResultChanged.InvokeAsync(null);
 
@@ -102,9 +109,17 @@
         await foreach (ShowcaseProgressEvent item in reader.ReadAllAsync())
         {
             _progress.Add(item);
-            await InvokeAsync(StateHasChanged);
+            await NotifyProgressChangedAsync();
         }
     }
+
+    private Task NotifyProgressChangedAsync() => InvokeAsync(async () =>
+    {
+        if (ProgressChanged.HasDelegate)
+            await ProgressChanged.InvokeAsync(_progress.ToArray());
+        else
+            StateHasChanged();
+    });
 
     private void Cancel() => _handle?.Cancel();
 

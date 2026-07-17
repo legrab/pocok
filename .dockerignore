@@ -6,3 +6,4 @@
 artifacts
 .local
 *.user
+showcase/src/Pocok.Showcase.Web/plugins

@@ -5,7 +5,7 @@ using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Conversion;
 using Pocok.Showcase.Conversion.Models;
 
-namespace Pocok.Showcase.Tests;
+namespace Pocok.Showcase.Samples.Tests;
 
 [TestFixture]
 public sealed class ConversionShowcaseTests
@@ -62,6 +62,30 @@ public sealed class ConversionShowcaseTests
         ShowcaseRunResult result = await TestSupport.ExecuteAsync(_slice, sample.CreateInput());
         result.CodePreview.ShouldNotBeNull();
         result.CodePreview.ShouldContain("OverflowPolicy.Saturate");
+    }
+
+    [Test]
+    public void SamplesExposeTheirConfiguredEditorValues()
+    {
+        var strict = (ConversionInput)_slice.Samples.Single(item => item.Id == "strict-integer").CreateInput();
+        var german = (ConversionInput)_slice.Samples.Single(item => item.Id == "german-decimal").CreateInput();
+
+        strict.SourceValue.ShouldBe("42");
+        strict.TargetType.ShouldBe("int");
+        german.SourceValue.ShouldBe("1.234,5");
+        german.Culture.ShouldBe("de-DE");
+    }
+
+    [Test]
+    public async Task EditedSourceValueChangesTheRealConversionOutcome()
+    {
+        var input = (ConversionInput)_slice.Samples.Single(item => item.Id == "strict-integer").CreateInput();
+
+        ShowcaseRunResult result = await TestSupport.ExecuteAsync(_slice, input with { SourceValue = "43" });
+
+        result.Status.ShouldBe(ShowcaseRunStatus.Success);
+        result.Headline.ShouldBe("43");
+        result.CodePreview.ShouldNotBeNull().ShouldContain("\"43\"");
     }
 
     [Test]

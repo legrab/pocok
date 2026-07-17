@@ -1,0 +1,90 @@
+@implements IAsyncDisposable
+@inject IShowcaseText Text
+
+<section class="rail-log-console" aria-label="@Text.GetText("shell", "Logs.Title")">
+    <header>
+        <strong>@Text.GetText("shell", "Logs.Title")</strong>
+        <span>@Records.Count / @Buffer.Capacity</span>
+    </header>
+    <div class="rail-log-records" role="log" aria-live="polite" aria-relevant="additions">
+        @if (Records.Count == 0)
+        {
+            <p class="rail-log-empty">@Text.GetText("shell", "Logs.Empty")</p>
+        }
+        else
+        {
+            @foreach (ShowcaseLogRecord record in Records)
+            {
+                <article class="rail-log-entry log-@LevelClass(record.Level)" @key="record.Sequence">
+                    <div class="rail-log-meta">
+                        <time datetime="@record.Timestamp.ToString("O", CultureInfo.InvariantCulture)">@record.Timestamp.ToString("HH:mm", CultureInfo.InvariantCulture)</time>
+                        <span>@LevelLabel(record.Level)</span>
+                        <span title="@record.Category">@record.Category</span>
+                    </div>
+                    <p>@record.Message</p>
+                </article>
+            }
+        }
+    </div>
+</section>
+
+@code {
+    private readonly CancellationTokenSource _disposeToken = new();
+    private ShowcaseLogSubscription? _subscription;
+    private Task? _watchTask;
+
+    [Parameter, EditorRequired]
+    public ShowcaseLogBuffer Buffer { get; set; } = default!;
+
+    private IReadOnlyList<ShowcaseLogRecord> Records { get; set; } = [];
+
+    protected override void OnInitialized()
+    {
+        Records = Buffer.Snapshot();
+        _subscription = Buffer.Subscribe();
+        _watchTask = WatchAsync(_subscription, _disposeToken.Token);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _disposeToken.CancelAsync();
+        if (_subscription is not null)
+            await _subscription.DisposeAsync();
+        if (_watchTask is not null)
+        {
+            try
+            {
+                await _watchTask;
+            }
+            catch (OperationCanceledException) when (_disposeToken.IsCancellationRequested)
+            {
+            }
+        }
+        _disposeToken.Dispose();
+    }
+
+    private async Task WatchAsync(ShowcaseLogSubscription subscription, CancellationToken cancellationToken)
+    {
+        await foreach (long _ in subscription.Updates.ReadAllAsync(cancellationToken))
+        {
+            await InvokeAsync(() =>
+            {
+                Records = Buffer.Snapshot();
+                StateHasChanged();
+            });
+        }
+    }
+
+    private static string LevelClass(LogLevel level) => level.ToString().ToLowerInvariant();
+
+    private static string LevelLabel(LogLevel level) => level switch
+    {
+        LogLevel.Trace => "TRC",
+        LogLevel.Debug => "DBG",
+        LogLevel.Information => "INF",
+        LogLevel.Warning => "WRN",
+        LogLevel.Error => "ERR",
+        LogLevel.Critical => "CRT",
+        _ => "---"
+    };
+}

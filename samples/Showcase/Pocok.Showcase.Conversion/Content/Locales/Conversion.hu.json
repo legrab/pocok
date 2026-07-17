@@ -1,55 +1,58 @@
 {
   "Package": {
     "Name": "Konverzió",
-    "Summary": "Explicit konverziós szabályok, strukturált hibák, gyűjtemények, enumok, időértékek és rögzített futásidejű céltípusok.",
+    "Summary": "Konverziós szabályok, gyűjteménykezelés, enumok, időértékek és strukturált hibaútvonalak kipróbálása.",
     "Status": {
       "Available": "Elérhető"
     }
   },
   "Sandbox": {
     "Samples": "Példák",
-    "Title": "Konverziós homokozó",
+    "Title": "Konverziós példa",
     "Running": "Fut",
     "Ready": "Kész",
     "Mode": "Szerkesztési mód",
-    "Fields": "Építő",
-    "Code": "Korlátozott kód",
-    "CodeLabel": "Korlátozott C#-szerű konverziós kifejezés",
-    "GeneratedCode": "Generált nyilvános API-hívás",
+    "Fields": "Űrlap",
+    "Code": "Kifejezés",
+    "CodeLabel": "Támogatott C#-szerű konverziós kifejezés",
+    "GeneratedCode": "Generált API-hívás",
     "Run": "Konverzió futtatása",
-    "Cancel": "Megszakítás"
+    "Cancel": "Megszakítás",
+    "ExecutionSteps": "Végrehajtási lépések",
+    "ShowSuggestions": "Javaslatok megnyitása",
+    "HideSuggestions": "Javaslatok bezárása"
   },
   "Fields": {
     "SourceKind": "Forrás típusa",
-    "Target": "Céltípus álnév",
+    "Target": "Céltípus neve",
     "Value": "Forrásérték",
-    "ValueHelp": "A tömbök JSON-tömbként adhatók meg; a kódszerkesztő ezekből biztonságos C#-szerű literált készít.",
+    "ValueHelp": "A tömböket JSON-ként add meg. A kifejezésnézet támogatott C#-szerű literálként jeleníti meg őket.",
     "Culture": "Kultúra",
     "Overflow": "Túlcsordulás",
     "Nulls": "Null kezelés",
-    "Enums": "Enum szabály",
+    "Enums": "Enumkezelés",
     "NumericLoss": "Numerikus veszteség",
-    "NumericBooleans": "Numerikus logikai érték",
-    "TemporalText": "Időszöveg szabály",
+    "NumericBooleans": "Szám és logikai érték",
+    "TemporalText": "Időérték szövege",
     "MaximumDepth": "Legnagyobb mélység",
     "MaximumItems": "Legnagyobb elemszám",
-    "MaximumItemsHelp": "Az explicit homokozókorlát 1–500; a ConversionContext.Strict csomagalapértéke 10 000."
+    "MaximumItemsHelp": "Ez a példa 1–500 elemet fogad el. A ConversionContext.Strict csomagalapértéke 10 000."
   },
   "SourceKinds": {
     "Text": "Szöveg",
     "Integer": "Előjeles egész",
     "UnsignedInteger": "Előjel nélküli egész",
-    "Decimal": "Decimal",
-    "FloatingPoint": "Lebegőpontos",
-    "Boolean": "Logikai",
+    "Decimal": "Decimális szám",
+    "FloatingPoint": "Lebegőpontos szám",
+    "Boolean": "Logikai érték",
     "Null": "Null",
     "TextArray": "Szövegtömb",
-    "ObjectArray": "Biztonságos objektumtömb"
+    "ObjectArray": "Biztonságos vegyes tömb"
   },
   "Result": {
     "Title": "Eredmény",
-    "Empty": "Futtass egy példát a strukturált eredmény megtekintéséhez.",
-    "CodePreview": "Kód előnézete",
+    "Empty": "Futtasd az aktuális bemenetet a konverziós eredmény megtekintéséhez.",
+    "CodePreview": "Futtatott hívás",
     "Truncated": "csonkolva",
     "Fields": {
       "Value": "Érték",
@@ -60,65 +63,66 @@
     }
   },
   "Tips": {
-    "Title": "Miért számít",
-    "Parser": "A szerkesztő szándékosan kis nyelvtant értelmez, és soha nem fordít vagy futtat tetszőleges kódot.",
-    "Allowlist": "A futásidejű céltípusok rögzített szótárból származnak, nem tetszőleges reflexióból.",
-    "Bounds": "A mélység-, bemenet-, kimenet- és elemszámkorlát explicit homokozóhatár.",
-    "Source": "A forrásliterálok kis, biztonságos skalár- és tömbérték-készletté alakulnak a konverzió előtt.",
-    "Failures": "A várt konverziós hibák megőrzik a stabil csomaghibakódot és értékútvonalat.",
-    "Policies": "A kultúrát és veszteségi szabályokat az alkalmazás határán érdemes explicitté tenni.",
+    "Title": "Mire érdemes figyelni",
+    "Parser": "A kifejezésszerkesztő szándékosan kis nyelvtant fogad el, és nem fordít vagy értékel ki tetszőleges C#-kódot.",
+    "Allowlist": "A futásidejű céltípusok rögzített engedélyezési listából származnak, nem tetszőleges reflexióból.",
+    "Bounds": "A példa külön korlátozza a bemenetet, a kimenetet, a mélységet és a gyűjtemények méretét.",
+    "Source": "A forrásliterálok a konverzió előtt támogatott skalár- vagy tömbértékké alakulnak.",
+    "Failures": "A várt konverziós hibák megőrzik a stabil hibakódot és az érték útvonalát.",
+    "Policies": "A kultúrát és az adatvesztési szabályokat az alkalmazás határain tedd egyértelművé.",
     "Strict": "A szigorú alapértékek invariánsak, és elutasítják az adatvesztést.",
-    "Saturation": "A telítés explicit; a szokásos túlcsordulás hibát ad.",
+    "Saturation": "A telítés csak külön beállítással használható; az alapértelmezett túlcsordulás hibát ad.",
     "Culture": "A kultúra a szöveg értelmezését változtatja, nem a determinisztikus eredményformázást.",
-    "NumericBoolean": "A szám-logikai konverzió külön engedélyezendő.",
-    "Collection": "A gyűjteménykonverzió az első hibás elemnél megáll.",
-    "FailurePath": "A hibaútvonal megmutatja a pontos hibás elemet vagy tagot.",
+    "NumericBoolean": "A szám és logikai érték közötti konverzió külön engedélyezést igényel.",
+    "Collection": "A gyűjtemény konverziója az első hibás elemnél megáll.",
+    "FailurePath": "A hibaútvonal pontosan megjelöli a hibás elemet vagy tagot.",
     "NoSerializer": "A konverter nem használ objektum- vagy JSON-szerializációs kerülőutat."
   },
   "Guide": {
+    "More": "További útmutató",
     "Purpose": {
       "Title": "Cél",
-      "Body": "A Pocok.Conversion az elszórt Convert.ChangeType hívásokat és szerializációs trükköket változtathatatlan szabályokkal és explicit eredményobjektumokkal váltja ki."
+      "Body": "A Pocok.Conversion az elszórt Convert.ChangeType hívásokat és szerializációs kerülőutakat változtathatatlan szabályokkal és egyértelmű eredményobjektumokkal váltja ki."
     },
     "QuickStart": {
-      "Title": "Gyors kezdés",
-      "Body": "Válassz példát, nézd meg a generált hívást, módosíts egy szabályt, majd futtasd. A homokozó a repository ValueConverter.Default példányát használja."
+      "Title": "Első lépések",
+      "Body": "Válassz példát, módosítsd a bemenetet vagy a szabályokat, majd futtasd. A példa közvetlenül a ValueConverter.Default API-t hívja."
     },
     "Targets": {
       "Title": "Támogatott céltípusok",
-      "Body": "A rögzített demólista skalárokat, előjeles és előjel nélküli számokat, Guid és időtípusokat, helyi enumokat és jelzőket, valamint kiválasztott tömböket fed le."
+      "Body": "Az engedélyezési lista skalárértékeket, előjeles és előjel nélküli számokat, Guid- és időtípusokat, helyi enumokat, jelzőket és kiválasztott tömböket tartalmaz."
     },
     "Context": {
       "Title": "ConversionContext",
-      "Body": "A ConversionContext egy változtathatatlan értékben rögzíti a kultúra-, veszteség-, túlcsordulás-, null-, enum-, logikai-, idő-, mélység- és gyűjteményszabályokat."
+      "Body": "A ConversionContext egy változtathatatlan értékben rögzíti a kultúra, adatvesztés, túlcsordulás, null, enum, logikai érték, idő, mélység és gyűjtemény kezelését."
     },
     "Policies": {
       "Title": "Szabályok",
-      "Body": "A Strict elutasítja a túlcsordulást, törtrészt, numerikus logikai konverziót, nem definiált enumot és nem round-trip időszöveget, amíg egy szabály ezt külön nem engedélyezi."
+      "Body": "A Strict alapbeállítás elutasítja a túlcsordulást, a törtrész elvesztését, a numerikus logikai konverziót, a nem definiált enumértéket és a nem round-trip időszöveget."
     },
     "Failures": {
-      "Title": "A hiba adat",
-      "Body": "A ConversionFailure stabil kódot, biztonságos üzenetet és útvonalat hordoz. A várt hibák nem válnak belső homokozóhibává."
+      "Title": "Strukturált hibák",
+      "Body": "A ConversionFailure stabil kódot, biztonságos üzenetet és értékútvonalat ad. A várt hibák a csomag által visszaadott eredmények maradnak, nem válnak hosthibává."
     },
     "Collections": {
       "Title": "Gyűjtemények",
-      "Body": "A kiválasztott felsorolható források elemenként alakulnak át, az első hibánál megállnak, és indexelt útvonalat adnak. A szöveg skalár marad."
+      "Body": "A támogatott felsorolható források elemenként alakulnak át, az első hibánál megállnak, és indexelt útvonalat adnak. A string skalárérték marad."
     },
     "Enums": {
       "Title": "Enumok és jelzők",
-      "Body": "A nevek ellenőrzöttek. Jelzőkombináció csak akkor fogadható el, ha minden bit deklarált és az enum szabály engedi."
+      "Body": "A nevek ellenőrzöttek. Jelzőkombináció csak akkor fogadható el, ha minden bit deklarált, és a kiválasztott enumszabály engedi a jelzőket."
     },
     "Temporal": {
       "Title": "Időértékek",
-      "Body": "A RoundTrip invariáns round-trip szöveget fogad el. A CultureAware a kiválasztott kultúra szokásos értelmezését használja."
+      "Body": "A RoundTrip invariáns round-trip szöveget fogad el. A CultureAware a kiválasztott kultúra szabályai szerint értelmezi a szöveget."
     },
     "Concurrency": {
       "Title": "Párhuzamosság",
-      "Body": "A ValueConverter.Default és a változtathatatlan környezetek újrahasználhatók. Minden homokozóbemenet, eredmény és megszakítási forrás circuit-szintű."
+      "Body": "A ValueConverter.Default és a változtathatatlan környezetek biztonságosan megoszthatók. A bemenet, az eredmény és a megszakítás állapota felhasználónként elkülönül."
     },
     "Boundaries": {
       "Title": "Határok",
-      "Body": "Az általános konverziós API nem ígér trimming- vagy NativeAOT-kompatibilitást, nem old fel tetszőleges típusokat, és nincs szerializációs kerülőútja."
+      "Body": "Az általános konverziós API nem ígér trimming- vagy NativeAOT-kompatibilitást, nem old fel tetszőleges típusokat, és nem használ szerializációs kerülőutat."
     },
     "Production": {
       "Title": "Éles használat",
@@ -126,32 +130,32 @@
     },
     "Snippet": {
       "TypedTitle": "Típusos konverzió",
-      "RuntimeTitle": "Futásidejű céltípusos konverzió"
+      "RuntimeTitle": "Konverzió futásidőben választott céltípusra"
     }
   },
   "Assist": {
     "Converter": "A rögzített helyi konverterváltozó.",
-    "Convert": "Engedélyezett generikus Convert hívás beszúrása.",
-    "Typeof": "Futásidejű céltípus választása a rögzített listából.",
+    "Convert": "Támogatott generikus Convert hívás beszúrása.",
+    "Typeof": "Futásidejű céltípus kiválasztása a rögzített listából.",
     "Strict": "Invariáns, adatvesztést elutasító szigorú alapértékek.",
     "Context": "Explicit változtathatatlan környezet létrehozása.",
-    "Culture": "Engedélyezett gyorsítótárazott kultúra használata.",
-    "NamedArgument": "Engedélyezett név szerinti környezetargumentum beszúrása.",
-    "Target": "Támogatott céltípus álnév beszúrása.",
-    "Policy": "Támogatott szabály-enumérték beszúrása.",
-    "Snippet": "Teljes engedélyezett példa beszúrása.",
+    "Culture": "Engedélyezett, gyorsítótárazott kultúra használata.",
+    "NamedArgument": "Támogatott név szerinti környezetargumentum beszúrása.",
+    "Target": "Támogatott céltípusnév beszúrása.",
+    "Policy": "Támogatott szabályérték beszúrása.",
+    "Snippet": "Teljes támogatott példa beszúrása.",
     "Runtime": "A futásidejű céltípus rögzített és engedélyezett marad."
   },
   "Boundaries": {
     "Title": "Határok",
-    "NoCompilation": "Nincs C# fordítás vagy kiértékelés.",
-    "FixedTargets": "Csak rögzített céltípusok és szabály-enumok.",
+    "NoCompilation": "Nincs C#-fordítás vagy tetszőleges kódkiértékelés.",
+    "FixedTargets": "Csak rögzített céltípusok és szabályértékek használhatók.",
     "BoundedInput": "Korlátozott kód, bemenet, kimenet, mélység és elemszám.",
     "NoSerializer": "Nincs objektum- vagy JSON-szerializációs kerülőút."
   },
   "Source": {
     "Title": "Forrásdokumentáció",
-    "Body": "A csomag nyilvános szerződésének és korlátainak repository-beli dokumentációja."
+    "Body": "A csomag nyilvános szerződésének, szabályainak és korlátainak dokumentációja."
   },
   "Samples": {
     "strict-integer": {
@@ -160,7 +164,7 @@
     },
     "saturating-byte": {
       "Name": "Telítődő byte",
-      "Description": "A 300 érték korlátozása a byte maximumára explicit túlcsordulási szabállyal."
+      "Description": "A 300 érték korlátozása a byte maximumára külön beállított túlcsordulási szabállyal."
     },
     "german-decimal": {
       "Name": "Német decimális szám",
@@ -171,35 +175,35 @@
       "Description": "Vesszővel elválasztott nevek átalakítása ellenőrzött jelzőkombinációvá."
     },
     "collection-success": {
-      "Name": "Sikeres gyűjtemény",
+      "Name": "Sikeres tömbkonverzió",
       "Description": "Szövegtömb átalakítása egészszám-tömbbé."
     },
     "collection-failure": {
-      "Name": "Gyűjteményhiba útvonala",
+      "Name": "Hibás tömbelem",
       "Description": "Megállás az első hibás elemnél, az indexelt hibaútvonal megőrzésével."
     },
     "fraction-rejected": {
-      "Name": "Tört elutasítva",
+      "Name": "Törtrész elutasítása",
       "Description": "A 12.7 egész számmá alakításakor a törtveszteség elutasítása."
     },
     "fraction-rounded": {
-      "Name": "Tört kerekítve",
-      "Description": "A 12.7 kerekítése explicit legközelebbiérték-szabállyal."
+      "Name": "Törtrész kerekítése",
+      "Description": "A 12.7 kerekítése külön beállított legközelebbiérték-szabállyal."
     },
     "numeric-boolean": {
-      "Name": "Numerikus logikai érték",
-      "Description": "A nulla és egy logikai értékké alakításának explicit engedélyezése."
+      "Name": "Szám logikai értékként",
+      "Description": "A nulla és egy logikai értékké alakításának külön engedélyezése."
     },
     "null-default": {
-      "Name": "Null szabály",
+      "Name": "Nullkezelés",
       "Description": "A céltípus alapértékének használata, majd összehasonlítás a Preserve és Reject szabállyal."
     },
     "temporal-roundtrip": {
-      "Name": "Időérték round-trip",
+      "Name": "Időérték round-trip formátumban",
       "Description": "DateTimeOffset értelmezése invariáns round-trip szabállyal, az eltolás megőrzésével."
     },
     "undefined-enum": {
-      "Name": "Nem definiált enum",
+      "Name": "Nem definiált enumérték",
       "Description": "A cél enumban nem deklarált numerikus érték elutasítása."
     }
   }

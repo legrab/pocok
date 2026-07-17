@@ -1,6 +1,6 @@
 # Planned package slices
 
-The permanent host architecture and the `Pocok.Conversion` and `Pocok.Scripting` slices are implemented. The immutable package catalog keeps these other current non-retired packages visible for later implementation, in order:
+The permanent host architecture and the `Pocok.Conversion`, `Pocok.Scripting`, and `Pocok.Licensing` slices are implemented. The immutable package catalog keeps these other current non-retired packages visible in the collapsed **Coming soon** section:
 
 1. `Pocok.Readiness`
 2. `Pocok.AppDefaults`
@@ -13,7 +13,6 @@ The permanent host architecture and the `Pocok.Conversion` and `Pocok.Scripting`
 9. `Pocok.Localization`
 10. `Pocok.Signals`
 11. `Pocok.Subscriptions`
-12. `Pocok.Licensing`
-13. `Pocok.AppDefaults.Licensing`
+12. `Pocok.AppDefaults.Licensing`
 
-Each slice must remain package-owned, use the shared execution and UI contracts, and pass publication plus readiness before another slice is added. Licensing should include the key-generation and license-checker CLI workflows in one guide rather than creating separate pages. Retired packages, tests, benchmarks, and release tools are not showcase targets.
+Each slice must remain package-owned, use the shared execution and UI contracts, and pass publication plus readiness before another slice is added. The Licensing slice demonstrates claim validation and links to the broader signing, encryption, key-generation, and license-checker workflows rather than exposing private-key operations in the public deployment. Retired packages, tests, benchmarks, and release tools are not showcase targets.

@@ -31,6 +31,8 @@ builder.Services.AddOptions<ShowcaseOptions>()
         || Uri.TryCreate(options.PublicRepositoryBaseUrl, UriKind.Absolute, out Uri? uri)
         && uri.Scheme is "https" or "http",
         "Showcase public repository base URL must be an absolute HTTP or HTTPS URL.")
+    .Validate(options => Enum.IsDefined(options.InAppLogMinimumLevel),
+        "Showcase in-app log minimum level must be valid.")
     .ValidateOnStart();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -73,6 +75,9 @@ builder.Services.AddSingleton<ReadinessSource>();
 builder.Services.AddSingleton<IReadinessSignal>(static provider => provider.GetRequiredService<ReadinessSource>());
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<ShowcaseRuntimeInfo>();
+builder.Services.AddScoped<ShowcaseUiState>();
+builder.Services.AddSingleton<ShowcasePublicLog>();
+ShowcaseInAppLogging.Add(builder.Services, builder.Configuration);
 builder.Services.AddSingleton<ShowcaseRunBuffer>();
 builder.Services.AddSingleton<ShowcaseRunnerState>();
 builder.Services.AddScoped<IShowcaseRunClient, ShowcaseRunClient>();

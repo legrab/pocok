@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+    <PackageReference Include="NUnit"/>
+    <PackageReference Include="NUnit3TestAdapter"/>
+    <PackageReference Include="Shouldly"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../showcase/src/Pocok.Showcase.Contracts/Pocok.Showcase.Contracts.csproj"/>
+    <ProjectReference Include="../../../showcase/src/Pocok.Showcase.Components/Pocok.Showcase.Components.csproj"/>
+    <ProjectReference Include="../../../showcase/src/Pocok.Showcase.Web/Pocok.Showcase.Web.csproj"/>
+    <ProjectReference Include="../Pocok.Showcase.Conversion/Pocok.Showcase.Conversion.csproj"/>
+    <ProjectReference Include="../Pocok.Showcase.Scripting/Pocok.Showcase.Scripting.csproj"/>
+    <ProjectReference Include="../Pocok.Showcase.Licensing/Pocok.Showcase.Licensing.csproj"/>
+    <ProjectReference Include="../../../src/Conversion/Pocok.Conversion.csproj"/>
+    <ProjectReference Include="../../../src/Scripting/Pocok.Scripting.csproj"/>
+    <ProjectReference Include="../../../src/Licensing/Pocok.Licensing.csproj"/>
+  </ItemGroup>
+</Project>

@@ -219,6 +219,7 @@ public sealed class ShowcaseRunnerService : BackgroundService
     private readonly IHostApplicationLifetime _lifetime;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<ShowcaseRunnerService> _logger;
+    private readonly ShowcasePublicLog _publicLog;
 
     public ShowcaseRunnerService(
         ShowcaseRunBuffer queue,
@@ -227,7 +228,8 @@ public sealed class ShowcaseRunnerService : BackgroundService
         IOptions<ShowcaseOptions> options,
         IHostApplicationLifetime lifetime,
         TimeProvider timeProvider,
-        ILogger<ShowcaseRunnerService> logger)
+        ILogger<ShowcaseRunnerService> logger,
+        ShowcasePublicLog publicLog)
     {
         _queue = queue;
         _state = state;
@@ -236,6 +238,7 @@ public sealed class ShowcaseRunnerService : BackgroundService
         _lifetime = lifetime;
         _timeProvider = timeProvider;
         _logger = logger;
+        _publicLog = publicLog;
     }
 
     public override Task StartAsync(CancellationToken cancellationToken)
@@ -272,6 +275,7 @@ public sealed class ShowcaseRunnerService : BackgroundService
     private async Task ExecuteEnvelopeAsync(ShowcaseRunEnvelope envelope, CancellationToken stoppingToken)
     {
         string correlationId = Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+        _publicLog.RunStarted(envelope.Slice.Descriptor.PackageId);
         await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
         using var timeout = new CancellationTokenSource(_options.Value.RunTimeout);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(

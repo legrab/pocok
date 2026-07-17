@@ -1,38 +1,50 @@
 {
   "App": {
-    "Title": "Pocok bemutató",
-    "Subtitle": "Kis .NET csomagok a valódi API-jaikkal kipróbálva."
+    "Title": "Pocok csomagbemutató",
+    "Subtitle": "Csomagáttekintő és futtatható példák a Pocok .NET csomagjaihoz."
   },
   "Navigation": {
-    "Home": "Csomagok",
-    "System": "Rendszer"
+    "Primary": "Elsődleges navigáció",
+    "Home": "Főoldal",
+    "System": "Rendszer",
+    "Sandboxes": "Tesztkörnyezetek"
   },
   "Language": {
     "Label": "Nyelv",
     "English": "Angol",
     "Hungarian": "Magyar"
   },
+  "Theme": {
+    "SwitchToLight": "Világos téma használata",
+    "SwitchToDark": "Sötét téma használata"
+  },
+  "Logs": {
+    "Title": "Élő napló",
+    "Empty": "Nincs megjeleníthető bejegyzés."
+  },
   "Home": {
-    "Eyebrow": ".NET 10 · Interaktív szerver",
-    "Title": "Kis csomagok, valódi működés",
-    "Intro": "A Pocok célzott .NET csomagkészlet explicit infrastruktúra-viselkedéshez. A bemutató megbízható repository-szeleteket futtat korlátozott, felhasználónként elkülönített homokozókban.",
-    "Known": "ismert csomag",
-    "Available": "elérhető szelet",
-    "Planned": "tervezett szelet",
-    "Loaded": "betöltött bővítményszelet",
+    "Eyebrow": ".NET 10 · Interaktív alkalmazás",
+    "Title": "Pocok csomagok, futtatható példákkal",
+    "Intro": "Böngészd át a csomagkatalógust, vagy próbáld ki a telepített példákat. Minden példa a csomag nyilvános API-ját használja, és felhasználónként elkülönítve fut.",
+    "Known": "nyilvántartott csomag",
+    "Available": "telepített példa",
+    "Planned": "példa nélküli csomag",
+    "Loaded": "betöltött bővítmény",
     "States": "Csomagállapotok",
     "Families": "Szűrés család szerint",
     "AllFamilies": "Minden család",
     "Capability": "Képesség",
     "MaintainerDefaults": "Karbantartói alapbeállítás",
-    "StartTitle": "Próbálj ki egy kész homokozót",
-    "StartText": "Minden elérhető szelet a valódi csomag-API-t használja szerkeszthető bemenettel, korlátozott futtatással és strukturált eredménnyel. Indulj az első telepített szelettel, vagy válassz egy másik elérhető csomagot lent.",
-    "StartAction": "Kiemelt homokozó megnyitása",
-    "SystemAction": "Futásidejű rendszer megtekintése",
-    "SandboxYes": "Interaktív homokozó",
-    "SandboxNo": "Még nincs homokozó",
+    "StartTitle": "Próbálj ki egy telepített példát",
+    "StartText": "A telepített példák szerkeszthető bemenettel hívják a csomag nyilvános API-ját, és strukturált eredményt adnak. Nyisd meg a kiemelt példát, vagy válassz másik csomagot.",
+    "StartAction": "Kiemelt példa megnyitása",
+    "SystemAction": "Futásidejű adatok",
+    "SandboxYes": "Futtatható példa",
+    "SandboxNo": "Még nincs példa",
     "Version": "Modulverzió",
-    "FilterCount": "megjelenített csomag"
+    "FilterCount": "megjelenített csomag",
+    "AvailableSandboxes": "Elérhető tesztkörnyezetek",
+    "ComingSoon": "Hamarosan"
   },
   "Actions": {
     "Open": "Csomag megnyitása",
@@ -51,20 +63,21 @@
     "Purpose": "Cél",
     "Family": "Család",
     "PackageState": "Csomagállapot",
-    "Sandbox": "Homokozó",
+    "Sandbox": "Példa",
     "NoSandbox": "Nincs telepítve ebben a kiadásban",
     "Documentation": "Forrásdokumentáció",
     "DocumentationLink": "Dokumentáció megnyitása",
     "Facts": "Csomagadatok",
-    "PlannedTitle": "Ez a szelet még nincs megvalósítva",
-    "PlannedMessage": "A csomag része az aktuális katalógusnak, de ez a telepítés még nem tartalmaz hozzá futtatható szeletet. Nem jelenít meg kitalált eredményt.",
-    "ContributorGuidance": "A közreműködő a samples/Showcase alatt adhat hozzá szeletet a meglévő közös szerződések, komponensek, lokalizáció és automatikus publikálás használatával.",
-    "ContributorGuide": "Szelet-hozzáadási útmutató",
+    "PlannedTitle": "Ehhez a csomaghoz nincs telepített példa",
+    "PlannedMessage": "A csomag szerepel a katalógusban, de ez a telepítés nem tartalmaz hozzá Showcase bővítményt.",
+    "ContributorGuidance": "Új bővítmény a samples/Showcase alatt adható hozzá a közös szerződések, komponensek, fordítások és manifestfájl alapján működő publikálás használatával.",
+    "ContributorGuide": "Bővítmény-hozzáadási útmutató",
     "NotFoundTitle": "A csomag nem található",
     "NotFoundText": "A kért csomag nem része az aktuális kiadási katalógusnak."
   },
   "Footer": {
-    "Tagline": "Megbízható, folyamaton belüli demók korlátozott, felhasználónként elkülönített futtatással."
+    "Tagline": "Korlátozott, folyamaton belüli példák a csomagok nyilvános API-jával.",
+    "Repository": "Forráskód a GitHubon"
   },
   "Result": {
     "Success": "Siker",
@@ -78,7 +91,7 @@
   "System": {
     "Eyebrow": "Futásidő",
     "Title": "Rendszerállapot",
-    "Intro": "Biztonságos futásidejű adatok az indításkor felderített modulokról és a változatlan kiadási katalógusról.",
+    "Intro": "Futásidejű adatok a betöltött modulokról és a telepítési katalógusról.",
     "Application": "Alkalmazás",
     "ApplicationVersion": "Alkalmazásverzió",
     "OperatingSystem": "Operációs rendszer",
@@ -90,80 +103,83 @@
     "KnownPackages": "Ismert csomagok",
     "InstalledSlices": "Telepített szeletek",
     "PlannedSlices": "Tervezett szeletek",
-    "QueueDepth": "Sor mélysége",
+    "QueueDepth": "Várakozó futások",
     "QueueCapacity": "Sor kapacitása",
     "Readiness": "Készenlét",
     "ReadinessState": "Állapot",
     "ReadinessSequence": "Sorszám",
     "Uptime": "Üzemidő",
-    "Culture": "Aktív kultúra",
+    "Culture": "Aktuális kultúra",
     "Modules": "Modulok",
-    "NoModules": "Nem található modul.",
-    "Diagnostics": "Biztonságos diagnosztika",
-    "NoDiagnostics": "Nincs moduldiagnosztika.",
+    "NoModules": "Nincs betöltött modul.",
+    "Diagnostics": "Moduldiagnosztika",
+    "NoDiagnostics": "Nincs diagnosztikai bejegyzés.",
     "Required": "Kötelező",
     "Optional": "Opcionális",
     "Version": "Verzió",
     "Status": "Állapot",
-    "DotNet": ".NET futtatókörnyezet"
+    "DotNet": ".NET futtatókörnyezet",
+    "FeatureToggles": "Funkciókapcsolók",
+    "LogConsole": "Alkalmazáson belüli naplókonzol",
+    "LogConsoleDescription": "A korlátozott, szintetikus Showcase-naplófolyam megjelenítése a bal oldalsávban."
   },
   "Errors": {
-    "Eyebrow": "Biztonságos hiba",
+    "Eyebrow": "Sikertelen kérés",
     "Title": "A kérés nem hajtható végre",
-    "Text": "Belső részletek nem kerültek kiadásra. Térj vissza a csomagkatalógushoz, majd próbáld újra.",
+    "Text": "Az alkalmazás nem jelenített meg belső hibarészleteket. Térj vissza a csomagkatalógushoz, majd próbáld újra.",
     "NotFoundTitle": "Az oldal nem található",
     "NotFoundText": "A kért bemutatóoldal nem létezik."
   },
   "Health": {
-    "Live": "Él",
-    "Ready": "Kész",
-    "NotReady": "Nem kész"
+    "Live": "Elérhető",
+    "Ready": "Üzemkész",
+    "NotReady": "Nem üzemkész"
   },
   "Packages": {
     "Pocok_Conversion": {
-      "Summary": "Szabályzatvezérelt értékkonverzió explicit hibákkal, kollekciókezeléssel és korlátozott működéssel."
+      "Summary": "Szabályvezérelt értékkonverzió egyértelmű hibákkal, gyűjteménykezeléssel és korlátozott rekurzióval."
     },
     "Pocok_Readiness": {
-      "Summary": "Explicit indítási, készenléti, hibakezelési, leállítási és újraindítási koordináció."
+      "Summary": "Újraindítható indítási és készenléti koordináció külön hiba- és megszakítási állapotokkal."
     },
     "Pocok_AppDefaults": {
-      "Summary": "Komponálható alkalmazáskonfigurátorok egységes host-beállításhoz."
+      "Summary": "Sorrendbe rendezett alkalmazáskonfigurátorok ismételhető host-beállításhoz."
     },
     "Pocok_AppDefaults_Logging": {
-      "Summary": "Konfigurációvezérelt Microsoft.Extensions.Logging alapbeállítások."
+      "Summary": "Konfigurációvezérelt, visszafogott Microsoft.Extensions.Logging alapbeállítások."
     },
     "Pocok_AppDefaults_Logging_Serilog": {
-      "Summary": "Serilog alapbeállítások a Pocok alkalmazáskonfigurátor-modelljén keresztül."
+      "Summary": "Serilog host-alapbeállítások a Pocok alkalmazáskonfigurátor-modelljén keresztül."
     },
     "Pocok_Modularity_Contracts": {
-      "Summary": "Stabil szolgáltatásmodul-szerződések hostok és megbízható bővítmények között."
+      "Summary": "Közös szerződések hostok és megbízható indítási modulok számára."
     },
     "Pocok_Modularity": {
-      "Summary": "Manifestvezérelt indításkori felderítés és regisztráció megbízható folyamaton belüli modulokhoz."
+      "Summary": "Megbízható, folyamaton belüli modulok felderítése és regisztrációja manifestfájl alapján."
     },
     "Pocok_AppDefaults_Modularity": {
-      "Summary": "Karbantartói alapbeállítások a Pocok modularitás konfigurációjához."
+      "Summary": "Szokásos host-konfiguráció a Pocok.Modularity használatához."
     },
     "Pocok_BackgroundWork": {
-      "Summary": "Kis konkurenciakezelő segédek összevonáshoz, késleltetéshez, ismétléshez és megfigyeléshez."
+      "Summary": "Konkurenciakezelő segédek összevonáshoz, késleltetéshez, ismétléshez és feladatmegfigyeléshez."
     },
     "Pocok_Scripting": {
-      "Summary": "Korlátozott JavaScript-futtatás importokkal, modulokkal, kötésekkel és strukturált hibákkal."
+      "Summary": "Korlátozott JavaScript-futtatás külön megadott kötésekkel, modulokkal és strukturált hibákkal."
     },
     "Pocok_Localization": {
-      "Summary": "Determinisztikus fájlalapú lokalizáció és szolgáltató-kompozíció."
+      "Summary": "Determinisztikus JSON- és RESX-lokalizáció rendezett szolgáltató-kompozícióval."
     },
     "Pocok_Signals": {
-      "Summary": "Típusos jelkezelési absztrakciók olvasáshoz, íráshoz, feliratkozáshoz és kapcsolatállapothoz."
+      "Summary": "Típusos jelolvasás, írás, feliratkozás, minőség- és kapcsolatállapot-kezelés."
     },
     "Pocok_Subscriptions": {
-      "Summary": "Konkurenciabiztos, kulcsalapú feliratkozási életciklus-kezelés."
+      "Summary": "Szálbiztos, kulcsalapú feliratkozások típusos szűréssel és leképezéssel."
     },
     "Pocok_Licensing": {
-      "Summary": "Aláírt és titkosított licencdokumentumok, ellenőrzés, futásidejű kikényszerítés és CLI-folyamatok."
+      "Summary": "Aláírt offline licencek ellenőrzéssel, futásidejű kikényszerítéssel és parancssori eszközökkel."
     },
     "Pocok_AppDefaults_Licensing": {
-      "Summary": "Alkalmazási alapbeállítások a Pocok licencelés konfigurálásához és kikényszerítéséhez."
+      "Summary": "Host-konfiguráció és kikényszerítési alapbeállítások a Pocok.Licensing csomaghoz."
     }
   },
   "RunStatus": {

@@ -1,6 +1,12 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject IShowcaseText Text
 @inject NavigationManager Navigation
+@inject ShowcaseSliceCatalog SliceCatalog
+@inject IEnumerable<ShowcaseLogBuffer> LogBuffers
+@inject ShowcaseUiState UiState
+@inject ShowcasePublicLog PublicLog
+@inject IJSRuntime JS
 
 <div class="shell">
     <aside class="shell-nav">
@@ -9,27 +15,139 @@
             <strong>@Text.GetText("shell", "App.Title")</strong>
         </a>
         <p class="nav-subtitle">@Text.GetText("shell", "App.Subtitle")</p>
-        <nav aria-label="@Text.GetText("shell", "Navigation.Home")">
+        <nav class="primary-nav" aria-label="@Text.GetText("shell", "Navigation.Primary")">
             <NavLink href="/" Match="NavLinkMatch.All">@Text.GetText("shell", "Navigation.Home")</NavLink>
+        </nav>
+        <section class="sandbox-nav" aria-labelledby="sandbox-nav-title">
+            <p id="sandbox-nav-title">@Text.GetText("shell", "Navigation.Sandboxes")</p>
+            <nav class="sandbox-nav-scroll" aria-label="@Text.GetText("shell", "Navigation.Sandboxes")">
+                @foreach (IShowcaseSlice slice in SliceCatalog.Installed)
+                {
+                    <NavLink href="@($"/packages/{slice.Descriptor.Slug}")">
+                        @Text.GetText(slice.Descriptor.ResourceNamespace, slice.Descriptor.DisplayNameKey)
+                    </NavLink>
+                }
+            </nav>
+        </section>
+        <nav class="system-nav" aria-label="@Text.GetText("shell", "Navigation.System")">
             <NavLink href="/system">@Text.GetText("shell", "Navigation.System")</NavLink>
         </nav>
         <div class="language-switch" aria-label="@Text.GetText("shell", "Language.Label")">
             <a href="@CultureUrl("en")" lang="en">EN</a>
             <a href="@CultureUrl("hu")" lang="hu">HU</a>
         </div>
-        <p class="nav-footer">@Text.GetText("shell", "Footer.Tagline")</p>
+        <button type="button"
+                class="theme-toggle"
+                aria-pressed="@(_theme == "light")"
+                title="@ThemeToggleLabel"
+                @onclick="ToggleThemeAsync">
+            <span aria-hidden="true">@(_theme == "dark" ? "☀" : "☾")</span>
+            <span>@ThemeToggleLabel</span>
+        </button>
+        @if (_logBuffer is not null && UiState.LogConsoleVisible)
+        {
+            <ShowcaseLogConsole Buffer="_logBuffer" />
+        }
+        <div class="nav-footer">
+            <p>@Text.GetText("shell", "Footer.Tagline")</p>
+            <a href="https://github.com/legrab/pocok"
+               target="_blank"
+               rel="noopener noreferrer">@Text.GetText("shell", "Footer.Repository")</a>
+        </div>
     </aside>
-    <div class="shell-content">
+    <div class="shell-content @(IsPackagePage ? "package-shell-content" : null)">
         <main>@Body</main>
         <footer><span>Apache-2.0</span><span>© 2026 Pocok contributors</span></footer>
     </div>
 </div>
 
 @code {
+    private ShowcaseLogBuffer? _logBuffer;
+    private string _theme = "dark";
+
+    private bool IsPackagePage => CurrentRelativePath.StartsWith("packages/", StringComparison.OrdinalIgnoreCase);
+
+    private string CurrentRelativePath
+    {
+        get
+        {
+            string relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+            int suffix = relative.IndexOfAny(['?', '#']);
+            return suffix < 0 ? relative : relative[..suffix];
+        }
+    }
+
+    private string ThemeToggleLabel => Text.GetText(
+        "shell",
+        _theme == "dark" ? "Theme.SwitchToLight" : "Theme.SwitchToDark");
+
+    protected override void OnInitialized()
+    {
+        _logBuffer = LogBuffers.SingleOrDefault();
+        UiState.Changed += OnUiStateChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+        _theme = await JS.InvokeAsync<string>("pocokShowcaseTheme.current");
+        bool logConsoleVisible = await JS.InvokeAsync<bool>(
+            "pocokShowcasePreferences.feature",
+            "log-console",
+            true);
+        UiState.SetLogConsoleVisible(logConsoleVisible);
+        LogCurrentPage();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        UiState.Changed -= OnUiStateChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+
     private string CultureUrl(string culture)
     {
         string relative = Navigation.ToBaseRelativePath(Navigation.Uri);
         string returnUrl = "/" + relative;
         return $"/culture/set?culture={Uri.EscapeDataString(culture)}&returnUrl={Uri.EscapeDataString(returnUrl)}";
+    }
+
+    private async Task ToggleThemeAsync()
+    {
+        _theme = await JS.InvokeAsync<string>("pocokShowcaseTheme.toggle");
+        PublicLog.ThemeChanged(_theme);
+    }
+
+    private void OnUiStateChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => LogCurrentPage();
+
+    private void LogCurrentPage()
+    {
+        string relative = CurrentRelativePath;
+        if (relative.Length == 0)
+        {
+            PublicLog.PageOpened("Home");
+            return;
+        }
+
+        if (string.Equals(relative, "system", StringComparison.OrdinalIgnoreCase))
+        {
+            PublicLog.PageOpened("System");
+            return;
+        }
+
+        const string packagePrefix = "packages/";
+        if (relative.StartsWith(packagePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            string slug = relative[packagePrefix.Length..].TrimEnd('/');
+            PublicLog.PageOpened(SliceCatalog.FindBySlug(slug)?.Descriptor.PackageId ?? "Package");
+            return;
+        }
+
+        PublicLog.PageOpened("Page");
     }
 }

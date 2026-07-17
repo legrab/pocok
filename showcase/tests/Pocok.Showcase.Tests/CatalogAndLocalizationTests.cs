@@ -3,9 +3,7 @@
 
 using System.Globalization;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Pocok.Showcase.Contracts;
-using Pocok.Showcase.Conversion;
 using Pocok.Showcase.Web.Services;
 
 namespace Pocok.Showcase.Tests;
@@ -22,62 +20,6 @@ public sealed class CatalogAndLocalizationTests
     }
 
     [Test]
-    public void PartialCatalogAcceptsOneInstalledSlice()
-    {
-        var packages = new ShowcasePackageCatalog(TestSupport.WebEnvironment());
-        var catalog = new ShowcaseSliceCatalog([new ConversionShowcaseSlice()], packages,
-            Options.Create(new ShowcaseOptions { RequireCompleteCatalog = false }));
-        catalog.Installed.Count.ShouldBe(1);
-        catalog.CreateFacts(packages).Count(item => item.ImplementationStatus == ShowcaseImplementationStatus.Planned)
-            .ShouldBe(14);
-    }
-
-    [Test]
-    public void StrictCatalogRejectsMissingSlices()
-    {
-        var packages = new ShowcasePackageCatalog(TestSupport.WebEnvironment());
-        Should.Throw<InvalidOperationException>(() => new ShowcaseSliceCatalog([new ConversionShowcaseSlice()], packages,
-            Options.Create(new ShowcaseOptions { RequireCompleteCatalog = true }))).Message.ShouldContain("missing");
-    }
-
-    [Test]
-    public async Task ShellAndSliceLocalizationLoad()
-    {
-        FakeWebHostEnvironment environment = TestSupport.WebEnvironment();
-        ShowcaseResourceRegistration[] registrations =
-        [
-            new("shell", environment.ContentRootPath, "Content/Locales/Shell"),
-            new("conversion", Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase", "Pocok.Showcase.Conversion"), "Content/Locales/Conversion")
-        ];
-        await using var text = new ShowcaseTextCatalog(registrations, environment);
-        CultureInfo previous = CultureInfo.CurrentUICulture;
-        try
-        {
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("hu");
-            text.GetText("conversion", "Sandbox.Run").ShouldBe("Konverzió futtatása");
-            text.GetText("shell", "Navigation.Home").ShouldBe("Csomagok");
-        }
-        finally { CultureInfo.CurrentUICulture = previous; }
-    }
-
-    [Test]
-    public async Task CultureLookupsRemainIsolated()
-    {
-        FakeWebHostEnvironment environment = TestSupport.WebEnvironment();
-        ShowcaseResourceRegistration[] registrations =
-        [new("conversion", Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase", "Pocok.Showcase.Conversion"), "Content/Locales/Conversion")];
-        await using var text = new ShowcaseTextCatalog(registrations, environment);
-        CultureInfo previous = CultureInfo.CurrentUICulture;
-        try
-        {
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en");
-            text.GetText("conversion", "Package.Name").ShouldBe("Conversion");
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("hu");
-            text.GetText("conversion", "Package.Name").ShouldBe("Konverzió");
-        }
-        finally { CultureInfo.CurrentUICulture = previous; }
-    }
-    [Test]
     public void CatalogSlugsAreUniqueAndResolvePlannedPackages()
     {
         var catalog = new ShowcasePackageCatalog(TestSupport.WebEnvironment());
@@ -89,25 +31,41 @@ public sealed class CatalogAndLocalizationTests
     }
 
     [Test]
-    public void ConversionManifestSharesStableHostAssemblies()
+    public async Task ShellLocalizationLoads()
     {
-        string path = Path.Combine(
-            TestSupport.RepositoryRoot,
-            "samples",
-            "Showcase",
-            "Pocok.Showcase.Conversion",
-            "pocok.module.json");
-        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(path));
-        string[] shared = manifest.RootElement.GetProperty("sharedAssemblies")
-            .EnumerateArray()
-            .Select(item => item.GetString()!)
-            .ToArray();
-        shared.ShouldContain("Pocok.Showcase.Contracts");
-        shared.ShouldContain("Pocok.Showcase.Components");
+        FakeWebHostEnvironment environment = TestSupport.WebEnvironment();
+        ShowcaseResourceRegistration[] registrations =
+        [new("shell", environment.ContentRootPath, "Content/Locales/Shell")];
+        await using var text = new ShowcaseTextCatalog(registrations, environment);
+        CultureInfo previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("hu");
+            text.GetText("shell", "Navigation.Home").ShouldBe("Főoldal");
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 
     [Test]
-    public void PublisherDiscoversSlicesWithoutAHostProjectList()
+    public void ShellLocalizationsHaveMatchingKeys()
+    {
+        string directory = Path.Combine(
+            TestSupport.RepositoryRoot,
+            "showcase",
+            "src",
+            "Pocok.Showcase.Web",
+            "Content",
+            "Locales");
+
+        ReadResourceKeys(Path.Combine(directory, "Shell.json"))
+            .ShouldBe(ReadResourceKeys(Path.Combine(directory, "Shell.hu.json")));
+    }
+
+    [Test]
+    public void PublisherDiscoversSlicesFromManifests()
     {
         string source = File.ReadAllText(Path.Combine(
             TestSupport.RepositoryRoot,
@@ -115,9 +73,33 @@ public sealed class CatalogAndLocalizationTests
             "tools",
             "Pocok.Showcase.PublishTool",
             "Program.cs"));
-        source.ShouldContain("Directory.EnumerateFiles(samplesRoot");
-        source.ShouldContain("\"Pocok.Showcase.*.csproj\"");
+        source.ShouldContain("DiscoverPluginProjects");
+        source.ShouldContain("pocok.module.json");
         source.ShouldNotContain("Pocok.Showcase.Conversion.csproj");
     }
 
+    private static string[] ReadResourceKeys(string path)
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        return EnumerateKeys(document.RootElement, string.Empty)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+    }
+
+    private static IEnumerable<string> EnumerateKeys(JsonElement element, string prefix)
+    {
+        foreach (JsonProperty property in element.EnumerateObject())
+        {
+            string key = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}.{property.Name}";
+            if (property.Value.ValueKind == JsonValueKind.Object)
+            {
+                foreach (string nested in EnumerateKeys(property.Value, key))
+                    yield return nested;
+            }
+            else
+            {
+                yield return key;
+            }
+        }
+    }
 }

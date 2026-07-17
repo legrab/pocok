@@ -15,7 +15,6 @@ window.pocokShowcase = {
     const cursor = replaceStart + text.length;
     element.focus();
     element.setSelectionRange(cursor, cursor);
-    element.dispatchEvent(new Event("input", { bubbles: true }));
     return element.value;
   }
 };

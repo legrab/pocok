@@ -20,9 +20,4 @@
   <Folder Name="/showcase/tools/">
     <Project Path="tools/Pocok.Showcase.PublishTool/Pocok.Showcase.PublishTool.csproj" />
   </Folder>
-  <Folder Name="/samples/" />
-  <Folder Name="/samples/Showcase/">
-    <Project Path="../samples/Showcase/Pocok.Showcase.Conversion/Pocok.Showcase.Conversion.csproj" />
-    <Project Path="../samples/Showcase/Pocok.Showcase.Scripting/Pocok.Showcase.Scripting.csproj" />
-  </Folder>
 </Solution>

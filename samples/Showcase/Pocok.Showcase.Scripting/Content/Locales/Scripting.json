@@ -1,7 +1,7 @@
 {
   "Package": {
     "Name": "Scripting",
-    "Summary": "Execute complete JavaScript through the repository's bounded ScriptRunner and inspect return values, runtime types, limits, and structured failures.",
+    "Summary": "Run complete JavaScript with Pocok.Scripting and inspect returned values, limits, and structured failures.",
     "Status": {
       "Available": "Available"
     }
@@ -13,11 +13,14 @@
     "Ready": "Ready",
     "CodeLabel": "Complete JavaScript source",
     "Run": "Run script",
-    "Cancel": "Cancel"
+    "Cancel": "Cancel",
+    "ExecutionSteps": "Execution steps",
+    "ShowSuggestions": "Show suggestions",
+    "HideSuggestions": "Hide suggestions"
   },
   "Fields": {
     "ExpectResult": "Require a return value",
-    "ExpectResultHelp": "When enabled, null or undefined is reported as a structured missing-result failure.",
+    "ExpectResultHelp": "When enabled, null and undefined are returned as a structured missing-result failure.",
     "Timeout": "Timeout (ms)",
     "MaxStatements": "Maximum statements",
     "MaxRecursion": "Maximum recursion depth",
@@ -25,7 +28,7 @@
   },
   "Result": {
     "Title": "Execution result",
-    "Empty": "Run a script to see its returned value or structured failure.",
+    "Empty": "Run the current script to inspect its value or structured failure.",
     "ScriptPreview": "Executed JavaScript",
     "Truncated": "truncated",
     "Fields": {
@@ -38,29 +41,30 @@
     }
   },
   "Tips": {
-    "Title": "Why this matters",
-    "Isolation": "Every request receives a fresh Jint engine, so scripts do not share mutable runtime state.",
-    "Bounds": "Timeout, statement count, recursion, source size, memory, outer queue, and output are bounded independently.",
+    "Title": "What to notice",
+    "Isolation": "Each run uses a fresh Jint engine, so scripts cannot share mutable engine state.",
+    "Bounds": "Timeout, statements, recursion, source length, memory, queueing, and output each have separate limits.",
     "ReturnValue": "The final JavaScript expression becomes the returned value. A declaration alone usually evaluates to undefined.",
-    "Failures": "Expected JavaScript and limit failures remain structured data rather than escaping as host exceptions.",
-    "Capabilities": "Production hosts must expose every scalar value or delegate capability explicitly. Nothing ambient is available."
+    "Failures": "JavaScript errors and limit violations are returned as structured failures instead of host exceptions.",
+    "Capabilities": "Hosts expose approved values and delegates explicitly; no ambient capabilities are available."
   },
   "Guide": {
+    "More": "More guidance",
     "Purpose": {
       "Title": "Purpose",
-      "Body": "Pocok.Scripting provides a narrow, host-controlled JavaScript boundary for automation and extension scenarios without exposing ambient CLR access."
+      "Body": "Pocok.Scripting provides a host-controlled JavaScript boundary for automation and extension points without exposing ambient CLR access."
     },
     "QuickStart": {
       "Title": "Quick start",
-      "Body": "Write a complete script and leave the value you want to inspect as the final expression. The sandbox invokes the real ScriptRunner from the repository."
+      "Body": "Write a complete script and leave the value to inspect as the final expression. The example invokes ScriptRunner directly."
     },
     "Results": {
       "Title": "Results",
-      "Body": "Successful executions return the final JavaScript value. The showcase formats scalar, array, and object results deterministically and never exposes the captured exception object."
+      "Body": "Successful runs return the final JavaScript value. The Showcase formats scalar, array, and object results deterministically and does not expose captured exception objects."
     },
     "Bounds": {
       "Title": "Execution bounds",
-      "Body": "ScriptRunner applies timeout, statement, recursion, source-length, memory, and cancellation limits. The showcase adds its own queue, input, and output bounds around that package contract."
+      "Body": "ScriptRunner limits timeout, statements, recursion, source length, memory, and cancellation. The Showcase also bounds queueing, input, and output."
     },
     "Capabilities": {
       "Title": "Explicit capabilities",
@@ -68,15 +72,15 @@
     },
     "Imports": {
       "Title": "Imports and modules",
-      "Body": "The package can resolve neutral comment imports from an explicit module source. This public playground focuses on direct complete scripts so no storage-backed module catalog is implied."
+      "Body": "The package can resolve comment-based imports from an explicit module source. This public deployment runs self-contained scripts and does not provide a persistent module catalog."
     },
     "Concurrency": {
       "Title": "Concurrency",
-      "Body": "ScriptRunner is instance-based and safe for concurrent callers because each request creates a fresh engine. Showcase runs remain isolated by scope, cancellation source, result channel, and progress channel."
+      "Body": "ScriptRunner creates a fresh engine for every request and supports concurrent callers. Each Showcase run has its own scope, cancellation source, result channel, and progress channel."
     },
     "Production": {
       "Title": "Production notes",
-      "Body": "Treat scripts as untrusted input, keep limits conservative, authorize every delegate capability, avoid secrets in diagnostics, and do not mistake in-process bounds for operating-system isolation."
+      "Body": "Treat scripts as untrusted input, keep limits conservative, authorize every delegate, exclude secrets from diagnostics, and remember that in-process limits are not operating-system isolation."
     },
     "Snippet": {
       "RunnerTitle": "Run a bounded script",
@@ -97,11 +101,11 @@
     "NoClr": "No ambient CLR or reflection access.",
     "NoIo": "No filesystem, network, browser, or service-provider access.",
     "FreshEngine": "A fresh engine and script state for every run.",
-    "Bounded": "Bounded source, timeout, statements, recursion, memory, queue, and output."
+    "Bounded": "Separate limits for source length, timeout, statements, recursion, memory, queueing, and output."
   },
   "Source": {
     "Title": "Source documentation",
-    "Body": "Repository documentation for the scripting package contract, capabilities, imports, and security boundaries."
+    "Body": "Package documentation for execution limits, capabilities, imports, and security boundaries."
   },
   "Samples": {
     "arithmetic": {

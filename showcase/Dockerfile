@@ -4,10 +4,23 @@ WORKDIR /src
 
 COPY . .
 
-RUN dotnet restore showcase/Pocok.Showcase.slnx --verbosity minimal
-RUN dotnet test showcase/Pocok.Showcase.slnx \
+RUN dotnet restore showcase/Pocok.Showcase.slnx --verbosity minimal \
+    && dotnet restore showcase/Pocok.Showcase.Samples.slnx --verbosity minimal
+RUN dotnet build showcase/Pocok.Showcase.slnx \
     --configuration Release \
     --no-restore \
+    --verbosity minimal \
+    && dotnet build showcase/Pocok.Showcase.Samples.slnx \
+    --configuration Release \
+    --no-restore \
+    --verbosity minimal
+RUN dotnet test showcase/tests/Pocok.Showcase.Tests/Pocok.Showcase.Tests.csproj \
+    --configuration Release \
+    --no-build \
+    --verbosity minimal \
+    && dotnet test samples/Showcase/Pocok.Showcase.Samples.Tests/Pocok.Showcase.Samples.Tests.csproj \
+    --configuration Release \
+    --no-build \
     --verbosity minimal
 RUN chmod +x showcase/scripts/publish-showcase.sh \
     && bash showcase/scripts/publish-showcase.sh /app/publish --no-restore

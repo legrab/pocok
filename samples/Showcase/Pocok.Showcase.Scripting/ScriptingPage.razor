@@ -1,151 +1,71 @@
-<ShowcasePackageHeader Descriptor="Context.Descriptor" Text="Context.Text" ImplementationStatusText="@T("Package.Status.Available")" />
-<div class="package-layout">
-    <div class="stack">
-        <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
-                              Samples="Context.Samples"
-                              SelectedId="_selectedId"
-                              SelectedIdChanged="SelectSampleAsync"
-                              Text="Context.Text"
-                              ResourceNamespace="scripting" />
+<div class="package-page">
+    <ShowcasePackageHeader Descriptor="Context.Descriptor"
+                           Text="Context.Text"
+                           ImplementationStatusText="@T("Package.Status.Available")" />
 
-        <ShowcaseSandboxFrame Title="@T("Sandbox.Title")" Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
-            <div class="completion-wrap">
-                <ShowcaseCodeAssistEditor Label="@T("Sandbox.CodeLabel")"
-                                          Value="_input.Script"
-                                          ValueChanged="ChangeScriptAsync"
-                                          Catalog="Context.CodeAssist"
-                                          Text="Context.Text"
-                                          ResourceNamespace="scripting" />
-            </div>
+    <ShowcasePackageWorkbench>
+        <Samples>
+            <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
+                                  Samples="Context.Samples"
+                                  SelectedId="@_selectedId"
+                                  SelectedIdChanged="SelectSampleAsync"
+                                  Text="Context.Text"
+                                  ResourceNamespace="scripting" />
+            <ShowcaseProgressPanel Title="@T("Sandbox.ExecutionSteps")"
+                                   Progress="_progress" />
+            @if (_result is not null)
+            {
+                <ShowcaseTipPanel Title="@T("Tips.Title")"
+                                  TipKeys="_result.TipKeys"
+                                  Text="Context.Text"
+                                  ResourceNamespace="scripting" />
+            }
+        </Samples>
+        <Main>
+            <ShowcaseSandboxFrame @key="_sampleRevision"
+                                  Title="@T("Sandbox.Title")"
+                                  Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
+                <ScriptingEditor @bind-Value="_input"
+                                 CodeAssist="Context.CodeAssist"
+                                 Text="Context.Text" />
 
-            <div class="field-grid scripting-options">
-                <div class="field checkbox-field">
-                    <label for="expect-result">@T("Fields.ExpectResult")</label>
-                    <input id="expect-result" type="checkbox" checked="@_input.ExpectResult" @onchange="ChangeExpectResult" />
-                    <small>@T("Fields.ExpectResultHelp")</small>
-                </div>
-                <div class="field">
-                    <label for="timeout">@T("Fields.Timeout")</label>
-                    <input id="timeout" type="number" min="50" max="2000" step="50" value="@_input.TimeoutMilliseconds" @onchange="ChangeTimeout" />
-                </div>
-                <div class="field">
-                    <label for="statements">@T("Fields.MaxStatements")</label>
-                    <input id="statements" type="number" min="100" max="100000" step="100" value="@_input.MaxStatements" @onchange="ChangeStatements" />
-                </div>
-                <div class="field">
-                    <label for="recursion">@T("Fields.MaxRecursion")</label>
-                    <input id="recursion" type="number" min="8" max="128" value="@_input.MaxRecursionDepth" @onchange="ChangeRecursion" />
-                </div>
-                <div class="field">
-                    <label for="memory">@T("Fields.MaxMemory")</label>
-                    <input id="memory" type="number" min="4" max="64" value="@_input.MaxMemoryMegabytes" @onchange="ChangeMemory" />
-                </div>
-            </div>
+                <ShowcaseExecutionControls Slice="Context.Slice"
+                                           Input="_input"
+                                           RunClient="Context.RunClient"
+                                           Culture="Context.Culture"
+                                           RunLabel="@T("Sandbox.Run")"
+                                           CancelLabel="@T("Sandbox.Cancel")"
+                                           ResetKey="@SampleResetKey"
+                                           ResultChanged="SetResultAsync"
+                                           RunningChanged="SetRunningAsync"
+                                           ProgressChanged="SetProgressAsync" />
+            </ShowcaseSandboxFrame>
 
-            <ShowcaseExecutionControls Slice="Context.Slice"
-                                       Input="_input"
-                                       RunClient="Context.RunClient"
-                                       Culture="Context.Culture"
-                                       RunLabel="@T("Sandbox.Run")"
-                                       CancelLabel="@T("Sandbox.Cancel")"
-                                       ResetKey="_selectedId"
-                                       ResultChanged="SetResultAsync"
-                                       RunningChanged="SetRunningAsync" />
-        </ShowcaseSandboxFrame>
-
-        @if (_result is not null)
-        {
-            <ShowcaseTipPanel Title="@T("Tips.Title")" TipKeys="_result.TipKeys" Text="Context.Text" ResourceNamespace="scripting" />
-        }
-        <ShowcaseResultPanel Title="@T("Result.Title")"
-                             EmptyText="@T("Result.Empty")"
-                             Result="_result"
-                             Text="Context.Text"
-                             ResourceNamespace="scripting"
-                             CodePreviewTitle="@T("Result.ScriptPreview")"
-                             CodePreviewLanguage="javascript"
-                             TruncatedLabel="@T("Result.Truncated")" />
-    </div>
-
-    <div class="stack facts-rail">
-        <ShowcaseGuideView Guide="Context.Slice.Guide" Text="Context.Text" ResourceNamespace="scripting" />
-        <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
-            <ul class="compact-list">
-                <li>@T("Boundaries.NoClr")</li>
-                <li>@T("Boundaries.NoIo")</li>
-                <li>@T("Boundaries.FreshEngine")</li>
-                <li>@T("Boundaries.Bounded")</li>
-            </ul>
-        </ShowcaseBoundariesPanel>
-        <section class="panel source-panel">
-            <h2>@T("Source.Title")</h2>
-            <p>@T("Source.Body")</p>
-            <span class="mono muted">@Context.Descriptor.SourceDocumentationPath</span>
-        </section>
-    </div>
+            <ShowcaseResultPanel Title="@T("Result.Title")"
+                                 EmptyText="@T("Result.Empty")"
+                                 Result="_result"
+                                 Text="Context.Text"
+                                 ResourceNamespace="scripting"
+                                 CodePreviewTitle="@T("Result.ScriptPreview")"
+                                 CodePreviewLanguage="javascript"
+                                 TruncatedLabel="@T("Result.Truncated")" />
+        </Main>
+        <Guidance>
+            <ShowcaseGuideView Guide="Context.Slice.Guide"
+                               Text="Context.Text"
+                               ResourceNamespace="scripting"
+                               MoreLabel="@T("Guide.More")" />
+            <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
+                <ul class="compact-list">
+                    <li>@T("Boundaries.NoClr")</li>
+                    <li>@T("Boundaries.NoIo")</li>
+                    <li>@T("Boundaries.FreshEngine")</li>
+                    <li>@T("Boundaries.Bounded")</li>
+                </ul>
+            </ShowcaseBoundariesPanel>
+            <ShowcaseSourcePanel Title="@T("Source.Title")"
+                                 Body="@T("Source.Body")"
+                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+        </Guidance>
+    </ShowcasePackageWorkbench>
 </div>
-
-@code {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
-
-    private ScriptingInput _input = new();
-    private string _selectedId = string.Empty;
-    private ShowcaseRunResult? _result;
-    private bool _running;
-
-    protected override void OnInitialized()
-    {
-        IShowcaseSample sample = Context.Samples.Single(static item => item.IsDefault);
-        _selectedId = sample.Id;
-        _input = (ScriptingInput)sample.CreateInput();
-    }
-
-    private string T(string key) => Context.Text.GetText("scripting", key);
-
-    private Task SelectSampleAsync(string id)
-    {
-        IShowcaseSample sample = Context.Samples.Single(item => item.Id == id);
-        _selectedId = id;
-        _input = (ScriptingInput)sample.CreateInput();
-        _result = null;
-        return Task.CompletedTask;
-    }
-
-    private Task ChangeScriptAsync(string script)
-    {
-        _input = _input with { Script = script };
-        return Task.CompletedTask;
-    }
-
-    private void ChangeExpectResult(ChangeEventArgs args)
-    {
-        bool value = args.Value is bool boolean
-            ? boolean
-            : bool.TryParse(args.Value?.ToString(), out bool parsed) && parsed;
-        _input = _input with { ExpectResult = value };
-    }
-
-    private void ChangeTimeout(ChangeEventArgs args) => UpdateNumber(args, 50, 2_000, value => _input = _input with { TimeoutMilliseconds = value });
-    private void ChangeStatements(ChangeEventArgs args) => UpdateNumber(args, 100, 100_000, value => _input = _input with { MaxStatements = value });
-    private void ChangeRecursion(ChangeEventArgs args) => UpdateNumber(args, 8, 128, value => _input = _input with { MaxRecursionDepth = value });
-    private void ChangeMemory(ChangeEventArgs args) => UpdateNumber(args, 4, 64, value => _input = _input with { MaxMemoryMegabytes = value });
-
-    private static void UpdateNumber(ChangeEventArgs args, int minimum, int maximum, Action<int> update)
-    {
-        if (int.TryParse(args.Value?.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
-            update(Math.Clamp(value, minimum, maximum));
-    }
-
-    private Task SetResultAsync(ShowcaseRunResult? result)
-    {
-        _result = result;
-        return Task.CompletedTask;
-    }
-
-    private Task SetRunningAsync(bool running)
-    {
-        _running = running;
-        return Task.CompletedTask;
-    }
-}

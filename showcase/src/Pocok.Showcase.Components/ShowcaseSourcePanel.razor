@@ -1,0 +1,13 @@
+<details class="panel collapsible-support source-panel">
+    <summary>@Title</summary>
+    <div class="collapsible-support-content">
+        <p>@Body</p>
+        <span class="mono muted">@Path</span>
+    </div>
+</details>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Source documentation";
+    [Parameter] public string Body { get; set; } = string.Empty;
+    [Parameter] public string Path { get; set; } = string.Empty;
+}

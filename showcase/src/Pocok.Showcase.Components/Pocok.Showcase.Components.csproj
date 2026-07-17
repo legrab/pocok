@@ -8,4 +8,8 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <ProjectReference Include="../Pocok.Showcase.Contracts/Pocok.Showcase.Contracts.csproj"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Pocok.Showcase.Tests"/>
+  </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 @page "/system"
+@implements IDisposable
 @inject ShowcaseSliceCatalog SliceCatalog
 @inject ShowcasePackageCatalog PackageCatalog
 @inject Pocok.Modularity.Catalog.IModuleCatalog ModuleCatalog
@@ -8,6 +9,10 @@
 @inject ShowcaseRuntimeInfo Runtime
 @inject Microsoft.Extensions.Options.IOptions<ShowcaseOptions> Options
 @inject IShowcaseText Text
+@inject IEnumerable<ShowcaseLogBuffer> LogBuffers
+@inject ShowcaseUiState UiState
+@inject ShowcasePublicLog PublicLog
+@inject IJSRuntime JS
 
 <PageTitle>@Text.GetText("shell", "System.Title") · @Text.GetText("shell", "App.Title")</PageTitle>
 
@@ -18,6 +23,23 @@
 </section>
 
 <div class="system-grid">
+    @if (_logBuffer is not null)
+    {
+        <section class="panel system-wide feature-toggles">
+            <h2>@Text.GetText("shell", "System.FeatureToggles")</h2>
+            <label class="feature-toggle" for="log-console-toggle">
+                <span>
+                    <strong>@Text.GetText("shell", "System.LogConsole")</strong>
+                    <small>@Text.GetText("shell", "System.LogConsoleDescription")</small>
+                </span>
+                <input id="log-console-toggle"
+                       type="checkbox"
+                       checked="@UiState.LogConsoleVisible"
+                       @onchange="SetLogConsoleVisibility" />
+            </label>
+        </section>
+    }
+
     <section class="panel">
         <h2>@Text.GetText("shell", "System.Application")</h2>
         <dl>
@@ -94,6 +116,19 @@
 </div>
 
 @code {
+    private ShowcaseLogBuffer? _logBuffer;
+
+    protected override void OnInitialized()
+    {
+        _logBuffer = LogBuffers.SingleOrDefault();
+        UiState.Changed += OnUiStateChanged;
+    }
+
+    public void Dispose()
+    {
+        UiState.Changed -= OnUiStateChanged;
+    }
+
     private static string FormatUptime(TimeSpan uptime)
     {
         string clock = uptime.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
@@ -101,4 +136,14 @@
             ? $"{(int)uptime.TotalDays}d {clock}"
             : clock;
     }
+
+    private async Task SetLogConsoleVisibility(ChangeEventArgs args)
+    {
+        bool visible = args.Value is true || string.Equals(args.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+        await JS.InvokeVoidAsync("pocokShowcasePreferences.setFeature", "log-console", visible);
+        UiState.SetLogConsoleVisible(visible);
+        PublicLog.ConsoleVisibilityChanged(visible);
+    }
+
+    private void OnUiStateChanged() => _ = InvokeAsync(StateHasChanged);
 }

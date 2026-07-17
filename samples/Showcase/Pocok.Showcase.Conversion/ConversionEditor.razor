@@ -1,0 +1,134 @@
+<ShowcaseModeSwitch Label="@T("Sandbox.Mode")"
+                    FirstLabel="@T("Sandbox.Fields")"
+                    FirstValue="@nameof(ConversionEditorMode.Fields)"
+                    SecondLabel="@T("Sandbox.Code")"
+                    SecondValue="@nameof(ConversionEditorMode.Code)"
+                    SelectedValue="@Value.EditorMode.ToString()"
+                    SelectedValueChanged="SetModeAsync" />
+
+@if (Value.EditorMode == ConversionEditorMode.Fields)
+{
+    <div class="field-grid">
+        <div class="field">
+            <label for="source-kind">@T("Fields.SourceKind")</label>
+            <select id="source-kind" value="@Value.SourceKind" @onchange="args => SetSourceKindAsync(ReadEnum(args, Value.SourceKind))">
+                @foreach (ConversionSourceKind item in Enum.GetValues<ConversionSourceKind>())
+                {
+                    <option value="@item" selected="@(item == Value.SourceKind)">@T($"SourceKinds.{item}")</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label for="target-type">@T("Fields.Target")</label>
+            <select id="target-type" value="@Value.TargetType" @onchange="args => SetTargetTypeAsync(ReadString(args))">
+                @foreach (string item in ConversionShowcaseSlice.TargetAliases)
+                {
+                    <option value="@item" selected="@(item == Value.TargetType)">@item</option>
+                }
+            </select>
+        </div>
+        <div class="field full">
+            <label for="source-value">@T("Fields.Value")</label>
+            <ShowcaseBufferedTextArea Id="source-value"
+                                      class="compact-editor"
+                                      Value="@Value.SourceValue"
+                                      ValueChanged="SetSourceValueAsync"
+                                      disabled="@(Value.SourceKind == ConversionSourceKind.Null)" />
+            <small>@T("Fields.ValueHelp")</small>
+        </div>
+        <div class="field">
+            <label for="culture">@T("Fields.Culture")</label>
+            <select id="culture" value="@Value.Culture" @onchange="args => SetCultureAsync(ReadString(args))">
+                <option value="invariant" selected="@(Value.Culture == "invariant")">Invariant</option>
+                <option value="en-US" selected="@(Value.Culture == "en-US")">en-US</option>
+                <option value="de-DE" selected="@(Value.Culture == "de-DE")">de-DE</option>
+                <option value="hu-HU" selected="@(Value.Culture == "hu-HU")">hu-HU</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="overflow">@T("Fields.Overflow")</label>
+            <select id="overflow" value="@Value.Overflow" @onchange="args => SetOverflowAsync(ReadEnum(args, Value.Overflow))">
+                @foreach (OverflowPolicy item in Enum.GetValues<OverflowPolicy>())
+                {
+                    <option value="@item" selected="@(item == Value.Overflow)">@item</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label for="nulls">@T("Fields.Nulls")</label>
+            <select id="nulls" value="@Value.Nulls" @onchange="args => SetNullPolicyAsync(ReadEnum(args, Value.Nulls))">
+                @foreach (NullPolicy item in Enum.GetValues<NullPolicy>())
+                {
+                    <option value="@item" selected="@(item == Value.Nulls)">@item</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label for="enums">@T("Fields.Enums")</label>
+            <select id="enums" value="@Value.Enums" @onchange="args => SetEnumPolicyAsync(ReadEnum(args, Value.Enums))">
+                @foreach (EnumPolicy item in Enum.GetValues<EnumPolicy>())
+                {
+                    <option value="@item" selected="@(item == Value.Enums)">@item</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label for="numeric-loss">@T("Fields.NumericLoss")</label>
+            <select id="numeric-loss" value="@Value.NumericLoss" @onchange="args => SetNumericLossAsync(ReadEnum(args, Value.NumericLoss))">
+                @foreach (NumericLossPolicy item in Enum.GetValues<NumericLossPolicy>())
+                {
+                    <option value="@item" selected="@(item == Value.NumericLoss)">@item</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label for="numeric-booleans">@T("Fields.NumericBooleans")</label>
+            <select id="numeric-booleans" value="@Value.NumericBooleans" @onchange="args => SetNumericBooleansAsync(ReadEnum(args, Value.NumericBooleans))">
+                @foreach (NumericBooleanPolicy item in Enum.GetValues<NumericBooleanPolicy>())
+                {
+                    <option value="@item" selected="@(item == Value.NumericBooleans)">@item</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label for="temporal-text">@T("Fields.TemporalText")</label>
+            <select id="temporal-text" value="@Value.TemporalText" @onchange="args => SetTemporalTextAsync(ReadEnum(args, Value.TemporalText))">
+                @foreach (TemporalTextPolicy item in Enum.GetValues<TemporalTextPolicy>())
+                {
+                    <option value="@item" selected="@(item == Value.TemporalText)">@item</option>
+                }
+            </select>
+        </div>
+        <div class="field">
+            <label for="maximum-depth">@T("Fields.MaximumDepth")</label>
+            <input id="maximum-depth"
+                   type="number"
+                   min="1"
+                   max="64"
+                   value="@Value.MaximumDepth"
+                   @onchange="args => SetMaximumDepthAsync(ReadValue(args, Value.MaximumDepth))" />
+        </div>
+        <div class="field">
+            <label for="maximum-items">@T("Fields.MaximumItems")</label>
+            <input id="maximum-items"
+                   type="number"
+                   min="1"
+                   max="500"
+                   value="@DisplayedMaximumItems"
+                   @onchange="args => SetMaximumItemsAsync(ReadValue(args, DisplayedMaximumItems))" />
+            <small>@T("Fields.MaximumItemsHelp")</small>
+        </div>
+    </div>
+    <ShowcaseCodeBlock Title="@T("Sandbox.GeneratedCode")" Code="@Value.Code" Language="csharp" />
+}
+else
+{
+    <ShowcaseCodeAssistEditor Label="@T("Sandbox.CodeLabel")"
+                              @bind-Value:get="Value.Code"
+                              @bind-Value:set="SetCodeAsync"
+                              ShowSuggestionsLabel="@T("Sandbox.ShowSuggestions")"
+                              HideSuggestionsLabel="@T("Sandbox.HideSuggestions")"
+                              Catalog="CodeAssist"
+                              Text="Text"
+                              ResourceNamespace="conversion" />
+}

@@ -3,7 +3,7 @@
         <h2>@Title</h2>
         @if (Result is not null)
         {
-            <ShowcaseRunStatus Status="Result.Status" Text="Text" ResourceNamespace="StatusResourceNamespace" />
+            <ShowcaseRunStatus Status="Result.Status" Text="Text" ResourceNamespace="@StatusResourceNamespace" />
         }
     </div>
     @if (Result is null)
@@ -13,7 +13,7 @@
     else
     {
         <p class="result-headline">@Result.Headline</p>
-        <ShowcaseStructuredFields Fields="Result.Fields" Text="Text" ResourceNamespace="ResourceNamespace" />
+        <ShowcaseStructuredFields Fields="Result.Fields" Text="Text" ResourceNamespace="@ResourceNamespace" />
         @if (Result.Diagnostics.Count > 0)
         {
             <ShowcaseDiagnostics Diagnostics="Result.Diagnostics" />

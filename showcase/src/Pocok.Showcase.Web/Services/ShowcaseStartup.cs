@@ -28,6 +28,7 @@ public sealed class ShowcaseStartupService : IHostedService
     private readonly IModuleCatalog _modules;
     private readonly IOptions<ShowcaseOptions> _options;
     private readonly ILogger<ShowcaseStartupService> _logger;
+    private readonly ShowcasePublicLog _publicLog;
     private ReadinessCycle? _cycle;
 
     public ShowcaseStartupService(
@@ -38,7 +39,8 @@ public sealed class ShowcaseStartupService : IHostedService
         ShowcaseTextCatalog text,
         IModuleCatalog modules,
         IOptions<ShowcaseOptions> options,
-        ILogger<ShowcaseStartupService> logger)
+        ILogger<ShowcaseStartupService> logger,
+        ShowcasePublicLog publicLog)
     {
         _readiness = readiness;
         _runner = runner;
@@ -48,6 +50,7 @@ public sealed class ShowcaseStartupService : IHostedService
         _modules = modules;
         _options = options;
         _logger = logger;
+        _publicLog = publicLog;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -55,9 +58,13 @@ public sealed class ShowcaseStartupService : IHostedService
         _cycle = _readiness.BeginStartup();
         try
         {
+            _publicLog.Initializing();
             Validate();
+            _publicLog.CatalogValidated(_slices.All.Count);
+            _publicLog.RunnerReady();
             _readiness.MarkReady(_cycle);
             LogReady(_logger, _slices.All.Count, null);
+            _publicLog.Ready();
             return Task.CompletedTask;
         }
         catch (Exception exception)
@@ -86,7 +93,7 @@ public sealed class ShowcaseStartupService : IHostedService
         if (_packages.Current.Count == 0)
             throw new InvalidOperationException("The generated package catalog is empty.");
         if (_slices.All.Count == 0)
-            throw new InvalidOperationException("No showcase slices were registered.");
+            throw new InvalidOperationException("No showcase slices were registered. Build showcase/Pocok.Showcase.Samples.slnx to stage local plugins, or set SHOWCASE_PLUGIN_DIR to a published plugin directory.");
         ModuleDescriptor[] requiredFailures = _modules.Modules
             .Where(static module => module.Required && module.Status != ModuleStatus.Registered)
             .ToArray();

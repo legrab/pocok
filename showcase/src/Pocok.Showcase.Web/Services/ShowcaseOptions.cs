@@ -12,6 +12,16 @@ public sealed class ShowcaseOptions
     public bool RequireCompleteCatalog { get; set; }
     public string? PublicRepositoryBaseUrl { get; set; }
 
+    public bool InAppLogConsoleEnabled { get; set; } = true;
+
+    [Range(4, 512)]
+    public int InAppLogCapacity { get; set; } = 64;
+
+    public LogLevel InAppLogMinimumLevel { get; set; } = LogLevel.Information;
+
+    [Range(80, 512)]
+    public int InAppLogMaximumTextLength { get; set; } = 240;
+
     [Range(1, 256)]
     public int QueueCapacity { get; set; } = 16;
 

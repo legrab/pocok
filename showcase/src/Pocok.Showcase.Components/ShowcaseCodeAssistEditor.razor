@@ -1,85 +1,42 @@
-@inject IJSRuntime JavaScript
-
 <div class="code-assist">
+    <div class="code-assist-toolbar">
+        <label for="@_id">@Label</label>
+        <button type="button"
+                class="secondary code-assist-toggle"
+                aria-expanded="@_suggestionsOpen"
+                aria-controls="@_suggestionsId"
+                @onclick="ToggleSuggestionsAsync">
+            @(_suggestionsOpen ? HideSuggestionsLabel : ShowSuggestionsLabel)
+        </button>
+    </div>
     <textarea id="@_id"
+              @key="_editorValue.Revision"
               class="code-editor"
-              value="@Value"
+              value="@_editorValue.RenderedValue"
               spellcheck="false"
-              data-showcase-suggestions="@(_suggestions.Count > 0 ? "open" : "closed")"
+              data-showcase-suggestions="@(_suggestionsOpen && _suggestions.Count > 0 ? "open" : "closed")"
               @oninput="OnInputAsync"
+              @onblur="OnBlurAsync"
               @onkeydown="OnKeyDownAsync"
               aria-label="@Label"></textarea>
-    @if (_suggestions.Count > 0)
+    @if (_suggestionsOpen && _suggestions.Count > 0)
     {
-        <div class="completion-list" role="listbox">
+        <div id="@_suggestionsId" class="completion-list" role="listbox">
             @for (var index = 0; index < _suggestions.Count; index++)
             {
                 @if (_suggestions[index] is { } item)
                 {
-                <button type="button"
-                        role="option"
-                        aria-selected="@(index == _selectedIndex)"
-                        class="completion-item @(index == _selectedIndex ? "is-selected" : null)"
-                        @onmousedown:preventDefault="true"
-                        @onclick="() => InsertAsync(item)">
-                    <span><strong>@item.Label</strong><small>@item.Kind</small></span>
-                    <span>@Text.GetText(ResourceNamespace, item.DocumentationKey)</span>
-                </button>
+                    <button type="button"
+                            role="option"
+                            aria-selected="@(index == _selectedIndex)"
+                            class="completion-item @(index == _selectedIndex ? "is-selected" : null)"
+                            @onmousedown:preventDefault="true"
+                            @onclick="() => InsertAsync(item)">
+                        <span><strong>@item.Label</strong><small>@item.Kind</small></span>
+                        <span>@Text.GetText(ResourceNamespace, item.DocumentationKey)</span>
+                    </button>
                 }
             }
         </div>
     }
 </div>
-
-@code {
-    private readonly string _id = $"showcase-editor-{Guid.NewGuid():N}";
-    private IReadOnlyList<ShowcaseCodeAssistItem> _suggestions = Array.Empty<ShowcaseCodeAssistItem>();
-    private int _selectedIndex;
-
-    [Parameter] public string Label { get; set; } = "Constrained code editor";
-    [Parameter] public string Value { get; set; } = string.Empty;
-    [Parameter] public EventCallback<string> ValueChanged { get; set; }
-    [Parameter, EditorRequired] public ShowcaseCodeAssistCatalog Catalog { get; set; } = ShowcaseCodeAssistCatalog.Empty;
-    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
-    [Parameter, EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
-
-    private async Task OnInputAsync(ChangeEventArgs args)
-    {
-        Value = args.Value?.ToString() ?? string.Empty;
-        await ValueChanged.InvokeAsync(Value);
-        int cursor = await JavaScript.InvokeAsync<int>("pocokShowcase.getCursor", _id);
-        _suggestions = ShowcaseCodeAssistFilter.Filter(Catalog, Value, cursor, 8);
-        _selectedIndex = 0;
-    }
-
-    private async Task OnKeyDownAsync(KeyboardEventArgs args)
-    {
-        if (_suggestions.Count == 0)
-            return;
-
-        switch (args.Key)
-        {
-            case "ArrowDown":
-                _selectedIndex = (_selectedIndex + 1) % _suggestions.Count;
-                break;
-            case "ArrowUp":
-                _selectedIndex = (_selectedIndex - 1 + _suggestions.Count) % _suggestions.Count;
-                break;
-            case "Enter" when !args.ShiftKey:
-            case "Tab":
-                await InsertAsync(_suggestions[_selectedIndex]);
-                break;
-            case "Escape":
-                _suggestions = Array.Empty<ShowcaseCodeAssistItem>();
-                break;
-        }
-    }
-
-    private async Task InsertAsync(ShowcaseCodeAssistItem item)
-    {
-        string next = await JavaScript.InvokeAsync<string>("pocokShowcase.insertCompletion", _id, item.InsertText);
-        Value = next;
-        _suggestions = Array.Empty<ShowcaseCodeAssistItem>();
-        await ValueChanged.InvokeAsync(next);
-    }
-}

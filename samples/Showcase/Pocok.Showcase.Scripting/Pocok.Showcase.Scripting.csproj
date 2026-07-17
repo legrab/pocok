@@ -2,6 +2,7 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <ShowcasePluginId>pocok.showcase.scripting</ShowcasePluginId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,4 +18,5 @@
     <Content Update="pocok.module.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"/>
     <Content Update="Content/**/*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"/>
   </ItemGroup>
+  <Import Project="../../../showcase/Showcase.Plugin.targets"/>
 </Project>
