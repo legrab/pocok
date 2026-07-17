@@ -5,7 +5,7 @@ This runnable sample demonstrates external JSON and RESX resources composed with
 Run from the repository root:
 
 ```pwsh
-dotnet run --project samples/Localization.Console/Localization.Console.csproj
+dotnet run --project samples/Localization.Console/Pocok.Localization.Console.csproj
 ```
 
 Expected output:

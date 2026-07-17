@@ -1,12 +1,12 @@
 <Solution>
   <Folder Name="/benchmarks/">
-    <Project Path="benchmarks/Conversion.Benchmarks/Conversion.Benchmarks.csproj"/>
+    <Project Path="benchmarks/Conversion.Benchmarks/Pocok.Conversion.Benchmarks.csproj"/>
   </Folder>
   <Folder Name="/samples/">
-    <Project Path="samples/Conversion.Console/Conversion.Console.csproj"/>
-    <Project Path="samples/Conversion.Trimmed/Conversion.Trimmed.csproj"/>
+    <Project Path="samples/Conversion.Console/Pocok.Conversion.Console.csproj"/>
+    <Project Path="samples/Conversion.Trimmed/Pocok.Conversion.Trimmed.csproj"/>
     <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
-    <Project Path="samples/Readiness.Console/Readiness.Console.csproj"/>
+    <Project Path="samples/Readiness.Console/Pocok.Readiness.Console.csproj"/>
     <Project Path="samples/Licensing.Console/Pocok.Licensing.Console.csproj"/>
   </Folder>
   <Folder Name="/src/">

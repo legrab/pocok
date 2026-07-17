@@ -10,7 +10,7 @@ This runnable sample demonstrates the four core `Pocok.BackgroundWork` behaviors
 Run from the repository root:
 
 ```pwsh
-dotnet run --project samples/BackgroundWork.Console/BackgroundWork.Console.csproj
+dotnet run --project samples/BackgroundWork.Console/Pocok.BackgroundWork.Console.csproj
 ```
 
 Expected output:

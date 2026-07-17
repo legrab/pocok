@@ -1563,7 +1563,7 @@ The origin's seeding orchestration is domain and persistence specific. Modularit
     ModularCommunicator.PortablePlugin/
 
   benchmarks/
-    Pocok.Conversion.Benchmarks/
+    Conversion.Benchmarks/
 
   tools/
     PackageSmoke/
