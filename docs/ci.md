@@ -24,9 +24,11 @@ False positives are acceptable. A plan that cannot prove partial validation safe
 
 ## Jobs and stable gate
 
-The workflow has planning, Linux validation, Windows validation, pull-request coverage comparison, and a final `CI gate` job. Branch protection should require `CI gate`, whose name is stable even when dynamic jobs are intentionally skipped.
+The workflow has planning, Linux validation, Windows validation, public release validation, pull-request coverage comparison, and a final `CI gate` job. Branch protection should require `CI gate`, whose name is stable even when dynamic jobs are intentionally skipped.
 
 Linux restores, formats, builds, and tests selected projects. It also packs, smoke-tests, and audits selected packages. Windows runs the same affected behavioral tests and samples without duplicate coverage collection.
+
+Public release validation restores, formats, builds, and tests `Pocok.Core.slnx` with `IncludeExperimental=false`. This keeps the non-experimental packaging references and public API snapshots executable before a publication tag reaches the release workflow. The planning job skips it only for documentation-only changes, and the final gate requires it whenever selected.
 
 Documentation-only pull requests run repository-owned tooling checks and produce a plan, but do not start the .NET validation jobs.
 
@@ -66,6 +68,12 @@ Run the selected Linux or Windows behavior locally:
 ```pwsh
 ./tools/Ci/Invoke-AffectedValidation.ps1 -Platform Linux
 ./tools/Ci/Invoke-AffectedValidation.ps1 -Platform Windows
+```
+
+Run the publication-shaped source validation locally:
+
+```pwsh
+./tools/Ci/Invoke-PublicReleaseValidation.ps1
 ```
 
 Create the PR coverage comparison after Linux head coverage exists:

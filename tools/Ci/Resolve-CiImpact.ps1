@@ -80,6 +80,9 @@ $plan = New-PocokCiPlan `
 
 Write-PocokJson -InputObject $plan -Path $resolvedOutput
 
+$runValidation = ($plan.mode -ne 'DocumentationOnly').ToString().ToLowerInvariant()
+$runCoverage = (($plan.mode -ne 'DocumentationOnly') -and $plan.coverageSlices.Count -gt 0).ToString().ToLowerInvariant()
+
 function Write-List {
     param([string]$Title, [object[]]$Values)
     Add-Content -LiteralPath $summaryPath -Value "### $Title"
@@ -101,6 +104,7 @@ Add-Content -LiteralPath $summaryPath -Value "- Base: ``$($plan.baseSha)``"
 Add-Content -LiteralPath $summaryPath -Value "- Head: ``$($plan.headSha)``"
 Add-Content -LiteralPath $summaryPath -Value "- Pack: **$($plan.runPack)**"
 Add-Content -LiteralPath $summaryPath -Value "- Public audit: **$($plan.runPublicAudit)**"
+Add-Content -LiteralPath $summaryPath -Value "- Public release validation: **$runValidation**"
 Add-Content -LiteralPath $summaryPath -Value ''
 Write-List -Title 'Reasons' -Values @($plan.reasons)
 Write-List -Title 'Changed files' -Values @($plan.changedFiles)
@@ -110,11 +114,10 @@ Write-List -Title 'Selected samples' -Values @($plan.affectedSampleProjects)
 Write-List -Title 'Packages to pack' -Values @($plan.packageIdsToPack)
 
 if ($GitHubOutput) {
-    $runValidation = ($plan.mode -ne 'DocumentationOnly').ToString().ToLowerInvariant()
-    $runCoverage = (($plan.mode -ne 'DocumentationOnly') -and $plan.coverageSlices.Count -gt 0).ToString().ToLowerInvariant()
     Add-Content -LiteralPath $GitHubOutput -Value "mode=$($plan.mode)"
     Add-Content -LiteralPath $GitHubOutput -Value "run-linux=$runValidation"
     Add-Content -LiteralPath $GitHubOutput -Value "run-windows=$runValidation"
+    Add-Content -LiteralPath $GitHubOutput -Value "run-public-release=$runValidation"
     Add-Content -LiteralPath $GitHubOutput -Value "run-coverage=$runCoverage"
     Add-Content -LiteralPath $GitHubOutput -Value "plan-path=$OutputPath"
 }

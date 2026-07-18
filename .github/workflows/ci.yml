@@ -28,6 +28,7 @@ jobs:
       mode: ${{ steps.impact.outputs.mode }}
       run-linux: ${{ steps.impact.outputs.run-linux }}
       run-windows: ${{ steps.impact.outputs.run-windows }}
+      run-public-release: ${{ steps.impact.outputs.run-public-release }}
       run-coverage: ${{ steps.impact.outputs.run-coverage }}
 
     steps:
@@ -163,6 +164,29 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  public-release:
+    name: Public release validation
+    needs: plan
+    if: needs.plan.outputs.run-public-release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+
+      - name: Validate public release configuration
+        shell: pwsh
+        run: ./tools/Ci/Invoke-PublicReleaseValidation.ps1
+
   coverage:
     name: Compare affected coverage
     needs: [plan, linux]
@@ -210,7 +234,7 @@ jobs:
   gate:
     name: CI gate
     if: always()
-    needs: [plan, linux, windows, coverage]
+    needs: [plan, linux, windows, public-release, coverage]
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate required jobs
@@ -219,9 +243,11 @@ jobs:
           PLAN_RESULT: ${{ needs.plan.result }}
           LINUX_RESULT: ${{ needs.linux.result }}
           WINDOWS_RESULT: ${{ needs.windows.result }}
+          PUBLIC_RELEASE_RESULT: ${{ needs.public-release.result }}
           COVERAGE_RESULT: ${{ needs.coverage.result }}
           REQUIRE_LINUX: ${{ needs.plan.outputs.run-linux }}
           REQUIRE_WINDOWS: ${{ needs.plan.outputs.run-windows }}
+          REQUIRE_PUBLIC_RELEASE: ${{ needs.plan.outputs.run-public-release }}
           REQUIRE_COVERAGE: ${{ github.event_name == 'pull_request' && needs.plan.outputs.run-coverage == 'true' }}
         run: |
           if ($env:PLAN_RESULT -ne 'success') {
@@ -232,6 +258,9 @@ jobs:
           }
           if ($env:REQUIRE_WINDOWS -eq 'true' -and $env:WINDOWS_RESULT -ne 'success') {
             throw "Required Windows validation did not succeed: $env:WINDOWS_RESULT"
+          }
+          if ($env:REQUIRE_PUBLIC_RELEASE -eq 'true' -and $env:PUBLIC_RELEASE_RESULT -ne 'success') {
+            throw "Required public release validation did not succeed: $env:PUBLIC_RELEASE_RESULT"
           }
           if ($env:REQUIRE_COVERAGE -eq 'true' -and $env:COVERAGE_RESULT -ne 'success') {
             throw "Required coverage comparison did not succeed: $env:COVERAGE_RESULT"

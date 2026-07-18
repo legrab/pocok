@@ -16,20 +16,20 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/AppDefaults/Pocok.AppDefaults.csproj"/>
+    <ProjectReference Include="../../src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj"/>
     <ProjectReference Include="../../src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj"/>
     <ProjectReference Include="../../src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj"/>
     <ProjectReference Include="../../src/Conversion/Pocok.Conversion.csproj"/>
+    <ProjectReference Include="../../src/Licensing/Pocok.Licensing.csproj"/>
     <ProjectReference Include="../../src/Readiness/Pocok.Readiness.csproj"/>
+    <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(IncludeExperimental)' == 'true'">
     <ProjectReference Include="../../src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj"/>
-    <ProjectReference Include="../../src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj"/>
-    <ProjectReference Include="../../src/Licensing/Pocok.Licensing.csproj"/>
     <ProjectReference Include="../../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
     <ProjectReference Include="../../src/Modularity/Pocok.Modularity.csproj"/>
     <ProjectReference Include="../../src/BackgroundWork/Pocok.BackgroundWork.csproj"/>
-    <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
     <ProjectReference Include="../../src/Signals/Pocok.Signals.csproj"/>
     <ProjectReference Include="../../src/Localization/Pocok.Localization.csproj"/>
     <ProjectReference Include="../../src/Subscriptions/Pocok.Subscriptions.csproj"/>

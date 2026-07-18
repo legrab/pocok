@@ -53,13 +53,8 @@ jobs:
           ./tools/PackageCatalog/New-ReleaseVersionsProps.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -CandidateVersion '${{ needs.resolve.outputs.version }}' -OutputPath artifacts/release-versions.props
           ./tools/PackageCatalog/Resolve-PackageClosure.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -OutputPath artifacts/release-closure.json
       - name: Restore, build, and test release graph
-        shell: bash
-        run: |
-          release_props="$PWD/artifacts/release-versions.props"
-          dotnet restore Pocok.Core.slnx --locked-mode -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
-          dotnet format Pocok.Core.slnx --verify-no-changes --no-restore
-          dotnet build Pocok.Core.slnx --configuration Release --no-restore -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
-          dotnet test Pocok.Core.slnx --configuration Release --no-build -p:PocokReleaseVersionsFile="$release_props" -p:IncludeExperimental=false
+        shell: pwsh
+        run: ./tools/Ci/Invoke-PublicReleaseValidation.ps1 -ReleaseVersionsFile artifacts/release-versions.props
       - name: Pack local package closure
         shell: pwsh
         run: |
