@@ -1,37 +1,46 @@
 <Solution>
   <Folder Name="/benchmarks/">
-    <Project Path="benchmarks/Conversion.Benchmarks/Pocok.Conversion.Benchmarks.csproj"/>
+    <Project Path="benchmarks/Conversion.Benchmarks/Pocok.Conversion.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/dependencies/">
+    <Project Path="src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj" />
+    <Project Path="src/BackgroundWork/Pocok.BackgroundWork.csproj" />
+    <Project Path="src/Localization/Pocok.Localization.csproj" />
+    <Project Path="src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj" />
+    <Project Path="src/Modularity/Pocok.Modularity.csproj" />
+    <Project Path="src/Signals/Pocok.Signals.csproj" />
+    <Project Path="src/Subscriptions/Pocok.Subscriptions.csproj" />
   </Folder>
   <Folder Name="/samples/">
-    <Project Path="samples/Conversion.Console/Pocok.Conversion.Console.csproj"/>
-    <Project Path="samples/Conversion.Trimmed/Pocok.Conversion.Trimmed.csproj"/>
-    <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
-    <Project Path="samples/Readiness.Console/Pocok.Readiness.Console.csproj"/>
-    <Project Path="samples/Licensing.Console/Pocok.Licensing.Console.csproj"/>
-    <Project Path="samples/Scripting.Console/Pocok.Scripting.Console.csproj"/>
+    <Project Path="samples/Conversion.Console/Pocok.Conversion.Console.csproj" />
+    <Project Path="samples/Conversion.Trimmed/Pocok.Conversion.Trimmed.csproj" />
+    <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj" />
+    <Project Path="samples/Readiness.Console/Pocok.Readiness.Console.csproj" />
+    <Project Path="samples/Licensing.Console/Pocok.Licensing.Console.csproj" />
+    <Project Path="samples/Scripting.Console/Pocok.Scripting.Console.csproj" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Licensing/Pocok.Licensing.csproj"/>
-    <Project Path="src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj"/>
-    <Project Path="src/Licensing.Keygen/Pocok.Licensing.Keygen.csproj"/>
-    <Project Path="src/Licensing.LicenseChecker/Pocok.Licensing.LicenseChecker.csproj"/>
-    <Project Path="src/AppDefaults/Pocok.AppDefaults.csproj"/>
-    <Project Path="src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj"/>
-    <Project Path="src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj"/>
-    <Project Path="src/Conversion/Pocok.Conversion.csproj"/>
-    <Project Path="src/Readiness/Pocok.Readiness.csproj"/>
-    <Project Path="src/Scripting/Pocok.Scripting.csproj"/>
+    <Project Path="src/Licensing/Pocok.Licensing.csproj" />
+    <Project Path="src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj" />
+    <Project Path="src/Licensing.Keygen/Pocok.Licensing.Keygen.csproj" />
+    <Project Path="src/Licensing.LicenseChecker/Pocok.Licensing.LicenseChecker.csproj" />
+    <Project Path="src/AppDefaults/Pocok.AppDefaults.csproj" />
+    <Project Path="src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj" />
+    <Project Path="src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj" />
+    <Project Path="src/Conversion/Pocok.Conversion.csproj" />
+    <Project Path="src/Readiness/Pocok.Readiness.csproj" />
+    <Project Path="src/Scripting/Pocok.Scripting.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Unit/Licensing.Tests/Pocok.Licensing.Tests.csproj"/>
-    <Project Path="tests/Unit/AppDefaults.Licensing.Tests/Pocok.AppDefaults.Licensing.Tests.csproj"/>
-    <Project Path="tests/Unit/AppDefaults.Tests/Pocok.AppDefaults.Tests.csproj"/>
-    <Project Path="tests/Unit/AppDefaults.Logging.Tests/Pocok.AppDefaults.Logging.Tests.csproj"/>
-    <Project Path="tests/Unit/AppDefaults.Logging.Serilog.Tests/Pocok.AppDefaults.Logging.Serilog.Tests.csproj"/>
-    <Project Path="tests/Architecture/Pocok.Architecture.Tests.csproj"/>
-    <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj"/>
-    <Project Path="tests/Unit/Conversion.Tests/Pocok.Conversion.Tests.csproj"/>
-    <Project Path="tests/Unit/Readiness.Tests/Pocok.Readiness.Tests.csproj"/>
-    <Project Path="tests/Unit/Scripting.Tests/Pocok.Scripting.Tests.csproj"/>
+    <Project Path="tests/Unit/Licensing.Tests/Pocok.Licensing.Tests.csproj" />
+    <Project Path="tests/Unit/AppDefaults.Licensing.Tests/Pocok.AppDefaults.Licensing.Tests.csproj" />
+    <Project Path="tests/Unit/AppDefaults.Tests/Pocok.AppDefaults.Tests.csproj" />
+    <Project Path="tests/Unit/AppDefaults.Logging.Tests/Pocok.AppDefaults.Logging.Tests.csproj" />
+    <Project Path="tests/Unit/AppDefaults.Logging.Serilog.Tests/Pocok.AppDefaults.Logging.Serilog.Tests.csproj" />
+    <Project Path="tests/Architecture/Pocok.Architecture.Tests.csproj" />
+    <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj" />
+    <Project Path="tests/Unit/Conversion.Tests/Pocok.Conversion.Tests.csproj" />
+    <Project Path="tests/Unit/Readiness.Tests/Pocok.Readiness.Tests.csproj" />
+    <Project Path="tests/Unit/Scripting.Tests/Pocok.Scripting.Tests.csproj" />
   </Folder>
 </Solution>
