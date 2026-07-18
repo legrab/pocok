@@ -269,7 +269,7 @@ jobs:
   readme-coverage:
     name: Update README coverage
     needs: [linux, gate]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.linux.result == 'success' && needs.gate.result == 'success'
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.linux.result == 'success' && needs.gate.result == 'success'
     permissions:
       actions: read
       contents: write
