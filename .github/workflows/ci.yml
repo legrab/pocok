@@ -266,3 +266,81 @@ jobs:
             throw "Required coverage comparison did not succeed: $env:COVERAGE_RESULT"
           }
           Write-Host 'All required CI jobs succeeded.'
+  readme-coverage:
+    name: Update README coverage
+    needs: [linux, gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.linux.result == 'success' && needs.gate.result == 'success'
+    permissions:
+      actions: read
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Download impact plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ci-impact-plan
+          path: artifacts/ci
+
+      - name: Download main coverage
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ci-linux-results
+          path: artifacts
+
+      - name: Refresh README coverage block
+        shell: pwsh
+        run: ./tools/Ci/Update-ReadmeCoverage.ps1
+
+      - name: Commit refreshed coverage
+        shell: pwsh
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          git fetch origin main
+          $currentMain = [string](& git rev-parse origin/main)
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not resolve origin/main."
+          }
+          $currentMain = $currentMain.Trim()
+          if ($currentMain -ne $env:EXPECTED_SHA) {
+            Write-Host "Main advanced from $env:EXPECTED_SHA to $currentMain; the newer CI run will refresh coverage."
+            return
+          }
+
+          git diff --quiet -- README.md
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host 'README coverage is already current.'
+            return
+          }
+          if ($LASTEXITCODE -ne 1) {
+            throw "Could not inspect README changes."
+          }
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          git commit -m 'docs: refresh coverage summary [skip ci]'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not commit README coverage."
+          }
+
+          git push origin HEAD:main
+          if ($LASTEXITCODE -eq 0) {
+            return
+          }
+
+          git fetch origin main
+          $latestMain = ([string](& git rev-parse origin/main)).Trim()
+          if ($latestMain -ne $env:EXPECTED_SHA) {
+            Write-Warning "Main advanced while publishing coverage; the newer CI run will refresh README."
+            return
+          }
+          throw "Could not push README coverage update."
