@@ -1,0 +1,10 @@
+<ol class="timeline">
+    @foreach (ShowcaseTimelineEvent item in Timeline)
+    {
+        <li><span class="mono">@item.Kind</span><span>@item.Message</span></li>
+    }
+</ol>
+
+@code {
+    [Parameter] public IReadOnlyList<ShowcaseTimelineEvent> Timeline { get; set; } = Array.Empty<ShowcaseTimelineEvent>();
+}

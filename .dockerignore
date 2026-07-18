@@ -1,0 +1,9 @@
+.git
+.idea
+.vs
+**/bin
+**/obj
+artifacts
+.local
+*.user
+showcase/src/Pocok.Showcase.Web/plugins

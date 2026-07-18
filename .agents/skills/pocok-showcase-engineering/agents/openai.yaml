@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pocok Showcase Engineering"
+  short_description: "Develop the Pocok Showcase and sample plugins"
+  default_prompt: "Use $pocok-showcase-engineering to implement or review a Pocok Showcase change."

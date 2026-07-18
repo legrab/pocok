@@ -1,0 +1,136 @@
+{
+  "Package": {
+    "Name": "Szkriptfuttatás",
+    "Summary": "Teljes JavaScript futtatása a Pocok.Scripting használatával, a visszatérési értékek, korlátok és strukturált hibák megjelenítésével.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Példák",
+    "Title": "JavaScript tesztkörnyezet",
+    "Running": "Fut",
+    "Ready": "Kész",
+    "CodeLabel": "Teljes JavaScript forrás",
+    "Run": "Szkript futtatása",
+    "Cancel": "Megszakítás",
+    "ExecutionSteps": "Végrehajtási lépések",
+    "ShowSuggestions": "Javaslatok megnyitása",
+    "HideSuggestions": "Javaslatok bezárása"
+  },
+  "Fields": {
+    "ExpectResult": "Visszatérési érték szükséges",
+    "ExpectResultHelp": "Bekapcsolva a null és az undefined hiányzó eredményként, strukturált hibával tér vissza.",
+    "Timeout": "Időkorlát (ms)",
+    "MaxStatements": "Utasítások legnagyobb száma",
+    "MaxRecursion": "Legnagyobb rekurziós mélység",
+    "MaxMemory": "Memóriakorlát (MiB)"
+  },
+  "Result": {
+    "Title": "Futtatási eredmény",
+    "Empty": "Futtasd az aktuális szkriptet a visszatérési érték vagy a strukturált hiba megtekintéséhez.",
+    "ScriptPreview": "Futtatott JavaScript",
+    "Truncated": "csonkolva",
+    "Fields": {
+      "ReturnValue": "Visszatérési érték",
+      "ResultType": "Eredmény futásidejű típusa",
+      "ExpectResult": "Visszatérési érték kötelező",
+      "Limits": "Futtatási korlátok",
+      "Line": "Hiba sora",
+      "Column": "Hiba oszlopa"
+    }
+  },
+  "Tips": {
+    "Title": "Mire érdemes figyelni",
+    "Isolation": "Minden futás új Jint motort használ, ezért a szkriptek nem oszthatnak meg módosítható motorállapotot.",
+    "Bounds": "Az időkorlát, az utasításszám, a rekurzió, a forráshossz, a memória, a várakozási sor és a kimenet külön korlátozható.",
+    "ReturnValue": "Az utolsó JavaScript-kifejezés lesz a visszatérési érték. Egy deklaráció önmagában általában undefined értéket ad.",
+    "Failures": "A JavaScript-hibák és a korlátok megsértése a hostban keletkező kivétel helyett strukturált hibaként tér vissza.",
+    "Capabilities": "A host kizárólag külön engedélyezett értékeket és delegáltakat ad át; nincs automatikus környezeti hozzáférés."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "A Pocok.Scripting a host által felügyelt JavaScript-határt ad automatizálási és bővítési pontokhoz anélkül, hogy általános CLR-hozzáférést nyitna."
+    },
+    "QuickStart": {
+      "Title": "Első lépések",
+      "Body": "Írj egy teljes szkriptet, és az ellenőrizni kívánt értéket hagyd az utolsó kifejezésként. A példa közvetlenül a ScriptRunner API-t hívja."
+    },
+    "Results": {
+      "Title": "Eredmények",
+      "Body": "Sikeres futáskor az utolsó JavaScript-érték tér vissza. A Showcase a skalár-, tömb- és objektumeredményeket determinisztikusan formázza, a rögzített kivételobjektumokat pedig nem jeleníti meg."
+    },
+    "Bounds": {
+      "Title": "Futtatási korlátok",
+      "Body": "A ScriptRunner korlátozza a futási időt, az utasításszámot, a rekurziót, a forráshosszt, a memóriát és kezeli a megszakítást. A Showcase ezen felül a várakozási sort, a bemenetet és a kimenetet is korlátozza."
+    },
+    "Capabilities": {
+      "Title": "Explicit hozzáférések",
+      "Body": "A host jóváhagyott skalárértékeket és delegáltakat adhat át ScriptBinding használatával. Összetett CLR-objektumok és automatikus CLR-integráció nem érhető el."
+    },
+    "Imports": {
+      "Title": "Importok és modulok",
+      "Body": "A csomag külön megadott modulforrásból képes kommentalapú importokat feloldani. A nyilvános telepítés önálló szkripteket futtat, és nem biztosít tartós modulkatalógust."
+    },
+    "Concurrency": {
+      "Title": "Párhuzamosság",
+      "Body": "A ScriptRunner minden kéréshez új motort hoz létre, ezért párhuzamosan is használható. Minden Showcase-futás saját függőségi hatókört, megszakítási forrást, eredmény- és állapotcsatornát kap."
+    },
+    "Production": {
+      "Title": "Éles használat",
+      "Body": "A szkripteket kezeld nem megbízható bemenetként, tartsd szigorúan a korlátokat, minden delegáltat külön engedélyezz, ne írj titkot a diagnosztikába, és ne tekintsd a folyamaton belüli korlátokat operációs rendszer szintű izolációnak."
+    },
+    "Snippet": {
+      "RunnerTitle": "Korlátozott szkript futtatása",
+      "ScriptTitle": "Teljes szkript visszatérési értékkel"
+    }
+  },
+  "Assist": {
+    "Const": "Nem módosítható helyi változó beszúrása.",
+    "Function": "Teljes függvénydeklaráció beszúrása.",
+    "Return": "return utasítás beszúrása függvénytörzsbe.",
+    "Array": "Tömbátalakítási példa beszúrása.",
+    "Object": "Objektumliterál visszaadása utolsó kifejezésként.",
+    "Reduce": "Tömb összesítése egyetlen értékké.",
+    "Map": "Minden tömbelem átalakítása."
+  },
+  "Boundaries": {
+    "Title": "Határok",
+    "NoClr": "Nincs automatikus CLR- vagy reflexióhozzáférés.",
+    "NoIo": "Nincs hozzáférés a fájlrendszerhez, hálózathoz, böngészőhöz vagy szolgáltatáskonténerhez.",
+    "FreshEngine": "Minden futás új motort és külön szkriptállapotot kap.",
+    "Bounded": "Külön korlát vonatkozik a forráshosszra, futási időre, utasításszámra, rekurzióra, memóriára, várakozási sorra és kimenetre."
+  },
+  "Source": {
+    "Title": "Forrásdokumentáció",
+    "Body": "A csomag futtatási korlátainak, hozzáféréseinek, importjainak és biztonsági határainak dokumentációja."
+  },
+  "Samples": {
+    "arithmetic": {
+      "Name": "Függvény eredménye",
+      "Description": "Függvény definiálása, majd a 12 háromszögszámának visszaadása az utolsó kifejezéssel."
+    },
+    "object-result": {
+      "Name": "Objektum- és tömberedmény",
+      "Description": "Összesített és átalakított tömbértékeket tartalmazó objektum visszaadása."
+    },
+    "string-result": {
+      "Name": "Sablonsztring",
+      "Description": "JavaScript-sablonsztring visszaadása egy teljes szkriptből."
+    },
+    "missing-result": {
+      "Name": "Hiányzó eredmény",
+      "Description": "Deklarációval záruló szkript futtatása kötelező eredmény mellett, majd a strukturált hiba megtekintése."
+    },
+    "syntax-error": {
+      "Name": "Szintaktikai hiba",
+      "Description": "Érvénytelen JavaScript futtatása, majd a biztonságosan megjelenített hibapozíció ellenőrzése."
+    },
+    "recursion-limit": {
+      "Name": "Rekurziós korlát",
+      "Description": "A beállított rekurziós korlát elérése a hostfolyamat működésének veszélyeztetése nélkül."
+    }
+  }
+}

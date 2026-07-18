@@ -51,6 +51,11 @@ function Change {
 $plan = Get-Plan -Changes @(Change 'docs/ci.md')
 Assert-True ($plan.mode -eq 'DocumentationOnly') 'Documentation-only changes must skip .NET validation.'
 
+$showcasePlan = Get-Plan -Changes @(Change 'samples/Showcase/Pocok.Showcase.Conversion/ConversionShowcaseSlice.cs')
+Assert-True ($showcasePlan.mode -eq 'Partial') 'Showcase changes must remain delegated to the Showcase workflow without selecting core projects.'
+Assert-True ($showcasePlan.affectedTestProjects.Count -eq 0) 'Showcase-owned tests must not enter the core package validation plan.'
+Assert-True ($showcasePlan.affectedSampleProjects.Count -eq 0) 'Showcase plugins must not enter the core package-sample validation plan.'
+
 $plan = Get-Plan -Changes @(Change 'src/BackgroundWork/Coalescing/CoalescingTaskRunner.cs')
 Assert-SequenceEqual $plan.affectedPackageIds @('Pocok.BackgroundWork', 'Pocok.Localization') 'BackgroundWork must select its reverse package closure.'
 Assert-True ($plan.affectedTestProjects -contains 'tests/Unit/BackgroundWork.Tests/Pocok.BackgroundWork.Tests.csproj') 'BackgroundWork tests were not selected.'
@@ -104,10 +109,38 @@ Assert-SequenceEqual $plan.affectedPackageIds @($plan.affectedPackageIds | Sort-
 $windowsPlan = Get-Plan -Changes @(Change 'src\Conversion\ValueConverter.cs')
 Assert-SequenceEqual $windowsPlan.affectedPackageIds @('Pocok.Conversion', 'Pocok.Scripting', 'Pocok.Signals') 'Windows separators must normalize correctly.'
 
+$workflowViolations = @(Get-PocokWorkflowActionPinViolations -WorkflowRoot (Join-Path $repositoryRoot '.github/workflows'))
+Assert-True ($workflowViolations.Count -eq 0) "Repository workflows must pin external actions to full commit SHAs. Violations: $($workflowViolations | ConvertTo-Json -Compress)"
+
 $tempRoot = Join-Path $repositoryRoot 'artifacts/ci-tooling-tests'
 Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
 try {
+    $workflowRoot = Join-Path $tempRoot 'workflow-pins'
+    New-Item -ItemType Directory -Path $workflowRoot -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $workflowRoot 'valid.yml') -Encoding utf8NoBOM -Value @'
+jobs:
+  valid:
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: "owner/action/subpath@0123456789abcdef0123456789abcdef01234567"
+      - uses: ./.github/actions/local
+'@
+    $validWorkflowViolations = @(Get-PocokWorkflowActionPinViolations -WorkflowRoot $workflowRoot)
+    Assert-True ($validWorkflowViolations.Count -eq 0) 'Full commit SHAs and repository-local actions must pass workflow pin validation.'
+
+    Set-Content -LiteralPath (Join-Path $workflowRoot 'invalid.yaml') -Encoding utf8NoBOM -Value @'
+jobs:
+  invalid:
+    steps:
+      - uses: actions/checkout@v7
+      - uses: owner/action@0123456789abcdef0123456789abcdef0123456
+      - uses: docker://example/image:latest
+'@
+    $invalidWorkflowViolations = @(Get-PocokWorkflowActionPinViolations -WorkflowRoot $workflowRoot)
+    Assert-True ($invalidWorkflowViolations.Count -eq 3) 'Floating tags, short SHAs, and non-commit external references must fail workflow pin validation.'
+    Assert-SequenceEqual @($invalidWorkflowViolations.reference) @('actions/checkout@v7', 'owner/action@0123456789abcdef0123456789abcdef0123456', 'docker://example/image:latest') 'Workflow pin violations must be deterministic and actionable.'
+
     $cycleRoot = Join-Path $tempRoot 'cycle'
     Write-Host "`n[CI tooling test] Synthetic project-cycle repository: $cycleRoot"
     New-Item -ItemType Directory -Path (Join-Path $cycleRoot 'eng') -Force | Out-Null

@@ -1,0 +1,20 @@
+<span class="state-badge @CssClass"><span aria-hidden="true">@Prefix</span>@Text</span>
+
+@code {
+    [Parameter] public ShowcaseImplementationStatus Status { get; set; }
+    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+
+    private string CssClass => Status switch
+    {
+        ShowcaseImplementationStatus.Available => "is-available",
+        ShowcaseImplementationStatus.Failed => "is-failed",
+        _ => "is-planned"
+    };
+
+    private string Prefix => Status switch
+    {
+        ShowcaseImplementationStatus.Available => "✓",
+        ShowcaseImplementationStatus.Failed => "!",
+        _ => "·"
+    };
+}

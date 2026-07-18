@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/dependencies/">
+    <Project Path="../src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj" />
+    <Project Path="../src/AppDefaults/Pocok.AppDefaults.csproj" />
+    <Project Path="../src/BackgroundWork/Pocok.BackgroundWork.csproj" />
+    <Project Path="../src/Localization/Pocok.Localization.csproj" />
+    <Project Path="../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj" />
+    <Project Path="../src/Modularity/Pocok.Modularity.csproj" />
+    <Project Path="../src/Readiness/Pocok.Readiness.csproj" />
+  </Folder>
+  <Folder Name="/showcase/" />
+  <Folder Name="/showcase/src/">
+    <Project Path="src/Pocok.Showcase.Contracts/Pocok.Showcase.Contracts.csproj" />
+    <Project Path="src/Pocok.Showcase.Components/Pocok.Showcase.Components.csproj" />
+    <Project Path="src/Pocok.Showcase.Web/Pocok.Showcase.Web.csproj" />
+  </Folder>
+  <Folder Name="/showcase/tests/">
+    <Project Path="tests/Pocok.Showcase.Tests/Pocok.Showcase.Tests.csproj" />
+  </Folder>
+  <Folder Name="/showcase/tools/">
+    <Project Path="tools/Pocok.Showcase.PublishTool/Pocok.Showcase.PublishTool.csproj" />
+  </Folder>
+</Solution>

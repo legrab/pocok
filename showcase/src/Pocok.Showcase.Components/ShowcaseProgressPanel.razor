@@ -1,0 +1,22 @@
+@if (Progress.Count > 0)
+{
+    <details class="panel collapsible-support progress-panel">
+        <summary>
+            <span>@Title</span>
+            <span class="mono muted">@Progress.Count</span>
+        </summary>
+        <div class="collapsible-support-content" aria-live="polite" aria-atomic="false">
+            <ol class="timeline progress-timeline">
+                @foreach (ShowcaseProgressEvent progress in Progress)
+                {
+                    <li><span class="mono">@progress.Stage</span><span>@progress.Message</span></li>
+                }
+            </ol>
+        </div>
+    </details>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "Execution steps";
+    [Parameter] public IReadOnlyList<ShowcaseProgressEvent> Progress { get; set; } = [];
+}

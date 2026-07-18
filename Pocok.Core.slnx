@@ -8,6 +8,7 @@
     <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
     <Project Path="samples/Readiness.Console/Pocok.Readiness.Console.csproj"/>
     <Project Path="samples/Licensing.Console/Pocok.Licensing.Console.csproj"/>
+    <Project Path="samples/Scripting.Console/Pocok.Scripting.Console.csproj"/>
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Licensing/Pocok.Licensing.csproj"/>
@@ -19,6 +20,7 @@
     <Project Path="src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj"/>
     <Project Path="src/Conversion/Pocok.Conversion.csproj"/>
     <Project Path="src/Readiness/Pocok.Readiness.csproj"/>
+    <Project Path="src/Scripting/Pocok.Scripting.csproj"/>
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Unit/Licensing.Tests/Pocok.Licensing.Tests.csproj"/>
@@ -30,5 +32,6 @@
     <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj"/>
     <Project Path="tests/Unit/Conversion.Tests/Pocok.Conversion.Tests.csproj"/>
     <Project Path="tests/Unit/Readiness.Tests/Pocok.Readiness.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.Tests/Pocok.Scripting.Tests.csproj"/>
   </Folder>
 </Solution>

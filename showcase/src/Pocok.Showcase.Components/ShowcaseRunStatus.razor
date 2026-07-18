@@ -1,0 +1,14 @@
+<span class="run-status status-@Status.ToString().ToLowerInvariant()">@Label</span>
+
+@code {
+    [Parameter]
+    public Pocok.Showcase.Contracts.ShowcaseRunStatus Status { get; set; }
+
+    [Parameter]
+    public IShowcaseText? Text { get; set; }
+
+    [Parameter]
+    public string ResourceNamespace { get; set; } = "shell";
+
+    private string Label => Text?.GetText(ResourceNamespace, $"RunStatus.{Status}") ?? Status.ToString();
+}

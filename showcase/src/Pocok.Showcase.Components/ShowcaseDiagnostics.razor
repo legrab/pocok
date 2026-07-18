@@ -1,0 +1,10 @@
+<ul class="diagnostics">
+    @foreach (ShowcaseDiagnostic diagnostic in Diagnostics)
+    {
+        <li class="diagnostic-@diagnostic.Severity"><span class="mono">@diagnostic.Code</span> @diagnostic.Message</li>
+    }
+</ul>
+
+@code {
+    [Parameter] public IReadOnlyList<ShowcaseDiagnostic> Diagnostics { get; set; } = Array.Empty<ShowcaseDiagnostic>();
+}

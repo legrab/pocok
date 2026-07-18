@@ -1,0 +1,37 @@
+<div class="mode-switch" role="group" aria-label="@Label">
+    <button type="button"
+            class="secondary mode-button @(SelectedValue == FirstValue ? "is-selected" : null)"
+            aria-pressed="@(SelectedValue == FirstValue)"
+            @onclick="() => SelectedValueChanged.InvokeAsync(FirstValue)">
+        @FirstLabel
+    </button>
+    <button type="button"
+            class="secondary mode-button @(SelectedValue == SecondValue ? "is-selected" : null)"
+            aria-pressed="@(SelectedValue == SecondValue)"
+            @onclick="() => SelectedValueChanged.InvokeAsync(SecondValue)">
+        @SecondLabel
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = "Mode";
+
+    [Parameter]
+    public string FirstLabel { get; set; } = "First";
+
+    [Parameter]
+    public string FirstValue { get; set; } = "first";
+
+    [Parameter]
+    public string SecondLabel { get; set; } = "Second";
+
+    [Parameter]
+    public string SecondValue { get; set; } = "second";
+
+    [Parameter]
+    public string SelectedValue { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> SelectedValueChanged { get; set; }
+}

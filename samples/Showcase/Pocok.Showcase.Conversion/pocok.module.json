@@ -1,0 +1,18 @@
+{
+  "manifestVersion": 1,
+  "id": "pocok.showcase.conversion",
+  "version": "1.0.0",
+  "entryAssembly": "Pocok.Showcase.Conversion.dll",
+  "required": true,
+  "sharedAssemblies": [
+    "Pocok.Showcase.Contracts",
+    "Pocok.Showcase.Components",
+    "Microsoft.AspNetCore.Components",
+    "Microsoft.AspNetCore.Components.Web"
+  ],
+  "metadata": {
+    "packageId": "Pocok.Conversion",
+    "slug": "conversion",
+    "kind": "showcase-slice"
+  }
+}

@@ -1,0 +1,164 @@
+name: Publish licensing tool
+
+on:
+  push:
+    tags:
+      - 'licensing.keygen-v*'
+      - 'licensing.licensechecker-v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pocok-publication
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      tool-id: ${{ steps.tool.outputs.tool-id }}
+      project: ${{ steps.tool.outputs.project }}
+      version: ${{ steps.tool.outputs.version }}
+      executable: ${{ steps.tool.outputs.executable }}
+      title: ${{ steps.tool.outputs.title }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - id: tool
+        name: Resolve tool from tag
+        shell: pwsh
+        run: ./tools/GitHubRelease/Resolve-LicensingToolFromTag.ps1 -Tag '${{ github.ref_name }}' -GitHubOutput $env:GITHUB_OUTPUT
+
+  validate:
+    needs: resolve
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+      - name: Build and test licensing tools
+        shell: pwsh
+        run: |
+          dotnet restore Pocok.Core.slnx
+          if ($LASTEXITCODE -ne 0) { throw "Restore failed with exit code $LASTEXITCODE." }
+          dotnet build Pocok.Core.slnx --configuration Release --no-restore
+          if ($LASTEXITCODE -ne 0) { throw "Build failed with exit code $LASTEXITCODE." }
+          dotnet test tests/Unit/Licensing.Tests/Pocok.Licensing.Tests.csproj --configuration Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw "Licensing tests failed with exit code $LASTEXITCODE." }
+          ./tools/GitHubRelease/Test-LicensingToolRelease.ps1
+      - name: Prove keygen-to-checker round trip
+        shell: pwsh
+        run: |
+          $proofRoot = Join-Path $env:RUNNER_TEMP 'pocok-licensing-tool-proof'
+          New-Item -ItemType Directory -Path $proofRoot -Force | Out-Null
+          $privateKey = Join-Path $proofRoot 'private.pem'
+          $publicKey = Join-Path $proofRoot 'public.pem'
+          $license = Join-Path $proofRoot 'license.pocok'
+          dotnet run --project src/Licensing.Keygen/Pocok.Licensing.Keygen.csproj --configuration Release --no-build -- keys --private $privateKey --public $publicKey
+          if ($LASTEXITCODE -ne 0) { throw "Key generation failed with exit code $LASTEXITCODE." }
+          dotnet run --project src/Licensing.Keygen/Pocok.Licensing.Keygen.csproj --configuration Release --no-build -- issue --private $privateKey --id release-proof --module Reporting --valid-until 2099-01-01T00:00:00Z --out $license
+          if ($LASTEXITCODE -ne 0) { throw "License issuance failed with exit code $LASTEXITCODE." }
+          dotnet run --project src/Licensing.LicenseChecker/Pocok.Licensing.LicenseChecker.csproj --configuration Release --no-build -- --license $license --public $publicKey --module Reporting
+          if ($LASTEXITCODE -ne 0) { throw "License checking failed with exit code $LASTEXITCODE." }
+
+  build:
+    needs: [resolve, validate]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: linux-x64
+            archive: tar.gz
+          - rid: linux-arm64
+            archive: tar.gz
+          - rid: win-x64
+            archive: zip
+          - rid: osx-x64
+            archive: tar.gz
+          - rid: osx-arm64
+            archive: tar.gz
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+      - name: Publish self-contained executable
+        shell: pwsh
+        run: |
+          $output = Join-Path $PWD 'artifacts/publish/${{ matrix.rid }}'
+          dotnet publish '${{ needs.resolve.outputs.project }}' --configuration Release --runtime '${{ matrix.rid }}' --self-contained true --output $output -p:Version='${{ needs.resolve.outputs.version }}' -p:PublishSingleFile=true -p:PublishTrimmed=false -p:DebugType=embedded
+          if ($LASTEXITCODE -ne 0) { throw "Publish failed with exit code $LASTEXITCODE." }
+      - id: package
+        name: Package release asset
+        shell: pwsh
+        run: |
+          $rid = '${{ matrix.rid }}'
+          $extension = if ($rid.StartsWith('win-', [StringComparison]::Ordinal)) { '.exe' } else { '' }
+          $publishRoot = Join-Path $PWD "artifacts/publish/$rid"
+          $binary = Join-Path $publishRoot ('${{ needs.resolve.outputs.executable }}' + $extension)
+          if (-not (Test-Path -LiteralPath $binary -PathType Leaf)) { throw "Published executable is missing: $binary" }
+          $staging = Join-Path $PWD "artifacts/staging/$rid"
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
+          Copy-Item -LiteralPath $binary -Destination $staging
+          $stagedBinary = Join-Path $staging ([System.IO.Path]::GetFileName($binary))
+          Copy-Item -LiteralPath LICENSE -Destination $staging
+          Copy-Item -LiteralPath NOTICE -Destination $staging
+          Copy-Item -LiteralPath docs/licensing.md -Destination (Join-Path $staging 'LICENSING.md')
+          $releaseRoot = Join-Path $PWD 'artifacts/release'
+          New-Item -ItemType Directory -Path $releaseRoot -Force | Out-Null
+          $baseName = '${{ needs.resolve.outputs.tool-id }}-${{ needs.resolve.outputs.version }}-' + $rid
+          if ('${{ matrix.archive }}' -eq 'zip') {
+            $archive = Join-Path $releaseRoot "$baseName.zip"
+            Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $archive
+          }
+          else {
+            & chmod +x $stagedBinary
+            $archive = Join-Path $releaseRoot "$baseName.tar.gz"
+            & tar -czf $archive -C $staging .
+            if ($LASTEXITCODE -ne 0) { throw "Archive creation failed with exit code $LASTEXITCODE." }
+          }
+          "archive=$archive" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: licensing-tool-${{ matrix.rid }}
+          path: ${{ steps.package.outputs.archive }}
+          if-no-files-found: error
+
+  release:
+    needs: [resolve, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: licensing-tool-*
+          path: artifacts/release
+          merge-multiple: true
+      - name: Create GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TOOL_ID: ${{ needs.resolve.outputs.tool-id }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+          RELEASE_TITLE: ${{ needs.resolve.outputs.title }}
+        run: |
+          assets=(
+            "artifacts/release/${TOOL_ID}-${VERSION}-linux-x64.tar.gz"
+            "artifacts/release/${TOOL_ID}-${VERSION}-linux-arm64.tar.gz"
+            "artifacts/release/${TOOL_ID}-${VERSION}-win-x64.zip"
+            "artifacts/release/${TOOL_ID}-${VERSION}-osx-x64.tar.gz"
+            "artifacts/release/${TOOL_ID}-${VERSION}-osx-arm64.tar.gz"
+          )
+          for asset in "${assets[@]}"; do
+            test -f "$asset"
+          done
+          args=(--verify-tag --generate-notes --title "${RELEASE_TITLE} ${VERSION}")
+          [[ "${VERSION}" == *-* ]] && args+=(--prerelease)
+          gh release create '${{ github.ref_name }}' "${assets[@]}" "${args[@]}"

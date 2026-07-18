@@ -52,7 +52,14 @@ dotnet_diagnostic.CA1032.severity = none
 dotnet_diagnostic.CA1819.severity = none
 dotnet_diagnostic.CA2227.severity = none
 
+# Get is an established cross-language public contract and renaming it would be a breaking change.
+[showcase/src/Pocok.Showcase.Contracts/ShowcaseContracts.cs]
+dotnet_diagnostic.CA1716.severity = none
+
 # The semaphore is intentionally kept alive so reload callers queued just before disposal are not raced by Dispose.
 [src/Localization/FileResources/FileStringLocalizer.cs]
 dotnet_diagnostic.CA2213.severity = none
 
+
+[samples/Showcase/Pocok.Showcase.Conversion/Models/ConversionModels.cs]
+dotnet_diagnostic.CA1720.severity = none

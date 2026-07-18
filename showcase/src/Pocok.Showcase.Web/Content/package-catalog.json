@@ -1,0 +1,169 @@
+{
+  "packages": [
+    {
+      "id": "Pocok.Conversion",
+      "family": "Capability",
+      "state": "Active",
+      "releasable": true,
+      "project": "src/Conversion/Pocok.Conversion.csproj",
+      "summary": "Policy-driven value conversion with explicit failures, collection support, and bounded behavior.",
+      "documentationPath": "src/Conversion/README.md",
+      "sortOrder": 1,
+      "slug": "conversion"
+    },
+    {
+      "id": "Pocok.Readiness",
+      "family": "Capability",
+      "state": "Active",
+      "releasable": true,
+      "project": "src/Readiness/Pocok.Readiness.csproj",
+      "summary": "Explicit startup, readiness, failure, cancellation, shutdown, and restart coordination.",
+      "documentationPath": "src/Readiness/README.md",
+      "sortOrder": 2,
+      "slug": "readiness"
+    },
+    {
+      "id": "Pocok.AppDefaults",
+      "family": "MaintainerDefaults",
+      "state": "Active",
+      "releasable": true,
+      "project": "src/AppDefaults/Pocok.AppDefaults.csproj",
+      "summary": "Composable application configurators for consistent host setup.",
+      "documentationPath": "src/AppDefaults/README.md",
+      "sortOrder": 3,
+      "slug": "app-defaults"
+    },
+    {
+      "id": "Pocok.AppDefaults.Logging",
+      "family": "MaintainerDefaults",
+      "state": "Active",
+      "releasable": true,
+      "project": "src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj",
+      "summary": "Configuration-driven Microsoft.Extensions.Logging defaults.",
+      "documentationPath": "src/AppDefaults.Logging/README.md",
+      "sortOrder": 4,
+      "slug": "app-defaults-logging"
+    },
+    {
+      "id": "Pocok.AppDefaults.Logging.Serilog",
+      "family": "MaintainerDefaults",
+      "state": "Active",
+      "releasable": true,
+      "project": "src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj",
+      "summary": "Serilog defaults integrated through the Pocok application configurator model.",
+      "documentationPath": "src/AppDefaults.Logging.Serilog/README.md",
+      "sortOrder": 5,
+      "slug": "app-defaults-logging-serilog"
+    },
+    {
+      "id": "Pocok.Modularity.Contracts",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj",
+      "summary": "Stable service-module contracts shared between hosts and trusted plugins.",
+      "documentationPath": "src/Modularity.Contracts/README.md",
+      "sortOrder": 6,
+      "slug": "modularity-contracts"
+    },
+    {
+      "id": "Pocok.Modularity",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/Modularity/Pocok.Modularity.csproj",
+      "summary": "Manifest-driven startup discovery and registration for trusted in-process modules.",
+      "documentationPath": "src/Modularity/README.md",
+      "sortOrder": 7,
+      "slug": "modularity"
+    },
+    {
+      "id": "Pocok.AppDefaults.Modularity",
+      "family": "MaintainerDefaults",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj",
+      "summary": "Maintainer defaults for Pocok modularity configuration.",
+      "documentationPath": "src/AppDefaults.Modularity/README.md",
+      "sortOrder": 8,
+      "slug": "app-defaults-modularity"
+    },
+    {
+      "id": "Pocok.BackgroundWork",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/BackgroundWork/Pocok.BackgroundWork.csproj",
+      "summary": "Small concurrency helpers for coalescing, debouncing, repetition, and observation.",
+      "documentationPath": "src/BackgroundWork/README.md",
+      "sortOrder": 9,
+      "slug": "background-work"
+    },
+    {
+      "id": "Pocok.Scripting",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/Scripting/Pocok.Scripting.csproj",
+      "summary": "Bounded JavaScript execution with imports, modules, bindings, and structured failures.",
+      "documentationPath": "src/Scripting/README.md",
+      "sortOrder": 10,
+      "slug": "scripting"
+    },
+    {
+      "id": "Pocok.Localization",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/Localization/Pocok.Localization.csproj",
+      "summary": "Deterministic file-backed localization and provider composition.",
+      "documentationPath": "src/Localization/README.md",
+      "sortOrder": 11,
+      "slug": "localization"
+    },
+    {
+      "id": "Pocok.Signals",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/Signals/Pocok.Signals.csproj",
+      "summary": "Typed signal runtime abstractions for reading, writing, subscribing, and connection state.",
+      "documentationPath": "src/Signals/README.md",
+      "sortOrder": 12,
+      "slug": "signals"
+    },
+    {
+      "id": "Pocok.Subscriptions",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/Subscriptions/Pocok.Subscriptions.csproj",
+      "summary": "Concurrency-safe keyed subscription lifecycle management.",
+      "documentationPath": "src/Subscriptions/README.md",
+      "sortOrder": 13,
+      "slug": "subscriptions"
+    },
+    {
+      "id": "Pocok.Licensing",
+      "family": "Capability",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/Licensing/Pocok.Licensing.csproj",
+      "summary": "Signed and encrypted license documents, validation, runtime enforcement, and CLI workflows.",
+      "documentationPath": "src/Licensing/README.md",
+      "sortOrder": 14,
+      "slug": "licensing"
+    },
+    {
+      "id": "Pocok.AppDefaults.Licensing",
+      "family": "MaintainerDefaults",
+      "state": "Experimental",
+      "releasable": false,
+      "project": "src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj",
+      "summary": "Application defaults for configuring and enforcing Pocok licensing.",
+      "documentationPath": "src/AppDefaults.Licensing/README.md",
+      "sortOrder": 15,
+      "slug": "app-defaults-licensing"
+    }
+  ]
+}

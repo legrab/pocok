@@ -1,0 +1,136 @@
+{
+  "Package": {
+    "Name": "Scripting",
+    "Summary": "Run complete JavaScript with Pocok.Scripting and inspect returned values, limits, and structured failures.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Samples",
+    "Title": "JavaScript sandbox",
+    "Running": "Running",
+    "Ready": "Ready",
+    "CodeLabel": "Complete JavaScript source",
+    "Run": "Run script",
+    "Cancel": "Cancel",
+    "ExecutionSteps": "Execution steps",
+    "ShowSuggestions": "Show suggestions",
+    "HideSuggestions": "Hide suggestions"
+  },
+  "Fields": {
+    "ExpectResult": "Require a return value",
+    "ExpectResultHelp": "When enabled, null and undefined are returned as a structured missing-result failure.",
+    "Timeout": "Timeout (ms)",
+    "MaxStatements": "Maximum statements",
+    "MaxRecursion": "Maximum recursion depth",
+    "MaxMemory": "Memory limit (MiB)"
+  },
+  "Result": {
+    "Title": "Execution result",
+    "Empty": "Run the current script to inspect its value or structured failure.",
+    "ScriptPreview": "Executed JavaScript",
+    "Truncated": "truncated",
+    "Fields": {
+      "ReturnValue": "Return value",
+      "ResultType": "Runtime result type",
+      "ExpectResult": "Return value required",
+      "Limits": "Execution limits",
+      "Line": "Failure line",
+      "Column": "Failure column"
+    }
+  },
+  "Tips": {
+    "Title": "What to notice",
+    "Isolation": "Each run uses a fresh Jint engine, so scripts cannot share mutable engine state.",
+    "Bounds": "Timeout, statements, recursion, source length, memory, queueing, and output each have separate limits.",
+    "ReturnValue": "The final JavaScript expression becomes the returned value. A declaration alone usually evaluates to undefined.",
+    "Failures": "JavaScript errors and limit violations are returned as structured failures instead of host exceptions.",
+    "Capabilities": "Hosts expose approved values and delegates explicitly; no ambient capabilities are available."
+  },
+  "Guide": {
+    "More": "More guidance",
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Pocok.Scripting provides a host-controlled JavaScript boundary for automation and extension points without exposing ambient CLR access."
+    },
+    "QuickStart": {
+      "Title": "Quick start",
+      "Body": "Write a complete script and leave the value to inspect as the final expression. The example invokes ScriptRunner directly."
+    },
+    "Results": {
+      "Title": "Results",
+      "Body": "Successful runs return the final JavaScript value. The Showcase formats scalar, array, and object results deterministically and does not expose captured exception objects."
+    },
+    "Bounds": {
+      "Title": "Execution bounds",
+      "Body": "ScriptRunner limits timeout, statements, recursion, source length, memory, and cancellation. The Showcase also bounds queueing, input, and output."
+    },
+    "Capabilities": {
+      "Title": "Explicit capabilities",
+      "Body": "Hosts may register approved scalar values and delegates through ScriptBinding. Complex CLR objects and ambient interop remain unavailable."
+    },
+    "Imports": {
+      "Title": "Imports and modules",
+      "Body": "The package can resolve comment-based imports from an explicit module source. This public deployment runs self-contained scripts and does not provide a persistent module catalog."
+    },
+    "Concurrency": {
+      "Title": "Concurrency",
+      "Body": "ScriptRunner creates a fresh engine for every request and supports concurrent callers. Each Showcase run has its own scope, cancellation source, result channel, and progress channel."
+    },
+    "Production": {
+      "Title": "Production notes",
+      "Body": "Treat scripts as untrusted input, keep limits conservative, authorize every delegate, exclude secrets from diagnostics, and remember that in-process limits are not operating-system isolation."
+    },
+    "Snippet": {
+      "RunnerTitle": "Run a bounded script",
+      "ScriptTitle": "Complete script with a return value"
+    }
+  },
+  "Assist": {
+    "Const": "Declare an immutable local value.",
+    "Function": "Insert a complete function declaration.",
+    "Return": "Return from a function body.",
+    "Array": "Insert an array transformation sample.",
+    "Object": "Return an object literal as the final expression.",
+    "Reduce": "Reduce an array to one value.",
+    "Map": "Transform every array item."
+  },
+  "Boundaries": {
+    "Title": "Boundaries",
+    "NoClr": "No ambient CLR or reflection access.",
+    "NoIo": "No filesystem, network, browser, or service-provider access.",
+    "FreshEngine": "A fresh engine and script state for every run.",
+    "Bounded": "Separate limits for source length, timeout, statements, recursion, memory, queueing, and output."
+  },
+  "Source": {
+    "Title": "Source documentation",
+    "Body": "Package documentation for execution limits, capabilities, imports, and security boundaries."
+  },
+  "Samples": {
+    "arithmetic": {
+      "Name": "Function return value",
+      "Description": "Define a function and return the triangular number of 12 from the final expression."
+    },
+    "object-result": {
+      "Name": "Object and array result",
+      "Description": "Return an object containing aggregate and transformed array values."
+    },
+    "string-result": {
+      "Name": "Template string",
+      "Description": "Return a JavaScript template string from a complete script."
+    },
+    "missing-result": {
+      "Name": "Missing result",
+      "Description": "End with a declaration while a result is required and inspect the structured failure."
+    },
+    "syntax-error": {
+      "Name": "Syntax failure",
+      "Description": "Run invalid JavaScript and inspect its safe diagnostic location."
+    },
+    "recursion-limit": {
+      "Name": "Recursion limit",
+      "Description": "Trigger the configured recursion boundary without affecting the host process."
+    }
+  }
+}

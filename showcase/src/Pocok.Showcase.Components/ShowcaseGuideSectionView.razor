@@ -1,0 +1,29 @@
+<article id="@Section.Id" class="guide-section @(Compact ? "guide-section-compact" : null) @(Embedded ? "guide-section-embedded" : null)">
+    @if (ShowTitle)
+    {
+        <h2>@Text.GetText(ResourceNamespace, Section.TitleKey)</h2>
+    }
+    @foreach (string paragraph in Section.ParagraphKeys)
+    {
+        <p>@Text.GetText(ResourceNamespace, paragraph)</p>
+    }
+    @foreach (string snippetId in Section.SnippetIds)
+    {
+        @if (Snippets.FirstOrDefault(candidate => candidate.Id == snippetId) is { } snippet)
+        {
+            <ShowcaseCodeBlock Title="@Text.GetText(ResourceNamespace, snippet.TitleKey)"
+                               Code="@snippet.Code"
+                               Language="@snippet.Language" />
+        }
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired] public ShowcaseGuideSection Section { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<ShowcaseCodeSnippet> Snippets { get; set; } = [];
+    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
+    [Parameter, EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
+    [Parameter] public bool Compact { get; set; }
+    [Parameter] public bool ShowTitle { get; set; } = true;
+    [Parameter] public bool Embedded { get; set; }
+}

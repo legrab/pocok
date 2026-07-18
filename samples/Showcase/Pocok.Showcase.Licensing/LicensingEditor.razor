@@ -1,0 +1,110 @@
+<div class="licensing-editor">
+    <details class="panel collapsible-support editor-section" open>
+        <summary>@T("Editor.Claims")</summary>
+        <div class="collapsible-support-content">
+            <div class="field-grid">
+            <div class="field">
+                <label for="license-id">@T("Fields.LicenseId")</label>
+                <input id="license-id" type="text"
+                       value="@Value.LicenseId"
+                       @onchange="args => SetLicenseIdAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="customer">@T("Fields.Customer")</label>
+                <input id="customer" type="text"
+                       value="@Value.Customer"
+                       @onchange="args => SetCustomerAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="issued-at">@T("Fields.IssuedAt")</label>
+                <input id="issued-at" type="text"
+                       value="@Value.IssuedAtUtc"
+                       @onchange="args => SetIssuedAtAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="valid-from">@T("Fields.ValidFrom")</label>
+                <input id="valid-from" type="text"
+                       value="@Value.ValidFromUtc"
+                       @onchange="args => SetValidFromAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="valid-until">@T("Fields.ValidUntil")</label>
+                <input id="valid-until" type="text"
+                       value="@Value.ValidUntilUtc"
+                       @onchange="args => SetValidUntilAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="max-runtime">@T("Fields.MaximumRuntime")</label>
+                <input id="max-runtime" type="number" min="0" max="10080"
+                       value="@Value.MaximumProcessRuntimeMinutes"
+                       @onchange="args => SetMaximumRuntimeAsync(ReadValue(args, Value.MaximumProcessRuntimeMinutes))" />
+                <small>@T("Fields.ZeroDisables")</small>
+            </div>
+            <div class="field checkbox-field">
+                <label for="all-modules">@T("Fields.AllModules")</label>
+                <input id="all-modules" type="checkbox"
+                       checked="@Value.AllModules"
+                       @onchange="args => SetAllModulesAsync(ReadValue(args, Value.AllModules))" />
+            </div>
+            <div class="field full">
+                <label for="licensed-modules">@T("Fields.LicensedModules")</label>
+                <ShowcaseBufferedTextArea Id="licensed-modules"
+                                          class="compact-editor"
+                                          Value="@Value.LicensedModules"
+                                          ValueChanged="SetLicensedModulesAsync" />
+                <small>@T("Fields.ModulesHelp")</small>
+            </div>
+            </div>
+        </div>
+    </details>
+
+    <details class="panel collapsible-support editor-section" open>
+        <summary>@T("Editor.Runtime")</summary>
+        <div class="collapsible-support-content">
+            <div class="field-grid">
+            <div class="field">
+                <label for="required-module">@T("Fields.RequiredModule")</label>
+                <input id="required-module" type="text"
+                       value="@Value.RequiredModule"
+                       @onchange="args => SetRequiredModuleAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="utc-now">@T("Fields.UtcNow")</label>
+                <input id="utc-now" type="text"
+                       value="@Value.UtcNow"
+                       @onchange="args => SetUtcNowAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="runtime">@T("Fields.ProcessRuntime")</label>
+                <input id="runtime" type="number" min="0" max="10080"
+                       value="@Value.ProcessRuntimeMinutes"
+                       @onchange="args => SetProcessRuntimeAsync(ReadValue(args, Value.ProcessRuntimeMinutes))" />
+            </div>
+            <div class="field">
+                <label for="licensed-machine">@T("Fields.LicensedMachine")</label>
+                <input id="licensed-machine" type="text"
+                       value="@Value.LicensedMachineFingerprint"
+                       @onchange="args => SetLicensedMachineAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="current-machine">@T("Fields.CurrentMachine")</label>
+                <input id="current-machine" type="text"
+                       value="@Value.CurrentMachineFingerprint"
+                       @onchange="args => SetCurrentMachineAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="license-psk">@T("Fields.LicensePsk")</label>
+                <input id="license-psk" type="password"
+                       value="@Value.LicensePresharedKey"
+                       @onchange="args => SetLicensePskAsync(ReadString(args))" />
+            </div>
+            <div class="field">
+                <label for="supplied-psk">@T("Fields.SuppliedPsk")</label>
+                <input id="supplied-psk" type="password"
+                       value="@Value.SuppliedPresharedKey"
+                       @onchange="args => SetSuppliedPskAsync(ReadString(args))" />
+            </div>
+            </div>
+        </div>
+    </details>
+</div>

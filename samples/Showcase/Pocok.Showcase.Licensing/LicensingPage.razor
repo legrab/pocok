@@ -1,0 +1,100 @@
+<div class="package-page">
+    <ShowcasePackageHeader Descriptor="Context.Descriptor"
+                           Text="Context.Text"
+                           ImplementationStatusText="@T("Package.Status.Available")" />
+
+    <ShowcasePackageWorkbench>
+        <Samples>
+            <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
+                                  Samples="Context.Samples"
+                                  SelectedId="@_selectedId"
+                                  SelectedIdChanged="SelectSampleAsync"
+                                  Text="Context.Text"
+                                  ResourceNamespace="licensing" />
+            <ShowcaseProgressPanel Title="@T("Sandbox.ExecutionSteps")"
+                                   Progress="_progress" />
+            @if (_result is not null)
+            {
+                <ShowcaseTipPanel Title="@T("Tips.Title")"
+                                  TipKeys="_result.TipKeys"
+                                  Text="Context.Text"
+                                  ResourceNamespace="licensing" />
+            }
+        </Samples>
+        <Main>
+            <ShowcaseSandboxFrame @key="_sampleRevision"
+                                  Title="@T("Sandbox.Title")"
+                                  Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
+                <LicensingEditor Value="@_input"
+                                 ValueChanged="SetInputAsync"
+                                 Text="Context.Text" />
+
+                <div class="actions">
+                    <ShowcaseRunButton Label="@T("Sandbox.Generate")"
+                                       CssClass="secondary"
+                                       Clicked="GenerateLicense" />
+                </div>
+
+                @if (_generationError is not null)
+                {
+                    <p class="diagnostic-warning" role="alert">@_generationError</p>
+                }
+                else if (_generatedLicense is not null)
+                {
+                    <section class="panel generated-license" aria-labelledby="generated-license-title">
+                        <h3 id="generated-license-title">@T("Generation.Title")</h3>
+                        <p>@T("Generation.Intro")</p>
+                        <dl class="structured-fields">
+                            <dt>@T("Generation.KeyId")</dt>
+                            <dd class="mono">@_generatedLicense.KeyId</dd>
+                        </dl>
+                        <ShowcaseCodeBlock Title="@T("Generation.SignedLicense")"
+                                           Code="@_generatedLicense.SignedLicense"
+                                           Language="json" />
+                        <ShowcaseCodeBlock Title="@T("Generation.PublicKey")"
+                                           Code="@_generatedLicense.PublicKeyPem"
+                                           Language="text" />
+                        <p>@T("Generation.ImportHint")</p>
+                    </section>
+                }
+
+                <ShowcaseExecutionControls Slice="Context.Slice"
+                                           Input="_input"
+                                           RunClient="Context.RunClient"
+                                           Culture="Context.Culture"
+                                           RunLabel="@T("Sandbox.Run")"
+                                           CancelLabel="@T("Sandbox.Cancel")"
+                                           ResetKey="@SampleResetKey"
+                                           ResultChanged="SetResultAsync"
+                                           RunningChanged="SetRunningAsync"
+                                           ProgressChanged="SetProgressAsync" />
+            </ShowcaseSandboxFrame>
+
+            <ShowcaseResultPanel Title="@T("Result.Title")"
+                                 EmptyText="@T("Result.Empty")"
+                                 Result="_result"
+                                 Text="Context.Text"
+                                 ResourceNamespace="licensing"
+                                 CodePreviewTitle="@T("Result.CodePreview")"
+                                 CodePreviewLanguage="csharp"
+                                 TruncatedLabel="@T("Result.Truncated")" />
+        </Main>
+        <Guidance>
+            <ShowcaseGuideView Guide="Context.Slice.Guide"
+                               Text="Context.Text"
+                               ResourceNamespace="licensing"
+                               MoreLabel="@T("Guide.More")" />
+            <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
+                <ul class="compact-list">
+                    <li>@T("Boundaries.ClaimsOnly")</li>
+                    <li>@T("Boundaries.NoPrivateKeys")</li>
+                    <li>@T("Boundaries.NoFiles")</li>
+                    <li>@T("Boundaries.ExpectedFailures")</li>
+                </ul>
+            </ShowcaseBoundariesPanel>
+            <ShowcaseSourcePanel Title="@T("Source.Title")"
+                                 Body="@T("Source.Body")"
+                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+        </Guidance>
+    </ShowcasePackageWorkbench>
+</div>

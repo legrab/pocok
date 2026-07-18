@@ -1,0 +1,135 @@
+@implements IAsyncDisposable
+
+<div class="actions">
+    <ShowcaseRunButton Label="@RunLabel" Disabled="_running" Clicked="RunAsync" />
+    @if (_running)
+    {
+        <button type="button" class="secondary" @onclick="Cancel">@CancelLabel</button>
+    }
+</div>
+@if (!ProgressChanged.HasDelegate)
+{
+    <div aria-live="polite" aria-atomic="false">
+        @if (_progress.Count > 0)
+        {
+            <ol class="timeline progress-timeline">
+                @foreach (ShowcaseProgressEvent progress in _progress)
+                {
+                    <li><span class="mono">@progress.Stage</span><span>@progress.Message</span></li>
+                }
+            </ol>
+        }
+    </div>
+}
+
+@code {
+    private readonly List<ShowcaseProgressEvent> _progress = [];
+    private ShowcaseRunHandle? _handle;
+    private string? _lastResetKey;
+    private bool _running;
+
+    [Parameter, EditorRequired]
+    public IShowcaseSlice Slice { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public object Input { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public IShowcaseRunClient RunClient { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
+
+    [Parameter]
+    public string RunLabel { get; set; } = "Run";
+
+    [Parameter]
+    public string CancelLabel { get; set; } = "Cancel";
+
+    [Parameter]
+    public string? ResetKey { get; set; }
+
+    [Parameter]
+    public EventCallback<ShowcaseRunResult?> ResultChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> RunningChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<IReadOnlyList<ShowcaseProgressEvent>> ProgressChanged { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_lastResetKey is null)
+        {
+            _lastResetKey = ResetKey;
+            return;
+        }
+
+        if (!_running && !string.Equals(_lastResetKey, ResetKey, StringComparison.Ordinal))
+        {
+            _progress.Clear();
+            _lastResetKey = ResetKey;
+            await NotifyProgressChangedAsync();
+        }
+    }
+
+    private async Task RunAsync()
+    {
+        if (_running)
+            return;
+
+        _running = true;
+        _progress.Clear();
+        await NotifyProgressChangedAsync();
+        await RunningChanged.InvokeAsync(true);
+        await ResultChanged.InvokeAsync(null);
+
+        try
+        {
+            _handle = await RunClient.SubmitAsync(Slice, Input, Culture);
+            Task progressTask = ReadProgressAsync(_handle.Progress);
+            ShowcaseRunResult result = await _handle.Completion;
+            await progressTask;
+            await ResultChanged.InvokeAsync(result);
+        }
+        finally
+        {
+            if (_handle is not null)
+                await _handle.DisposeAsync();
+
+            _handle = null;
+            _running = false;
+            await RunningChanged.InvokeAsync(false);
+        }
+    }
+
+    private async Task ReadProgressAsync(ChannelReader<ShowcaseProgressEvent> reader)
+    {
+        await foreach (ShowcaseProgressEvent item in reader.ReadAllAsync())
+        {
+            _progress.Add(item);
+            await NotifyProgressChangedAsync();
+        }
+    }
+
+    private Task NotifyProgressChangedAsync() => InvokeAsync(async () =>
+    {
+        if (ProgressChanged.HasDelegate)
+            await ProgressChanged.InvokeAsync(_progress.ToArray());
+        else
+            StateHasChanged();
+    });
+
+    private void Cancel() => _handle?.Cancel();
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_handle is null)
+            return;
+
+        _handle.Cancel();
+        await _handle.DisposeAsync();
+        _handle = null;
+    }
+}

@@ -1,0 +1,71 @@
+<div class="package-page">
+    <ShowcasePackageHeader Descriptor="Context.Descriptor"
+                           Text="Context.Text"
+                           ImplementationStatusText="@T("Package.Status.Available")" />
+
+    <ShowcasePackageWorkbench>
+        <Samples>
+            <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
+                                  Samples="Context.Samples"
+                                  SelectedId="@_selectedId"
+                                  SelectedIdChanged="SelectSampleAsync"
+                                  Text="Context.Text"
+                                  ResourceNamespace="scripting" />
+            <ShowcaseProgressPanel Title="@T("Sandbox.ExecutionSteps")"
+                                   Progress="_progress" />
+            @if (_result is not null)
+            {
+                <ShowcaseTipPanel Title="@T("Tips.Title")"
+                                  TipKeys="_result.TipKeys"
+                                  Text="Context.Text"
+                                  ResourceNamespace="scripting" />
+            }
+        </Samples>
+        <Main>
+            <ShowcaseSandboxFrame @key="_sampleRevision"
+                                  Title="@T("Sandbox.Title")"
+                                  Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
+                <ScriptingEditor @bind-Value="_input"
+                                 CodeAssist="Context.CodeAssist"
+                                 Text="Context.Text" />
+
+                <ShowcaseExecutionControls Slice="Context.Slice"
+                                           Input="_input"
+                                           RunClient="Context.RunClient"
+                                           Culture="Context.Culture"
+                                           RunLabel="@T("Sandbox.Run")"
+                                           CancelLabel="@T("Sandbox.Cancel")"
+                                           ResetKey="@SampleResetKey"
+                                           ResultChanged="SetResultAsync"
+                                           RunningChanged="SetRunningAsync"
+                                           ProgressChanged="SetProgressAsync" />
+            </ShowcaseSandboxFrame>
+
+            <ShowcaseResultPanel Title="@T("Result.Title")"
+                                 EmptyText="@T("Result.Empty")"
+                                 Result="_result"
+                                 Text="Context.Text"
+                                 ResourceNamespace="scripting"
+                                 CodePreviewTitle="@T("Result.ScriptPreview")"
+                                 CodePreviewLanguage="javascript"
+                                 TruncatedLabel="@T("Result.Truncated")" />
+        </Main>
+        <Guidance>
+            <ShowcaseGuideView Guide="Context.Slice.Guide"
+                               Text="Context.Text"
+                               ResourceNamespace="scripting"
+                               MoreLabel="@T("Guide.More")" />
+            <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
+                <ul class="compact-list">
+                    <li>@T("Boundaries.NoClr")</li>
+                    <li>@T("Boundaries.NoIo")</li>
+                    <li>@T("Boundaries.FreshEngine")</li>
+                    <li>@T("Boundaries.Bounded")</li>
+                </ul>
+            </ShowcaseBoundariesPanel>
+            <ShowcaseSourcePanel Title="@T("Source.Title")"
+                                 Body="@T("Source.Body")"
+                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+        </Guidance>
+    </ShowcasePackageWorkbench>
+</div>

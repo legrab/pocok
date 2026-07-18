@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup>
+    <StageShowcasePlugin Condition="'$(StageShowcasePlugin)' == ''">true</StageShowcasePlugin>
+    <ShowcasePluginStageRoot Condition="'$(ShowcasePluginStageRoot)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)src/Pocok.Showcase.Web/plugins'))</ShowcasePluginStageRoot>
+    <ShowcasePluginStageDirectory>$([System.IO.Path]::Combine('$(ShowcasePluginStageRoot)', '$(ShowcasePluginId)'))</ShowcasePluginStageDirectory>
+  </PropertyGroup>
+
+  <Target Name="StageShowcasePlugin"
+          AfterTargets="Build"
+          Condition="'$(StageShowcasePlugin)' == 'true' and '$(DesignTimeBuild)' != 'true' and '$(ShowcasePluginId)' != ''">
+    <ItemGroup>
+      <_ShowcasePluginFile Include="$(TargetDir)**/*" />
+    </ItemGroup>
+    <RemoveDir Directories="$(ShowcasePluginStageDirectory)" />
+    <MakeDir Directories="$(ShowcasePluginStageDirectory)" />
+    <Copy SourceFiles="@(_ShowcasePluginFile)"
+          DestinationFiles="@(_ShowcasePluginFile->'$(ShowcasePluginStageDirectory)/%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Message Importance="High" Text="Staged showcase plugin '$(ShowcasePluginId)' to '$(ShowcasePluginStageDirectory)'." />
+  </Target>
+
+  <Target Name="CleanStagedShowcasePlugin"
+          BeforeTargets="Clean"
+          Condition="'$(ShowcasePluginId)' != ''">
+    <RemoveDir Directories="$(ShowcasePluginStageDirectory)" />
+  </Target>
+</Project>

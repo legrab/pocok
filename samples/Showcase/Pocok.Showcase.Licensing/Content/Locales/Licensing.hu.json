@@ -1,0 +1,139 @@
+{
+  "Package": {
+    "Name": "Licencelés",
+    "Summary": "Licencfeltételek ellenőrzése idő, futásidő, modul, gépazonosító és előre megosztott kulcs alapján.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Példák",
+    "Title": "Licencellenőrzés",
+    "Running": "Ellenőrzés",
+    "Ready": "Kész",
+    "Generate": "Licenc generálása",
+    "Run": "Licenc ellenőrzése",
+    "Cancel": "Megszakítás",
+    "ExecutionSteps": "Végrehajtási lépések"
+  },
+  "Editor": {
+    "Claims": "Licencfeltételek",
+    "Runtime": "Futásidejű adatok"
+  },
+  "Generation": {
+    "Title": "Generált, átvihető licenc",
+    "Intro": "Az aláírt csomag és a nyilvános kulcs a csomag API-jával készül. Az ideiglenes privát kulcs soha nem jelenik meg és nem kerül visszaadásra.",
+    "KeyId": "Megbízható kulcs azonosítója",
+    "SignedLicense": "Aláírt licenc (.pocok)",
+    "PublicKey": "Megbízható nyilvános kulcs (.pem)",
+    "ImportHint": "Az alkalmazás az aláírt szöveget LicenseText értékként használhatja, a nyilvános kulcsot pedig ezzel az azonosítóval regisztrálhatja a LicenseReader vagy LicenseService ellenőrzése előtt.",
+    "Error": "A licenc nem generálható:"
+  },
+  "Fields": {
+    "LicenseId": "Licencazonosító",
+    "Customer": "Ügyfél megnevezése",
+    "IssuedAt": "Kiadás időpontja (UTC, ISO-8601)",
+    "ValidFrom": "Érvényesség kezdete (opcionális)",
+    "ValidUntil": "Érvényesség vége (opcionális)",
+    "MaximumRuntime": "Legnagyobb folyamat-futásidő (perc)",
+    "ZeroDisables": "A 0 érték kikapcsolja a futásidő-korlátot.",
+    "AllModules": "Minden modul engedélyezése",
+    "LicensedModules": "Engedélyezett modulok",
+    "ModulesHelp": "A modulazonosítókat vesszővel vagy új sorral válaszd el.",
+    "RequiredModule": "Az alkalmazás által kért modul",
+    "UtcNow": "Aktuális UTC idő (ISO-8601)",
+    "ProcessRuntime": "A folyamat eddigi futásideje (perc)",
+    "LicensedMachine": "A licencben szereplő gépazonosító",
+    "CurrentMachine": "Az aktuális gépazonosító",
+    "LicensePsk": "A kiadó által megadott előre megosztott kulcs",
+    "SuppliedPsk": "Futáskor megadott előre megosztott kulcs"
+  },
+  "Result": {
+    "Title": "Ellenőrzés eredménye",
+    "Empty": "Futtasd az ellenőrzést a stabil eredménykód és a biztonságos hibaüzenet megtekintéséhez.",
+    "CodePreview": "Azonos működésű ellenőrzőhívás",
+    "Truncated": "csonkolva",
+    "Fields": {
+      "Code": "Eredménykód",
+      "LicenseId": "Licencazonosító",
+      "RequiredModule": "Kért modul",
+      "Claims": "Licencfeltételek összefoglalása",
+      "Runtime": "Futásidejű adatok"
+    }
+  },
+  "Tips": {
+    "Title": "Mire érdemes figyelni",
+    "Claims": "A LicenseValidator már hitelesített feltételeket vizsgál. Az aláírás ellenőrzése ezt megelőzően, a LicenseReader feladata.",
+    "Modules": "A modulazonosítók összehasonlítása nem érzékeny a kis- és nagybetűkre; az AllModules minden modult engedélyez.",
+    "Machines": "A géphez kötés 64 karakteres, adatvédelmi szempontból biztonságosabb SHA-256 ujjlenyomatot használ.",
+    "Psk": "A licenc nem magát a kulcsot, hanem annak licenchez kötött kivonatát tárolja.",
+    "ExpectedFailures": "A lejárt licenc, a hiányzó modul, valamint a gép-, futásidő- és kulcshiba normál ellenőrzési eredmény, nem alkalmazáshiba."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "A Pocok.Licensing offline licencdokumentumokat, aláírás-ellenőrzést, feltételvizsgálatot és futásidejű licenckikényszerítést biztosít .NET alkalmazásokhoz."
+    },
+    "QuickStart": {
+      "Title": "Gyors kezdés",
+      "Body": "Válassz példát, módosítsd a licencfeltételeket és a futásidejű adatokat, majd generálj aláírt, átvihető licencet vagy futtasd a LicenseValidatort. A nyilvános tesztkörnyezet minden adatot csak memóriában kezel."
+    },
+    "Claims": {
+      "Title": "Támogatott feltételek",
+      "Body": "A licenc érvényességi időszakot, legnagyobb folyamat-futásidőt, modulokat, gépazonosítókat, licenchez kötött kulcskivonatot és nem titkos metaadatokat tartalmazhat."
+    },
+    "Signatures": {
+      "Title": "Aláírási határ",
+      "Body": "Az alkalmazás csak nyilvános kulcsokat kap, és a LicenseReaderrel ellenőrzi az ECDSA P-256 aláírású csomagot. A privát aláírókulcs nem kerülhet kliensoldali telepítésbe."
+    },
+    "Runtime": {
+      "Title": "Futásidejű ellenőrzés",
+      "Body": "A LicenseValidator stabil eredménykódot ad vissza. A LicenseService tárolja az utolsó frissítés eredményét, a LicenseGuard pedig szükség esetén műveletszintű kivétellé alakítja a sikertelen ellenőrzést."
+    },
+    "Production": {
+      "Title": "Éles használat",
+      "Body": "A licencelés offline visszatartó eszköz, nem feltörhetetlen DRM. Az értékes műveletek közelében ellenőrizz, és ne írj titkokat naplóba vagy diagnosztikába."
+    },
+    "Snippet": {
+      "ValidatorTitle": "Hitelesített feltételek ellenőrzése"
+    }
+  },
+  "Boundaries": {
+    "Title": "A tesztkörnyezet korlátai",
+    "ClaimsOnly": "Memóriában épít fel, ír alá, hitelesít és ellenőriz licencfeltételeket a nyilvános API-val.",
+    "NoPrivateKeys": "Az ideiglenes privát aláírókulcs a memóriában marad, nem jelenik meg és nem kerül visszaadásra.",
+    "NoFiles": "Nem olvas és nem ír licencfájlt a szerveren.",
+    "ExpectedFailures": "A sikertelen ellenőrzés strukturált eredmény marad, és nem állítja le a gazdaalkalmazást."
+  },
+  "Source": {
+    "Title": "Forrásdokumentáció",
+    "Body": "A csomag dokumentációja az aláírásról, titkosításról, licencfeltételekről, futásidejű szolgáltatásokról és fenyegetési modellről."
+  },
+  "Samples": {
+    "valid-module": {
+      "Name": "Engedélyezett modul",
+      "Description": "Érvényes licenc ellenőrzése, amely tartalmazza a kért Reporting modult."
+    },
+    "missing-module": {
+      "Name": "Hiányzó modul",
+      "Description": "Az Admin modul kérése olyan licenccel, amely csak a Reporting és Export modulokat tartalmazza."
+    },
+    "expired": {
+      "Name": "Lejárt licenc",
+      "Description": "Az aktuális idő a licenc kizáró végpontjára kerül."
+    },
+    "runtime-exceeded": {
+      "Name": "Túllépett futásidő",
+      "Description": "A folyamat egy perccel túllépi a licencben engedélyezett futásidőt."
+    },
+    "machine-mismatch": {
+      "Name": "Eltérő gépazonosító",
+      "Description": "A licenc másik gép ujjlenyomatához tartozik."
+    },
+    "psk-mismatch": {
+      "Name": "Hibás előre megosztott kulcs",
+      "Description": "A futáskor megadott kulcs nem egyezik a licenchez kötött kivonattal."
+    }
+  }
+}

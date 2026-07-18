@@ -1,0 +1,121 @@
+name: Showcase
+
+on:
+  push:
+    paths:
+      - "showcase/**"
+      - "samples/Showcase/**"
+      - "src/**"
+      - "eng/packages.json"
+      - "Directory.*"
+      - "global.json"
+      - ".github/workflows/showcase.yml"
+  pull_request:
+    paths:
+      - "showcase/**"
+      - "samples/Showcase/**"
+      - "src/**"
+      - "eng/packages.json"
+      - "Directory.*"
+      - "global.json"
+      - ".github/workflows/showcase.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: "3.13"
+      - name: Restore
+        shell: pwsh
+        run: |
+          Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
+          dotnet restore showcase/Pocok.Showcase.slnx --verbosity minimal
+          dotnet restore showcase/Pocok.Showcase.Samples.slnx --verbosity minimal
+      - name: Format
+        shell: pwsh
+        run: |
+          Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
+          dotnet format showcase/Pocok.Showcase.slnx --verify-no-changes --no-restore
+          dotnet format showcase/Pocok.Showcase.Samples.slnx --verify-no-changes --no-restore
+      - name: Build
+        shell: pwsh
+        run: |
+          Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
+          dotnet build showcase/Pocok.Showcase.slnx --configuration Release --no-restore --verbosity minimal
+          dotnet build showcase/Pocok.Showcase.Samples.slnx --configuration Release --no-restore --verbosity minimal
+      - name: Test
+        shell: pwsh
+        run: |
+          Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
+          dotnet test showcase/tests/Pocok.Showcase.Tests/Pocok.Showcase.Tests.csproj --configuration Release --no-build --verbosity minimal
+          dotnet test samples/Showcase/Pocok.Showcase.Samples.Tests/Pocok.Showcase.Samples.Tests.csproj --configuration Release --no-build --verbosity minimal
+      - name: Publish with Bash
+        if: runner.os == 'Linux'
+        run: bash showcase/scripts/publish-showcase.sh "${{ runner.temp }}/pocok-showcase" --no-restore
+      - name: Publish with PowerShell on Linux
+        if: runner.os == 'Linux'
+        shell: pwsh
+        run: ./showcase/scripts/publish-showcase.ps1 -OutputPath "${{ runner.temp }}/pocok-showcase-pwsh" -NoRestore
+      - name: Publish with PowerShell on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./showcase/scripts/publish-showcase.ps1 -OutputPath "${{ runner.temp }}/pocok-showcase" -NoRestore
+      - name: Smoke
+        run: python showcase/scripts/smoke-showcase.py "${{ runner.temp }}/pocok-showcase"
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Build image
+        run: docker build --file showcase/Dockerfile --tag pocok-showcase:ci .
+      - name: Smoke image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --rm --name pocok-showcase-ci -p 8080:8080 pocok-showcase:ci
+          cleanup() {
+            docker logs pocok-showcase-ci || true
+            docker stop pocok-showcase-ci || true
+          }
+          trap cleanup EXIT
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:8080/health/ready >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8080/health/live >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/ >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/packages/conversion >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/packages/scripting >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/packages/licensing >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/packages/readiness >/dev/null
+          curl --fail --silent http://127.0.0.1:8080/system >/dev/null
+      - name: Non-default port
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --rm --name pocok-showcase-port-ci -e PORT=9090 -p 9090:9090 pocok-showcase:ci
+          cleanup() {
+            docker logs pocok-showcase-port-ci || true
+            docker stop pocok-showcase-port-ci || true
+          }
+          trap cleanup EXIT
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:9090/health/ready >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1

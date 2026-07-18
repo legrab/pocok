@@ -1,0 +1,9 @@
+<aside class="boundaries-panel">
+    <h2>@Title</h2>
+    @ChildContent
+</aside>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Boundaries";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

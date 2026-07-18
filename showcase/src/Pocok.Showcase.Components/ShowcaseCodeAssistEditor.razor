@@ -1,0 +1,52 @@
+<div class="code-assist">
+    <div class="code-assist-toolbar">
+        <label for="@_id">@Label</label>
+        <div class="code-assist-toolbar-actions">
+            @if (ActionRequested.HasDelegate)
+            {
+                <button type="button"
+                        class="secondary code-assist-action"
+                        @onclick="InvokeActionAsync">
+                    @ActionLabel
+                </button>
+            }
+            <button type="button"
+                    class="secondary code-assist-toggle"
+                    aria-expanded="@_suggestionsOpen"
+                    aria-controls="@_suggestionsId"
+                    @onclick="ToggleSuggestionsAsync">
+                @(_suggestionsOpen ? HideSuggestionsLabel : ShowSuggestionsLabel)
+            </button>
+        </div>
+    </div>
+    <textarea id="@_id"
+              @key="_editorValue.Revision"
+              class="code-editor"
+              value="@_editorValue.RenderedValue"
+              spellcheck="false"
+              data-showcase-suggestions="@(_suggestionsOpen && _suggestions.Count > 0 ? "open" : "closed")"
+              @oninput="OnInputAsync"
+              @onblur="OnBlurAsync"
+              @onkeydown="OnKeyDownAsync"
+              aria-label="@Label"></textarea>
+    @if (_suggestionsOpen && _suggestions.Count > 0)
+    {
+        <div id="@_suggestionsId" class="completion-list" role="listbox">
+            @for (var index = 0; index < _suggestions.Count; index++)
+            {
+                @if (_suggestions[index] is { } item)
+                {
+                    <button type="button"
+                            role="option"
+                            aria-selected="@(index == _selectedIndex)"
+                            class="completion-item @(index == _selectedIndex ? "is-selected" : null)"
+                            @onmousedown:preventDefault="true"
+                            @onclick="() => InsertAsync(item)">
+                        <span><strong>@item.Label</strong><small>@item.Kind</small></span>
+                        <span>@Text.GetText(ResourceNamespace, item.DocumentationKey)</span>
+                    </button>
+                }
+            }
+        </div>
+    }
+</div>
