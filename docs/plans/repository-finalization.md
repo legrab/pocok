@@ -45,6 +45,8 @@ actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
 NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
 ```
 
+`Get-PocokWorkflowActionPinViolations` in `tools/Ci/Pocok.Ci.psm1`, exercised by `Test-CiTooling.ps1`, already rejects floating, short, and unsupported external `uses:` references while permitting repository-local actions. Preserve this guard when adding workflows or actions.
+
 ## Repository capabilities to reuse
 
 | Need | Reuse |

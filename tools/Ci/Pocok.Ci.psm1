@@ -952,8 +952,53 @@ function Invoke-PocokCommand {
     }
 }
 
+function Get-PocokWorkflowActionPinViolations {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] [string]$WorkflowRoot)
+
+    $resolvedRoot = [IO.Path]::GetFullPath($WorkflowRoot)
+    if (-not (Test-Path -LiteralPath $resolvedRoot -PathType Container)) {
+        throw "Workflow root does not exist: $resolvedRoot"
+    }
+
+    $violations = [Collections.Generic.List[object]]::new()
+    $workflowFiles = @(
+        Get-ChildItem -LiteralPath $resolvedRoot -File -Recurse |
+            Where-Object { $_.Extension -in @('.yml', '.yaml') } |
+            Sort-Object FullName
+    )
+
+    foreach ($workflowFile in $workflowFiles) {
+        $lines = [IO.File]::ReadAllLines($workflowFile.FullName)
+        for ($index = 0; $index -lt $lines.Length; $index++) {
+            if ($lines[$index] -notmatch '^\s*(?:-\s*)?uses:\s*(?<reference>\S+)') {
+                continue
+            }
+
+            $reference = $Matches.reference.Trim([char[]]@([char]39, [char]34))
+            if ($reference.StartsWith('./', [StringComparison]::Ordinal)) {
+                continue
+            }
+
+            if ($reference -match '^[^/@\s]+/[^@\s]+@[0-9a-fA-F]{40}$') {
+                continue
+            }
+
+            $relativePath = [IO.Path]::GetRelativePath($resolvedRoot, $workflowFile.FullName).Replace('\', '/')
+            $violations.Add([pscustomobject]@{
+                path = $relativePath
+                line = $index + 1
+                reference = $reference
+            })
+        }
+    }
+
+    return @($violations)
+}
+
 Export-ModuleMember -Function @(
     'ConvertTo-PocokPath',
+    'Get-PocokWorkflowActionPinViolations',
     'Get-PocokForwardClosure',
     'Get-PocokPackageDependencyClosure',
     'Get-PocokPackageModel',
