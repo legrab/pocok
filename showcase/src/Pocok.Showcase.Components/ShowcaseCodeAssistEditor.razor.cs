@@ -37,6 +37,12 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
     public string HideSuggestionsLabel { get; set; } = "Hide suggestions";
 
     [Parameter]
+    public string ActionLabel { get; set; } = "Apply";
+
+    [Parameter]
+    public EventCallback<string> ActionRequested { get; set; }
+
+    [Parameter]
     public string Value { get; set; } = string.Empty;
 
     [Parameter]
@@ -67,6 +73,14 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
             await RefreshSuggestionsAsync();
         else
             CloseSuggestions();
+    }
+
+    private async Task InvokeActionAsync()
+    {
+        string current = _editorValue.CurrentValue;
+        await _valueCommitter.FlushAsync(current);
+        CloseSuggestions();
+        await ActionRequested.InvokeAsync(current);
     }
 
     private async Task OnInputAsync(ChangeEventArgs args)

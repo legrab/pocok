@@ -20,6 +20,15 @@ public sealed class CodeAssistEditorStateTests
     }
 
     [Test]
+    public void CodeAssistEditorExposesAnOptionalValueAction()
+    {
+        typeof(ShowcaseCodeAssistEditor).GetProperty(nameof(ShowcaseCodeAssistEditor.ActionLabel))!.PropertyType
+            .ShouldBe(typeof(string));
+        typeof(ShowcaseCodeAssistEditor).GetProperty(nameof(ShowcaseCodeAssistEditor.ActionRequested))!.PropertyType
+            .ShouldBe(typeof(EventCallback<string>));
+    }
+
+    [Test]
     public void LocalInputAndParentAcknowledgementDoNotRewriteTheRenderedValue()
     {
         var value = new BufferedEditorValue();

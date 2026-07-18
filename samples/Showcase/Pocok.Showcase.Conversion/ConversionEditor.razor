@@ -126,9 +126,15 @@ else
     <ShowcaseCodeAssistEditor Label="@T("Sandbox.CodeLabel")"
                               @bind-Value:get="Value.Code"
                               @bind-Value:set="SetCodeAsync"
+                              ActionLabel="@T("Sandbox.FormatExpression")"
+                              ActionRequested="FormatCodeAsync"
                               ShowSuggestionsLabel="@T("Sandbox.ShowSuggestions")"
                               HideSuggestionsLabel="@T("Sandbox.HideSuggestions")"
                               Catalog="CodeAssist"
                               Text="Text"
                               ResourceNamespace="conversion" />
+    @if (_formatError is not null)
+    {
+        <p class="diagnostic-warning" role="alert">@_formatError</p>
+    }
 }

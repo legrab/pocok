@@ -1,13 +1,23 @@
 <div class="code-assist">
     <div class="code-assist-toolbar">
         <label for="@_id">@Label</label>
-        <button type="button"
-                class="secondary code-assist-toggle"
-                aria-expanded="@_suggestionsOpen"
-                aria-controls="@_suggestionsId"
-                @onclick="ToggleSuggestionsAsync">
-            @(_suggestionsOpen ? HideSuggestionsLabel : ShowSuggestionsLabel)
-        </button>
+        <div class="code-assist-toolbar-actions">
+            @if (ActionRequested.HasDelegate)
+            {
+                <button type="button"
+                        class="secondary code-assist-action"
+                        @onclick="InvokeActionAsync">
+                    @ActionLabel
+                </button>
+            }
+            <button type="button"
+                    class="secondary code-assist-toggle"
+                    aria-expanded="@_suggestionsOpen"
+                    aria-controls="@_suggestionsId"
+                    @onclick="ToggleSuggestionsAsync">
+                @(_suggestionsOpen ? HideSuggestionsLabel : ShowSuggestionsLabel)
+            </button>
+        </div>
     </div>
     <textarea id="@_id"
               @key="_editorValue.Revision"

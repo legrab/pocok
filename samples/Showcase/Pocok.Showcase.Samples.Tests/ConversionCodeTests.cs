@@ -78,6 +78,54 @@ public sealed class ConversionCodeTests
     }
 
     [Test]
+    public void FormatterUsesReadableNestedLayout()
+    {
+        var input = new ConversionInput
+        {
+            SourceKind = ConversionSourceKind.Integer,
+            SourceValue = "300",
+            TargetType = "byte",
+            Overflow = OverflowPolicy.Saturate
+        };
+
+        string code = ConversionCodeFormatter.Format(input);
+
+        code.ShouldBe("""
+            converter.Convert<byte>(
+                300,
+                new ConversionContext(
+                    CultureInfo.InvariantCulture,
+                    overflow: OverflowPolicy.Saturate,
+                    nulls: NullPolicy.Preserve,
+                    enums: EnumPolicy.DefinedValuesAndFlags,
+                    numericLoss: NumericLossPolicy.Reject,
+                    numericBooleans: NumericBooleanPolicy.Reject,
+                    temporalText: TemporalTextPolicy.RoundTrip,
+                    maximumDepth: 32
+                )
+            );
+            """);
+    }
+
+    [Test]
+    public void FormatterCanonicalizesAnEditedSingleLineExpression()
+    {
+        const string expression = "converter.Convert<byte>(300, new ConversionContext(CultureInfo.InvariantCulture, overflow: OverflowPolicy.Saturate, nulls: NullPolicy.Preserve, enums: EnumPolicy.DefinedValuesAndFlags, numericLoss: NumericLossPolicy.Reject, numericBooleans: NumericBooleanPolicy.Reject, temporalText: TemporalTextPolicy.RoundTrip, maximumDepth: 32));";
+
+        string formatted = ConversionCodeFormatter.Format(expression);
+
+        formatted.ShouldContain("converter.Convert<byte>(\n    300,");
+        formatted.ShouldContain("\n        overflow: OverflowPolicy.Saturate,");
+        ConversionCodeParser.Parse(formatted).IsSuccess.ShouldBeTrue();
+    }
+
+    [Test]
+    public void FormatterRejectsUnsupportedExpressions()
+    {
+        Should.Throw<FormatException>(() => ConversionCodeFormatter.Format("System.IO.File.ReadAllText(\"secret\")"));
+    }
+
+    [Test]
     public void LineCommentRemovalPreservesStringContent()
     {
         string code = "converter.Convert<string>(\"https://example.test\"); // trailing";

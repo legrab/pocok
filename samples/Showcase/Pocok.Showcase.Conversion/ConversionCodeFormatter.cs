@@ -14,13 +14,39 @@ public static class ConversionCodeFormatter
     {
         ArgumentNullException.ThrowIfNull(input);
         string value = FormatValue(input);
-        string collectionLimit = input.MaximumCollectionItems == 10_000
-            ? string.Empty
-            : $", maximumCollectionItems: {input.MaximumCollectionItems.ToString(CultureInfo.InvariantCulture)}";
-        string context = IsStrict(input)
-            ? "ConversionContext.Strict"
-            : $"new ConversionContext({FormatCulture(input.Culture)}, overflow: OverflowPolicy.{input.Overflow}, nulls: NullPolicy.{input.Nulls}, enums: EnumPolicy.{input.Enums}, numericLoss: NumericLossPolicy.{input.NumericLoss}, numericBooleans: NumericBooleanPolicy.{input.NumericBooleans}, temporalText: TemporalTextPolicy.{input.TemporalText}, maximumDepth: {input.MaximumDepth.ToString(CultureInfo.InvariantCulture)}{collectionLimit})";
-        return $"converter.Convert<{input.TargetType}>({value}, {context});";
+        var lines = new List<string>
+        {
+            $"converter.Convert<{input.TargetType}>(",
+            $"    {value},"
+        };
+
+        if (IsStrict(input))
+        {
+            lines.Add("    ConversionContext.Strict");
+        }
+        else
+        {
+            lines.Add("    new ConversionContext(");
+            List<string> contextArguments = ContextArguments(input);
+            for (int index = 0; index < contextArguments.Count; index++)
+            {
+                string suffix = index == contextArguments.Count - 1 ? string.Empty : ",";
+                lines.Add($"        {contextArguments[index]}{suffix}");
+            }
+            lines.Add("    )");
+        }
+
+        lines.Add(");");
+        return string.Join('\n', lines);
+    }
+
+    public static string Format(string code)
+    {
+        ConversionParseResult parsed = ConversionCodeParser.Parse(code);
+        if (!parsed.IsSuccess)
+            throw new FormatException(parsed.Error);
+
+        return Format(parsed.Input!);
     }
 
     public static string PolicySummary(ConversionInput input)
@@ -48,6 +74,28 @@ public static class ConversionCodeFormatter
         && input.TemporalText == TemporalTextPolicy.RoundTrip
         && input.MaximumDepth == 32
         && input.MaximumCollectionItems == 10_000;
+
+    private static List<string> ContextArguments(ConversionInput input)
+    {
+        var arguments = new List<string>
+        {
+            FormatCulture(input.Culture),
+            $"overflow: OverflowPolicy.{input.Overflow}",
+            $"nulls: NullPolicy.{input.Nulls}",
+            $"enums: EnumPolicy.{input.Enums}",
+            $"numericLoss: NumericLossPolicy.{input.NumericLoss}",
+            $"numericBooleans: NumericBooleanPolicy.{input.NumericBooleans}",
+            $"temporalText: TemporalTextPolicy.{input.TemporalText}",
+            $"maximumDepth: {input.MaximumDepth.ToString(CultureInfo.InvariantCulture)}"
+        };
+        if (input.MaximumCollectionItems != 10_000)
+        {
+            arguments.Add(
+                $"maximumCollectionItems: {input.MaximumCollectionItems.ToString(CultureInfo.InvariantCulture)}");
+        }
+
+        return arguments;
+    }
 
     private static string FormatValue(ConversionInput input) => input.SourceKind switch
     {

@@ -11,6 +11,8 @@ namespace Pocok.Showcase.Conversion;
 
 public partial class ConversionEditor
 {
+    private string? _formatError;
+
     [Parameter, EditorRequired]
     public ConversionInput Value { get; set; } = new();
 
@@ -51,6 +53,7 @@ public partial class ConversionEditor
 
         if (mode == ConversionEditorMode.Code)
         {
+            _formatError = null;
             await UpdateAsync(Value with { EditorMode = mode });
             return;
         }
@@ -104,7 +107,24 @@ public partial class ConversionEditor
         MaximumCollectionItems = Math.Clamp(value, 1, 500)
     });
 
-    private Task SetCodeAsync(string value) => ValueChanged.InvokeAsync(Value with { Code = value });
+    private Task SetCodeAsync(string value)
+    {
+        _formatError = null;
+        return ValueChanged.InvokeAsync(Value with { Code = value });
+    }
+
+    private Task FormatCodeAsync(string code)
+    {
+        ConversionParseResult parsed = ConversionCodeParser.Parse(code, Value.SampleId);
+        if (!parsed.IsSuccess)
+        {
+            _formatError = $"{T("Sandbox.FormatError")} {parsed.Error}";
+            return Task.CompletedTask;
+        }
+
+        _formatError = null;
+        return ValueChanged.InvokeAsync(Value with { Code = ConversionCodeFormatter.Format(parsed.Input!) });
+    }
 
     private Task UpdateAsync(ConversionInput input)
     {
