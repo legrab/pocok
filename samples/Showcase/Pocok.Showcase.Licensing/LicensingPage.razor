@@ -30,9 +30,9 @@
                                  Text="Context.Text" />
 
                 <div class="actions">
-                    <button type="button" class="secondary" @onclick="GenerateLicense">
-                        @T("Sandbox.Generate")
-                    </button>
+                    <ShowcaseRunButton Label="@T("Sandbox.Generate")"
+                                       CssClass="secondary"
+                                       Clicked="GenerateLicense" />
                 </div>
 
                 @if (_generationError is not null)

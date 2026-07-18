@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
+using System.Globalization;
+
+using Pocok.Licensing.Documents;
+using Pocok.Licensing.Validation;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Licensing;
 using Pocok.Showcase.Licensing.Models;
@@ -83,6 +87,18 @@ public sealed class LicensingShowcaseTests
     }
 
     [Test]
+    public void SamplesCreateFreshInputs()
+    {
+        foreach (IShowcaseSample sample in _slice.Samples)
+        {
+            object first = sample.CreateInput();
+            object second = sample.CreateInput();
+
+            ReferenceEquals(first, second).ShouldBeFalse($"Sample '{sample.Id}' reused its input instance.");
+        }
+    }
+
+    [Test]
     public async Task EditedIdentityAndModuleReachTheRealValidatorAndResult()
     {
         var input = (LicensingInput)_slice.Samples.Single(item => item.Id == "valid-module").CreateInput();
@@ -94,5 +110,59 @@ public sealed class LicensingShowcaseTests
         result.Status.ShouldBe(ShowcaseRunStatus.ExpectedFailure);
         result.Fields.Single(field => field.Name == "Result.Fields.LicenseId").Value.ShouldBe("edited-license");
         result.Fields.Single(field => field.Name == "Result.Fields.RequiredModule").Value.ShouldBe("Admin");
+    }
+
+    [Test]
+    public void GeneratedLicenseCanBeImportedAndValidatedAtRuntime()
+    {
+        var input = (LicensingInput)_slice.Samples.Single(item => item.Id == "valid-module").CreateInput();
+
+        GeneratedLicenseOutput generated = LicensingShowcaseSlice.GenerateLicense(input);
+        LicenseValidationResult verified = LicenseReader.ReadAndVerify(
+            generated.SignedLicense,
+            new Dictionary<string, string> { [generated.KeyId] = generated.PublicKeyPem });
+
+        verified.IsValid.ShouldBeTrue();
+        verified.License!.LicenseId.ShouldBe(input.LicenseId);
+
+        LicenseValidationResult runtime = LicenseValidator.Validate(
+            verified.License!,
+            new LicenseValidationContext
+            {
+                UtcNow = DateTimeOffset.Parse(input.UtcNow, CultureInfo.InvariantCulture),
+                ProcessRuntime = TimeSpan.FromMinutes(input.ProcessRuntimeMinutes),
+                RequiredModule = input.RequiredModule
+            });
+
+        runtime.IsValid.ShouldBeTrue();
+    }
+
+    [Test]
+    public void LicenseEditorSectionsAreOpenAndCollapsibleByDefault()
+    {
+        string editor = File.ReadAllText(Path.Combine(
+            TestSupport.RepositoryRoot,
+            "samples",
+            "Showcase",
+            "Pocok.Showcase.Licensing",
+            "LicensingEditor.razor"));
+
+        editor.Split("<details class=\"panel collapsible-support editor-section\" open>", StringSplitOptions.None)
+            .Length.ShouldBe(3);
+    }
+
+    [Test]
+    public void LicenseGenerationUsesAnInteractiveSharedButton()
+    {
+        string page = File.ReadAllText(Path.Combine(
+            TestSupport.RepositoryRoot,
+            "samples",
+            "Showcase",
+            "Pocok.Showcase.Licensing",
+            "LicensingPage.razor"));
+
+        page.ShouldContain("<ShowcaseRunButton");
+        page.ShouldContain("Clicked=\"GenerateLicense\"");
+        page.ShouldNotContain("@onclick=\"GenerateLicense\"");
     }
 }

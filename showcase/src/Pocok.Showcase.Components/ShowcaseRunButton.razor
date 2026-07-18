@@ -1,7 +1,8 @@
-<button type="button" class="primary-action" disabled="@Disabled" @onclick="Clicked">@Label</button>
+<button type="button" class="@CssClass" disabled="@Disabled" @onclick="Clicked">@Label</button>
 
 @code {
     [Parameter] public string Label { get; set; } = "Run";
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string CssClass { get; set; } = "primary-action";
     [Parameter] public EventCallback Clicked { get; set; }
 }
