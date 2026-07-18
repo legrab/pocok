@@ -26,8 +26,8 @@ shutdown, and repeated operation-level guards are simpler to test and harder to 
 |---|---|---|
 | `Pocok.Licensing` | License models, signing, optional encryption, verification, runtime validation, DI service, guards | Experimental until the repository release gate passes |
 | `Pocok.AppDefaults.Licensing` | Configuration binding, startup enforcement, periodic reload and enforcement | Experimental until the repository release gate passes |
-| `Pocok.Licensing.Keygen` | Non-packaged issuer and machine-fingerprint CLI | Repository tool |
-| `Pocok.Licensing.LicenseChecker` | Non-packaged standalone diagnostic checker | Repository tool |
+| `Pocok.Licensing.Keygen` | Issuer and machine-fingerprint CLI | Self-contained GitHub Release executable; never a NuGet package |
+| `Pocok.Licensing.LicenseChecker` | Standalone diagnostic checker | Self-contained GitHub Release executable; never a NuGet package |
 
 The runnable `samples/Licensing.Console` project demonstrates host integration. It creates an ephemeral private key only to
 keep the sample self-contained. Production applications must never contain issuer private keys.
@@ -278,7 +278,8 @@ No historical company, customer, or proprietary source material is copied into t
 
 ## Release gate
 
-The catalog remains `Experimental` and non-releasable until all executable proof succeeds on the receiving machine and CI:
+The Licensing NuGet packages are release-enabled, but a tag is valid only after all executable proof succeeds on the
+exact candidate commit and the dependency order in `PUBLICATION.md` is satisfied:
 
 ```powershell
 pwsh ./tools/PackageCatalog/Test-PackageCatalog.ps1
@@ -296,6 +297,10 @@ Also verify keygen-to-checker behavior on Windows and Linux, package contents, s
 Native AOT only if those deployment modes are claimed. Publication-shaped smoke for `Pocok.AppDefaults.Licensing` can run
 only after its internal `Pocok.Licensing` dependency is published to the configured public feed. Publication state must not
 be changed merely because static review passes.
+
+Keygen and LicenseChecker use `licensing.keygen-v*` and `licensing.licensechecker-v*` tags. Their workflow proves the real
+round trip and attaches exact self-contained archives for Windows, Linux, and macOS to a GitHub Release. It does not pack
+or push either executable to NuGet.
 
 ## Deliberately deferred extensions
 

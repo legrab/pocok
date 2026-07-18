@@ -52,4 +52,23 @@ public sealed class PackageCatalogTests
             workflow.ShouldNotContain($"- '{prefix}*'");
         }
     }
+
+    [Test]
+    public void ReleasablePackagesHavePublishTagTriggers()
+    {
+        using var document = JsonDocument.Parse(File.ReadAllText(
+            Path.Combine(RepositoryRoot.Path, "eng", "packages.json")));
+        var workflow = File.ReadAllText(Path.Combine(
+            RepositoryRoot.Path,
+            ".github",
+            "workflows",
+            "publish.yml"));
+
+        foreach (JsonElement package in document.RootElement.GetProperty("packages").EnumerateArray()
+                     .Where(package => package.GetProperty("releasable").GetBoolean()))
+        {
+            var prefix = package.GetProperty("tagPrefix").GetString();
+            workflow.ShouldContain($"- '{prefix}*'");
+        }
+    }
 }

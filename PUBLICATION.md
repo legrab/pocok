@@ -38,6 +38,22 @@ Pocok.AppDefaults.Logging.Serilog
 
 The two logging packages are alternatives at the provider-policy layer. The Serilog package intentionally depends on `Pocok.AppDefaults`, not on provider-neutral `Pocok.AppDefaults.Logging`.
 
+The Scripting and Licensing release paths are dependency ordered:
+
+```text
+Pocok.Conversion
+└── Pocok.Scripting
+
+Pocok.Licensing
+├── Pocok.AppDefaults + Pocok.Licensing
+│   └── Pocok.AppDefaults.Licensing
+├── Licensing.Keygen GitHub release
+└── Licensing.LicenseChecker GitHub release
+```
+
+`Pocok.Licensing` has no internal NuGet dependency. The issuer and checker remain non-packable executables: their tags
+produce self-contained Windows, Linux, and macOS GitHub Release archives and never enter the NuGet package catalog.
+
 The Modularity family is not part of the initial public release. Its projects remain packable for clean-room verification, but `releasable` is false and no publication tag trigger exists.
 
 ## Version resolution
@@ -111,9 +127,21 @@ readiness-v0.1.0
 appdefaults-v0.1.0
 appdefaults.logging-v0.1.0
 appdefaults.logging.serilog-v0.1.0
+scripting-v0.1.0-alpha.2
+licensing-v0.1.0-alpha.2
+appdefaults.licensing-v0.1.0-alpha.1
 ```
 
 Modularity prefixes are reserved in the package catalog but deliberately absent from `.github/workflows/publish.yml` until the release gate is removed.
+
+The GitHub-only licensing executable prefixes are:
+
+```text
+licensing.keygen-v0.1.0-alpha.1
+licensing.licensechecker-v0.1.0-alpha.1
+```
+
+They are handled by `.github/workflows/publish-licensing-tool.yml`, not by the NuGet publication workflow.
 
 ## Retired packages
 
@@ -138,6 +166,10 @@ A package is releasable only when, on the exact candidate commit:
 
 Modularity additionally requires its real plugin fixture matrix on Linux and Windows before any release eligibility change.
 
+Licensing tool releases additionally require the keygen-to-checker round trip and successful self-contained publication
+for every declared runtime identifier. Release archives contain the executable, `LICENSE`, `NOTICE`, and the licensing
+guide; private keys and generated licenses are never release assets.
+
 ## Local acceptance
 
 ```pwsh
@@ -161,6 +193,13 @@ Publication is tag-driven. Create and push an annotated tag only after the depen
 ```pwsh
 git tag -a appdefaults-v0.1.0 -m "Release Pocok.AppDefaults 0.1.0"
 git push origin appdefaults-v0.1.0
+```
+
+GitHub-only licensing tools use the same annotated-tag discipline:
+
+```pwsh
+git tag -a licensing.keygen-v0.1.0-alpha.1 -m "Release Pocok Licensing Keygen 0.1.0-alpha.1"
+git push origin licensing.keygen-v0.1.0-alpha.1
 ```
 
 Never push package artifacts with a wildcard or manually reuse a published version.

@@ -201,8 +201,8 @@
       "tagPrefix": "scripting-v",
       "family": "Capability",
       "releaseTier": 2,
-      "state": "Experimental",
-      "releasable": false,
+      "state": "Active",
+      "releasable": true,
       "consumer": "ScriptingConsumer",
       "internalDependencies": [
         "Pocok.Conversion"
@@ -263,8 +263,8 @@
       "tagPrefix": "licensing-v",
       "family": "Capability",
       "releaseTier": 2,
-      "state": "Experimental",
-      "releasable": false,
+      "state": "Active",
+      "releasable": true,
       "consumer": "LicensingConsumer",
       "internalDependencies": [],
       "allowedExternalDependencies": [
@@ -280,8 +280,8 @@
       "tagPrefix": "appdefaults.licensing-v",
       "family": "MaintainerDefaults",
       "releaseTier": 3,
-      "state": "Experimental",
-      "releasable": false,
+      "state": "Active",
+      "releasable": true,
       "consumer": "AppDefaultsLicensingConsumer",
       "internalDependencies": [
         "Pocok.AppDefaults",
