@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pocok Package Engineering"
+  short_description: "Build and evolve Pocok library packages safely"
+  default_prompt: "Use $pocok-package-engineering to implement or review a Pocok library package change."

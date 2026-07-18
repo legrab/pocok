@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pocok Release Engineering"
+  short_description: "Validate, package, and release Pocok libraries"
+  default_prompt: "Use $pocok-release-engineering to prepare or review Pocok package release work."

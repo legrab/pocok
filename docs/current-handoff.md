@@ -1,6 +1,6 @@
 # Current repository handoff
 
-Status revision: working tree based on `d94c3ed` with dependency-aware CI and slice coverage awaiting executable acceptance
+Status revision: provisional pre-MVP evidence; refresh against the exact current commit in `docs/plans/repository-finalization.md` R1 before changing eligibility
 
 Refresh owner: any change that alters release eligibility, acceptance evidence, package closure, or the Modularity gate must update this file or remove obsolete claims.
 
@@ -20,30 +20,10 @@ Refresh owner: any change that alters release eligibility, acceptance evidence, 
 - Pocok.Localization is now an experimental, non-releasable alpha package containing deterministic composition over standard .NET string-localizer providers, enum translation fallback, and explicit resource-file culture resolution; database, filesystem, resource-assembly discovery, caching, global culture mutation, and application-specific integrations remain outside this extraction.
 - Pocok.Subscriptions is now an experimental, non-releasable alpha package containing a thread-safe keyed listener registry with typed filtering and mapping; transport connections, retry timers, logging, persistence, and network lifecycle remain outside this extraction.
 - Pocok.Licensing and Pocok.AppDefaults.Licensing are experimental, non-releasable alpha packages. Static review covers signed and optionally encrypted licenses, module/time/runtime/machine/PSK constraints, explicit reload, host enforcement, CLI tooling, tests, sample, and package consumers. The .NET 10, PowerShell, package-smoke, and Windows/Linux acceptance gate in `docs/licensing.md` is still required.
-- Do not create release tags until Linux CI, candidate-scoped publication-shaped restore, audit, and debugger Source Link evidence are current.
+- Do not create release tags until Linux CI, candidate-scoped publication-shaped restore, audit, and the automated portable-PDB/Source Link proof specified by `docs/plans/repository-finalization.md` are current.
 
 ## Next action
 
-Run `./tools/Ci/Test-CiTooling.ps1` and the complete Linux/Windows CI gate, then complete the licensing acceptance gate, verify real debugger Source Link behavior from an installed candidate package, and run candidate-scoped publication smoke before release eligibility changes.
+Execute `docs/plans/repository-finalization.md` from R1. The immediate evidence remains `./tools/Ci/Test-CiTooling.ps1`, complete Linux/Windows CI, the licensing acceptance gate, automated portable-PDB/Source Link verification from an installed candidate package, and candidate-scoped publication smoke before eligibility changes.
 
-<details>
-<summary>Acceptance matrix</summary>
-
-```pwsh
-dotnet --info
-$PSVersionTable
-
-dotnet restore Pocok.slnx
-dotnet format Pocok.slnx --verify-no-changes --no-restore
-dotnet build Pocok.slnx --configuration Release --no-restore
-dotnet test Pocok.slnx --configuration Release --no-build
-dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/packages
-
-./tools/PackageCatalog/Test-PackageCatalog.ps1
-./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode LocalClosure
-./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1
-```
-
-For each release candidate, generate release-version props and run candidate-scoped local-closure, publication, and audit modes. Publication mode requires internal dependencies to exist on nuget.org.
-
-</details>
+Use `.agents/skills/pocok-release-engineering/SKILL.md` for the release acceptance procedure and `.agents/skills/pocok-package-engineering/SKILL.md` for each package-specific gate. This handoff records state only.
