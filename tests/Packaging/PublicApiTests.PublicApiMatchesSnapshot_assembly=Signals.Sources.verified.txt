@@ -1,4 +1,4 @@
-namespace Pocok.Signals.Operations
+﻿namespace Pocok.Signals.Operations
 {
     public sealed class SignalFailure : System.IEquatable<Pocok.Signals.Operations.SignalFailure>
     {

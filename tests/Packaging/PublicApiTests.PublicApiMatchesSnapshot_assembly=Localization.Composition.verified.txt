@@ -1,4 +1,4 @@
-namespace Pocok.Localization.Composition
+﻿namespace Pocok.Localization.Composition
 {
     public sealed class CompositeStringLocalizer : Microsoft.Extensions.Localization.IStringLocalizer
     {

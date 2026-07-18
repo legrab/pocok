@@ -1,4 +1,4 @@
-namespace Pocok.Scripting.Execution
+﻿namespace Pocok.Scripting.Execution
 {
     public sealed class ScriptBinding : System.IEquatable<Pocok.Scripting.Execution.ScriptBinding>
     {

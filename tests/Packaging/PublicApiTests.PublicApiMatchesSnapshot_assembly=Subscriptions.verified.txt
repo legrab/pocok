@@ -1,4 +1,4 @@
-namespace Pocok.Subscriptions
+﻿namespace Pocok.Subscriptions
 {
     public sealed class KeyedSubscriptionHub<TKey> : System.IDisposable
         where TKey :  notnull
