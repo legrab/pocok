@@ -35,3 +35,8 @@ public sealed record LicensingOutput(
     string RuntimeSummary,
     string CodePreview,
     IReadOnlyList<string> TipKeys);
+
+public sealed record GeneratedLicenseOutput(
+    string KeyId,
+    string SignedLicense,
+    string PublicKeyPem);

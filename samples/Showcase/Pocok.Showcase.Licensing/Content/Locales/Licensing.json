@@ -11,6 +11,7 @@
     "Title": "License validation",
     "Running": "Validating",
     "Ready": "Ready",
+    "Generate": "Generate license",
     "Run": "Validate license",
     "Cancel": "Cancel",
     "ExecutionSteps": "Execution steps"
@@ -18,6 +19,15 @@
   "Editor": {
     "Claims": "License claims",
     "Runtime": "Runtime facts"
+  },
+  "Generation": {
+    "Title": "Generated transferable license",
+    "Intro": "This signed envelope and public key are generated through the package API. The ephemeral private key is never displayed or returned.",
+    "KeyId": "Trusted key ID",
+    "SignedLicense": "Signed license (.pocok)",
+    "PublicKey": "Trusted public key (.pem)",
+    "ImportHint": "An application can use the signed text as LicenseText and register the public key under this key ID before LicenseReader or LicenseService validates it.",
+    "Error": "The license could not be generated:"
   },
   "Fields": {
     "LicenseId": "License ID",
@@ -67,7 +77,7 @@
     },
     "QuickStart": {
       "Title": "Quick start",
-      "Body": "Choose an example, edit the signed claims and current runtime facts, then run LicenseValidator. The public sandbox keeps every value in memory."
+      "Body": "Choose an example, edit the claims and runtime facts, then generate a signed transferable license or run LicenseValidator. The public sandbox keeps every value in memory."
     },
     "Claims": {
       "Title": "Supported claims",
@@ -91,8 +101,8 @@
   },
   "Boundaries": {
     "Title": "Sandbox boundaries",
-    "ClaimsOnly": "Builds and validates in-memory claims through the public API.",
-    "NoPrivateKeys": "Does not create, upload, or expose private signing keys.",
+    "ClaimsOnly": "Builds, signs, verifies, and validates in-memory claims through the public API.",
+    "NoPrivateKeys": "Ephemeral private signing keys remain in memory and are never displayed or returned.",
     "NoFiles": "Does not read or write license files on the server.",
     "ExpectedFailures": "Validation failures remain structured results and do not stop the host."
   },

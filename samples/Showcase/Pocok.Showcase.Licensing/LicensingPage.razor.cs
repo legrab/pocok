@@ -17,6 +17,8 @@ public partial class LicensingPage
     private string _selectedId = string.Empty;
     private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
     private ShowcaseRunResult? _result;
+    private GeneratedLicenseOutput? _generatedLicense;
+    private string? _generationError;
     private bool _running;
     private long _sampleRevision;
 
@@ -44,6 +46,30 @@ public partial class LicensingPage
         _sampleRevision = checked(_sampleRevision + 1);
         _progress = [];
         _result = null;
+        _generatedLicense = null;
+        _generationError = null;
+    }
+
+    private Task SetInputAsync(LicensingInput input)
+    {
+        _input = input;
+        _generatedLicense = null;
+        _generationError = null;
+        return Task.CompletedTask;
+    }
+
+    private void GenerateLicense()
+    {
+        try
+        {
+            _generatedLicense = LicensingShowcaseSlice.GenerateLicense(_input);
+            _generationError = null;
+        }
+        catch (FormatException exception)
+        {
+            _generatedLicense = null;
+            _generationError = $"{T("Generation.Error")} {exception.Message}";
+        }
     }
 
     private Task SetResultAsync(ShowcaseRunResult? result)

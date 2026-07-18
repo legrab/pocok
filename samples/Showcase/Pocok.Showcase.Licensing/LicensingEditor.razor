@@ -1,7 +1,8 @@
 <div class="licensing-editor">
-    <section class="editor-section">
-        <h3>@T("Editor.Claims")</h3>
-        <div class="field-grid">
+    <details class="panel collapsible-support editor-section" open>
+        <summary>@T("Editor.Claims")</summary>
+        <div class="collapsible-support-content">
+            <div class="field-grid">
             <div class="field">
                 <label for="license-id">@T("Fields.LicenseId")</label>
                 <input id="license-id" type="text"
@@ -53,12 +54,14 @@
                                           ValueChanged="SetLicensedModulesAsync" />
                 <small>@T("Fields.ModulesHelp")</small>
             </div>
+            </div>
         </div>
-    </section>
+    </details>
 
-    <section class="editor-section">
-        <h3>@T("Editor.Runtime")</h3>
-        <div class="field-grid">
+    <details class="panel collapsible-support editor-section" open>
+        <summary>@T("Editor.Runtime")</summary>
+        <div class="collapsible-support-content">
+            <div class="field-grid">
             <div class="field">
                 <label for="required-module">@T("Fields.RequiredModule")</label>
                 <input id="required-module" type="text"
@@ -101,6 +104,7 @@
                        value="@Value.SuppliedPresharedKey"
                        @onchange="args => SetSuppliedPskAsync(ReadString(args))" />
             </div>
+            </div>
         </div>
-    </section>
+    </details>
 </div>

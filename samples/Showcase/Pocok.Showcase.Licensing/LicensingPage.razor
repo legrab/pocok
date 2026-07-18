@@ -25,7 +25,38 @@
             <ShowcaseSandboxFrame @key="_sampleRevision"
                                   Title="@T("Sandbox.Title")"
                                   Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
-                <LicensingEditor @bind-Value="_input" Text="Context.Text" />
+                <LicensingEditor Value="@_input"
+                                 ValueChanged="SetInputAsync"
+                                 Text="Context.Text" />
+
+                <div class="actions">
+                    <button type="button" class="secondary" @onclick="GenerateLicense">
+                        @T("Sandbox.Generate")
+                    </button>
+                </div>
+
+                @if (_generationError is not null)
+                {
+                    <p class="diagnostic-warning" role="alert">@_generationError</p>
+                }
+                else if (_generatedLicense is not null)
+                {
+                    <section class="panel generated-license" aria-labelledby="generated-license-title">
+                        <h3 id="generated-license-title">@T("Generation.Title")</h3>
+                        <p>@T("Generation.Intro")</p>
+                        <dl class="structured-fields">
+                            <dt>@T("Generation.KeyId")</dt>
+                            <dd class="mono">@_generatedLicense.KeyId</dd>
+                        </dl>
+                        <ShowcaseCodeBlock Title="@T("Generation.SignedLicense")"
+                                           Code="@_generatedLicense.SignedLicense"
+                                           Language="json" />
+                        <ShowcaseCodeBlock Title="@T("Generation.PublicKey")"
+                                           Code="@_generatedLicense.PublicKeyPem"
+                                           Language="text" />
+                        <p>@T("Generation.ImportHint")</p>
+                    </section>
+                }
 
                 <ShowcaseExecutionControls Slice="Context.Slice"
                                            Input="_input"

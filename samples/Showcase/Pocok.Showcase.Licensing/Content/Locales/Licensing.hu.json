@@ -11,6 +11,7 @@
     "Title": "Licencellenőrzés",
     "Running": "Ellenőrzés",
     "Ready": "Kész",
+    "Generate": "Licenc generálása",
     "Run": "Licenc ellenőrzése",
     "Cancel": "Megszakítás",
     "ExecutionSteps": "Végrehajtási lépések"
@@ -18,6 +19,15 @@
   "Editor": {
     "Claims": "Licencfeltételek",
     "Runtime": "Futásidejű adatok"
+  },
+  "Generation": {
+    "Title": "Generált, átvihető licenc",
+    "Intro": "Az aláírt csomag és a nyilvános kulcs a csomag API-jával készül. Az ideiglenes privát kulcs soha nem jelenik meg és nem kerül visszaadásra.",
+    "KeyId": "Megbízható kulcs azonosítója",
+    "SignedLicense": "Aláírt licenc (.pocok)",
+    "PublicKey": "Megbízható nyilvános kulcs (.pem)",
+    "ImportHint": "Az alkalmazás az aláírt szöveget LicenseText értékként használhatja, a nyilvános kulcsot pedig ezzel az azonosítóval regisztrálhatja a LicenseReader vagy LicenseService ellenőrzése előtt.",
+    "Error": "A licenc nem generálható:"
   },
   "Fields": {
     "LicenseId": "Licencazonosító",
@@ -67,7 +77,7 @@
     },
     "QuickStart": {
       "Title": "Gyors kezdés",
-      "Body": "Válassz példát, módosítsd a licencfeltételeket és a futásidejű adatokat, majd futtasd a LicenseValidatort. A nyilvános tesztkörnyezet minden adatot csak memóriában kezel."
+      "Body": "Válassz példát, módosítsd a licencfeltételeket és a futásidejű adatokat, majd generálj aláírt, átvihető licencet vagy futtasd a LicenseValidatort. A nyilvános tesztkörnyezet minden adatot csak memóriában kezel."
     },
     "Claims": {
       "Title": "Támogatott feltételek",
@@ -91,8 +101,8 @@
   },
   "Boundaries": {
     "Title": "A tesztkörnyezet korlátai",
-    "ClaimsOnly": "Memóriában épít fel és a nyilvános API-val ellenőriz licencfeltételeket.",
-    "NoPrivateKeys": "Nem készít, nem tölt fel és nem jelenít meg privát aláírókulcsot.",
+    "ClaimsOnly": "Memóriában épít fel, ír alá, hitelesít és ellenőriz licencfeltételeket a nyilvános API-val.",
+    "NoPrivateKeys": "Az ideiglenes privát aláírókulcs a memóriában marad, nem jelenik meg és nem kerül visszaadásra.",
     "NoFiles": "Nem olvas és nem ír licencfájlt a szerveren.",
     "ExpectedFailures": "A sikertelen ellenőrzés strukturált eredmény marad, és nem állítja le a gazdaalkalmazást."
   },

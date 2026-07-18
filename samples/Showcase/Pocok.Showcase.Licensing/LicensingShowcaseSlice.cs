@@ -35,6 +35,29 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
     public override IReadOnlyList<ShowcaseSample<LicensingInput>> TypedSamples => SampleCatalog;
     public override ShowcaseGuide Guide => GuideCatalog;
 
+    public static GeneratedLicenseOutput GenerateLicense(LicensingInput input)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+        if (!TryCreateLicense(input, out LicenseDocument? license, out string? error))
+            throw new FormatException(error ?? "The license claims are invalid.");
+
+        const string keyId = "showcase-ephemeral";
+        (string privateKeyPem, string publicKeyPem) = LicenseCryptography.CreateSigningKeyPair();
+        string signedLicense = LicenseCryptography.Sign(license!, keyId, privateKeyPem);
+        var trustedKeys = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            [keyId] = publicKeyPem
+        };
+        LicenseValidationResult verified = LicenseReader.ReadAndVerify(signedLicense, trustedKeys);
+        if (!verified.IsValid)
+        {
+            throw new InvalidOperationException(
+                $"The generated license could not be verified: {verified.Code}.");
+        }
+
+        return new GeneratedLicenseOutput(keyId, signedLicense, publicKeyPem);
+    }
+
     public override async ValueTask<LicensingOutput> ExecuteAsync(
         LicensingInput input,
         ShowcaseExecutionContext context,
