@@ -34,14 +34,14 @@ public class PublicApiTests
 
 #if INCLUDE_EXPERIMENTAL
         yield return Case(typeof(IServiceModule).Assembly, "Modularity.Contracts");
-        yield return Case(typeof(ModuleLoader).Assembly, "Modularity");
+        yield return Case(typeof(ModuleLoader).Assembly, "Modularity.Loading");
         yield return Case(typeof(ModularityDefaultsOptions).Assembly, "AppDefaults.Modularity");
-        yield return Case(typeof(ILicenseService).Assembly, "Licensing");
+        yield return Case(typeof(ILicenseService).Assembly, "Licensing.Runtime");
         yield return Case(typeof(LicensingApplicationConfigurator).Assembly, "AppDefaults.Licensing");
-        yield return Case(typeof(CoalescingTaskRunner).Assembly, "BackgroundWork");
-        yield return Case(typeof(ScriptRunner).Assembly, "Scripting");
-        yield return Case(typeof(SignalAddress).Assembly, "Signals");
-        yield return Case(typeof(CompositeStringLocalizer).Assembly, "Localization");
+        yield return Case(typeof(CoalescingTaskRunner).Assembly, "BackgroundWork.Coalescing");
+        yield return Case(typeof(ScriptRunner).Assembly, "Scripting.Execution");
+        yield return Case(typeof(SignalAddress).Assembly, "Signals.Sources");
+        yield return Case(typeof(CompositeStringLocalizer).Assembly, "Localization.Composition");
         yield return Case(typeof(KeyedSubscriptionHub<>).Assembly, "Subscriptions");
 #endif
     }

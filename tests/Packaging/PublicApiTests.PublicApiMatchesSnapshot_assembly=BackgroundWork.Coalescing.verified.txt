@@ -1,4 +1,4 @@
-namespace Pocok.BackgroundWork.Coalescing
+﻿namespace Pocok.BackgroundWork.Coalescing
 {
     public sealed class CoalescingTaskRunner : System.IAsyncDisposable
     {
