@@ -35,6 +35,9 @@ $consumerSpecs = @{
     'Pocok.Readiness' = @{ Template = 'ReadinessConsumer/Pocok.Readiness.Consumer.csproj.template'; Program = 'ReadinessConsumer/Program.cs' }
     'Pocok.BackgroundWork' = @{ Template = 'BackgroundWorkConsumer/Pocok.BackgroundWork.Consumer.csproj.template'; Program = 'BackgroundWorkConsumer/Program.cs' }
     'Pocok.Scripting' = @{ Template = 'ScriptingConsumer/Pocok.Scripting.Consumer.csproj.template'; Program = 'ScriptingConsumer/Program.cs' }
+    'Pocok.Scripting.JavaScript' = @{ Template = 'ScriptingJavaScriptConsumer/Pocok.Scripting.JavaScript.Consumer.csproj.template'; Program = 'ScriptingJavaScriptConsumer/Program.cs' }
+    'Pocok.Scripting.CSharp' = @{ Template = 'ScriptingCSharpConsumer/Pocok.Scripting.CSharp.Consumer.csproj.template'; Program = 'ScriptingCSharpConsumer/Program.cs' }
+    'Pocok.Scripting.Python' = @{ Template = 'ScriptingPythonConsumer/Pocok.Scripting.Python.Consumer.csproj.template'; Program = 'ScriptingPythonConsumer/Program.cs' }
     'Pocok.Signals' = @{ Template = 'SignalsConsumer/Pocok.Signals.Consumer.csproj.template'; Program = 'SignalsConsumer/Program.cs' }
     'Pocok.Localization' = @{ Template = 'LocalizationConsumer/Pocok.Localization.Consumer.csproj.template'; Program = 'LocalizationConsumer/Program.cs' }
     'Pocok.Subscriptions' = @{ Template = 'SubscriptionsConsumer/Pocok.Subscriptions.Consumer.csproj.template'; Program = 'SubscriptionsConsumer/Program.cs' }

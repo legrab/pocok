@@ -25,12 +25,16 @@
             <ShowcaseSandboxFrame @key="_sampleRevision"
                                   Title="@T("Sandbox.Title")"
                                   Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
-                <ScriptingEditor @bind-Value="_input"
-                                 CodeAssist="Context.CodeAssist"
+                <ScriptingEditor @ref="_editor"
+                                 Value="_input"
+                                 ValueChanged="SetInputAsync"
+                                 Engines="Engines"
+                                 ResetRevision="_sampleRevision"
                                  Text="Context.Text" />
 
                 <ShowcaseExecutionControls Slice="Context.Slice"
                                            Input="_input"
+                                           InputResolver="ResolveInputAsync"
                                            RunClient="Context.RunClient"
                                            Culture="Context.Culture"
                                            RunLabel="@T("Sandbox.Run")"
@@ -47,7 +51,7 @@
                                  Text="Context.Text"
                                  ResourceNamespace="scripting"
                                  CodePreviewTitle="@T("Result.ScriptPreview")"
-                                 CodePreviewLanguage="javascript"
+                                 CodePreviewLanguage="@_input.EngineId"
                                  TruncatedLabel="@T("Result.Truncated")" />
         </Main>
         <Guidance>
@@ -57,9 +61,9 @@
                                MoreLabel="@T("Guide.More")" />
             <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
                 <ul class="compact-list">
-                    <li>@T("Boundaries.NoClr")</li>
+                    <li>@T("Boundaries.Guardrails")</li>
                     <li>@T("Boundaries.NoIo")</li>
-                    <li>@T("Boundaries.FreshEngine")</li>
+                    <li>@T("Boundaries.Trusted")</li>
                     <li>@T("Boundaries.Bounded")</li>
                 </ul>
             </ShowcaseBoundariesPanel>

@@ -50,6 +50,12 @@
     public string? ResetKey { get; set; }
 
     [Parameter]
+    public EventCallback BeforeRun { get; set; }
+
+    [Parameter]
+    public Func<Task<object?>>? InputResolver { get; set; }
+
+    [Parameter]
     public EventCallback<ShowcaseRunResult?> ResultChanged { get; set; }
 
     [Parameter]
@@ -79,6 +85,13 @@
         if (_running)
             return;
 
+        if (BeforeRun.HasDelegate)
+            await BeforeRun.InvokeAsync();
+
+        object resolvedInput = InputResolver is null
+            ? Input
+            : await InputResolver() ?? throw new InvalidOperationException("The input resolver returned null.");
+
         _running = true;
         _progress.Clear();
         await NotifyProgressChangedAsync();
@@ -87,7 +100,7 @@
 
         try
         {
-            _handle = await RunClient.SubmitAsync(Slice, Input, Culture);
+            _handle = await RunClient.SubmitAsync(Slice, resolvedInput, Culture);
             Task progressTask = ReadProgressAsync(_handle.Progress);
             ShowcaseRunResult result = await _handle.Completion;
             await progressTask;

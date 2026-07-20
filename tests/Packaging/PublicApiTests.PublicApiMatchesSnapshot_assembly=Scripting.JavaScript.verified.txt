@@ -1,0 +1,26 @@
+﻿namespace Pocok.Scripting.JavaScript
+{
+    public sealed class JavaScriptImportSyntax : Pocok.Scripting.Import.IScriptImportSyntax
+    {
+        public const string EditorExportCompletionPrefixPattern = "//\\s*#import\\s+\\w*$";
+        public const string EditorModuleCompletionPrefixPattern = "//\\s*#import\\s+(?<Name>[A-Za-z0-9_]+)\\s+from\\s+\\w*$";
+        public JavaScriptImportSyntax() { }
+        public Pocok.Scripting.Execution.ScriptEngineId EngineId { get; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptReference> FindImports(string? content) { }
+        public string ImportedComment(Pocok.Scripting.Import.ScriptReference reference, int depth) { }
+        public string RemoveImports(string content) { }
+    }
+    public sealed class JavaScriptScriptEngineAdapter : Pocok.Scripting.Execution.IScriptEngineAdapter
+    {
+        public JavaScriptScriptEngineAdapter() { }
+        public Pocok.Scripting.Execution.ScriptEngineDescriptor Descriptor { get; }
+        public Pocok.Scripting.Execution.IScriptValidator Validator { get; }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ValidatedScript script, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class JavaScriptScriptValidator : Pocok.Scripting.Execution.IScriptValidator
+    {
+        public JavaScriptScriptValidator() { }
+        public Pocok.Scripting.Execution.ScriptEngineId EngineId { get; }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptValidationResult> ValidateAsync(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+}

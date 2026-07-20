@@ -1,0 +1,64 @@
+{
+  "Package": {
+    "Name": "Logging defaults",
+    "Summary": "Emit bounded structured events and probe the AppDefaults logging configurators.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Samples",
+    "Title": "Structured logging sandbox",
+    "Running": "Running",
+    "Ready": "Ready",
+    "Run": "Emit events",
+    "Cancel": "Cancel"
+  },
+  "Fields": {
+    "Level": "Minimum level",
+    "Count": "Event count",
+    "Property": "Include allowlisted properties",
+    "Exception": "Include safe synthetic exception"
+  },
+  "Result": {
+    "Title": "Captured safe events",
+    "Empty": "Run the sample to inspect bounded records.",
+    "Probe": "Configurator probe",
+    "Truncated": "truncated"
+  },
+  "Tips": {
+    "Structured": "Templates and scalar properties remain structured.",
+    "Safe": "No stack trace, scope, path, or arbitrary object is rendered."
+  },
+  "Guide": {
+    "More": "More guidance",
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Exercise the host logger and fresh AppDefaults builders without replacing the global logger."
+    },
+    "Snippet": {
+      "Title": "Structured event"
+    }
+  },
+  "Boundaries": {
+    "Title": "Boundaries",
+    "Host": "Uses the host ILoggerFactory when available.",
+    "Bounded": "At most twenty generated records are shown.",
+    "NoStack": "Exception stack traces are never rendered.",
+    "Allowlist": "Only allowlisted scalar properties are displayed."
+  },
+  "Samples": {
+    "structured": {
+      "Name": "Structured events",
+      "Description": "Emit bounded information events with scalar properties."
+    },
+    "levels": {
+      "Name": "Level selection",
+      "Description": "Emit warning-level records."
+    },
+    "exception": {
+      "Name": "Safe exception",
+      "Description": "Emit one synthetic error without a stack trace."
+    }
+  }
+}

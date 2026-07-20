@@ -13,6 +13,7 @@
   "metadata": {
     "packageId": "Pocok.Scripting",
     "slug": "scripting",
-    "kind": "showcase-slice"
+    "kind": "showcase-slice",
+    "coveredPackageIds": "Pocok.Scripting;Pocok.Scripting.JavaScript;Pocok.Scripting.CSharp;Pocok.Scripting.Python"
   }
 }

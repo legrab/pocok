@@ -1,0 +1,59 @@
+{
+  "Package": {
+    "Name": "Signals",
+    "Summary": "Korlátozott Signals-konfigurációs és használati receptek generálása.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Minták",
+    "Title": "Signals receptkészítő",
+    "Ready": "Típusos beállításokból generálva"
+  },
+  "Fields": {
+    "Mode": "Recept",
+    "Capacity": "Előfizetői puffer kapacitása",
+    "IncludeOptional": "Elavulásérzékelés bekapcsolása",
+    "IncludeLifecycle": "Explicit felszabadítás megjelenítése"
+  },
+  "Tips": {
+    "Generated": "A kód kizárólag korlátozott beállításokból készül.",
+    "Ownership": "A recept egyértelművé teszi a kapcsolat és az előfizetés tulajdonjogát."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "Forráspontos kiindulási receptek készítése a generált kód futtatása nélkül."
+    },
+    "Snippet": {
+      "Title": "Generált recept"
+    }
+  },
+  "Boundaries": {
+    "Title": "Korlátok",
+    "Generated": "Csak típusos beállítások generálhatnak kódot.",
+    "NoExecution": "A generált forrás nem fut le.",
+    "Constrained": "Az azonosítók és API-választások engedélyezett készletből származnak.",
+    "Ownership": "A kapcsolat, a megszakítás és a felszabadítás tulajdonjoga látható marad."
+  },
+  "Source": {
+    "Title": "Forrásdokumentáció",
+    "Body": "A teljes viselkedési szerződés a csomag dokumentációjában található."
+  },
+  "Samples": {
+    "read": {
+      "Name": "Pillanatnyi olvasás",
+      "Description": "Kapcsolódás és egy típusos jelminta beolvasása."
+    },
+    "write": {
+      "Name": "Visszaigazolt írás",
+      "Description": "Érték írása explicit konzisztenciaszinttel."
+    },
+    "subscribe": {
+      "Name": "Élő előfizetés",
+      "Description": "Korlátozott élő minták fogyasztása és a minőség kezelése."
+    }
+  }
+}

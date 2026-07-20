@@ -31,6 +31,10 @@
     <Project Path="src/Readiness/Pocok.Readiness.csproj"/>
     <Project Path="src/BackgroundWork/Pocok.BackgroundWork.csproj"/>
     <Project Path="src/Scripting/Pocok.Scripting.csproj"/>
+    <Project Path="src/Scripting.JavaScript/Pocok.Scripting.JavaScript.csproj"/>
+    <Project Path="src/Scripting.CSharp/Pocok.Scripting.CSharp.csproj"/>
+    <Project Path="src/Scripting.CSharp.Worker/Pocok.Scripting.CSharp.Worker.csproj"/>
+    <Project Path="src/Scripting.Python/Pocok.Scripting.Python.csproj"/>
     <Project Path="src/Signals/Pocok.Signals.csproj"/>
     <Project Path="src/Localization/Pocok.Localization.csproj"/>
     <Project Path="src/Subscriptions/Pocok.Subscriptions.csproj"/>
@@ -55,6 +59,9 @@
     <Project Path="tests/Unit/Modularity.Contracts.Tests/Pocok.Modularity.Contracts.Tests.csproj"/>
     <Project Path="tests/Unit/BackgroundWork.Tests/Pocok.BackgroundWork.Tests.csproj"/>
     <Project Path="tests/Unit/Scripting.Tests/Pocok.Scripting.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.JavaScript.Tests/Pocok.Scripting.JavaScript.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.CSharp.Tests/Pocok.Scripting.CSharp.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.Python.Tests/Pocok.Scripting.Python.Tests.csproj"/>
     <Project Path="tests/Unit/Signals.Tests/Pocok.Signals.Tests.csproj"/>
     <Project Path="tests/Unit/Localization.Tests/Pocok.Localization.Tests.csproj"/>
     <Project Path="tests/Unit/Subscriptions.Tests/Pocok.Subscriptions.Tests.csproj"/>

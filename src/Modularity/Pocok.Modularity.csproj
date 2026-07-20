@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Pocok.Modularity</PackageId>
-    <PackageVersion Condition="'$(PocokModularityPackageVersion)' != ''">$(PocokModularityPackageVersion)</PackageVersion>
+    <MinVerVersionOverride Condition="'$(PocokModularityPackageVersion)' != ''">$(PocokModularityPackageVersion)</MinVerVersionOverride>
     <MinVerTagPrefix>modularity-v</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
     <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>

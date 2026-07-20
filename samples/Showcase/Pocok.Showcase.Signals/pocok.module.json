@@ -1,0 +1,19 @@
+{
+  "manifestVersion": 1,
+  "id": "pocok.showcase.signals",
+  "version": "1.0.0",
+  "entryAssembly": "Pocok.Showcase.Signals.dll",
+  "required": true,
+  "sharedAssemblies": [
+    "Pocok.Showcase.Contracts",
+    "Pocok.Showcase.Components",
+    "Microsoft.AspNetCore.Components",
+    "Microsoft.AspNetCore.Components.Web"
+  ],
+  "metadata": {
+    "packageId": "Pocok.Signals",
+    "slug": "signals",
+    "kind": "showcase-slice",
+    "coveredPackageIds": "Pocok.Signals"
+  }
+}

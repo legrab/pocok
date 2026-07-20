@@ -7,30 +7,49 @@ using System.Text.Json;
 PublishArguments arguments = PublishArguments.Parse(args);
 string repositoryRoot = Path.GetFullPath(arguments.RepositoryRoot);
 string outputRoot = Path.GetFullPath(arguments.OutputPath);
-string webProject = Path.Combine(repositoryRoot, "showcase", "src", "Pocok.Showcase.Web", "Pocok.Showcase.Web.csproj");
+string webProject = Path.Combine(
+    repositoryRoot,
+    "showcase",
+    "src",
+    "Pocok.Showcase.Web",
+    "Pocok.Showcase.Web.csproj");
 string samplesRoot = Path.Combine(repositoryRoot, "samples", "Showcase");
 
-if (!File.Exists(webProject)) throw new FileNotFoundException("Showcase web project was not found.", webProject);
-if (Directory.Exists(outputRoot)) Directory.Delete(outputRoot, true);
+if (!File.Exists(webProject))
+    throw new FileNotFoundException("Showcase web project was not found.", webProject);
+if (Directory.Exists(outputRoot))
+    Directory.Delete(outputRoot, recursive: true);
 Directory.CreateDirectory(outputRoot);
 
 var common = new List<string>
 {
-    "publish", webProject, "--configuration", "Release", "--output", outputRoot, "--nologo", "--maxcpucount:1"
+    "publish",
+    webProject,
+    "--configuration",
+    "Release",
+    "--output",
+    outputRoot,
+    "--nologo",
+    "--maxcpucount:1"
 };
-if (arguments.NoRestore) common.Add("--no-restore");
+if (arguments.NoRestore)
+    common.Add("--no-restore");
 Console.WriteLine("Publishing showcase host...");
 await RunAsync(arguments.DotNetPath, common, repositoryRoot);
 
 PackageDocument packages = LoadPackageCatalog(repositoryRoot);
+var knownPackageIds = packages.Packages
+    .Select(static package => package.Id)
+    .ToHashSet(StringComparer.Ordinal);
 string contentRoot = Path.Combine(outputRoot, "Content");
 Directory.CreateDirectory(contentRoot);
-await File.WriteAllTextAsync(Path.Combine(contentRoot, "package-catalog.json"),
+await File.WriteAllTextAsync(
+    Path.Combine(contentRoot, "package-catalog.json"),
     JsonSerializer.Serialize(packages, PublishJson.Options) + Environment.NewLine);
 
 var inventory = new List<SliceInventoryItem>();
 var moduleIds = new HashSet<string>(StringComparer.Ordinal);
-var packageIds = new HashSet<string>(StringComparer.Ordinal);
+var coveredPackageIds = new HashSet<string>(StringComparer.Ordinal);
 var slugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 IEnumerable<string> projects = DiscoverPluginProjects(samplesRoot);
 
@@ -38,48 +57,87 @@ foreach (string project in projects)
 {
     string projectDirectory = Path.GetDirectoryName(project)!;
     string manifestPath = Path.Combine(projectDirectory, "pocok.module.json");
-    if (!File.Exists(manifestPath)) throw new InvalidOperationException($"Missing module manifest beside {project}.");
-    ModuleManifest manifest = JsonSerializer.Deserialize<ModuleManifest>(await File.ReadAllTextAsync(manifestPath), PublishJson.Options)
-                              ?? throw new InvalidOperationException($"Manifest {manifestPath} is empty.");
-    ValidateManifest(manifest, manifestPath, moduleIds, packageIds, slugs);
+    if (!File.Exists(manifestPath))
+        throw new InvalidOperationException($"Missing module manifest beside {project}.");
+    ModuleManifest manifest = JsonSerializer.Deserialize<ModuleManifest>(
+        await File.ReadAllTextAsync(manifestPath),
+        PublishJson.Options)
+        ?? throw new InvalidOperationException($"Manifest {manifestPath} is empty.");
+    string[] coverage = ValidateManifest(
+        manifest,
+        manifestPath,
+        knownPackageIds,
+        moduleIds,
+        coveredPackageIds,
+        slugs);
 
     string pluginOutput = Path.Combine(outputRoot, "plugins", manifest.Id);
     Directory.CreateDirectory(pluginOutput);
     var publish = new List<string>
     {
-        "publish", project, "--configuration", "Release", "--output", pluginOutput, "--nologo", "--maxcpucount:1",
+        "publish",
+        project,
+        "--configuration",
+        "Release",
+        "--output",
+        pluginOutput,
+        "--nologo",
+        "--maxcpucount:1",
         "-p:StageShowcasePlugin=false"
     };
-    if (arguments.NoRestore) publish.Add("--no-restore");
+    if (arguments.NoRestore)
+        publish.Add("--no-restore");
     Console.WriteLine($"Publishing slice {manifest.Metadata.PackageId}...");
     await RunAsync(arguments.DotNetPath, publish, repositoryRoot);
 
     string publishedManifest = Path.Combine(pluginOutput, "pocok.module.json");
-    if (!File.Exists(publishedManifest)) File.Copy(manifestPath, publishedManifest);
+    if (!File.Exists(publishedManifest))
+        File.Copy(manifestPath, publishedManifest);
     string entryAssembly = Path.Combine(pluginOutput, manifest.EntryAssembly);
     string deps = Path.ChangeExtension(entryAssembly, ".deps.json");
-    if (!File.Exists(entryAssembly)) throw new InvalidOperationException($"Published plugin is missing {manifest.EntryAssembly}.");
-    if (!File.Exists(deps)) throw new InvalidOperationException($"Published plugin is missing {Path.GetFileName(deps)}.");
-    inventory.Add(new SliceInventoryItem(manifest.Id, manifest.Version, manifest.Required,
-        manifest.Metadata.PackageId, manifest.Metadata.Slug, Path.GetRelativePath(outputRoot, pluginOutput).Replace('\\', '/')));
+    if (!File.Exists(entryAssembly))
+        throw new InvalidOperationException(
+            $"Published plugin is missing {manifest.EntryAssembly}.");
+    if (!File.Exists(deps))
+        throw new InvalidOperationException(
+            $"Published plugin is missing {Path.GetFileName(deps)}.");
+    inventory.Add(new SliceInventoryItem(
+        manifest.Id,
+        manifest.Version,
+        manifest.Required,
+        manifest.Metadata.PackageId,
+        manifest.Metadata.Slug,
+        coverage,
+        Path.GetRelativePath(outputRoot, pluginOutput).Replace('\\', '/')));
 }
 
 if (arguments.RequireCompleteCatalog)
 {
-    string[] missing = packages.Packages.Where(package => !packageIds.Contains(package.Id)).Select(package => package.Id).ToArray();
-    if (missing.Length > 0) throw new InvalidOperationException($"Strict catalog publication is missing: {string.Join(", ", missing)}.");
+    string[] missing = packages.Packages
+        .Where(package => !coveredPackageIds.Contains(package.Id))
+        .Select(static package => package.Id)
+        .ToArray();
+    if (missing.Length > 0)
+        throw new InvalidOperationException(
+            $"Strict catalog publication is missing: {string.Join(", ", missing)}.");
 }
 
-await File.WriteAllTextAsync(Path.Combine(contentRoot, "showcase-slices.json"),
-    JsonSerializer.Serialize(new SliceInventoryDocument(inventory), PublishJson.Options) + Environment.NewLine);
-Console.WriteLine($"Published Pocok Showcase to {outputRoot} with {inventory.Count} slice(s).");
+await File.WriteAllTextAsync(
+    Path.Combine(contentRoot, "showcase-slices.json"),
+    JsonSerializer.Serialize(new SliceInventoryDocument(inventory), PublishJson.Options)
+    + Environment.NewLine);
+Console.WriteLine(
+    $"Published Pocok Showcase to {outputRoot} with {inventory.Count} slice(s) "
+    + $"covering {coveredPackageIds.Count} package(s).");
 
 static IEnumerable<string> DiscoverPluginProjects(string samplesRoot)
 {
-    if (!Directory.Exists(samplesRoot)) return [];
+    if (!Directory.Exists(samplesRoot))
+        return [];
 
     var projects = new List<string>();
-    foreach (string manifest in Directory.EnumerateFiles(samplesRoot, "pocok.module.json", SearchOption.AllDirectories)
+    foreach (string manifest in Directory
+                 .EnumerateFiles(samplesRoot, "pocok.module.json", SearchOption.AllDirectories)
                  .Order(StringComparer.Ordinal))
     {
         string relative = Path.GetRelativePath(samplesRoot, manifest);
@@ -91,18 +149,23 @@ static IEnumerable<string> DiscoverPluginProjects(string samplesRoot)
             continue;
 
         string directory = Path.GetDirectoryName(manifest)!;
-        string[] candidates = Directory.EnumerateFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly)
+        string[] candidates = Directory
+            .EnumerateFiles(directory, "*.csproj", SearchOption.TopDirectoryOnly)
             .Order(StringComparer.Ordinal)
             .ToArray();
         if (candidates.Length != 1)
-            throw new InvalidOperationException($"Plugin directory '{directory}' must contain exactly one project file.");
+            throw new InvalidOperationException(
+                $"Plugin directory '{directory}' must contain exactly one project file.");
         projects.Add(candidates[0]);
     }
 
     return projects;
 }
 
-static async Task RunAsync(string executable, IReadOnlyList<string> arguments, string workingDirectory)
+static async Task RunAsync(
+    string executable,
+    IReadOnlyList<string> arguments,
+    string workingDirectory)
 {
     var start = new ProcessStartInfo(executable)
     {
@@ -111,16 +174,22 @@ static async Task RunAsync(string executable, IReadOnlyList<string> arguments, s
         RedirectStandardOutput = true,
         RedirectStandardError = true
     };
-    foreach (string argument in arguments) start.ArgumentList.Add(argument);
-    using Process process = Process.Start(start) ?? throw new InvalidOperationException($"Could not start {executable}.");
+    foreach (string argument in arguments)
+        start.ArgumentList.Add(argument);
+    using Process process = Process.Start(start)
+        ?? throw new InvalidOperationException($"Could not start {executable}.");
     Task<string> stdout = process.StandardOutput.ReadToEndAsync();
     Task<string> stderr = process.StandardError.ReadToEndAsync();
     await process.WaitForExitAsync();
     string output = await stdout;
     string error = await stderr;
-    if (output.Length > 0) Console.Write(output);
-    if (error.Length > 0) Console.Error.Write(error);
-    if (process.ExitCode != 0) throw new InvalidOperationException($"{executable} exited with code {process.ExitCode}.");
+    if (output.Length > 0)
+        Console.Write(output);
+    if (error.Length > 0)
+        Console.Error.Write(error);
+    if (process.ExitCode != 0)
+        throw new InvalidOperationException(
+            $"{executable} exited with code {process.ExitCode}.");
 }
 
 static PackageDocument LoadPackageCatalog(string repositoryRoot)
@@ -129,19 +198,29 @@ static PackageDocument LoadPackageCatalog(string repositoryRoot)
     using JsonDocument source = JsonDocument.Parse(File.ReadAllText(path));
     var result = new List<PackageEntry>();
     int sortOrder = 0;
-    foreach (JsonElement package in source.RootElement.GetProperty("packages").EnumerateArray())
+    foreach (JsonElement package in source.RootElement
+                 .GetProperty("packages")
+                 .EnumerateArray())
     {
         string state = package.GetProperty("state").GetString()!;
-        if (state == "Retired") continue;
+        if (state == "Retired")
+            continue;
         string id = package.GetProperty("id").GetString()!;
         string project = package.GetProperty("project").GetString()!;
-        result.Add(new PackageEntry(id, package.GetProperty("family").GetString()!, state,
-            package.GetProperty("releasable").GetBoolean(), project, Summary(id),
-            project[..project.LastIndexOf('/')] + "/README.md", ++sortOrder, Slug(id)));
+        result.Add(new PackageEntry(
+            id,
+            package.GetProperty("family").GetString()!,
+            state,
+            package.GetProperty("releasable").GetBoolean(),
+            project,
+            Summary(id),
+            project[..project.LastIndexOf('/')] + "/README.md",
+            ++sortOrder,
+            Slug(id)));
     }
+
     return new PackageDocument(result);
 }
-
 
 static string Slug(string packageId)
 {
@@ -153,7 +232,8 @@ static string Slug(string packageId)
     {
         if (character == '.')
         {
-            if (builder.Length > 0 && builder[^1] != '-') builder.Append('-');
+            if (builder.Length > 0 && builder[^1] != '-')
+                builder.Append('-');
             continue;
         }
 
@@ -167,35 +247,96 @@ static string Slug(string packageId)
 
 static string Summary(string id) => id switch
 {
-    "Pocok.Conversion" => "Policy-driven value conversion with explicit failures, collection support, and bounded behavior.",
-    "Pocok.Readiness" => "Explicit startup, readiness, failure, cancellation, shutdown, and restart coordination.",
-    "Pocok.AppDefaults" => "Composable application configurators for consistent host setup.",
-    "Pocok.AppDefaults.Logging" => "Configuration-driven Microsoft.Extensions.Logging defaults.",
-    "Pocok.AppDefaults.Logging.Serilog" => "Serilog defaults integrated through the Pocok application configurator model.",
-    "Pocok.Modularity.Contracts" => "Stable service-module contracts shared between hosts and trusted plugins.",
-    "Pocok.Modularity" => "Manifest-driven startup discovery and registration for trusted in-process modules.",
-    "Pocok.AppDefaults.Modularity" => "Maintainer defaults for Pocok modularity configuration.",
-    "Pocok.BackgroundWork" => "Small concurrency helpers for coalescing, debouncing, repetition, and observation.",
-    "Pocok.Scripting" => "Bounded JavaScript execution with imports, modules, bindings, and structured failures.",
-    "Pocok.Localization" => "Deterministic file-backed localization and provider composition.",
-    "Pocok.Signals" => "Typed signal runtime abstractions for reading, writing, subscribing, and connection state.",
-    "Pocok.Subscriptions" => "Concurrency-safe keyed subscription lifecycle management.",
-    "Pocok.Licensing" => "Signed and encrypted license documents, validation, runtime enforcement, and CLI workflows.",
-    "Pocok.AppDefaults.Licensing" => "Application defaults for configuring and enforcing Pocok licensing.",
+    "Pocok.Conversion" =>
+        "Policy-driven value conversion with explicit failures, collection support, and bounded behavior.",
+    "Pocok.Readiness" =>
+        "Explicit startup, readiness, failure, cancellation, shutdown, and restart coordination.",
+    "Pocok.AppDefaults" =>
+        "Composable application configurators for consistent host setup.",
+    "Pocok.AppDefaults.Logging" =>
+        "Configuration-driven Microsoft.Extensions.Logging defaults.",
+    "Pocok.AppDefaults.Logging.Serilog" =>
+        "Serilog defaults integrated through the Pocok application configurator model.",
+    "Pocok.Modularity.Contracts" =>
+        "Stable service-module contracts shared between hosts and trusted plugins.",
+    "Pocok.Modularity" =>
+        "Manifest-driven startup discovery and registration for trusted in-process modules.",
+    "Pocok.AppDefaults.Modularity" =>
+        "Maintainer defaults for Pocok modularity configuration.",
+    "Pocok.BackgroundWork" =>
+        "Small concurrency helpers for coalescing, debouncing, repetition, and observation.",
+    "Pocok.Scripting" =>
+        "Engine-neutral bounded script validation, selection, execution, and result conversion.",
+    "Pocok.Scripting.JavaScript" =>
+        "Restricted in-process JavaScript execution through Jint.",
+    "Pocok.Scripting.CSharp" =>
+        "Trusted-local C# script execution through a killable private worker.",
+    "Pocok.Scripting.Python" =>
+        "Trusted-local CPython script execution through an isolated external worker.",
+    "Pocok.Localization" =>
+        "Deterministic file-backed localization and provider composition.",
+    "Pocok.Signals" =>
+        "Typed signal runtime abstractions for reading, writing, subscribing, and connection state.",
+    "Pocok.Subscriptions" =>
+        "Concurrency-safe keyed subscription lifecycle management.",
+    "Pocok.Licensing" =>
+        "Signed and encrypted license documents, validation, runtime enforcement, and CLI workflows.",
+    "Pocok.AppDefaults.Licensing" =>
+        "Application defaults for configuring and enforcing Pocok licensing.",
     _ => id
 };
 
-static void ValidateManifest(ModuleManifest manifest, string path, HashSet<string> moduleIds, HashSet<string> packageIds, HashSet<string> slugs)
+static string[] ValidateManifest(
+    ModuleManifest manifest,
+    string path,
+    IReadOnlySet<string> knownPackageIds,
+    HashSet<string> moduleIds,
+    HashSet<string> coveredPackageIds,
+    HashSet<string> slugs)
 {
-    if (manifest.ManifestVersion != 1) throw new InvalidOperationException($"Unsupported manifest version in {path}.");
-    if (string.IsNullOrWhiteSpace(manifest.Id) || !moduleIds.Add(manifest.Id)) throw new InvalidOperationException($"Duplicate or empty module id in {path}.");
-    if (string.IsNullOrWhiteSpace(manifest.Metadata.PackageId) || !packageIds.Add(manifest.Metadata.PackageId)) throw new InvalidOperationException($"Duplicate or empty package id in {path}.");
-    if (string.IsNullOrWhiteSpace(manifest.Metadata.Slug) || !slugs.Add(manifest.Metadata.Slug)) throw new InvalidOperationException($"Duplicate or empty slug in {path}.");
-    if (manifest.Metadata.Slug.Any(character => !char.IsAsciiLetterOrDigit(character) && character != '-')) throw new InvalidOperationException($"Unsafe slug in {path}.");
-    if (string.IsNullOrWhiteSpace(manifest.EntryAssembly)) throw new InvalidOperationException($"Missing entry assembly in {path}.");
+    if (manifest.ManifestVersion != 1)
+        throw new InvalidOperationException($"Unsupported manifest version in {path}.");
+    if (string.IsNullOrWhiteSpace(manifest.Id) || !moduleIds.Add(manifest.Id))
+        throw new InvalidOperationException($"Duplicate or empty module id in {path}.");
+    if (string.IsNullOrWhiteSpace(manifest.Metadata.PackageId))
+        throw new InvalidOperationException($"Empty primary package id in {path}.");
+    if (string.IsNullOrWhiteSpace(manifest.Metadata.Slug) || !slugs.Add(manifest.Metadata.Slug))
+        throw new InvalidOperationException($"Duplicate or empty slug in {path}.");
+    if (manifest.Metadata.Slug.Any(
+            character => !char.IsAsciiLetterOrDigit(character) && character != '-'))
+        throw new InvalidOperationException($"Unsafe slug in {path}.");
+    if (string.IsNullOrWhiteSpace(manifest.EntryAssembly))
+        throw new InvalidOperationException($"Missing entry assembly in {path}.");
+
+    string[] coverage = string.IsNullOrWhiteSpace(manifest.Metadata.CoveredPackageIds)
+        ? [manifest.Metadata.PackageId]
+        : manifest.Metadata.CoveredPackageIds
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    if (!coverage.Contains(manifest.Metadata.PackageId, StringComparer.Ordinal))
+        throw new InvalidOperationException(
+            $"Manifest {path} must cover its primary package {manifest.Metadata.PackageId}.");
+    if (coverage.Distinct(StringComparer.Ordinal).Count() != coverage.Length)
+        throw new InvalidOperationException($"Manifest {path} contains duplicate package coverage.");
+
+    foreach (string packageId in coverage)
+    {
+        if (!knownPackageIds.Contains(packageId))
+            throw new InvalidOperationException(
+                $"Manifest {path} covers unknown package {packageId}.");
+        if (!coveredPackageIds.Add(packageId))
+            throw new InvalidOperationException(
+                $"Package {packageId} has more than one Showcase manifest owner.");
+    }
+
+    return coverage;
 }
 
-internal sealed record PublishArguments(string RepositoryRoot, string OutputPath, string DotNetPath, bool NoRestore, bool RequireCompleteCatalog)
+internal sealed record PublishArguments(
+    string RepositoryRoot,
+    string OutputPath,
+    string DotNetPath,
+    bool NoRestore,
+    bool RequireCompleteCatalog)
 {
     public static PublishArguments Parse(string[] args)
     {
@@ -208,34 +349,80 @@ internal sealed record PublishArguments(string RepositoryRoot, string OutputPath
         {
             switch (args[index])
             {
-                case "--repository-root": repositoryRoot = Required(args, ref index); break;
-                case "--output": output = Required(args, ref index); break;
-                case "--dotnet": dotnet = Required(args, ref index); break;
-                case "--no-restore": noRestore = true; break;
-                case "--require-complete": strict = true; break;
-                default: throw new ArgumentException($"Unknown argument '{args[index]}'.");
+                case "--repository-root":
+                    repositoryRoot = Required(args, ref index);
+                    break;
+                case "--output":
+                    output = Required(args, ref index);
+                    break;
+                case "--dotnet":
+                    dotnet = Required(args, ref index);
+                    break;
+                case "--no-restore":
+                    noRestore = true;
+                    break;
+                case "--require-complete":
+                    strict = true;
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown argument '{args[index]}'.");
             }
         }
+
         return new PublishArguments(repositoryRoot, output, dotnet, noRestore, strict);
     }
 
     private static string Required(string[] args, ref int index)
     {
-        if (++index >= args.Length) throw new ArgumentException("Missing argument value.");
+        if (++index >= args.Length)
+            throw new ArgumentException("Missing argument value.");
         return args[index];
     }
 }
 
-internal sealed record PackageEntry(string Id, string Family, string State, bool Releasable, string Project,
-    string Summary, string DocumentationPath, int SortOrder, string Slug);
+internal sealed record PackageEntry(
+    string Id,
+    string Family,
+    string State,
+    bool Releasable,
+    string Project,
+    string Summary,
+    string DocumentationPath,
+    int SortOrder,
+    string Slug);
+
 internal sealed record PackageDocument(IReadOnlyList<PackageEntry> Packages);
-internal sealed record SliceInventoryItem(string ModuleId, string Version, bool Required, string PackageId, string Slug, string Directory);
+
+internal sealed record SliceInventoryItem(
+    string ModuleId,
+    string Version,
+    bool Required,
+    string PackageId,
+    string Slug,
+    IReadOnlyList<string> CoveredPackageIds,
+    string Directory);
+
 internal sealed record SliceInventoryDocument(IReadOnlyList<SliceInventoryItem> Slices);
-internal sealed record ModuleManifest(int ManifestVersion, string Id, string Version, string EntryAssembly, bool Required,
-    IReadOnlyList<string> SharedAssemblies, ModuleMetadata Metadata);
-internal sealed record ModuleMetadata(string PackageId, string Slug, string Kind);
+
+internal sealed record ModuleManifest(
+    int ManifestVersion,
+    string Id,
+    string Version,
+    string EntryAssembly,
+    bool Required,
+    IReadOnlyList<string> SharedAssemblies,
+    ModuleMetadata Metadata);
+
+internal sealed record ModuleMetadata(
+    string PackageId,
+    string Slug,
+    string Kind,
+    string? CoveredPackageIds = null);
 
 internal static class PublishJson
 {
-    public static JsonSerializerOptions Options { get; } = new(JsonSerializerDefaults.Web) { WriteIndented = true };
+    public static JsonSerializerOptions Options { get; } = new(JsonSerializerDefaults.Web)
+    {
+        WriteIndented = true
+    };
 }

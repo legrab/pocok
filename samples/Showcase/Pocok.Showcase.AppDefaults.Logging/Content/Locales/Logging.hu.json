@@ -1,0 +1,64 @@
+{
+  "Package": {
+    "Name": "Logging defaults",
+    "Summary": "Korlátozott strukturált események kibocsátása és az AppDefaults naplózási konfigurátorainak ellenőrzése.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Minták",
+    "Title": "Strukturált naplózási homokozó",
+    "Running": "Fut",
+    "Ready": "Kész",
+    "Run": "Események kibocsátása",
+    "Cancel": "Megszakítás"
+  },
+  "Fields": {
+    "Level": "Naplózási szint",
+    "Count": "Események száma",
+    "Property": "Engedélyezett tulajdonságok megjelenítése",
+    "Exception": "Biztonságos szintetikus kivétel hozzáadása"
+  },
+  "Result": {
+    "Title": "Rögzített biztonságos események",
+    "Empty": "Futtasd a mintát a korlátozott rekordok megtekintéséhez.",
+    "Probe": "Konfigurátor-ellenőrzés",
+    "Truncated": "csonkolva"
+  },
+  "Tips": {
+    "Structured": "A sablonok és a skalár tulajdonságok strukturáltak maradnak.",
+    "Safe": "Veremkivonat, hatókör, elérési út és tetszőleges objektum nem jelenik meg."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "A gazda naplózójának és friss AppDefaults builderpéldányoknak az ellenőrzése a globális naplózó lecserélése nélkül."
+    },
+    "Snippet": {
+      "Title": "Strukturált esemény"
+    }
+  },
+  "Boundaries": {
+    "Title": "Korlátok",
+    "Host": "A gazda ILoggerFactory példányát használja, amikor elérhető.",
+    "Bounded": "Legfeljebb húsz generált rekord jelenik meg.",
+    "NoStack": "Kivétel-veremkivonat soha nem jelenik meg.",
+    "Allowlist": "Csak engedélyezett skalár tulajdonságok jelennek meg."
+  },
+  "Samples": {
+    "structured": {
+      "Name": "Strukturált események",
+      "Description": "Korlátozott információs események kibocsátása skalár tulajdonságokkal."
+    },
+    "levels": {
+      "Name": "Szint kiválasztása",
+      "Description": "Figyelmeztetési szintű rekordok kibocsátása."
+    },
+    "exception": {
+      "Name": "Biztonságos kivétel",
+      "Description": "Egy szintetikus hiba kibocsátása veremkivonat nélkül."
+    }
+  }
+}

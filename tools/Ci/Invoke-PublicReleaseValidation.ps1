@@ -23,7 +23,9 @@ $previousIncludeExperimental = [Environment]::GetEnvironmentVariable('IncludeExp
 $previousReleaseVersionsFile = [Environment]::GetEnvironmentVariable('PocokReleaseVersionsFile', 'Process')
 
 try {
-    $env:IncludeExperimental = 'false'
+    # Experimental describes API maturity, not alpha publication eligibility.
+    # Release Readiness validates the complete 18-library graph.
+    $env:IncludeExperimental = 'true'
 
     if ([string]::IsNullOrWhiteSpace($ReleaseVersionsFile)) {
         Remove-Item Env:PocokReleaseVersionsFile -ErrorAction SilentlyContinue
@@ -36,41 +38,15 @@ try {
         $env:PocokReleaseVersionsFile = $resolvedReleaseVersionsFile
     }
 
-    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @(
-        'restore', $Solution,
-        '--locked-mode'
-    ) -WorkingDirectory $repositoryRoot
-
-    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @(
-        'format', $Solution,
-        '--verify-no-changes',
-        '--no-restore'
-    ) -WorkingDirectory $repositoryRoot
-
-    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @(
-        'build', $Solution,
-        '--configuration', $Configuration,
-        '--no-restore'
-    ) -WorkingDirectory $repositoryRoot
-
-    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @(
-        'test', $Solution,
-        '--configuration', $Configuration,
-        '--no-build'
-    ) -WorkingDirectory $repositoryRoot
+    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @('restore', $Solution, '--locked-mode') -WorkingDirectory $repositoryRoot
+    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @('format', $Solution, '--verify-no-changes', '--no-restore') -WorkingDirectory $repositoryRoot
+    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @('build', $Solution, '--configuration', $Configuration, '--no-restore') -WorkingDirectory $repositoryRoot
+    Invoke-PocokCommand -FilePath 'dotnet' -Arguments @('test', $Solution, '--configuration', $Configuration, '--no-build') -WorkingDirectory $repositoryRoot
 }
 finally {
-    if ($null -eq $previousIncludeExperimental) {
-        Remove-Item Env:IncludeExperimental -ErrorAction SilentlyContinue
-    }
-    else {
-        $env:IncludeExperimental = $previousIncludeExperimental
-    }
+    if ($null -eq $previousIncludeExperimental) { Remove-Item Env:IncludeExperimental -ErrorAction SilentlyContinue }
+    else { $env:IncludeExperimental = $previousIncludeExperimental }
 
-    if ($null -eq $previousReleaseVersionsFile) {
-        Remove-Item Env:PocokReleaseVersionsFile -ErrorAction SilentlyContinue
-    }
-    else {
-        $env:PocokReleaseVersionsFile = $previousReleaseVersionsFile
-    }
+    if ($null -eq $previousReleaseVersionsFile) { Remove-Item Env:PocokReleaseVersionsFile -ErrorAction SilentlyContinue }
+    else { $env:PocokReleaseVersionsFile = $previousReleaseVersionsFile }
 }

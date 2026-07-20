@@ -1,5 +1,16 @@
 ﻿namespace Pocok.Scripting.Execution
 {
+    public interface IScriptEngineAdapter
+    {
+        Pocok.Scripting.Execution.ScriptEngineDescriptor Descriptor { get; }
+        Pocok.Scripting.Execution.IScriptValidator Validator { get; }
+        System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ValidatedScript script, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface IScriptValidator
+    {
+        Pocok.Scripting.Execution.ScriptEngineId EngineId { get; }
+        System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptValidationResult> ValidateAsync(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default);
+    }
     public sealed class ScriptBinding : System.IEquatable<Pocok.Scripting.Execution.ScriptBinding>
     {
         public System.Delegate? Function { get; }
@@ -8,29 +19,64 @@
         public static Pocok.Scripting.Execution.ScriptBinding ForFunction(string name, System.Delegate function) { }
         public static Pocok.Scripting.Execution.ScriptBinding ForValue(string name, object? value) { }
     }
+    public sealed class ScriptEngineCapabilities : System.IEquatable<Pocok.Scripting.Execution.ScriptEngineCapabilities>
+    {
+        public ScriptEngineCapabilities(bool EnforcesHardTimeout, bool EnforcesCancellation, bool EnforcesStatementLimit, bool EnforcesRecursionLimit, bool EnforcesMemoryLimit) { }
+        public bool EnforcesCancellation { get; init; }
+        public bool EnforcesHardTimeout { get; init; }
+        public bool EnforcesMemoryLimit { get; init; }
+        public bool EnforcesRecursionLimit { get; init; }
+        public bool EnforcesStatementLimit { get; init; }
+    }
+    public sealed class ScriptEngineDescriptor : System.IEquatable<Pocok.Scripting.Execution.ScriptEngineDescriptor>
+    {
+        public ScriptEngineDescriptor(Pocok.Scripting.Execution.ScriptEngineId Id, string Language, bool IsAvailable, Pocok.Scripting.Execution.ScriptEngineCapabilities Capabilities, string? UnavailableCode = null, string? UnavailableMessage = null) { }
+        public Pocok.Scripting.Execution.ScriptEngineCapabilities Capabilities { get; init; }
+        public Pocok.Scripting.Execution.ScriptEngineId Id { get; init; }
+        public bool IsAvailable { get; init; }
+        public string Language { get; init; }
+        public string? UnavailableCode { get; init; }
+        public string? UnavailableMessage { get; init; }
+    }
+    public readonly struct ScriptEngineId : System.IEquatable<Pocok.Scripting.Execution.ScriptEngineId>
+    {
+        public ScriptEngineId(string value) { }
+        public string Value { get; }
+        public static Pocok.Scripting.Execution.ScriptEngineId CSharp { get; }
+        public static Pocok.Scripting.Execution.ScriptEngineId JavaScript { get; }
+        public static Pocok.Scripting.Execution.ScriptEngineId Python { get; }
+        public override string ToString() { }
+    }
+    public sealed class ScriptEngineRegistry
+    {
+        public ScriptEngineRegistry(System.Collections.Generic.IEnumerable<Pocok.Scripting.Execution.IScriptEngineAdapter> adapters) { }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Execution.ScriptEngineDescriptor> Descriptors { get; }
+    }
     public sealed class ScriptExecutionOptions : System.IEquatable<Pocok.Scripting.Execution.ScriptExecutionOptions>
     {
         public ScriptExecutionOptions() { }
-        public long MaxMemoryBytes { get; init; }
-        public int MaxRecursionDepth { get; init; }
-        public int MaxScriptLength { get; init; }
-        public int MaxStatements { get; init; }
+        public long? MaxMemoryBytes { get; init; }
+        public int MaxOutputBytes { get; init; }
+        public int? MaxRecursionDepth { get; init; }
+        public int MaxSourceCharacters { get; init; }
+        public int? MaxStatements { get; init; }
         public System.TimeSpan Timeout { get; init; }
     }
     public sealed class ScriptExecutionRequest : System.IEquatable<Pocok.Scripting.Execution.ScriptExecutionRequest>
     {
-        public ScriptExecutionRequest(string identifier, string script) { }
+        public ScriptExecutionRequest(Pocok.Scripting.Execution.ScriptEngineId engineId, string identifier, string source) { }
         public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Execution.ScriptBinding> Bindings { get; init; }
+        public Pocok.Scripting.Execution.ScriptEngineId EngineId { get; }
         public bool ExpectResult { get; init; }
         public string Identifier { get; }
-        public string Script { get; }
+        public string Source { get; }
     }
     public sealed class ScriptFailure : System.IEquatable<Pocok.Scripting.Execution.ScriptFailure>
     {
-        public ScriptFailure(string Code, string Message, int? Line = default, int? Column = default, System.Exception? Exception = null) { }
+        public ScriptFailure(string Code, string Message, int? Line = default, int? Column = default, System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Execution.ScriptValidationDiagnostic>? Diagnostics = null) { }
         public string Code { get; init; }
         public int? Column { get; init; }
-        public System.Exception? Exception { get; init; }
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Execution.ScriptValidationDiagnostic>? Diagnostics { get; init; }
         public int? Line { get; init; }
         public string Message { get; init; }
     }
@@ -47,13 +93,54 @@
     }
     public sealed class ScriptRunner
     {
-        public ScriptRunner(Pocok.Conversion.IValueConverter? converter = null) { }
-        public System.Threading.Tasks.Task<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
-        public System.Threading.Tasks.Task<Pocok.Scripting.Execution.ScriptResult<T>> ExecuteAsync<T>(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
+        public ScriptRunner(Pocok.Scripting.Execution.ScriptEngineRegistry registry, Pocok.Conversion.IValueConverter? converter = null) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptResult<T>> ExecuteAsync<T>(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class ScriptValidationDiagnostic : System.IEquatable<Pocok.Scripting.Execution.ScriptValidationDiagnostic>
+    {
+        public ScriptValidationDiagnostic(string Code, string Message, Pocok.Scripting.Execution.ScriptValidationSeverity Severity = 0, int? Line = default, int? Column = default) { }
+        public string Code { get; init; }
+        public int? Column { get; init; }
+        public int? Line { get; init; }
+        public string Message { get; init; }
+        public Pocok.Scripting.Execution.ScriptValidationSeverity Severity { get; init; }
+    }
+    public sealed class ScriptValidationResult
+    {
+        public System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Execution.ScriptValidationDiagnostic> Diagnostics { get; }
+        public bool IsValid { get; }
+        public static Pocok.Scripting.Execution.ScriptValidationResult From(System.Collections.Generic.IEnumerable<Pocok.Scripting.Execution.ScriptValidationDiagnostic> diagnostics) { }
+        public static Pocok.Scripting.Execution.ScriptValidationResult Valid() { }
+    }
+    public enum ScriptValidationSeverity
+    {
+        Error = 0,
+        Warning = 1,
+    }
+    public sealed class UnavailableScriptEngineAdapter : Pocok.Scripting.Execution.IScriptEngineAdapter, Pocok.Scripting.Execution.IScriptValidator
+    {
+        public UnavailableScriptEngineAdapter(Pocok.Scripting.Execution.ScriptEngineId id, string language, string code, string message, Pocok.Scripting.Execution.ScriptEngineCapabilities? capabilities = null) { }
+        public Pocok.Scripting.Execution.ScriptEngineDescriptor Descriptor { get; }
+        public Pocok.Scripting.Execution.ScriptEngineId EngineId { get; }
+        public Pocok.Scripting.Execution.IScriptValidator Validator { get; }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ValidatedScript script, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptValidationResult> ValidateAsync(Pocok.Scripting.Execution.ScriptExecutionRequest request, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class ValidatedScript
+    {
+        public Pocok.Scripting.Execution.ScriptExecutionRequest Request { get; }
     }
 }
 namespace Pocok.Scripting.Import
 {
+    public interface IScriptImportSyntax
+    {
+        Pocok.Scripting.Execution.ScriptEngineId EngineId { get; }
+        System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptReference> FindImports(string? content);
+        string ImportedComment(Pocok.Scripting.Import.ScriptReference reference, int depth);
+        string RemoveImports(string content);
+    }
     public sealed class ImportedScriptContent : System.IEquatable<Pocok.Scripting.Import.ImportedScriptContent>
     {
         public ImportedScriptContent(Pocok.Scripting.Import.ScriptReference Reference, string Content) { }
@@ -76,14 +163,8 @@ namespace Pocok.Scripting.Import
     }
     public sealed class ScriptImportInjector
     {
-        public ScriptImportInjector(Pocok.Scripting.Modules.ScriptModuleResolver resolver) { }
+        public ScriptImportInjector(Pocok.Scripting.Modules.ScriptModuleResolver resolver, Pocok.Scripting.Import.IScriptImportSyntax syntax) { }
         public System.Threading.Tasks.ValueTask<Pocok.Scripting.Import.InjectedScript> InjectAsync(string script, System.Threading.CancellationToken cancellationToken = default) { }
-    }
-    public static class ScriptImportParser
-    {
-        public const string EditorExportCompletionPrefixPattern = "//\\s*#import\\s+\\w*$";
-        public const string EditorModuleCompletionPrefixPattern = "//\\s*#import\\s+(?<Name>[A-Za-z0-9_]+)\\s+from\\s+\\w*$";
-        public static System.Collections.Generic.IReadOnlyList<Pocok.Scripting.Import.ScriptReference> FindImports(string? content) { }
     }
     public sealed class ScriptImportResolution : System.IEquatable<Pocok.Scripting.Import.ScriptImportResolution>
     {
@@ -93,7 +174,8 @@ namespace Pocok.Scripting.Import
     }
     public sealed class ScriptReference : System.IEquatable<Pocok.Scripting.Import.ScriptReference>
     {
-        public ScriptReference(string name, string module) { }
+        public ScriptReference(Pocok.Scripting.Execution.ScriptEngineId engineId, string name, string module) { }
+        public Pocok.Scripting.Execution.ScriptEngineId EngineId { get; }
         public string Module { get; }
         public string Name { get; }
     }
@@ -111,13 +193,13 @@ namespace Pocok.Scripting.Modules
     }
     public sealed class ScriptModule : System.IEquatable<Pocok.Scripting.Modules.ScriptModule>
     {
-        public ScriptModule(string name, string module, string content) { }
+        public ScriptModule(Pocok.Scripting.Execution.ScriptEngineId engineId, string name, string module, string content) { }
         public string Content { get; }
         public Pocok.Scripting.Import.ScriptReference Reference { get; }
     }
     public sealed class ScriptModuleResolver
     {
-        public ScriptModuleResolver(Pocok.Scripting.Modules.IScriptModuleSource source) { }
+        public ScriptModuleResolver(Pocok.Scripting.Modules.IScriptModuleSource source, Pocok.Scripting.Import.IScriptImportSyntax syntax) { }
         public System.Threading.Tasks.ValueTask<Pocok.Scripting.Import.ScriptImportResolution> ResolveAsync(Pocok.Scripting.Import.ScriptReference root, System.Threading.CancellationToken cancellationToken = default) { }
     }
 }

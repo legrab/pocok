@@ -15,15 +15,42 @@ import urllib.parse
 import urllib.request
 
 
+PACKAGE_SLUGS = (
+    "conversion",
+    "readiness",
+    "app-defaults",
+    "app-defaults-logging",
+    "app-defaults-logging-serilog",
+    "modularity-contracts",
+    "modularity",
+    "app-defaults-modularity",
+    "background-work",
+    "scripting",
+    "scripting-javascript",
+    "scripting-csharp",
+    "scripting-python",
+    "localization",
+    "signals",
+    "subscriptions",
+    "licensing",
+    "app-defaults-licensing",
+)
+
+
 def free_port() -> int:
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
         return int(sock.getsockname()[1])
 
 
-def read_text(opener: urllib.request.OpenerDirector, url: str) -> tuple[int, str]:
+def read_text(
+    opener: urllib.request.OpenerDirector,
+    url: str,
+) -> tuple[int, str]:
     with opener.open(url, timeout=3) as response:
-        return response.status, html.unescape(response.read().decode("utf-8", errors="replace"))
+        return response.status, html.unescape(
+            response.read().decode("utf-8", errors="replace")
+        )
 
 
 def control_value(document: str, element_id: str) -> str:
@@ -36,7 +63,10 @@ def control_value(document: str, element_id: str) -> str:
     if textarea:
         return textarea.group(1)
 
-    input_tag = re.search(rf'<input(?=[^>]*\bid="{escaped_id}")[^>]*>', document)
+    input_tag = re.search(
+        rf'<input(?=[^>]*\bid="{escaped_id}")[^>]*>',
+        document,
+    )
     if input_tag:
         value = re.search(r'\bvalue="([^"]*)"', input_tag.group(0))
         if value:
@@ -48,7 +78,10 @@ def control_value(document: str, element_id: str) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("publish_root", type=Path)
-    parser.add_argument("--dotnet", default=os.environ.get("DOTNET_HOST_PATH", "dotnet"))
+    parser.add_argument(
+        "--dotnet",
+        default=os.environ.get("DOTNET_HOST_PATH", "dotnet"),
+    )
     args = parser.parse_args()
 
     root = args.publish_root.resolve()
@@ -66,15 +99,21 @@ def main() -> int:
             "PORT": str(port),
             "ASPNETCORE_ENVIRONMENT": "Production",
             "SHOWCASE_PLUGIN_DIR": str(plugins),
+            "Showcase__RequireCompleteCatalog": "true",
         }
     )
 
     stdout = root / "smoke.stdout.log"
     stderr = root / "smoke.stderr.log"
     cookie_jar = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
+    opener = urllib.request.build_opener(
+        urllib.request.HTTPCookieProcessor(cookie_jar)
+    )
 
-    with stdout.open("w", encoding="utf-8") as out, stderr.open("w", encoding="utf-8") as err:
+    with (
+        stdout.open("w", encoding="utf-8") as out,
+        stderr.open("w", encoding="utf-8") as err,
+    ):
         process = subprocess.Popen(
             [args.dotnet, str(app)],
             cwd=root,
@@ -87,10 +126,7 @@ def main() -> int:
                 "/health/live",
                 "/health/ready",
                 "/",
-                "/packages/conversion",
-                "/packages/scripting",
-                "/packages/licensing",
-                "/packages/readiness",
+                *(f"/packages/{slug}" for slug in PACKAGE_SLUGS),
                 "/system",
             ]
             deadline = time.monotonic() + 45
@@ -119,38 +155,76 @@ def main() -> int:
             _, licensing = read_text(opener, f"{base_url}/packages/licensing")
             _, scripting = read_text(opener, f"{base_url}/packages/scripting")
             sample_pages = [conversion, licensing, scripting]
-            if any("@bind:get=" in page or "@bind:set=" in page for page in sample_pages):
-                raise RuntimeError("A native sample binding was emitted as an inert HTML attribute.")
+            if any(
+                "@bind:get=" in page or "@bind:set=" in page
+                for page in sample_pages
+            ):
+                raise RuntimeError(
+                    "A native sample binding was emitted as an inert HTML attribute."
+                )
             if control_value(conversion, "source-value") != "300":
-                raise RuntimeError("Conversion default sample did not populate the source editor.")
+                raise RuntimeError(
+                    "Conversion default sample did not populate the source editor."
+                )
             if control_value(licensing, "license-id") != "demo-license":
-                raise RuntimeError("Licensing default sample did not populate the license ID.")
+                raise RuntimeError(
+                    "Licensing default sample did not populate the license ID."
+                )
             if control_value(licensing, "licensed-modules") != "Reporting, Export":
-                raise RuntimeError("Licensing default sample did not populate the module editor.")
+                raise RuntimeError(
+                    "Licensing default sample did not populate the module editor."
+                )
             if control_value(scripting, "timeout") != "1000":
-                raise RuntimeError("Scripting default sample did not populate execution options.")
+                raise RuntimeError(
+                    "Scripting default sample did not populate execution options."
+                )
 
             culture_url = (
                 f"{base_url}/culture/set?"
                 + urllib.parse.urlencode({"culture": "hu", "returnUrl": "/"})
             )
             status, hungarian_home = read_text(opener, culture_url)
-            if status != 200 or 'lang="hu"' not in hungarian_home or "Főoldal" not in hungarian_home:
-                raise RuntimeError("Hungarian culture cookie did not update shell rendering.")
+            if (
+                status != 200
+                or 'lang="hu"' not in hungarian_home
+                or "Főoldal" not in hungarian_home
+            ):
+                raise RuntimeError(
+                    "Hungarian culture cookie did not update shell rendering."
+                )
 
-            _, hungarian_conversion = read_text(opener, f"{base_url}/packages/conversion")
+            _, hungarian_conversion = read_text(
+                opener,
+                f"{base_url}/packages/conversion",
+            )
             if "Konverzió futtatása" not in hungarian_conversion:
-                raise RuntimeError("Hungarian culture cookie did not update Conversion rendering.")
+                raise RuntimeError(
+                    "Hungarian culture cookie did not update Conversion rendering."
+                )
 
-            _, hungarian_scripting = read_text(opener, f"{base_url}/packages/scripting")
+            _, hungarian_scripting = read_text(
+                opener,
+                f"{base_url}/packages/scripting",
+            )
             if "Szkript futtatása" not in hungarian_scripting:
-                raise RuntimeError("Hungarian culture cookie did not update Scripting rendering.")
+                raise RuntimeError(
+                    "Hungarian culture cookie did not update Scripting rendering."
+                )
 
-            _, hungarian_licensing = read_text(opener, f"{base_url}/packages/licensing")
+            _, hungarian_licensing = read_text(
+                opener,
+                f"{base_url}/packages/licensing",
+            )
             if "Licenc ellenőrzése" not in hungarian_licensing:
-                raise RuntimeError("Hungarian culture cookie did not update Licensing rendering.")
+                raise RuntimeError(
+                    "Hungarian culture cookie did not update Licensing rendering."
+                )
 
-            print("Smoke test passed:", ", ".join(endpoints), "and EN/HU cookie localization")
+            print(
+                "Smoke test passed:",
+                ", ".join(endpoints),
+                "and EN/HU cookie localization",
+            )
             return 0
         finally:
             process.terminate()

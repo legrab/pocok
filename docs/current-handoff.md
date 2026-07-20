@@ -1,92 +1,27 @@
 # Current repository handoff
 
-**Status revision:** Documentation topology reconciled against `main`; executable release evidence remains provisional  
-**Next execution owner:** [`docs/plans/release-readiness.md`](plans/release-readiness.md) RR1
+**Status revision:** Release Readiness Phase 2 implementation candidate prepared against PR #32 head `da13c00c8086b3ae86d368966a14f0f5efe19362`; executable proof remains pending.
 
-Any change that alters package eligibility, package closure, release evidence, or the Modularity gate must update this file with observed results. A documentation checkbox is not executable proof.
+## Current candidate state
 
-## Current catalog state
+- The repository continues to use schema-v1 `state`, `releaseTier`, and `releasable` metadata.
+- The library graph contains eighteen non-retired packages: the original fifteen plus `Pocok.Scripting.JavaScript`, `Pocok.Scripting.CSharp`, and `Pocok.Scripting.Python`.
+- All eighteen entries are candidate alpha-publication targets while API maturity remains unchanged. `Experimental` is not treated as a publication prohibition.
+- Package-specific workflow triggers cover all eighteen tag prefixes.
+- The synchronized `GLOBAL-v*` workflow retains the shared `pocok-publication` queue, deterministic dependency order, provenance-aware resume, and the current eighteen-package safety cap.
+- The local Showcase has ten package-owned plugins covering all eighteen libraries. Multi-package ownership is explicit through `IShowcasePackageCoverage`.
+- Logging and Localization execute bounded real package paths. Readiness, BackgroundWork, Modularity, Signals, and Subscriptions provide constrained source-accurate recipe builders.
+- JavaScript remains the public Scripting engine. C# and Python remain trusted/local only and report truthful unavailability otherwise.
 
-`eng/packages.json` is schema version 1 and currently uses `state`, `releasable`, and `releaseTier`.
+## Required proof before merge or release approval
 
-There are fifteen non-retired packable libraries.
+1. Resolve the existing PR #32 CI and Showcase failures and obtain green Linux, Windows, public-release, Showcase, and Docker checks.
+2. Review all new generated recipe snippets against the final public APIs.
+3. Run `tools/ReleaseReadiness/Invoke-ReleaseReadinessRehearsal.ps1` with an unused prerelease version.
+4. Review the exact eighteen package artifacts, symbols, candidate manifest, local-closure smoke, public audit, and complete Showcase publish/smoke output.
+5. Confirm NuGet trusted-publishing registrations and external prerequisites without publishing.
+6. Obtain explicit approval before creating one annotated `GLOBAL-v<version>` tag.
 
-Current catalog entries with `releasable: true`:
+See [release-readiness-phase2-candidate.md](release-readiness-phase2-candidate.md) and [implementation/release-readiness-package-gate-audit.md](implementation/release-readiness-package-gate-audit.md).
 
-- `Pocok.Conversion`;
-- `Pocok.Readiness`;
-- `Pocok.AppDefaults`;
-- `Pocok.AppDefaults.Logging`;
-- `Pocok.AppDefaults.Logging.Serilog`;
-- `Pocok.Scripting`;
-- `Pocok.Licensing`;
-- `Pocok.AppDefaults.Licensing`.
-
-Current experimental entries with `releasable: false`:
-
-- `Pocok.Modularity.Contracts`;
-- `Pocok.Modularity`;
-- `Pocok.AppDefaults.Modularity`;
-- `Pocok.BackgroundWork`;
-- `Pocok.Localization`;
-- `Pocok.Signals`;
-- `Pocok.Subscriptions`.
-
-The catalog, not older prose, is the current eligibility authority. This documentation restructuring does not change any entry.
-
-## Current implementation and evidence
-
-- Pull-request CI derives affected source, test, sample, benchmark, package, smoke, audit, and coverage work from changed paths plus reverse dependencies. Pushes to `main`, explicit full runs, policy changes, and unsafe graph states retain complete validation through the stable CI gate.
-- CI tooling rejects non-local workflow actions that are not pinned to full commit SHAs.
-- A prior Windows .NET 10.0.102 and PowerShell 7.3.6 run passed formatting, solution build, 236 tests, core samples, catalog validation, local-closure smoke, and public release audit on a pre-licensing baseline. This is historical evidence, not proof for the current candidate.
-- The previous Ubuntu `SourceFailurePublishesFailureAndReconnects` fake-time race was corrected by waiting for timer registration. A fresh Linux run remains required for current evidence.
-- BackgroundWork, Localization, Signals, and Subscriptions already have source, focused tests, API tracking, samples, and installed-package consumers. Their remaining alpha gates require a current gap audit and executable proof rather than wholesale reimplementation.
-- Modularity already follows the resolved BCL `AssemblyLoadContext` design, with clean-room fixtures, integration tests, `ModularCommunicator`, and real Showcase plugin loading. Its eligibility remains blocked until the complete Linux and Windows gate passes.
-- `Pocok.Scripting` is currently one releasable package with Jint in the package and an implicit JavaScript runner. Release Readiness owns splitting it into an engine-neutral core plus JavaScript, C#, and Python adapters.
-- `Pocok.Licensing` and `Pocok.AppDefaults.Licensing` are currently catalogued as releasable. Their source/tests/sample/consumer and documented acceptance gate still require current-candidate executable confirmation before a synchronized release.
-- Existing local Showcase plugins are Conversion, Scripting, and Licensing. Release Readiness owns seven more local plugins and the shared internal Monaco wrapper.
-
-No new test, package, CI, NuGet, browser, Docker, or deployment proof was produced by the documentation-plan patch.
-
-## Current GLOBAL-v* orchestration
-
-A schema-v1 synchronized global workflow is implemented.
-
-It:
-
-- targets only non-retired entries with `releasable: true`;
-- derives deterministic dependency-first order from `eng/packages.json`;
-- shares `group: pocok-publication`, `cancel-in-progress: false`, and `queue: max` with package-specific publication;
-- validates exact versions and repository/tag provenance before authentication;
-- performs target-scoped local smoke and public-content audit;
-- preserves candidate and state artifacts;
-- uses a draft GitHub Release;
-- waits for package propagation;
-- supports provenance-aware same-tag resume.
-
-The hosted job rejects more than eighteen target packages. Release Readiness expands the library graph from fifteen to exactly eighteen by adding the Scripting JavaScript, C#, and Python adapters, then uses this existing workflow for the first library-only synchronized prerelease.
-
-[`docs/plans/mvp-closure.md`](plans/mvp-closure.md) later owns:
-
-- schema-v2 catalog and publication policy;
-- typed release tooling;
-- immutable candidate manifests and rebuild-free recovery;
-- automated Source Link proof;
-- ten Showcase bundle packages;
-- capacity for the twenty-eight-package library-plus-bundle graph;
-- exact NuGet Showcase composition;
-- browser, Docker, public-feed, and Render closure.
-
-## Next action
-
-Execute [`docs/plans/release-readiness.md`](plans/release-readiness.md) from RR1:
-
-1. establish a fresh exact baseline;
-2. record package-specific gaps and current failures;
-3. split and harden Scripting;
-4. close the seven remaining package gates;
-5. complete ten-plugin local Showcase coverage;
-6. rehearse the eighteen-library graph;
-7. request explicit approval before creating a `GLOBAL-v*` tag.
-
-Use package, Showcase, release, and agentic skills only for the slices that need them. Preserve source changes, local executable proof, hosted cross-platform proof, package proof, public-feed proof, and actual publication as distinct evidence layers.
+MVP Closure remains responsible for schema-v2 typed tooling, immutable exact-artifact recovery, Showcase bundle packages, NuGet-backed Showcase composition, capacity beyond eighteen, browser/Docker public-feed proof, and Render rollout.

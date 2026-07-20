@@ -1,0 +1,165 @@
+<div class="package-page">
+    <ShowcasePackageHeader Descriptor="Context.Descriptor"
+                           Text="Context.Text"
+                           ImplementationStatusText="@T("Package.Status.Available")" />
+
+    <ShowcasePackageWorkbench>
+        <Samples>
+            <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
+                                  Samples="Context.Samples"
+                                  SelectedId="@_selectedId"
+                                  SelectedIdChanged="SelectSampleAsync"
+                                  Text="Context.Text"
+                                  ResourceNamespace="app-defaults-logging" />
+        </Samples>
+        <Main>
+            <ShowcaseSandboxFrame @key="_sampleRevision"
+                                  Title="@T("Sandbox.Title")"
+                                  Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="log-level">@T("Fields.Level")</label>
+                        <select id="log-level" value="@_input.Level" @onchange="SetLevelAsync">
+                            @foreach (LogLevel level in Enum.GetValues<LogLevel>())
+                            {
+                                <option value="@level">@level</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="log-count">@T("Fields.Count")</label>
+                        <input id="log-count"
+                               type="number"
+                               min="1"
+                               max="20"
+                               value="@_input.EventCount"
+                               @onchange="SetCountAsync" />
+                    </div>
+                    <div class="field checkbox-field">
+                        <label for="log-property">@T("Fields.Property")</label>
+                        <input id="log-property"
+                               type="checkbox"
+                               checked="@_input.IncludeProperty"
+                               @onchange="SetPropertyAsync" />
+                    </div>
+                    <div class="field checkbox-field">
+                        <label for="log-exception">@T("Fields.Exception")</label>
+                        <input id="log-exception"
+                               type="checkbox"
+                               checked="@_input.IncludeException"
+                               @onchange="SetExceptionAsync" />
+                    </div>
+                </div>
+
+                <ShowcaseExecutionControls Slice="Context.Slice"
+                                           Input="_input"
+                                           RunClient="Context.RunClient"
+                                           Culture="Context.Culture"
+                                           RunLabel="@T("Sandbox.Run")"
+                                           CancelLabel="@T("Sandbox.Cancel")"
+                                           ResetKey="@SampleResetKey"
+                                           ResultChanged="SetResultAsync"
+                                           RunningChanged="SetRunningAsync" />
+            </ShowcaseSandboxFrame>
+
+            <ShowcaseResultPanel Title="@T("Result.Title")"
+                                 EmptyText="@T("Result.Empty")"
+                                 Result="_result"
+                                 Text="Context.Text"
+                                 ResourceNamespace="app-defaults-logging"
+                                 CodePreviewTitle="@T("Result.Probe")"
+                                 CodePreviewLanguage="csharp"
+                                 TruncatedLabel="@T("Result.Truncated")" />
+        </Main>
+        <Guidance>
+            <ShowcaseGuideView Guide="Context.Slice.Guide"
+                               Text="Context.Text"
+                               ResourceNamespace="app-defaults-logging"
+                               MoreLabel="@T("Guide.More")" />
+            <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
+                <ul class="compact-list">
+                    <li>@T("Boundaries.Host")</li>
+                    <li>@T("Boundaries.Bounded")</li>
+                    <li>@T("Boundaries.NoStack")</li>
+                    <li>@T("Boundaries.Allowlist")</li>
+                </ul>
+            </ShowcaseBoundariesPanel>
+        </Guidance>
+    </ShowcasePackageWorkbench>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ShowcasePageContext Context { get; set; } = default!;
+
+    private LoggingInput _input = new();
+    private string _selectedId = string.Empty;
+    private ShowcaseRunResult? _result;
+    private bool _running;
+    private long _sampleRevision;
+
+    private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
+
+    protected override void OnInitialized() =>
+        Select(Context.Samples.Single(static sample => sample.IsDefault));
+
+    private string T(string key) => Context.Text.GetText("app-defaults-logging", key);
+
+    private Task SelectSampleAsync(string id)
+    {
+        Select(Context.Samples.Single(sample => sample.Id == id));
+        return Task.CompletedTask;
+    }
+
+    private void Select(IShowcaseSample sample)
+    {
+        _selectedId = sample.Id;
+        _input = (LoggingInput)sample.CreateInput();
+        _result = null;
+        _sampleRevision = checked(_sampleRevision + 1);
+    }
+
+    private Task SetLevelAsync(ChangeEventArgs args)
+    {
+        if (Enum.TryParse(args.Value?.ToString(), out LogLevel value))
+            _input = _input with { Level = value };
+        return Task.CompletedTask;
+    }
+
+    private Task SetCountAsync(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out int value))
+            _input = _input with { EventCount = Math.Clamp(value, 1, 20) };
+        return Task.CompletedTask;
+    }
+
+    private Task SetPropertyAsync(ChangeEventArgs args)
+    {
+        _input = _input with { IncludeProperty = ReadBool(args) };
+        return Task.CompletedTask;
+    }
+
+    private Task SetExceptionAsync(ChangeEventArgs args)
+    {
+        _input = _input with { IncludeException = ReadBool(args) };
+        return Task.CompletedTask;
+    }
+
+    private static bool ReadBool(ChangeEventArgs args) =>
+        args.Value is true || string.Equals(
+            args.Value?.ToString(),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+
+    private Task SetResultAsync(ShowcaseRunResult? result)
+    {
+        _result = result;
+        return Task.CompletedTask;
+    }
+
+    private Task SetRunningAsync(bool running)
+    {
+        _running = running;
+        return Task.CompletedTask;
+    }
+}

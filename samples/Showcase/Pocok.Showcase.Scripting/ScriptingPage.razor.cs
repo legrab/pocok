@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
+using Pocok.Scripting.Execution;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Scripting.Models;
 
@@ -10,9 +11,7 @@ namespace Pocok.Showcase.Scripting;
 
 public partial class ScriptingPage
 {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
-
+    private ScriptingEditor? _editor;
     private ScriptingInput _input = new();
     private string _selectedId = string.Empty;
     private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
@@ -20,21 +19,38 @@ public partial class ScriptingPage
     private bool _running;
     private long _sampleRevision;
 
+    [Parameter, EditorRequired]
+    public ShowcasePageContext Context { get; set; } = default!;
+
+    [Inject]
+    private ScriptEngineRegistry Registry { get; set; } = default!;
+
+    private IReadOnlyList<ScriptEngineDescriptor> Engines => Registry.Descriptors;
     private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
 
-    protected override void OnInitialized()
-    {
-        IShowcaseSample sample = Context.Samples.Single(static item => item.IsDefault);
-        SelectSample(sample);
-    }
+    protected override void OnInitialized() =>
+        SelectSample(Context.Samples.Single(static item => item.IsDefault));
 
     private string T(string key) => Context.Text.GetText("scripting", key);
 
-    private Task SelectSampleAsync(string id)
+    private Task SetInputAsync(ScriptingInput input)
     {
-        IShowcaseSample sample = Context.Samples.Single(item => item.Id == id);
-        SelectSample(sample);
+        _input = input;
         return Task.CompletedTask;
+    }
+
+    private async Task<object?> ResolveInputAsync()
+    {
+        if (_editor is not null)
+            await _editor.FlushAsync();
+        return _input;
+    }
+
+    private async Task SelectSampleAsync(string id)
+    {
+        if (_editor is not null)
+            await _editor.FlushAsync();
+        SelectSample(Context.Samples.Single(item => item.Id == id));
     }
 
     private void SelectSample(IShowcaseSample sample)

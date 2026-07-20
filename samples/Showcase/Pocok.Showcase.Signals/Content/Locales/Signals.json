@@ -1,0 +1,59 @@
+{
+  "Package": {
+    "Name": "Signals",
+    "Summary": "Generate constrained Signals configuration and usage recipes.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Presets",
+    "Title": "Signals recipe builder",
+    "Ready": "Generated from typed options"
+  },
+  "Fields": {
+    "Mode": "Recipe",
+    "Capacity": "Subscriber buffer capacity",
+    "IncludeOptional": "Enable stale detection",
+    "IncludeLifecycle": "Show explicit disposal"
+  },
+  "Tips": {
+    "Generated": "The code is generated from constrained options.",
+    "Ownership": "The recipe makes lifecycle ownership explicit."
+  },
+  "Guide": {
+    "More": "More guidance",
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Use these recipes as source-accurate starting points without running generated code."
+    },
+    "Snippet": {
+      "Title": "Generated recipe"
+    }
+  },
+  "Boundaries": {
+    "Title": "Boundaries",
+    "Generated": "Only typed options produce code.",
+    "NoExecution": "Generated source is not executed.",
+    "Constrained": "Identifiers and API choices are allowlisted.",
+    "Ownership": "Cancellation and disposal ownership stay visible."
+  },
+  "Source": {
+    "Title": "Source documentation",
+    "Body": "Read the package documentation for the complete behavioral contract."
+  },
+  "Samples": {
+    "read": {
+      "Name": "Point-in-time read",
+      "Description": "Connect and read one typed signal sample."
+    },
+    "write": {
+      "Name": "Acknowledged write",
+      "Description": "Write a value with explicit consistency."
+    },
+    "subscribe": {
+      "Name": "Live subscription",
+      "Description": "Consume bounded live samples and handle quality."
+    }
+  }
+}

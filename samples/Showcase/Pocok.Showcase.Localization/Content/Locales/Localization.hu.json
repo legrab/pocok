@@ -1,0 +1,69 @@
+{
+  "Package": {
+    "Name": "Localization",
+    "Summary": "JSON- és RESX-kompozíció, visszaesés, enumfordítás és újratöltés bemutatása.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Minták",
+    "Title": "Lokalizációs homokozó",
+    "Running": "Fut",
+    "Ready": "Kész",
+    "Run": "Erőforrások betöltése",
+    "Cancel": "Megszakítás"
+  },
+  "Fields": {
+    "Culture": "Kultúra",
+    "Watch": "Fájlfigyelés bekapcsolása",
+    "Reload": "Explicit újratöltés végrehajtása"
+  },
+  "Result": {
+    "Title": "Lokalizált értékek",
+    "Empty": "Futtasd a mintát a lokalizációs viselkedés megtekintéséhez.",
+    "Json": "JSON-érték",
+    "Resx": "RESX-érték",
+    "Fallback": "Kompozit visszaesés",
+    "Missing": "Hiányzó kulcs",
+    "Enum": "Enumfordítás",
+    "Culture": "Kultúra",
+    "Code": "API-útvonal",
+    "Truncated": "csonkolva"
+  },
+  "Tips": {
+    "Fallback": "A szülőkultúrára és a kompozit forrásra való visszaesés explicit.",
+    "Reload": "Az újratöltés megtartja az utolsó érvényes, korlátozott pillanatképet."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "Valódi fájlalapú lokalizálók használata a Showcase saját ideiglenes könyvtárában."
+    },
+    "Snippet": {
+      "Title": "Fájlalapú lokalizáló"
+    }
+  },
+  "Boundaries": {
+    "Title": "Korlátok",
+    "Temp": "A fájlok csak egy korlátozott, biztonságos ideiglenes könyvtárban léteznek.",
+    "Dispose": "Minden fájlfigyelő és lokalizáló szabályosan felszabadul.",
+    "NoPath": "Az ideiglenes elérési utak nem kerülnek a kimenetbe.",
+    "Bounded": "A fájlok és az eredmények mérete korlátozott."
+  },
+  "Samples": {
+    "hungarian": {
+      "Name": "Magyar szülőkultúra-visszaesés",
+      "Description": "A hu-HU kultúra feloldása a hu erőforrásokból."
+    },
+    "english": {
+      "Name": "Angol JSON és RESX",
+      "Description": "Azonos tartalmú szolgáltatói értékek összehasonlítása."
+    },
+    "reload": {
+      "Name": "Explicit újratöltés",
+      "Description": "A JSON-erőforrás módosítása és a pillanatkép újratöltése."
+    }
+  }
+}

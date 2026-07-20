@@ -6,17 +6,15 @@ namespace Pocok.Showcase.Scripting.Models;
 public sealed record ScriptingInput
 {
     public string SampleId { get; init; } = "arithmetic";
-
-    public string Script { get; init; } = """
-        function add(left, right) { return left + right; }
-        add(20, 22);
-        """;
-
+    public string EngineId { get; init; } = "javascript";
+    public string Source { get; init; } = "21 * 2;";
+    public IReadOnlyDictionary<string, string> Sources { get; init; } =
+        new Dictionary<string, string>(StringComparer.Ordinal);
     public bool ExpectResult { get; init; } = true;
     public int TimeoutMilliseconds { get; init; } = 1_000;
-    public int MaxStatements { get; init; } = 10_000;
-    public int MaxRecursionDepth { get; init; } = 64;
-    public int MaxMemoryMegabytes { get; init; } = 16;
+    public int? MaxStatements { get; init; } = 10_000;
+    public int? MaxRecursionDepth { get; init; } = 64;
+    public int? MaxMemoryMegabytes { get; init; } = 16;
 }
 
 public sealed record ScriptingOutput(
@@ -25,6 +23,7 @@ public sealed record ScriptingOutput(
     string? Result,
     string ResultType,
     bool ExpectResult,
+    string EngineId,
     string? FailureCode,
     string? FailureMessage,
     int? FailureLine,

@@ -1,0 +1,8 @@
+<Project>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Pocok.Scripting.Python.Worker/pocok_worker.py"
+             Link="Pocok.Scripting/PythonWorker/pocok_worker.py"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

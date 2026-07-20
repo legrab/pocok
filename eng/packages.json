@@ -134,7 +134,7 @@
       "family": "Capability",
       "releaseTier": 0,
       "state": "Experimental",
-      "releasable": false,
+      "releasable": true,
       "consumer": "ModularityContractsConsumer",
       "internalDependencies": [],
       "allowedExternalDependencies": [
@@ -150,7 +150,7 @@
       "family": "Capability",
       "releaseTier": 1,
       "state": "Experimental",
-      "releasable": false,
+      "releasable": true,
       "consumer": "ModularityConsumer",
       "internalDependencies": [
         "Pocok.Modularity.Contracts"
@@ -168,7 +168,7 @@
       "family": "MaintainerDefaults",
       "releaseTier": 2,
       "state": "Experimental",
-      "releasable": false,
+      "releasable": true,
       "consumer": "AppDefaultsModularityConsumer",
       "internalDependencies": [
         "Pocok.AppDefaults",
@@ -189,7 +189,7 @@
       "family": "Capability",
       "releaseTier": 0,
       "state": "Experimental",
-      "releasable": false,
+      "releasable": true,
       "consumer": "BackgroundWorkConsumer",
       "internalDependencies": [],
       "allowedExternalDependencies": [],
@@ -207,10 +207,55 @@
       "internalDependencies": [
         "Pocok.Conversion"
       ],
-      "allowedExternalDependencies": [
-        "Jint"
-      ],
+      "allowedExternalDependencies": [],
       "versionProperty": "PocokScriptingPackageVersion"
+    },
+    {
+      "id": "Pocok.Scripting.JavaScript",
+      "project": "src/Scripting.JavaScript/Pocok.Scripting.JavaScript.csproj",
+      "tagPrefix": "scripting.javascript-v",
+      "family": "Capability",
+      "releaseTier": 3,
+      "state": "Experimental",
+      "releasable": true,
+      "consumer": "ScriptingJavaScriptConsumer",
+      "internalDependencies": [
+        "Pocok.Scripting"
+      ],
+      "allowedExternalDependencies": [
+        "Jint", "Acornima"
+      ],
+      "versionProperty": "PocokScriptingJavaScriptPackageVersion"
+    },
+    {
+      "id": "Pocok.Scripting.CSharp",
+      "project": "src/Scripting.CSharp/Pocok.Scripting.CSharp.csproj",
+      "tagPrefix": "scripting.csharp-v",
+      "family": "Capability",
+      "releaseTier": 3,
+      "state": "Experimental",
+      "releasable": true,
+      "consumer": "ScriptingCSharpConsumer",
+      "internalDependencies": [
+        "Pocok.Scripting"
+      ],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokScriptingCSharpPackageVersion"
+    },
+    {
+      "id": "Pocok.Scripting.Python",
+      "project": "src/Scripting.Python/Pocok.Scripting.Python.csproj",
+      "tagPrefix": "scripting.python-v",
+      "family": "Capability",
+      "releaseTier": 3,
+      "state": "Experimental",
+      "releasable": true,
+      "consumer": "ScriptingPythonConsumer",
+      "internalDependencies": [
+        "Pocok.Scripting"
+      ],
+      "allowedExternalDependencies": [],
+      "versionProperty": "PocokScriptingPythonPackageVersion"
     },
     {
       "id": "Pocok.Localization",
@@ -219,7 +264,7 @@
       "family": "Capability",
       "releaseTier": 2,
       "state": "Experimental",
-      "releasable": false,
+      "releasable": true,
       "consumer": "LocalizationConsumer",
       "internalDependencies": [
         "Pocok.BackgroundWork"
@@ -236,7 +281,7 @@
       "family": "Capability",
       "releaseTier": 2,
       "state": "Experimental",
-      "releasable": false,
+      "releasable": true,
       "consumer": "SignalsConsumer",
       "internalDependencies": [
         "Pocok.Conversion"
@@ -251,7 +296,7 @@
       "family": "Capability",
       "releaseTier": 2,
       "state": "Experimental",
-      "releasable": false,
+      "releasable": true,
       "consumer": "SubscriptionsConsumer",
       "internalDependencies": [],
       "allowedExternalDependencies": [],

@@ -1,0 +1,59 @@
+{
+  "Package": {
+    "Name": "Readiness",
+    "Summary": "Korlátozott Readiness-konfigurációs és használati receptek generálása.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Minták",
+    "Title": "Readiness receptkészítő",
+    "Ready": "Típusos beállításokból generálva"
+  },
+  "Fields": {
+    "Mode": "Recept",
+    "Capacity": "Időtúllépés (másodperc)",
+    "IncludeOptional": "Megszakítási időtúllépés hozzáadása",
+    "IncludeLifecycle": "Állapot- és életcikluskimenet hozzáadása"
+  },
+  "Tips": {
+    "Generated": "A kód kizárólag korlátozott beállításokból készül.",
+    "Ownership": "A recept egyértelművé teszi az életciklus tulajdonjogát."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "Forráspontos kiindulási receptek készítése a generált kód futtatása nélkül."
+    },
+    "Snippet": {
+      "Title": "Generált recept"
+    }
+  },
+  "Boundaries": {
+    "Title": "Korlátok",
+    "Generated": "Csak típusos beállítások generálhatnak kódot.",
+    "NoExecution": "A generált forrás nem fut le.",
+    "Constrained": "Az azonosítók és API-választások engedélyezett készletből származnak.",
+    "Ownership": "A megszakítás és a felszabadítás tulajdonjoga látható marad."
+  },
+  "Source": {
+    "Title": "Forrásdokumentáció",
+    "Body": "A teljes viselkedési szerződés a csomag dokumentációjában található."
+  },
+  "Samples": {
+    "ready": {
+      "Name": "Kész életciklus",
+      "Description": "Forrás létrehozása és egy indulási ciklus készre jelölése."
+    },
+    "failure": {
+      "Name": "Hiba jelentése",
+      "Description": "Strukturált indulási hiba jelentése."
+    },
+    "shutdown": {
+      "Name": "Leállítás tulajdonjoga",
+      "Description": "Leállítás indítása és a forrás leállítottra jelölése."
+    }
+  }
+}

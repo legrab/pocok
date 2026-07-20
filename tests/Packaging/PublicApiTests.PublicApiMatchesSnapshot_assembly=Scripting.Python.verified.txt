@@ -1,0 +1,17 @@
+﻿namespace Pocok.Scripting.Python
+{
+    public sealed class PythonScriptEngineAdapter : Pocok.Scripting.Execution.IScriptEngineAdapter
+    {
+        public PythonScriptEngineAdapter(Pocok.Scripting.Python.PythonScriptEngineOptions? options = null) { }
+        public Pocok.Scripting.Execution.ScriptEngineDescriptor Descriptor { get; }
+        public Pocok.Scripting.Execution.IScriptValidator Validator { get; }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ValidatedScript script, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class PythonScriptEngineOptions : System.IEquatable<Pocok.Scripting.Python.PythonScriptEngineOptions>
+    {
+        public PythonScriptEngineOptions() { }
+        public System.Collections.Generic.IReadOnlyList<string> AllowedImports { get; init; }
+        public string? PythonExecutable { get; init; }
+        public string? WorkerPath { get; init; }
+    }
+}

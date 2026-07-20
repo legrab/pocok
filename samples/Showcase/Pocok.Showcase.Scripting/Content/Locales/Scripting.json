@@ -1,26 +1,25 @@
 {
   "Package": {
     "Name": "Scripting",
-    "Summary": "Run complete JavaScript with Pocok.Scripting and inspect returned values, limits, and structured failures.",
+    "Summary": "Compare bounded JavaScript, C#, and Python adapters through one engine-neutral runner.",
     "Status": {
       "Available": "Available"
     }
   },
   "Sandbox": {
     "Samples": "Samples",
-    "Title": "JavaScript sandbox",
+    "Title": "Multi-engine scripting sandbox",
     "Running": "Running",
     "Ready": "Ready",
-    "CodeLabel": "Complete JavaScript source",
+    "CodeLabel": "Script source",
     "Run": "Run script",
     "Cancel": "Cancel",
     "ExecutionSteps": "Execution steps",
-    "ShowSuggestions": "Show suggestions",
-    "HideSuggestions": "Hide suggestions"
+    "EditorFallback": "Monaco is unavailable; the bounded text editor remains active."
   },
   "Fields": {
+    "Engine": "Language engine",
     "ExpectResult": "Require a return value",
-    "ExpectResultHelp": "When enabled, null and undefined are returned as a structured missing-result failure.",
     "Timeout": "Timeout (ms)",
     "MaxStatements": "Maximum statements",
     "MaxRecursion": "Maximum recursion depth",
@@ -28,109 +27,87 @@
   },
   "Result": {
     "Title": "Execution result",
-    "Empty": "Run the current script to inspect its value or structured failure.",
-    "ScriptPreview": "Executed JavaScript",
+    "Empty": "Run the current source to inspect its value or safe failure.",
+    "ScriptPreview": "Executed source",
     "Truncated": "truncated",
     "Fields": {
       "ReturnValue": "Return value",
+      "Engine": "Engine",
       "ResultType": "Runtime result type",
-      "ExpectResult": "Return value required",
       "Limits": "Execution limits",
       "Line": "Failure line",
-      "Column": "Failure column"
+      "Column": "Failure column",
+      "ExpectResult": "Return value required"
     }
   },
   "Tips": {
     "Title": "What to notice",
-    "Isolation": "Each run uses a fresh Jint engine, so scripts cannot share mutable engine state.",
-    "Bounds": "Timeout, statements, recursion, source length, memory, queueing, and output each have separate limits.",
-    "ReturnValue": "The final JavaScript expression becomes the returned value. A declaration alone usually evaluates to undefined.",
-    "Failures": "JavaScript errors and limit violations are returned as structured failures instead of host exceptions.",
-    "Capabilities": "Hosts expose approved values and delegates explicitly; no ambient capabilities are available."
+    "Isolation": "Each run uses fresh engine or child-process state.",
+    "Bounds": "Only limits reported by the selected adapter are requested.",
+    "Failures": "Validation and execution failures expose safe diagnostics only.",
+    "Capabilities": "C# and Python require an explicitly trusted local deployment."
   },
   "Guide": {
     "More": "More guidance",
     "Purpose": {
       "Title": "Purpose",
-      "Body": "Pocok.Scripting provides a host-controlled JavaScript boundary for automation and extension points without exposing ambient CLR access."
+      "Body": "Pocok.Scripting separates engine-neutral orchestration from language adapters."
     },
     "QuickStart": {
       "Title": "Quick start",
-      "Body": "Write a complete script and leave the value to inspect as the final expression. The example invokes ScriptRunner directly."
-    },
-    "Results": {
-      "Title": "Results",
-      "Body": "Successful runs return the final JavaScript value. The Showcase formats scalar, array, and object results deterministically and does not expose captured exception objects."
+      "Body": "Choose an engine and run the equivalent sample."
     },
     "Bounds": {
       "Title": "Execution bounds",
-      "Body": "ScriptRunner limits timeout, statements, recursion, source length, memory, and cancellation. The Showcase also bounds queueing, input, and output."
-    },
-    "Capabilities": {
-      "Title": "Explicit capabilities",
-      "Body": "Hosts may register approved scalar values and delegates through ScriptBinding. Complex CLR objects and ambient interop remain unavailable."
-    },
-    "Imports": {
-      "Title": "Imports and modules",
-      "Body": "The package can resolve comment-based imports from an explicit module source. This public deployment runs self-contained scripts and does not provide a persistent module catalog."
-    },
-    "Concurrency": {
-      "Title": "Concurrency",
-      "Body": "ScriptRunner creates a fresh engine for every request and supports concurrent callers. Each Showcase run has its own scope, cancellation source, result channel, and progress channel."
+      "Body": "The runner validates before execution and rejects unsupported mandatory limits."
     },
     "Production": {
       "Title": "Production notes",
-      "Body": "Treat scripts as untrusted input, keep limits conservative, authorize every delegate, exclude secrets from diagnostics, and remember that in-process limits are not operating-system isolation."
+      "Body": "Validators are guardrails, not an operating-system sandbox. Public deployments enable JavaScript only."
     },
     "Snippet": {
-      "RunnerTitle": "Run a bounded script",
-      "ScriptTitle": "Complete script with a return value"
+      "RunnerTitle": "Register explicit engines"
     }
-  },
-  "Assist": {
-    "Const": "Declare an immutable local value.",
-    "Function": "Insert a complete function declaration.",
-    "Return": "Return from a function body.",
-    "Array": "Insert an array transformation sample.",
-    "Object": "Return an object literal as the final expression.",
-    "Reduce": "Reduce an array to one value.",
-    "Map": "Transform every array item."
   },
   "Boundaries": {
     "Title": "Boundaries",
-    "NoClr": "No ambient CLR or reflection access.",
-    "NoIo": "No filesystem, network, browser, or service-provider access.",
-    "FreshEngine": "A fresh engine and script state for every run.",
-    "Bounded": "Separate limits for source length, timeout, statements, recursion, memory, queueing, and output."
+    "Guardrails": "Validation is fail-closed guardrail logic, not an OS sandbox.",
+    "NoIo": "Filesystem, network, reflection, process, and environment access are denied by default.",
+    "Trusted": "C# and Python are trusted/local only.",
+    "Bounded": "Source, output, timeout, and supported engine limits are bounded."
   },
   "Source": {
     "Title": "Source documentation",
-    "Body": "Package documentation for execution limits, capabilities, imports, and security boundaries."
+    "Body": "Package documentation for engine contracts, adapters, validation, and trust boundaries."
   },
   "Samples": {
     "arithmetic": {
-      "Name": "Function return value",
-      "Description": "Define a function and return the triangular number of 12 from the final expression."
+      "Name": "Arithmetic",
+      "Description": "Return the same triangular-number result in all languages."
     },
     "object-result": {
-      "Name": "Object and array result",
-      "Description": "Return an object containing aggregate and transformed array values."
+      "Name": "Structured result",
+      "Description": "Return an equivalent object and list shape."
     },
     "string-result": {
-      "Name": "Template string",
-      "Description": "Return a JavaScript template string from a complete script."
+      "Name": "String result",
+      "Description": "Return the same deterministic string."
     },
     "missing-result": {
       "Name": "Missing result",
-      "Description": "End with a declaration while a result is required and inspect the structured failure."
+      "Description": "Require a result from source that only declares a value."
     },
     "syntax-error": {
       "Name": "Syntax failure",
-      "Description": "Run invalid JavaScript and inspect its safe diagnostic location."
+      "Description": "Inspect a safe parser diagnostic."
     },
-    "recursion-limit": {
-      "Name": "Recursion limit",
-      "Description": "Trigger the configured recursion boundary without affecting the host process."
+    "bounded-runaway": {
+      "Name": "Bounded runaway",
+      "Description": "Trigger timeout or an engine execution bound."
+    },
+    "validator-rejection": {
+      "Name": "Validator rejection",
+      "Description": "Request a prohibited engine-specific capability and stop before execution."
     }
   }
 }

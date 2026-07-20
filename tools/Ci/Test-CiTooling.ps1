@@ -66,7 +66,7 @@ Assert-True ($plan.affectedTestProjects -contains 'tests/Unit/BackgroundWork.Tes
 Assert-True ($plan.affectedTestProjects -notcontains 'tests/Unit/Localization.Tests/Pocok.Localization.Tests.csproj') 'A BackgroundWork test-only change must not run Localization tests.'
 
 $plan = Get-Plan -Changes @(Change 'src/Conversion/ValueConverter.cs')
-Assert-SequenceEqual $plan.affectedPackageIds @('Pocok.Conversion', 'Pocok.Scripting', 'Pocok.Signals') 'Conversion reverse dependencies are incorrect.'
+Assert-SequenceEqual $plan.affectedPackageIds @('Pocok.Conversion', 'Pocok.Scripting', 'Pocok.Scripting.CSharp', 'Pocok.Scripting.JavaScript', 'Pocok.Scripting.Python', 'Pocok.Signals') 'Conversion reverse dependencies are incorrect.'
 
 $plan = Get-Plan -Changes @(Change 'src/AppDefaults/ApplicationConfiguratorExtensions.cs')
 Assert-SequenceEqual $plan.affectedPackageIds @('Pocok.AppDefaults', 'Pocok.AppDefaults.Licensing', 'Pocok.AppDefaults.Logging', 'Pocok.AppDefaults.Logging.Serilog', 'Pocok.AppDefaults.Modularity') 'AppDefaults reverse dependencies are incorrect.'
@@ -107,7 +107,7 @@ Assert-True ((Get-Plan -Changes @(Change 'src/Conversion/ValueConverter.cs') -Ev
 $plan = Get-Plan -Changes @(Change 'src/AppDefaults/ApplicationConfiguratorExtensions.cs')
 Assert-SequenceEqual $plan.affectedPackageIds @($plan.affectedPackageIds | Sort-Object) 'Package arrays must be ordinally deterministic.'
 $windowsPlan = Get-Plan -Changes @(Change 'src\Conversion\ValueConverter.cs')
-Assert-SequenceEqual $windowsPlan.affectedPackageIds @('Pocok.Conversion', 'Pocok.Scripting', 'Pocok.Signals') 'Windows separators must normalize correctly.'
+Assert-SequenceEqual $windowsPlan.affectedPackageIds @('Pocok.Conversion', 'Pocok.Scripting', 'Pocok.Scripting.CSharp', 'Pocok.Scripting.JavaScript', 'Pocok.Scripting.Python', 'Pocok.Signals') 'Windows separators must normalize correctly.'
 
 $workflowViolations = @(Get-PocokWorkflowActionPinViolations -WorkflowRoot (Join-Path $repositoryRoot '.github/workflows'))
 Assert-True ($workflowViolations.Count -eq 0) "Repository workflows must pin external actions to full commit SHAs. Violations: $($workflowViolations | ConvertTo-Json -Compress)"

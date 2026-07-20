@@ -1,0 +1,26 @@
+@using BlazorMonaco.Editor
+@implements IAsyncDisposable
+
+<div class="showcase-monaco-editor">
+    <label for="@_id">@Label</label>
+    @if (_fallback)
+    {
+        <div class="diagnostic warning" role="status">@FallbackDiagnostic</div>
+        <ShowcaseBufferedTextArea @ref="_fallbackEditor"
+                                  Id="@_id"
+                                  Value="@Value"
+                                  ValueChanged="@ValueChanged"
+                                  class="code-editor"
+                                  aria-label="@Label"
+                                  spellcheck="false" />
+    }
+    else
+    {
+        <StandaloneCodeEditor @key="_modelKey"
+                              @ref="_editor"
+                              Id="@_id"
+                              CssClass="code-editor showcase-monaco-surface"
+                              ConstructionOptions="CreateOptions"
+                              OnDidChangeModelContent="@(_ => OnContentChangedAsync())" />
+    }
+</div>

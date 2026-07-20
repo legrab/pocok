@@ -50,9 +50,8 @@ public sealed class RepositoryBoundaryTests
         }
     }
 
-
     [Test]
-    public void PackableProjectsDoNotReferenceNonPackableRuntimeProjects()
+    public void PackableProjectsReferenceOnlyPackableRuntimeProjectsOrPrivateBuildAssets()
     {
         var root = RepositoryRoot.Path;
         var projects = Directory.EnumerateFiles(root, "*.csproj", SearchOption.AllDirectories)
@@ -72,8 +71,10 @@ public sealed class RepositoryBoundaryTests
 
                 projects.ContainsKey(referencedPath)
                     .ShouldBeTrue($"Unknown project reference: {projectPath} -> {include}");
-                IsPackable(projects[referencedPath]).ShouldBeTrue(
-                    $"Packable project {projectPath} references non-packable runtime project {referencedPath}.");
+                if (IsPackable(projects[referencedPath])) continue;
+
+                IsApprovedPrivateBuildAssetReference(projectPath, referencedPath, reference).ShouldBeTrue(
+                    $"Packable project {projectPath} references unapproved non-packable project {referencedPath}.");
             }
         }
     }
@@ -132,6 +133,35 @@ public sealed class RepositoryBoundaryTests
                 compile.Attribute("Link")?.Value.ShouldNotBeNullOrWhiteSpace();
             }
         }
+    }
+
+    private static bool IsApprovedPrivateBuildAssetReference(
+        string projectPath,
+        string referencedPath,
+        XElement reference)
+    {
+        string root = RepositoryRoot.Path;
+        string adapter = Path.GetFullPath(Path.Combine(
+            root,
+            "src",
+            "Scripting.CSharp",
+            "Pocok.Scripting.CSharp.csproj"));
+        string worker = Path.GetFullPath(Path.Combine(
+            root,
+            "src",
+            "Scripting.CSharp.Worker",
+            "Pocok.Scripting.CSharp.Worker.csproj"));
+
+        return string.Equals(projectPath, adapter, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(referencedPath, worker, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(
+                   reference.Attribute("ReferenceOutputAssembly")?.Value,
+                   "false",
+                   StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(
+                   reference.Attribute("PrivateAssets")?.Value,
+                   "all",
+                   StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsPackable(XDocument document)

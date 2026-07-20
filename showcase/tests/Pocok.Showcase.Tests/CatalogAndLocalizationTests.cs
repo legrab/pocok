@@ -15,7 +15,7 @@ public sealed class CatalogAndLocalizationTests
     public void PackageCatalogLoadsCurrentPackages()
     {
         var catalog = new ShowcasePackageCatalog(TestSupport.WebEnvironment());
-        catalog.Packages.Count.ShouldBe(15);
+        catalog.Packages.Count.ShouldBe(18);
         catalog.Find("Pocok.Conversion").ShouldNotBeNull();
     }
 

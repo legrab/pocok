@@ -1,0 +1,63 @@
+{
+  "Package": {
+    "Name": "BackgroundWork",
+    "Summary": "Korlátozott BackgroundWork-konfigurációs és használati receptek generálása.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Minták",
+    "Title": "BackgroundWork receptkészítő",
+    "Ready": "Típusos beállításokból generálva"
+  },
+  "Fields": {
+    "Mode": "Recept",
+    "Capacity": "Időköz (ezredmásodperc)",
+    "IncludeOptional": "Hibakezelés hozzáadása",
+    "IncludeLifecycle": "Explicit leállítás és tulajdonjog megjelenítése"
+  },
+  "Tips": {
+    "Generated": "A kód kizárólag korlátozott beállításokból készül.",
+    "Ownership": "A recept egyértelművé teszi az életciklus tulajdonjogát."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "Forráspontos kiindulási receptek készítése a generált kód futtatása nélkül."
+    },
+    "Snippet": {
+      "Title": "Generált recept"
+    }
+  },
+  "Boundaries": {
+    "Title": "Korlátok",
+    "Generated": "Csak típusos beállítások generálhatnak kódot.",
+    "NoExecution": "A generált forrás nem fut le.",
+    "Constrained": "Az azonosítók és API-választások engedélyezett készletből származnak.",
+    "Ownership": "A megszakítás és a felszabadítás tulajdonjoga látható marad."
+  },
+  "Source": {
+    "Title": "Forrásdokumentáció",
+    "Body": "A teljes viselkedési szerződés a csomag dokumentációjában található."
+  },
+  "Samples": {
+    "observe": {
+      "Name": "Hibák megfigyelése",
+      "Description": "Feladat megfigyelése saját hibakezelési felelősséggel."
+    },
+    "coalesce": {
+      "Name": "Kérések összevonása",
+      "Description": "Átfedő kérések összevonása egyetlen követő futásba."
+    },
+    "debounce": {
+      "Name": "Változások késleltetése",
+      "Description": "Csendes időszak kivárása a futtatás előtt."
+    },
+    "repeat": {
+      "Name": "Biztonságos ismétlés",
+      "Description": "Korlátozott, nem átfedő iterációk futtatása."
+    }
+  }
+}

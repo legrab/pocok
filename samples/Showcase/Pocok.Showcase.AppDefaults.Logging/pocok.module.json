@@ -1,0 +1,19 @@
+{
+  "manifestVersion": 1,
+  "id": "pocok.showcase.app-defaults-logging",
+  "version": "1.0.0",
+  "entryAssembly": "Pocok.Showcase.AppDefaults.Logging.dll",
+  "required": true,
+  "sharedAssemblies": [
+    "Pocok.Showcase.Contracts",
+    "Pocok.Showcase.Components",
+    "Microsoft.AspNetCore.Components",
+    "Microsoft.AspNetCore.Components.Web"
+  ],
+  "metadata": {
+    "packageId": "Pocok.AppDefaults.Logging",
+    "slug": "app-defaults-logging",
+    "kind": "showcase-slice",
+    "coveredPackageIds": "Pocok.AppDefaults;Pocok.AppDefaults.Logging;Pocok.AppDefaults.Logging.Serilog"
+  }
+}

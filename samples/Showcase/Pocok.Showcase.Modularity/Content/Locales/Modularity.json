@@ -1,0 +1,58 @@
+{
+  "Package": {
+    "Name": "Modularity",
+    "Summary": "Generate constrained Modularity configuration and usage recipes.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Presets",
+    "Title": "Modularity recipe builder",
+    "Ready": "Generated from typed options"
+  },
+  "Fields": {
+    "Mode": "Recipe",
+    "IncludeOptional": "Make module optional",
+    "IncludeLifecycle": "Include matching manifest"
+  },
+  "Tips": {
+    "Generated": "The code is generated from constrained options.",
+    "Ownership": "The recipe makes lifecycle ownership explicit."
+  },
+  "Guide": {
+    "More": "More guidance",
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Use these recipes as source-accurate starting points without running generated code."
+    },
+    "Snippet": {
+      "Title": "Generated recipe"
+    }
+  },
+  "Boundaries": {
+    "Title": "Boundaries",
+    "Generated": "Only typed options produce code.",
+    "NoExecution": "Generated source is not executed.",
+    "Constrained": "Identifiers and API choices are allowlisted.",
+    "Ownership": "Cancellation and disposal ownership stay visible."
+  },
+  "Source": {
+    "Title": "Source documentation",
+    "Body": "Read the package documentation for the complete behavioral contract."
+  },
+  "Samples": {
+    "direct": {
+      "Name": "Direct registration",
+      "Description": "Configure trusted module directories directly."
+    },
+    "app-defaults": {
+      "Name": "AppDefaults registration",
+      "Description": "Apply Modularity defaults to a host builder."
+    },
+    "manifest": {
+      "Name": "Matching manifest",
+      "Description": "Generate registration and a consistent module manifest."
+    }
+  }
+}
