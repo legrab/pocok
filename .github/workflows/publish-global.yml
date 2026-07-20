@@ -1,0 +1,125 @@
+name: Publish synchronized package graph
+
+on:
+  push:
+    tags:
+      - 'GLOBAL-v*'
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: pocok-publication
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  publish-global:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          global-json-file: global.json
+      - id: resolve
+        name: Resolve and validate synchronized graph
+        shell: pwsh
+        run: |
+          ./tools/PackageCatalog/Resolve-GlobalRelease.ps1 -Tag '${{ github.ref_name }}' -Commit '${{ github.sha }}' -OutputPath artifacts/global-release/plan.json -GitHubOutput $env:GITHUB_OUTPUT
+          $plan = Get-Content artifacts/global-release/plan.json -Raw | ConvertFrom-Json
+          if (@($plan.packages).Count -gt 18) {
+            throw 'The synchronized graph exceeds the safe single-job capacity of 18 packages. Revisit the orchestration design before publishing.'
+          }
+      - name: Validate package catalog and global tooling
+        shell: pwsh
+        run: |
+          ./tools/PackageCatalog/Test-PackageCatalog.ps1
+          ./tools/PackageCatalog/Test-GlobalRelease.ps1
+      - name: Preflight all exact versions and provenance
+        shell: pwsh
+        run: |
+          ./tools/PackageCatalog/Test-GlobalReleasePreflight.ps1 -Tag '${{ github.ref_name }}' -Commit '${{ github.sha }}' -OutputPath artifacts/global-release/preflight-state.json | Out-Host
+      - name: Generate synchronized versions
+        shell: pwsh
+        run: |
+          ./tools/PackageCatalog/New-GlobalReleaseVersionsProps.ps1 -Version '${{ steps.resolve.outputs.version }}' -OutputPath artifacts/global-release/release-versions.props
+      - name: Restore, build, and test release graph
+        shell: pwsh
+        run: ./tools/Ci/Invoke-PublicReleaseValidation.ps1 -ReleaseVersionsFile artifacts/global-release/release-versions.props
+      - name: Pack synchronized graph
+        shell: pwsh
+        run: |
+          Remove-Item artifacts/packages -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory artifacts/packages -Force | Out-Null
+          $releaseProps = Join-Path $PWD 'artifacts/global-release/release-versions.props'
+          $plan = Get-Content artifacts/global-release/plan.json -Raw | ConvertFrom-Json
+          foreach ($package in $plan.packages) {
+            dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=false
+            if ($LASTEXITCODE -ne 0) { throw "Packing $($package.id) failed with exit code $LASTEXITCODE." }
+            foreach ($extension in @('nupkg','snupkg')) {
+              $path = Join-Path artifacts/packages "$($package.id).${{ steps.resolve.outputs.version }}.$extension"
+              if (-not (Test-Path $path -PathType Leaf)) { throw "Missing exact artifact $path." }
+            }
+          }
+      - name: Test complete local closure
+        shell: pwsh
+        run: |
+          $plan = Get-Content artifacts/global-release/plan.json -Raw | ConvertFrom-Json
+          ./tools/PackageSmoke/Invoke-PackageSmoke.ps1 -NoPack -Mode LocalClosure -PackageIds @($plan.packages.id)
+      - name: Audit public contents
+        shell: pwsh
+        run: |
+          $plan = Get-Content artifacts/global-release/plan.json -Raw | ConvertFrom-Json
+          ./tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1 -PackageIds @($plan.packages.id)
+      - name: Preserve zero-push candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: global-release-${{ github.ref_name }}
+          path: |
+            artifacts/global-release
+            artifacts/packages/*.nupkg
+            artifacts/packages/*.snupkg
+          if-no-files-found: error
+          retention-days: 30
+      - name: Create or update draft GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view '${{ github.ref_name }}' >/dev/null 2>&1; then
+            args=(--verify-tag --draft --generate-notes --title '${{ github.ref_name }}')
+            [[ '${{ steps.resolve.outputs.version }}' == *-* ]] && args+=(--prerelease)
+            gh release create '${{ github.ref_name }}' "${args[@]}"
+          fi
+          gh release upload '${{ github.ref_name }}' artifacts/global-release/plan.json artifacts/global-release/preflight-state.json --clobber
+      - name: Log in to NuGet with trusted publishing
+        uses: NuGet/login@d22cc5f58ff5b88bf9bd452535b4335137e24544 # v1.1.0
+        id: nuget-login
+        with:
+          user: ${{ vars.NUGET_USERNAME }}
+      - name: Publish missing packages sequentially
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: |
+          ./tools/PackageCatalog/Invoke-GlobalRelease.ps1 -Tag '${{ github.ref_name }}' -Commit '${{ github.sha }}' -PackagesPath artifacts/packages -ApiKey $env:NUGET_API_KEY -PropagationTimeout '00:15:00' -StatePath artifacts/global-release/final-state.json
+      - name: Finalize GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload '${{ github.ref_name }}' artifacts/global-release/final-state.json artifacts/packages/*.nupkg artifacts/packages/*.snupkg --clobber
+          gh release edit '${{ github.ref_name }}' --draft=false
+      - name: Preserve final state after failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: global-release-state-${{ github.ref_name }}
+          path: artifacts/global-release
+          if-no-files-found: warn
+          retention-days: 30

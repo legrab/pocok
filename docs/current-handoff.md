@@ -28,3 +28,7 @@ Refresh owner: any change that alters release eligibility, acceptance evidence, 
 Execute `docs/plans/repository-finalization.md` from R1. The immediate evidence remains `./tools/Ci/Test-CiTooling.ps1`, complete Linux/Windows CI, the licensing acceptance gate, automated portable-PDB/Source Link verification from an installed candidate package, and candidate-scoped publication smoke before eligibility changes.
 
 Use `.agents/skills/pocok-release-engineering/SKILL.md` for the release acceptance procedure and `.agents/skills/pocok-package-engineering/SKILL.md` for each package-specific gate. This handoff records state only.
+
+## GLOBAL-v* interim orchestration
+
+A schema-v1 synchronized global release workflow is now present. It remains blocked by the existing exact-commit release gates and performs no publication until a GLOBAL-v* tag is explicitly pushed. Future finalization migrates it to typed tooling and immutable manifests.

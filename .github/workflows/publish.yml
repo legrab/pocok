@@ -65,9 +65,7 @@ jobs:
           $closure = Get-Content artifacts/release-closure.json -Raw | ConvertFrom-Json
           foreach ($package in $closure) {
             dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=false
-            if ($LASTEXITCODE -ne 0) {
-              throw "Packing $($package.id) failed with exit code $LASTEXITCODE."
-            }
+            if ($LASTEXITCODE -ne 0) { throw "Packing $($package.id) failed with exit code $LASTEXITCODE." }
           }
       - name: Verify exact candidate
         shell: bash
@@ -94,8 +92,7 @@ jobs:
         shell: bash
         env:
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
-        run: |
-          dotnet nuget push "artifacts/packages/${{ needs.resolve.outputs.package-id }}.${{ needs.resolve.outputs.version }}.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "artifacts/packages/${{ needs.resolve.outputs.package-id }}.${{ needs.resolve.outputs.version }}.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
       - name: Create GitHub release
         shell: bash
         env:

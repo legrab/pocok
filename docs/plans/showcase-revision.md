@@ -470,3 +470,7 @@ Showcase MVP completion requires separately labelled evidence for current-local 
 | BlazorMonaco assets | Pinned local package assets | Buffered textarea preserves functionality; Monaco acceptance remains failed until repaired. |
 | Docker/BuildKit | Build local and full-NuGet images | Published-directory smoke is retained, but Docker gate remains failed. |
 | Render service/access | Existing linked Blueprint service and previous deploy | Exact local image/record retained; no deployment claim. |
+
+## Global release integration note
+
+The current schema-v1 `GLOBAL-v*` workflow publishes only catalog entries that are presently releasable. Future Showcase bundle work must add bundles to the existing synchronized orchestrator after schema-v2 catalog and bundle proof are implemented. Do not create a second global release workflow for Showcase packages.
