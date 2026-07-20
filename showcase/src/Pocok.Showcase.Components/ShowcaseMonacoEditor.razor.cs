@@ -156,14 +156,7 @@ public partial class ShowcaseMonacoEditor
 
     public async ValueTask DisposeAsync()
     {
-        try
-        {
-            await FlushAsync();
-        }
-        catch (Exception)
-        {
-            // Disposal preserves the last successfully committed value.
-        }
+        _valueCommitter.Dispose();
 
         try
         {
@@ -174,7 +167,6 @@ public partial class ShowcaseMonacoEditor
             // Browser teardown or circuit loss already released the client resources.
         }
 
-        _valueCommitter.Dispose();
         GC.SuppressFinalize(this);
     }
 }
