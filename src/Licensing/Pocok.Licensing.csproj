@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <PackageVersion Condition="'$(PocokLicensingPackageVersion)' != ''">$(PocokLicensingPackageVersion)</PackageVersion>
+    <MinVerVersionOverride Condition="'$(PocokLicensingPackageVersion)' != ''">$(PocokLicensingPackageVersion)</MinVerVersionOverride>
     <PackageId>Pocok.Licensing</PackageId>
     <MinVerTagPrefix>licensing-v</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
