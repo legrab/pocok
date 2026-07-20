@@ -26,7 +26,7 @@
                                   Title="@T("Sandbox.Title")"
                                   Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
                 <ScriptingEditor @ref="_editor"
-                                 Value="_input"
+                                 Value="@_input"
                                  ValueChanged="SetInputAsync"
                                  Engines="Engines"
                                  ResetRevision="_sampleRevision"

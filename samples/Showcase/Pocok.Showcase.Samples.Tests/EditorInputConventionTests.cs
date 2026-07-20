@@ -87,7 +87,30 @@ public sealed class EditorInputConventionTests
     }
 
     [Test]
-    [Ignore("Whatever, this is stupid")]
+    public void PluginRazorImportsEnableDomEventHandlers()
+    {
+        string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
+        var violations = new List<string>();
+
+        foreach (string projectDirectory in Directory.EnumerateDirectories(samplesRoot))
+        {
+            if (!Directory.EnumerateFiles(projectDirectory, "*.razor", SearchOption.AllDirectories).Any())
+                continue;
+
+            string importsPath = Path.Combine(projectDirectory, "_Imports.razor");
+            string imports = File.Exists(importsPath) ? File.ReadAllText(importsPath) : string.Empty;
+            if (!imports.Contains("@using Microsoft.AspNetCore.Components.Web", StringComparison.Ordinal))
+            {
+                violations.Add(Path.GetRelativePath(TestSupport.RepositoryRoot, projectDirectory));
+            }
+        }
+
+        violations.ShouldBeEmpty(
+            "sample plugin Razor imports must include Microsoft.AspNetCore.Components.Web; "
+            + "without it, DOM event directives such as @onchange compile as inert attributes");
+    }
+
+    [Test]
     public void SamplePagesAdvanceAUniqueEditorRevisionForEverySelection()
     {
         string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
@@ -101,9 +124,11 @@ public sealed class EditorInputConventionTests
 
             string codeBehindPath = path + ".cs";
             string codeBehind = File.Exists(codeBehindPath) ? File.ReadAllText(codeBehindPath) : string.Empty;
+            string implementation = content + Environment.NewLine + codeBehind;
             if (!content.Contains("@key=\"_sampleRevision\"", StringComparison.Ordinal)
-                || !content.Contains("ResetKey=\"@SampleResetKey\"", StringComparison.Ordinal)
-                || !codeBehind.Contains("_sampleRevision = checked(_sampleRevision + 1);", StringComparison.Ordinal))
+                || !implementation.Contains("_sampleRevision = checked(_sampleRevision + 1);", StringComparison.Ordinal)
+                || (content.Contains("<ShowcaseExecutionControls", StringComparison.Ordinal)
+                    && !content.Contains("ResetKey=\"@SampleResetKey\"", StringComparison.Ordinal)))
             {
                 violations.Add(Path.GetRelativePath(TestSupport.RepositoryRoot, path));
             }

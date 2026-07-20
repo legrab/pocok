@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
+using Pocok.Showcase.Components;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Licensing.Models;
 
@@ -10,6 +11,8 @@ namespace Pocok.Showcase.Licensing;
 
 public partial class LicensingEditor
 {
+    private ShowcaseBufferedTextArea? _licensedModulesEditor;
+
     [Parameter, EditorRequired]
     public LicensingInput Value { get; set; } = new();
 
@@ -29,6 +32,13 @@ public partial class LicensingEditor
     }
 
     private string T(string key) => Text.GetText("licensing", key);
+
+    /// <summary>Flushes pending browser-owned text before an explicit action.</summary>
+    public async Task FlushAsync()
+    {
+        if (_licensedModulesEditor is not null)
+            await _licensedModulesEditor.FlushAsync();
+    }
 
     private Task SetLicenseIdAsync(string value) => UpdateAsync(Value with { LicenseId = value });
     private Task SetCustomerAsync(string value) => UpdateAsync(Value with { Customer = value });

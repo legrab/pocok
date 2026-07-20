@@ -29,7 +29,8 @@
         </div>
         <div class="field full">
             <label for="source-value">@T("Fields.Value")</label>
-            <ShowcaseBufferedTextArea Id="source-value"
+            <ShowcaseBufferedTextArea @ref="_sourceValueEditor"
+                                      Id="source-value"
                                       class="compact-editor"
                                       Value="@Value.SourceValue"
                                       ValueChanged="SetSourceValueAsync"
@@ -123,7 +124,8 @@
 }
 else
 {
-    <ShowcaseCodeAssistEditor Label="@T("Sandbox.CodeLabel")"
+    <ShowcaseCodeAssistEditor @ref="_codeEditor"
+                              Label="@T("Sandbox.CodeLabel")"
                               @bind-Value:get="Value.Code"
                               @bind-Value:set="SetCodeAsync"
                               ActionLabel="@T("Sandbox.FormatExpression")"

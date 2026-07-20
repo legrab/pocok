@@ -25,13 +25,15 @@
             <ShowcaseSandboxFrame @key="_sampleRevision"
                                   Title="@T("Sandbox.Title")"
                                   Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
-                <ConversionEditor Value="@_input"
+                <ConversionEditor @ref="_editor"
+                                  Value="@_input"
                                   ValueChanged="SetInputAsync"
                                   CodeAssist="Context.CodeAssist"
                                   Text="Context.Text" />
 
                 <ShowcaseExecutionControls Slice="Context.Slice"
                                            Input="_input"
+                                           InputResolver="ResolveInputAsync"
                                            RunClient="Context.RunClient"
                                            Culture="Context.Culture"
                                            RunLabel="@T("Sandbox.Run")"

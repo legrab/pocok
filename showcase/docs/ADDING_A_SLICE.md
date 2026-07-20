@@ -94,6 +94,7 @@ Keep the browser-owned editing value separate from the page's committed input mo
 - Use `ShowcaseBufferedTextArea` for ordinary multiline text and `ShowcaseCodeAssistEditor` for source code with completion suggestions.
 - Let the shared control debounce parent updates. It keeps the live DOM value local, commits the latest value after 500 ms, and flushes immediately on blur or an explicit editor action.
 - Use normal Blazor `onchange` binding for inputs that need updates only after editing is committed. Do not add debounce to selects, checkboxes, buttons, or other discrete controls.
+- Include `@using Microsoft.AspNetCore.Components.Web` in every plugin `_Imports.razor`. Without that import, DOM event directives such as `@onchange`, `@onclick`, and `@onblur` can be emitted as inert attributes instead of interactive handlers.
 - Do not use `@bind:event="oninput"` or a raw `@oninput` callback in a sample plugin. If a new single-line or specialized control genuinely needs per-keystroke behavior, add a shared control under `Pocok.Showcase.Components` that reuses `BufferedEditorValue` and `DebouncedValueCommitter<T>`.
 - The page remains the owner of committed typed input. The temporary editing buffer is circuit-local UI state and must not be stored in a singleton.
 
