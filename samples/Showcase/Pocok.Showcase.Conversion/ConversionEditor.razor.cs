@@ -4,6 +4,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Pocok.Conversion;
+using Pocok.Showcase.Components;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Conversion.Models;
 
@@ -11,6 +12,8 @@ namespace Pocok.Showcase.Conversion;
 
 public partial class ConversionEditor
 {
+    private ShowcaseBufferedTextArea? _sourceValueEditor;
+    private ShowcaseCodeAssistEditor? _codeEditor;
     private string? _formatError;
 
     [Parameter, EditorRequired]
@@ -44,33 +47,58 @@ public partial class ConversionEditor
 
     private string T(string key) => Text.GetText("conversion", key);
 
+    /// <summary>Flushes the active browser-owned editor value before an explicit action.</summary>
+    public async Task FlushAsync()
+    {
+        await FlushActiveInputAsync();
+    }
+
+    private async Task<ConversionInput> FlushActiveInputAsync()
+    {
+        ConversionInput input = Value;
+        if (Value.EditorMode == ConversionEditorMode.Fields && _sourceValueEditor is not null)
+        {
+            string sourceValue = await _sourceValueEditor.FlushAsync();
+            return input with { SourceValue = sourceValue };
+        }
+
+        if (Value.EditorMode == ConversionEditorMode.Code && _codeEditor is not null)
+        {
+            string code = await _codeEditor.FlushAsync();
+            return input with { Code = code };
+        }
+
+        return input;
+    }
+
     private Task SetModeAsync(string mode) => SetModeAsync(Enum.Parse<ConversionEditorMode>(mode));
 
     private async Task SetModeAsync(ConversionEditorMode mode)
     {
-        if (Value.EditorMode == mode)
+        ConversionInput input = await FlushActiveInputAsync();
+        if (input.EditorMode == mode)
             return;
 
         if (mode == ConversionEditorMode.Code)
         {
             _formatError = null;
-            await UpdateAsync(Value with { EditorMode = mode });
+            await UpdateAsync(input with { EditorMode = mode });
             return;
         }
 
-        ConversionParseResult parsed = ConversionCodeParser.Parse(Value.Code, Value.SampleId);
+        ConversionParseResult parsed = ConversionCodeParser.Parse(input.Code, input.SampleId);
         if (parsed.IsSuccess)
         {
             ConversionInput fields = parsed.Input! with
             {
-                SampleId = Value.SampleId,
+                SampleId = input.SampleId,
                 EditorMode = ConversionEditorMode.Fields
             };
             await UpdateAsync(fields);
             return;
         }
 
-        await ValueChanged.InvokeAsync(Value with { EditorMode = ConversionEditorMode.Fields });
+        await ValueChanged.InvokeAsync(input with { EditorMode = ConversionEditorMode.Fields });
     }
 
     private Task SetSourceKindAsync(ConversionSourceKind value) => UpdateAsync(Value with

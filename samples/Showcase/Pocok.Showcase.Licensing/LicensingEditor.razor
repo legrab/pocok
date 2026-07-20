@@ -48,7 +48,8 @@
             </div>
             <div class="field full">
                 <label for="licensed-modules">@T("Fields.LicensedModules")</label>
-                <ShowcaseBufferedTextArea Id="licensed-modules"
+                <ShowcaseBufferedTextArea @ref="_licensedModulesEditor"
+                                          Id="licensed-modules"
                                           class="compact-editor"
                                           Value="@Value.LicensedModules"
                                           ValueChanged="SetLicensedModulesAsync" />

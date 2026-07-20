@@ -13,6 +13,7 @@ public partial class LicensingPage
     [Parameter, EditorRequired]
     public ShowcasePageContext Context { get; set; } = default!;
 
+    private LicensingEditor? _editor;
     private LicensingInput _input = new();
     private string _selectedId = string.Empty;
     private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
@@ -58,8 +59,11 @@ public partial class LicensingPage
         return Task.CompletedTask;
     }
 
-    private void GenerateLicense()
+    private async Task GenerateLicense()
     {
+        if (_editor is not null)
+            await _editor.FlushAsync();
+
         try
         {
             _generatedLicense = LicensingShowcaseSlice.GenerateLicense(_input);
@@ -70,6 +74,13 @@ public partial class LicensingPage
             _generatedLicense = null;
             _generationError = $"{T("Generation.Error")} {exception.Message}";
         }
+    }
+
+    private async Task<object?> ResolveInputAsync()
+    {
+        if (_editor is not null)
+            await _editor.FlushAsync();
+        return _input;
     }
 
     private Task SetResultAsync(ShowcaseRunResult? result)

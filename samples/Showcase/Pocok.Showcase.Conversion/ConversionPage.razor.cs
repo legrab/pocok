@@ -13,6 +13,7 @@ public partial class ConversionPage
     [Parameter, EditorRequired]
     public ShowcasePageContext Context { get; set; } = default!;
 
+    private ConversionEditor? _editor;
     private ConversionInput _input = new();
     private string _selectedId = string.Empty;
     private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
@@ -56,6 +57,13 @@ public partial class ConversionPage
     {
         _input = input;
         return Task.CompletedTask;
+    }
+
+    private async Task<object?> ResolveInputAsync()
+    {
+        if (_editor is not null)
+            await _editor.FlushAsync();
+        return _input;
     }
 
     private Task SetRunningAsync(bool running)

@@ -66,6 +66,15 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
         }
     }
 
+    /// <summary>Flushes pending browser-owned text before an explicit action.</summary>
+    public async Task<string> FlushAsync()
+    {
+        string current = _editorValue.CurrentValue;
+        if (_editorValue.HasUncommittedInput)
+            await _valueCommitter.FlushAsync(current);
+        return current;
+    }
+
     private async Task ToggleSuggestionsAsync()
     {
         _suggestionsOpen = !_suggestionsOpen;
@@ -77,8 +86,7 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
 
     private async Task InvokeActionAsync()
     {
-        string current = _editorValue.CurrentValue;
-        await _valueCommitter.FlushAsync(current);
+        string current = await FlushAsync();
         CloseSuggestions();
         await ActionRequested.InvokeAsync(current);
     }
@@ -93,8 +101,7 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
 
     private async Task OnBlurAsync(FocusEventArgs _)
     {
-        if (_editorValue.HasUncommittedInput)
-            await _valueCommitter.FlushAsync(_editorValue.CurrentValue);
+        await FlushAsync();
     }
 
     private async Task RefreshSuggestionsAsync()
