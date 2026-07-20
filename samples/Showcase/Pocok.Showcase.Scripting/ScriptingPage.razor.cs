@@ -46,11 +46,10 @@ public partial class ScriptingPage
         return _input;
     }
 
-    private async Task SelectSampleAsync(string id)
+    private Task SelectSampleAsync(string id)
     {
-        if (_editor is not null)
-            await _editor.FlushAsync();
         SelectSample(Context.Samples.Single(item => item.Id == id));
+        return Task.CompletedTask;
     }
 
     private void SelectSample(IShowcaseSample sample)
