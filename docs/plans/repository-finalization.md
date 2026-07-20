@@ -488,3 +488,19 @@ Verify:
 | GitHub Actions/Release permissions | `contents: write`, `id-token: write`, queue support | Local/disposable rehearsal only; never emulate publication with local tags. |
 | raw GitHub source access | Connected Source Link checksum proof | Local Git-object proof is retained, but release stays blocked until connected proof passes. |
 | Render access | Owned by Showcase S9 | Local exact Docker image and smoke are recovery evidence, not deployment evidence. |
+
+## Interim global release groundwork
+
+The schema-v1 repository now has a basic `GLOBAL-v*` orchestrator with deterministic topological ordering, exact synchronized version properties, sequential publication, propagation checks, repository-tag validation, and provenance-aware same-version resume.
+
+R2 remains responsible for replacing the interim PowerShell authority with `Pocok.ReleaseTool`, schema v2, `publicationPolicy`, and `NuGet.Versioning`. R8 must upgrade the existing workflow rather than create a competing implementation. Its migration gate must remove duplicated PowerShell graph, SemVer, NuGet-query, and provenance algorithms after typed-tool parity passes.
+
+R8 recovery must preserve these semantics:
+
+- a fresh release normally uses a globally valid new version;
+- equal exact versions may be resumed only with commit or immutable-manifest provenance matching the global tag;
+- higher unrelated package versions do not alone prevent filling a missing synchronized exact version unless the future publication policy explicitly forbids it;
+- immutable candidate manifests and hashes replace the interim rebuilt-rerun limitation;
+- schema-v2 libraries and Showcase bundles extend the same orchestrator.
+
+R9-R11, the Scripting split, Source Link proof, Showcase handoffs, approval gates, publication, deployment, and final closure remain open.

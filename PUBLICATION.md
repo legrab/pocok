@@ -203,3 +203,6 @@ git push origin licensing.keygen-v0.1.0-alpha.1
 ```
 
 Never push package artifacts with a wildcard or manually reuse a published version.
+## Synchronized global tags
+
+`GLOBAL-v<major.minor.patch[-prerelease]>` publishes every currently releasable package at one exact version through `.github/workflows/publish-global.yml`. The graph is derived from `eng/packages.json` and released sequentially in dependency-first order. Existing exact versions are skipped only when their nuspec repository commit matches the global tag commit. Conflicting or unprovable equal versions fail before any push. The workflow does not create package-specific tags and requires no PAT. See `docs/global-release.md`.
