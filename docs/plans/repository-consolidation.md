@@ -1,13 +1,13 @@
 # Archived repository consolidation retrospective
 
-**Status:** Historical design and implementation evidence; not an active plan
-**Superseded execution plans:** `repository-finalization.md` and `showcase-revision.md`
+**Status:** Historical design and implementation evidence; not an active plan  
+**Successor plans:** `release-readiness.md` followed by `mvp-closure.md`
 
-Do not load this file to initialize ordinary work. Use the matching skill under `.agents/skills/` and current source. Git history retains the former detailed 2,000-line evaluation and implementation checklist.
+Do not load this file to initialize ordinary work. Use the matching skill under `.agents/skills/` and current source. Git history retains the former detailed evaluation and implementation checklist.
 
 ## Why this record remains
 
-The consolidation review established the repository's public boundary and recorded why extracted application code was reshaped into cohesive packages rather than copied wholesale. It also captured the limits of a one-shot implementation performed before complete executable proof was available.
+The consolidation review established the repository's public boundary and recorded why extracted application code was reshaped into cohesive packages rather than copied wholesale. It also captured the limits of one-shot implementation before complete executable proof was available.
 
 ## Decisions carried forward
 
@@ -18,14 +18,14 @@ The consolidation review established the repository's public boundary and record
 - Small internal reusable code follows a controlled shared-source policy instead of an internal convenience package leaking into public dependencies.
 - AppDefaults packages remain explicit composition helpers with integrations depending on abstractions.
 - Modularity is a trusted startup plugin model with contracts separated from loading and host defaults.
-- `eng/packages.json` became the release/package identity source and package closure must be proven from artifacts rather than assumed from solution builds.
-- Source changes, static inspection, executable proof, package proof, cross-platform proof, and publication evidence are distinct claims.
+- `eng/packages.json` is the release/package identity source and package closure must be proven from artifacts rather than assumed from solution builds.
+- Source changes, static inspection, executable proof, package proof, cross-platform proof, publication, and deployment are distinct claims.
 
 Current ADRs, package READMEs, source, tests, catalog metadata, and executable results own the detailed truth for these decisions.
 
 ## Historical outcome
 
-The consolidation created or reshaped the repository/package structure, tests, samples, catalog, audits, smoke tooling, AppDefaults family, Modularity family, and compatibility evidence. Later work added further packages and changed their evidence state, so the former phase/commit checklist and acceptance matrix are intentionally removed from this document.
+The consolidation created or reshaped the repository/package structure, tests, samples, catalog, audits, smoke tooling, AppDefaults family, Modularity family, and compatibility evidence. Later work added packages and changed their evidence state, so the former phase/commit checklist and acceptance matrix are intentionally not active.
 
 ## Where active work lives
 
@@ -33,8 +33,9 @@ The consolidation created or reshaped the repository/package structure, tests, s
 - Release graph, artifacts, tags, and NuGet: `.agents/skills/pocok-release-engineering/SKILL.md`
 - Showcase host and samples: `.agents/skills/pocok-showcase-engineering/SKILL.md`
 - Collaboration and evidence records: `.agents/skills/pocok-agentic-workflow/SKILL.md`
-- Current MVP closure: `docs/plans/repository-finalization.md`
-- Current Showcase closure: `docs/plans/showcase-revision.md`
+- Immediate library and local-Showcase readiness: `docs/plans/release-readiness.md`
+- Later exact-artifact, NuGet-Showcase, and deployment closure: `docs/plans/mvp-closure.md`
+- Deferred product ideas: `docs/plans/post-mvp-roadmap.md`
 - Current time-sensitive evidence: `docs/current-handoff.md`
 
 The repository and executable evidence outrank this retrospective.
