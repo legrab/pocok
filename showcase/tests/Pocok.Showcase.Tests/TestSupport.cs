@@ -3,10 +3,8 @@
 
 using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Web.Services;
 
@@ -36,12 +34,15 @@ internal static class TestSupport
             progress ?? new RecordingProgressWriter(),
             selected,
             selected,
-            new NoopTemporaryDirectoryFactory(),
+            new TestTemporaryDirectoryFactory(),
             Guid.NewGuid().ToString("N"),
             EmptyServiceProvider.Instance);
     }
 
-    public static async Task<ShowcaseRunResult> ExecuteAsync(IShowcaseSlice slice, object input, CultureInfo? culture = null,
+    public static async Task<ShowcaseRunResult> ExecuteAsync(
+        IShowcaseSlice slice,
+        object input,
+        CultureInfo? culture = null,
         CancellationToken cancellationToken = default) =>
         await slice.ExecuteUntypedAsync(input, CreateContext(culture), cancellationToken);
 
@@ -72,15 +73,24 @@ internal static class TestSupport
         public object? GetService(Type serviceType) => null;
     }
 
-    private sealed class NoopTemporaryDirectoryFactory : ISafeTemporaryDirectoryFactory
+    private sealed class TestTemporaryDirectoryFactory : ISafeTemporaryDirectoryFactory
     {
-        public ValueTask<IAsyncDisposable> CreateAsync(CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult<IAsyncDisposable>(new NoopAsyncDisposable());
+        public ValueTask<IAsyncDisposable> CreateAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "pocok-showcase-tests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(path);
+            return ValueTask.FromResult<IAsyncDisposable>(new TestTemporaryDirectory(path));
+        }
     }
 
-    private sealed class NoopAsyncDisposable : IAsyncDisposable
+    private sealed class TestTemporaryDirectory(string path) : IAsyncDisposable
     {
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+        public ValueTask DisposeAsync()
+        {
+            if (Directory.Exists(path)) Directory.Delete(path, recursive: true);
+            return ValueTask.CompletedTask;
+        }
     }
 }
 

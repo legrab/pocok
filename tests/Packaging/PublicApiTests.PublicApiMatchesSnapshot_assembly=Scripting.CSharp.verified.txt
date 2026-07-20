@@ -1,0 +1,18 @@
+﻿namespace Pocok.Scripting.CSharp
+{
+    public sealed class CSharpScriptEngineAdapter : Pocok.Scripting.Execution.IScriptEngineAdapter
+    {
+        public CSharpScriptEngineAdapter(Pocok.Scripting.CSharp.CSharpScriptEngineOptions? options = null) { }
+        public Pocok.Scripting.Execution.ScriptEngineDescriptor Descriptor { get; }
+        public Pocok.Scripting.Execution.IScriptValidator Validator { get; }
+        public System.Threading.Tasks.ValueTask<Pocok.Scripting.Execution.ScriptResult<object?>> ExecuteAsync(Pocok.Scripting.Execution.ValidatedScript script, Pocok.Scripting.Execution.ScriptExecutionOptions options, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class CSharpScriptEngineOptions : System.IEquatable<Pocok.Scripting.CSharp.CSharpScriptEngineOptions>
+    {
+        public CSharpScriptEngineOptions() { }
+        public System.Collections.Generic.IReadOnlyList<string> AllowedImports { get; init; }
+        public System.Collections.Generic.IReadOnlyList<string> AllowedReferencePaths { get; init; }
+        public string? DotNetHostPath { get; init; }
+        public string? WorkerDirectory { get; init; }
+    }
+}

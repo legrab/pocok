@@ -8,7 +8,17 @@ on:
       - 'appdefaults-v*'
       - 'appdefaults.logging-v*'
       - 'appdefaults.logging.serilog-v*'
+      - 'modularity.contracts-v*'
+      - 'modularity-v*'
+      - 'appdefaults.modularity-v*'
+      - 'backgroundwork-v*'
       - 'scripting-v*'
+      - 'scripting.javascript-v*'
+      - 'scripting.csharp-v*'
+      - 'scripting.python-v*'
+      - 'localization-v*'
+      - 'signals-v*'
+      - 'subscriptions-v*'
       - 'licensing-v*'
       - 'appdefaults.licensing-v*'
 
@@ -48,6 +58,9 @@ jobs:
       - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: '3.14'
       - name: Resolve release package versions and closure
         shell: pwsh
         run: |
@@ -55,7 +68,12 @@ jobs:
           ./tools/PackageCatalog/Resolve-PackageClosure.ps1 -CandidatePackageId '${{ needs.resolve.outputs.package-id }}' -OutputPath artifacts/release-closure.json
       - name: Restore, build, and test release graph
         shell: pwsh
-        run: ./tools/Ci/Invoke-PublicReleaseValidation.ps1 -ReleaseVersionsFile artifacts/release-versions.props
+        run: |
+          $env:DOTNET_HOST_PATH = (Get-Command dotnet).Source
+          $env:POCOK_CSHARP_WORKER_DIRECTORY = Join-Path $env:GITHUB_WORKSPACE 'src/Scripting.CSharp.Worker/bin/Release/net10.0'
+          $env:POCOK_PYTHON_EXECUTABLE = (Get-Command python).Source
+          $env:POCOK_PYTHON_WORKER_PATH = Join-Path $env:GITHUB_WORKSPACE 'src/Scripting.Python/Worker/pocok_worker.py'
+          ./tools/Ci/Invoke-PublicReleaseValidation.ps1 -ReleaseVersionsFile artifacts/release-versions.props
       - name: Pack local package closure
         shell: pwsh
         run: |
@@ -64,7 +82,7 @@ jobs:
           $releaseProps = Join-Path $PWD 'artifacts/release-versions.props'
           $closure = Get-Content artifacts/release-closure.json -Raw | ConvertFrom-Json
           foreach ($package in $closure) {
-            dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=false
+            dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=true
             if ($LASTEXITCODE -ne 0) { throw "Packing $($package.id) failed with exit code $LASTEXITCODE." }
           }
       - name: Verify exact candidate

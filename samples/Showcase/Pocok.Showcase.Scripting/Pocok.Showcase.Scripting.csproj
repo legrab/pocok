@@ -1,19 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-    <ShowcasePluginId>pocok.showcase.scripting</ShowcasePluginId>
-  </PropertyGroup>
-
+  <PropertyGroup><IsPackable>false</IsPackable><AddRazorSupportForMvc>true</AddRazorSupportForMvc><ShowcasePluginId>pocok.showcase.scripting</ShowcasePluginId></PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <ProjectReference Include="../../../showcase/src/Pocok.Showcase.Contracts/Pocok.Showcase.Contracts.csproj"/>
     <ProjectReference Include="../../../showcase/src/Pocok.Showcase.Components/Pocok.Showcase.Components.csproj"/>
     <ProjectReference Include="../../../src/Scripting/Pocok.Scripting.csproj"/>
+    <ProjectReference Include="../../../src/Scripting.JavaScript/Pocok.Scripting.JavaScript.csproj"/>
+    <ProjectReference Include="../../../src/Scripting.CSharp/Pocok.Scripting.CSharp.csproj"/>
+    <ProjectReference Include="../../../src/Scripting.Python/Pocok.Scripting.Python.csproj"/>
     <ProjectReference Include="../../../src/Conversion/Pocok.Conversion.csproj"/>
     <ProjectReference Include="../../../src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
   </ItemGroup>
-
   <ItemGroup>
     <Content Update="pocok.module.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"/>
     <Content Update="Content/**/*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"/>

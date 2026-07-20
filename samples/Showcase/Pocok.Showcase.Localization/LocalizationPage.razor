@@ -1,0 +1,146 @@
+<div class="package-page">
+    <ShowcasePackageHeader Descriptor="Context.Descriptor"
+                           Text="Context.Text"
+                           ImplementationStatusText="@T("Package.Status.Available")" />
+
+    <ShowcasePackageWorkbench>
+        <Samples>
+            <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
+                                  Samples="Context.Samples"
+                                  SelectedId="@_selectedId"
+                                  SelectedIdChanged="SelectSampleAsync"
+                                  Text="Context.Text"
+                                  ResourceNamespace="localization" />
+        </Samples>
+        <Main>
+            <ShowcaseSandboxFrame @key="_sampleRevision"
+                                  Title="@T("Sandbox.Title")"
+                                  Status="@(_running ? T("Sandbox.Running") : T("Sandbox.Ready"))">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="culture">@T("Fields.Culture")</label>
+                        <select id="culture" value="@_input.Culture" @onchange="SetCultureAsync">
+                            <option value="en-US">en-US</option>
+                            <option value="hu-HU">hu-HU</option>
+                        </select>
+                    </div>
+                    <div class="field checkbox-field">
+                        <label for="watch">@T("Fields.Watch")</label>
+                        <input id="watch"
+                               type="checkbox"
+                               checked="@_input.WatchForChanges"
+                               @onchange="SetWatchAsync" />
+                    </div>
+                    <div class="field checkbox-field">
+                        <label for="reload">@T("Fields.Reload")</label>
+                        <input id="reload"
+                               type="checkbox"
+                               checked="@_input.Reload"
+                               @onchange="SetReloadAsync" />
+                    </div>
+                </div>
+
+                <ShowcaseExecutionControls Slice="Context.Slice"
+                                           Input="_input"
+                                           RunClient="Context.RunClient"
+                                           Culture="Context.Culture"
+                                           RunLabel="@T("Sandbox.Run")"
+                                           CancelLabel="@T("Sandbox.Cancel")"
+                                           ResetKey="@SampleResetKey"
+                                           ResultChanged="SetResultAsync"
+                                           RunningChanged="SetRunningAsync" />
+            </ShowcaseSandboxFrame>
+
+            <ShowcaseResultPanel Title="@T("Result.Title")"
+                                 EmptyText="@T("Result.Empty")"
+                                 Result="_result"
+                                 Text="Context.Text"
+                                 ResourceNamespace="localization"
+                                 CodePreviewTitle="@T("Result.Code")"
+                                 CodePreviewLanguage="csharp"
+                                 TruncatedLabel="@T("Result.Truncated")" />
+        </Main>
+        <Guidance>
+            <ShowcaseGuideView Guide="Context.Slice.Guide"
+                               Text="Context.Text"
+                               ResourceNamespace="localization"
+                               MoreLabel="@T("Guide.More")" />
+            <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
+                <ul class="compact-list">
+                    <li>@T("Boundaries.Temp")</li>
+                    <li>@T("Boundaries.Dispose")</li>
+                    <li>@T("Boundaries.NoPath")</li>
+                    <li>@T("Boundaries.Bounded")</li>
+                </ul>
+            </ShowcaseBoundariesPanel>
+        </Guidance>
+    </ShowcasePackageWorkbench>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ShowcasePageContext Context { get; set; } = default!;
+
+    private LocalizationInput _input = new();
+    private string _selectedId = string.Empty;
+    private ShowcaseRunResult? _result;
+    private bool _running;
+    private long _sampleRevision;
+
+    private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
+
+    protected override void OnInitialized() =>
+        Select(Context.Samples.Single(static sample => sample.IsDefault));
+
+    private string T(string key) => Context.Text.GetText("localization", key);
+
+    private Task SelectSampleAsync(string id)
+    {
+        Select(Context.Samples.Single(sample => sample.Id == id));
+        return Task.CompletedTask;
+    }
+
+    private void Select(IShowcaseSample sample)
+    {
+        _selectedId = sample.Id;
+        _input = (LocalizationInput)sample.CreateInput();
+        _result = null;
+        _sampleRevision = checked(_sampleRevision + 1);
+    }
+
+    private Task SetCultureAsync(ChangeEventArgs args)
+    {
+        _input = _input with { Culture = args.Value?.ToString() ?? "en-US" };
+        return Task.CompletedTask;
+    }
+
+    private Task SetWatchAsync(ChangeEventArgs args)
+    {
+        _input = _input with { WatchForChanges = ReadBool(args) };
+        return Task.CompletedTask;
+    }
+
+    private Task SetReloadAsync(ChangeEventArgs args)
+    {
+        _input = _input with { Reload = ReadBool(args) };
+        return Task.CompletedTask;
+    }
+
+    private static bool ReadBool(ChangeEventArgs args) =>
+        args.Value is true || string.Equals(
+            args.Value?.ToString(),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+
+    private Task SetResultAsync(ShowcaseRunResult? result)
+    {
+        _result = result;
+        return Task.CompletedTask;
+    }
+
+    private Task SetRunningAsync(bool running)
+    {
+        _running = running;
+        return Task.CompletedTask;
+    }
+}

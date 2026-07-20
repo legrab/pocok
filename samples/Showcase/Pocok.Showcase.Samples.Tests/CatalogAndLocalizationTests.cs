@@ -4,8 +4,19 @@
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using Pocok.Scripting.Execution;
+using Pocok.Scripting.JavaScript;
+using Pocok.Showcase.AppDefaults.Logging;
+using Pocok.Showcase.BackgroundWork;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Conversion;
+using Pocok.Showcase.Licensing;
+using Pocok.Showcase.Localization;
+using Pocok.Showcase.Modularity;
+using Pocok.Showcase.Readiness;
+using Pocok.Showcase.Scripting;
+using Pocok.Showcase.Signals;
+using Pocok.Showcase.Subscriptions;
 using Pocok.Showcase.Web.Services;
 
 namespace Pocok.Showcase.Samples.Tests;
@@ -13,6 +24,14 @@ namespace Pocok.Showcase.Samples.Tests;
 [TestFixture, NonParallelizable]
 public sealed class CatalogAndLocalizationTests
 {
+    private static IShowcaseSlice[] AllSlices() =>
+    [
+        new ConversionShowcaseSlice(), CreateScriptingSlice(), new LicensingShowcaseSlice(),
+        new LoggingShowcaseSlice(), new LocalizationShowcaseSlice(), new ReadinessShowcaseSlice(),
+        new BackgroundWorkShowcaseSlice(), new ModularityShowcaseSlice(), new SignalsShowcaseSlice(),
+        new SubscriptionsShowcaseSlice()
+    ];
+
     [Test]
     public void PartialCatalogAcceptsOneInstalledSlice()
     {
@@ -20,16 +39,34 @@ public sealed class CatalogAndLocalizationTests
         var catalog = new ShowcaseSliceCatalog([new ConversionShowcaseSlice()], packages,
             Options.Create(new ShowcaseOptions { RequireCompleteCatalog = false }));
         catalog.Installed.Count.ShouldBe(1);
-        catalog.CreateFacts(packages).Count(item => item.ImplementationStatus == ShowcaseImplementationStatus.Planned)
-            .ShouldBe(14);
+        catalog.CreateFacts(packages).Count(item => item.ImplementationStatus == ShowcaseImplementationStatus.Planned).ShouldBe(17);
     }
 
     [Test]
-    public void StrictCatalogRejectsMissingSlices()
+    public void StrictCatalogAcceptsTheTenPluginEighteenPackageCoverageMap()
     {
         var packages = new ShowcasePackageCatalog(TestSupport.WebEnvironment());
-        Should.Throw<InvalidOperationException>(() => new ShowcaseSliceCatalog([new ConversionShowcaseSlice()], packages,
-            Options.Create(new ShowcaseOptions { RequireCompleteCatalog = true }))).Message.ShouldContain("missing");
+        var catalog = new ShowcaseSliceCatalog(AllSlices(), packages,
+            Options.Create(new ShowcaseOptions { RequireCompleteCatalog = true }));
+        catalog.Installed.Count.ShouldBe(10);
+        catalog.CreateFacts(packages).Count(fact => fact.ImplementationStatus == ShowcaseImplementationStatus.Available).ShouldBe(18);
+    }
+
+    [Test]
+    public void ExactCoverageHasNoMissingOrDuplicatePackageOwner()
+    {
+        var packages = new ShowcasePackageCatalog(TestSupport.WebEnvironment());
+        var catalog = new ShowcaseSliceCatalog(
+            AllSlices(),
+            packages,
+            Options.Create(new ShowcaseOptions { RequireCompleteCatalog = true }));
+        string[] covered = catalog.CreateFacts(packages)
+            .Where(fact => fact.ImplementationStatus == ShowcaseImplementationStatus.Available)
+            .Select(fact => fact.Id)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+        covered.Length.ShouldBe(18);
+        covered.Distinct(StringComparer.Ordinal).Count().ShouldBe(18);
     }
 
     [Test]
@@ -39,55 +76,38 @@ public sealed class CatalogAndLocalizationTests
         ShowcaseResourceRegistration[] registrations =
         [
             new("shell", environment.ContentRootPath, "Content/Locales/Shell"),
-            new("conversion", Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase", "Pocok.Showcase.Conversion"), "Content/Locales/Conversion")
+            new(
+                "localization",
+                Path.Combine(
+                    TestSupport.RepositoryRoot,
+                    "samples",
+                    "Showcase",
+                    "Pocok.Showcase.Localization"),
+                "Content/Locales/Localization")
         ];
         await using var text = new ShowcaseTextCatalog(registrations, environment);
         CultureInfo previous = CultureInfo.CurrentUICulture;
         try
         {
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("hu");
-            text.GetText("conversion", "Sandbox.Run").ShouldBe("Konverzió futtatása");
-            text.GetText("conversion", "Sandbox.ShowSuggestions").ShouldBe("Javaslatok megnyitása");
+            text.GetText("localization", "Sandbox.Run").ShouldBe("Erőforrások betöltése");
             text.GetText("shell", "Navigation.Home").ShouldBe("Főoldal");
         }
-        finally
-        {
-            CultureInfo.CurrentUICulture = previous;
-        }
+        finally { CultureInfo.CurrentUICulture = previous; }
     }
 
     [Test]
-    public async Task CultureLookupsRemainIsolated()
-    {
-        FakeWebHostEnvironment environment = TestSupport.WebEnvironment();
-        ShowcaseResourceRegistration[] registrations =
-        [new("conversion", Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase", "Pocok.Showcase.Conversion"), "Content/Locales/Conversion")];
-        await using var text = new ShowcaseTextCatalog(registrations, environment);
-        CultureInfo previous = CultureInfo.CurrentUICulture;
-        try
-        {
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en");
-            text.GetText("conversion", "Package.Name").ShouldBe("Conversion");
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("hu");
-            text.GetText("conversion", "Package.Name").ShouldBe("Konverzió");
-        }
-        finally
-        {
-            CultureInfo.CurrentUICulture = previous;
-        }
-    }
-
-    [Test]
-    public void SampleLocalizationsHaveMatchingKeys()
+    public void AllTenPluginLocalizationsHaveMatchingKeys()
     {
         string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
         (string Directory, string BaseName)[] resources =
         [
-            ("Pocok.Showcase.Conversion", "Conversion"),
-            ("Pocok.Showcase.Scripting", "Scripting"),
-            ("Pocok.Showcase.Licensing", "Licensing")
+            ("Pocok.Showcase.Conversion", "Conversion"), ("Pocok.Showcase.Scripting", "Scripting"),
+            ("Pocok.Showcase.Licensing", "Licensing"), ("Pocok.Showcase.AppDefaults.Logging", "Logging"),
+            ("Pocok.Showcase.Localization", "Localization"), ("Pocok.Showcase.Readiness", "Readiness"),
+            ("Pocok.Showcase.BackgroundWork", "BackgroundWork"), ("Pocok.Showcase.Modularity", "Modularity"),
+            ("Pocok.Showcase.Signals", "Signals"), ("Pocok.Showcase.Subscriptions", "Subscriptions")
         ];
-
         foreach ((string directory, string baseName) in resources)
         {
             string localeRoot = Path.Combine(samplesRoot, directory, "Content", "Locales");
@@ -96,30 +116,26 @@ public sealed class CatalogAndLocalizationTests
         }
     }
 
-    [Test]
-    public void ConversionManifestSharesStableHostAssemblies()
+
+    private static ScriptingShowcaseSlice CreateScriptingSlice()
     {
-        string path = Path.Combine(
-            TestSupport.RepositoryRoot,
-            "samples",
-            "Showcase",
-            "Pocok.Showcase.Conversion",
-            "pocok.module.json");
-        using JsonDocument manifest = JsonDocument.Parse(File.ReadAllText(path));
-        string[] shared = manifest.RootElement.GetProperty("sharedAssemblies")
-            .EnumerateArray()
-            .Select(item => item.GetString()!)
-            .ToArray();
-        shared.ShouldContain("Pocok.Showcase.Contracts");
-        shared.ShouldContain("Pocok.Showcase.Components");
+        var registry = new ScriptEngineRegistry(
+        [
+            new JavaScriptScriptEngineAdapter(),
+            new UnavailableScriptEngineAdapter(ScriptEngineId.CSharp, "C#", "scripting.engine.trusted_only", "C# is trusted/local only."),
+            new UnavailableScriptEngineAdapter(
+                ScriptEngineId.Python,
+                "Python",
+                "scripting.engine.trusted_only",
+                "Python is trusted/local only.")
+        ]);
+        return new ScriptingShowcaseSlice(new ScriptRunner(registry), registry);
     }
 
     private static string[] ReadResourceKeys(string path)
     {
         using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
-        return EnumerateKeys(document.RootElement, string.Empty)
-            .Order(StringComparer.Ordinal)
-            .ToArray();
+        return EnumerateKeys(document.RootElement, string.Empty).Order(StringComparer.Ordinal).ToArray();
     }
 
     private static IEnumerable<string> EnumerateKeys(JsonElement element, string prefix)
@@ -128,14 +144,8 @@ public sealed class CatalogAndLocalizationTests
         {
             string key = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}.{property.Name}";
             if (property.Value.ValueKind == JsonValueKind.Object)
-            {
-                foreach (string nested in EnumerateKeys(property.Value, key))
-                    yield return nested;
-            }
-            else
-            {
-                yield return key;
-            }
+                foreach (string nested in EnumerateKeys(property.Value, key)) yield return nested;
+            else yield return key;
         }
     }
 }

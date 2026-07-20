@@ -1,0 +1,19 @@
+{
+  "manifestVersion": 1,
+  "id": "pocok.showcase.background-work",
+  "version": "1.0.0",
+  "entryAssembly": "Pocok.Showcase.BackgroundWork.dll",
+  "required": true,
+  "sharedAssemblies": [
+    "Pocok.Showcase.Contracts",
+    "Pocok.Showcase.Components",
+    "Microsoft.AspNetCore.Components",
+    "Microsoft.AspNetCore.Components.Web"
+  ],
+  "metadata": {
+    "packageId": "Pocok.BackgroundWork",
+    "slug": "background-work",
+    "kind": "showcase-slice",
+    "coveredPackageIds": "Pocok.BackgroundWork"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "Package": {
+    "Name": "Subscriptions",
+    "Summary": "Korlátozott Subscriptions-konfigurációs és használati receptek generálása.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Minták",
+    "Title": "Subscriptions receptkészítő",
+    "Ready": "Típusos beállításokból generálva"
+  },
+  "Fields": {
+    "Mode": "Recept",
+    "Capacity": "Mintaküldések száma",
+    "IncludeOptional": "Értékszűrő hozzáadása",
+    "IncludeLifecycle": "Explicit eltávolítás és felszabadítás megjelenítése"
+  },
+  "Tips": {
+    "Generated": "A kód kizárólag korlátozott beállításokból készül.",
+    "Ownership": "A recept egyértelművé teszi a regisztráció tulajdonjogát."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "Forráspontos kiindulási receptek készítése a generált kód futtatása nélkül."
+    },
+    "Snippet": {
+      "Title": "Generált recept"
+    }
+  },
+  "Boundaries": {
+    "Title": "Korlátok",
+    "Generated": "Csak típusos beállítások generálhatnak kódot.",
+    "NoExecution": "A generált forrás nem fut le.",
+    "Constrained": "Az azonosítók és API-választások engedélyezett készletből származnak.",
+    "Ownership": "A regisztráció eltávolítása és a hub felszabadítása látható marad."
+  },
+  "Source": {
+    "Title": "Forrásdokumentáció",
+    "Body": "A teljes viselkedési szerződés a csomag dokumentációjában található."
+  },
+  "Samples": {
+    "subscribe": {
+      "Name": "Típusos előfizetés",
+      "Description": "Egy típusos visszahívás regisztrálása egy kulcshoz."
+    },
+    "filter-map": {
+      "Name": "Szűrés és leképezés",
+      "Description": "Az objektumbemenet korlátozása a visszahívás előtt."
+    },
+    "remove": {
+      "Name": "Tulajdonolt eltávolítás",
+      "Description": "A regisztráció, majd a hub felszabadítása."
+    }
+  }
+}

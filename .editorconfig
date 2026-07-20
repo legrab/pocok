@@ -12,7 +12,7 @@ trim_trailing_whitespace = true
 indent_size = 2
 
 [*.cs]
-file_header_template = SPDX-License-Identifier:Apache-2.0\nCopyright 2026 Pocok contributors
+file_header_template = SPDX-License-Identifier: Apache-2.0\nCopyright 2026 Pocok contributors
 csharp_style_namespace_declarations = file_scoped:warning
 csharp_style_var_when_type_is_apparent = true:suggestion
 csharp_style_var_elsewhere = false:suggestion

@@ -21,7 +21,7 @@ When work crosses domains, use only the involved skills. Follow their selective-
 - Do not add the excluded complete application, business-workflow engine, or application UI surface.
 - Public content remains product-neutral and contains no company, customer, historical, operational, secret, or proprietary material.
 - Keep source, configuration, JSON, and tooling files UTF-8 without BOM.
-- Original hand-authored source uses `SPDX-License-Identifier:Apache-2.0` and `Copyright 2026 Pocok contributors`; generated files, snapshots, project/configuration files, and ordinary documentation do not need repetitive headers.
+- Original hand-authored source uses `SPDX-License-Identifier: Apache-2.0` and `Copyright 2026 Pocok contributors`; generated files, snapshots, project/configuration files, and ordinary documentation do not need repetitive headers.
 - Preserve `LICENSE`, `NOTICE`, third-party notices, and provenance. A stewardship request is nonbinding and never narrows Apache-2.0 permissions.
 
 ## Stable implementation constraints

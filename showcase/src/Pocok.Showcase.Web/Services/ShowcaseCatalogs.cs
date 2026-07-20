@@ -108,10 +108,24 @@ public sealed class ShowcaseSliceCatalog
 
         Validate(installed, packages, options.Value.RequireCompleteCatalog);
         Installed = new ReadOnlyCollection<IShowcaseSlice>(installed);
-        _bySlug = new ReadOnlyDictionary<string, IShowcaseSlice>(
-            installed.ToDictionary(slice => slice.Descriptor.Slug, StringComparer.OrdinalIgnoreCase));
-        _byPackageId = new ReadOnlyDictionary<string, IShowcaseSlice>(
-            installed.ToDictionary(slice => slice.Descriptor.PackageId, StringComparer.Ordinal));
+
+        var byPackageId = new Dictionary<string, IShowcaseSlice>(StringComparer.Ordinal);
+        foreach (IShowcaseSlice slice in installed)
+        {
+            foreach (string packageId in CoveredPackageIds(slice))
+                byPackageId.Add(packageId, slice);
+        }
+
+        _byPackageId = new ReadOnlyDictionary<string, IShowcaseSlice>(byPackageId);
+
+        var bySlug = new Dictionary<string, IShowcaseSlice>(StringComparer.OrdinalIgnoreCase);
+        foreach (ShowcasePackageCatalogEntry package in packages.Packages)
+        {
+            if (byPackageId.TryGetValue(package.Id, out IShowcaseSlice? owner))
+                bySlug.Add(package.Slug, owner);
+        }
+
+        _bySlug = new ReadOnlyDictionary<string, IShowcaseSlice>(bySlug);
     }
 
     public IReadOnlyList<IShowcaseSlice> Installed { get; }
@@ -147,9 +161,10 @@ public sealed class ShowcaseSliceCatalog
         bool requireCompleteCatalog)
     {
         EnsureUnique(installed, slice => slice.Descriptor.ModuleId, "module id", StringComparer.Ordinal);
-        EnsureUnique(installed, slice => slice.Descriptor.PackageId, "package id", StringComparer.Ordinal);
-        EnsureUnique(installed, slice => slice.Descriptor.Slug, "slug", StringComparer.OrdinalIgnoreCase);
+        EnsureUnique(installed, slice => slice.Descriptor.PackageId, "primary package id", StringComparer.Ordinal);
+        EnsureUnique(installed, slice => slice.Descriptor.Slug, "primary slug", StringComparer.OrdinalIgnoreCase);
 
+        var owners = new Dictionary<string, IShowcaseSlice>(StringComparer.Ordinal);
         foreach (IShowcaseSlice slice in installed)
         {
             slice.Descriptor.Validate();
@@ -160,22 +175,57 @@ public sealed class ShowcaseSliceCatalog
             if (slice.Samples.Select(sample => sample.Id).Distinct(StringComparer.Ordinal).Count() != slice.Samples.Count)
                 throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' contains duplicate sample ids.");
 
-            ShowcasePackageCatalogEntry package = packages.Find(slice.Descriptor.PackageId)
+            IReadOnlyList<string> coverage = CoveredPackageIds(slice);
+            if (!coverage.Contains(slice.Descriptor.PackageId, StringComparer.Ordinal))
+                throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' must cover its primary package.");
+
+            foreach (string packageId in coverage)
+            {
+                if (packages.Find(packageId) is null)
+                    throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' covers unknown package '{packageId}'.");
+                if (!owners.TryAdd(packageId, slice))
+                    throw new InvalidOperationException($"Package '{packageId}' has more than one Showcase owner.");
+            }
+
+            ShowcasePackageCatalogEntry primary = packages.Find(slice.Descriptor.PackageId)
                 ?? throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' is absent from the package catalog.");
-            if (!string.Equals(package.Slug, slice.Descriptor.Slug, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(primary.Slug, slice.Descriptor.Slug, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException(
-                    $"Slice '{slice.Descriptor.PackageId}' uses slug '{slice.Descriptor.Slug}', but the package catalog uses '{package.Slug}'.");
+                    $"Slice '{slice.Descriptor.PackageId}' uses slug '{slice.Descriptor.Slug}', but the package catalog uses '{primary.Slug}'.");
         }
 
         if (requireCompleteCatalog)
         {
             string[] missing = packages.Packages
-                .Where(package => installed.All(slice => slice.Descriptor.PackageId != package.Id))
+                .Where(package => !owners.ContainsKey(package.Id))
                 .Select(package => package.Id)
                 .ToArray();
             if (missing.Length > 0)
                 throw new InvalidOperationException($"Strict showcase catalog is missing: {string.Join(", ", missing)}.");
         }
+    }
+
+    private static IReadOnlyList<string> CoveredPackageIds(IShowcaseSlice slice)
+    {
+        if (slice is IShowcasePackageCoverage coverage)
+            return coverage.CoveredPackageIds;
+
+        return slice.Descriptor.PackageId switch
+        {
+            "Pocok.Scripting" =>
+            [
+                "Pocok.Scripting",
+                "Pocok.Scripting.JavaScript",
+                "Pocok.Scripting.CSharp",
+                "Pocok.Scripting.Python"
+            ],
+            "Pocok.Licensing" =>
+            [
+                "Pocok.Licensing",
+                "Pocok.AppDefaults.Licensing"
+            ],
+            _ => [slice.Descriptor.PackageId]
+        };
     }
 
     private static void EnsureUnique(

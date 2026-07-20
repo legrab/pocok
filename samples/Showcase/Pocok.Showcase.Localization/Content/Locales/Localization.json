@@ -1,0 +1,69 @@
+{
+  "Package": {
+    "Name": "Localization",
+    "Summary": "Exercise JSON/RESX composition, fallback, enum translation, and reload.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Samples",
+    "Title": "Localization sandbox",
+    "Running": "Running",
+    "Ready": "Ready",
+    "Run": "Load resources",
+    "Cancel": "Cancel"
+  },
+  "Fields": {
+    "Culture": "Culture",
+    "Watch": "Enable watcher",
+    "Reload": "Perform explicit reload"
+  },
+  "Result": {
+    "Title": "Localized values",
+    "Empty": "Run the sample to inspect localization behavior.",
+    "Json": "JSON value",
+    "Resx": "RESX value",
+    "Fallback": "Composite fallback",
+    "Missing": "Missing key",
+    "Enum": "Enum translation",
+    "Culture": "Culture",
+    "Code": "API path",
+    "Truncated": "truncated"
+  },
+  "Tips": {
+    "Fallback": "Parent and composite fallback are explicit.",
+    "Reload": "Reload retains a valid bounded snapshot."
+  },
+  "Guide": {
+    "More": "More guidance",
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Use real file localizers in a Showcase-owned temporary directory."
+    },
+    "Snippet": {
+      "Title": "File localizer"
+    }
+  },
+  "Boundaries": {
+    "Title": "Boundaries",
+    "Temp": "Files live only in a bounded safe temporary directory.",
+    "Dispose": "Every watcher and localizer is disposed.",
+    "NoPath": "Temporary paths are never returned.",
+    "Bounded": "Files and results remain bounded."
+  },
+  "Samples": {
+    "hungarian": {
+      "Name": "Hungarian parent fallback",
+      "Description": "Resolve hu-HU through hu resources."
+    },
+    "english": {
+      "Name": "English JSON and RESX",
+      "Description": "Compare equivalent provider values."
+    },
+    "reload": {
+      "Name": "Explicit reload",
+      "Description": "Update the JSON resource and reload the snapshot."
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "Package": {
+    "Name": "BackgroundWork",
+    "Summary": "Generate constrained BackgroundWork configuration and usage recipes.",
+    "Status": {
+      "Available": "Available"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Presets",
+    "Title": "BackgroundWork recipe builder",
+    "Ready": "Generated from typed options"
+  },
+  "Fields": {
+    "Mode": "Recipe",
+    "Capacity": "Interval / quiet period (ms)",
+    "IncludeOptional": "Add failure handling",
+    "IncludeLifecycle": "Show explicit stop/ownership"
+  },
+  "Tips": {
+    "Generated": "The code is generated from constrained options.",
+    "Ownership": "The recipe makes lifecycle ownership explicit."
+  },
+  "Guide": {
+    "More": "More guidance",
+    "Purpose": {
+      "Title": "Purpose",
+      "Body": "Use these recipes as source-accurate starting points without running generated code."
+    },
+    "Snippet": {
+      "Title": "Generated recipe"
+    }
+  },
+  "Boundaries": {
+    "Title": "Boundaries",
+    "Generated": "Only typed options produce code.",
+    "NoExecution": "Generated source is not executed.",
+    "Constrained": "Identifiers and API choices are allowlisted.",
+    "Ownership": "Cancellation and disposal ownership stay visible."
+  },
+  "Source": {
+    "Title": "Source documentation",
+    "Body": "Read the package documentation for the complete behavioral contract."
+  },
+  "Samples": {
+    "observe": {
+      "Name": "Observe failures",
+      "Description": "Observe a task and own fault handling."
+    },
+    "coalesce": {
+      "Name": "Coalesce requests",
+      "Description": "Collapse overlapping requests to one follow-up run."
+    },
+    "debounce": {
+      "Name": "Debounce changes",
+      "Description": "Wait for a quiet period before running."
+    },
+    "repeat": {
+      "Name": "Repeat safely",
+      "Description": "Run bounded non-overlapping iterations."
+    }
+  }
+}

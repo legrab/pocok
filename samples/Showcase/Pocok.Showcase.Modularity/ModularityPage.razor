@@ -1,0 +1,127 @@
+<div class="package-page">
+    <ShowcasePackageHeader Descriptor="Context.Descriptor"
+                           Text="Context.Text"
+                           ImplementationStatusText="@T("Package.Status.Available")" />
+
+    <ShowcasePackageWorkbench>
+        <Samples>
+            <ShowcaseSamplePicker Title="@T("Sandbox.Samples")"
+                                  Samples="Context.Samples"
+                                  SelectedId="@_selectedId"
+                                  SelectedIdChanged="SelectSampleAsync"
+                                  Text="Context.Text"
+                                  ResourceNamespace="modularity" />
+        </Samples>
+        <Main>
+            <ShowcaseSandboxFrame @key="_sampleRevision"
+                                  Title="@T("Sandbox.Title")"
+                                  Status="@T("Sandbox.Ready")">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="recipe-mode">@T("Fields.Mode")</label>
+                        <select id="recipe-mode" value="@_input.Mode" @onchange="SetModeAsync">
+                            @foreach (string mode in ModularityRecipeRenderer.Modes)
+                            {
+                                <option value="@mode">@mode</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field checkbox-field">
+                        <label for="recipe-optional">@T("Fields.IncludeOptional")</label>
+                        <input id="recipe-optional"
+                               type="checkbox"
+                               checked="@_input.IncludeOptional"
+                               @onchange="SetOptionalAsync" />
+                    </div>
+                    <div class="field checkbox-field">
+                        <label for="recipe-lifecycle">@T("Fields.IncludeLifecycle")</label>
+                        <input id="recipe-lifecycle"
+                               type="checkbox"
+                               checked="@_input.IncludeLifecycle"
+                               @onchange="SetLifecycleAsync" />
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <pre><code>@_preview</code></pre>
+                </div>
+            </ShowcaseSandboxFrame>
+        </Main>
+        <Guidance>
+            <ShowcaseGuideView Guide="Context.Slice.Guide"
+                               Text="Context.Text"
+                               ResourceNamespace="modularity"
+                               MoreLabel="@T("Guide.More")" />
+            <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
+                <ul class="compact-list">
+                    <li>@T("Boundaries.Generated")</li>
+                    <li>@T("Boundaries.NoExecution")</li>
+                    <li>@T("Boundaries.Constrained")</li>
+                    <li>@T("Boundaries.Ownership")</li>
+                </ul>
+            </ShowcaseBoundariesPanel>
+            <ShowcaseSourcePanel Title="@T("Source.Title")"
+                                 Body="@T("Source.Body")"
+                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+        </Guidance>
+    </ShowcasePackageWorkbench>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ShowcasePageContext Context { get; set; } = default!;
+
+    private ModularityInput _input = new();
+    private string _selectedId = string.Empty;
+    private string _preview = string.Empty;
+    private long _sampleRevision;
+
+    protected override void OnInitialized() =>
+        SelectSample(Context.Samples.Single(static sample => sample.IsDefault));
+
+    private string T(string key) => Context.Text.GetText("modularity", key);
+
+    private Task SelectSampleAsync(string id)
+    {
+        SelectSample(Context.Samples.Single(sample => sample.Id == id));
+        return Task.CompletedTask;
+    }
+
+    private void SelectSample(IShowcaseSample sample)
+    {
+        _selectedId = sample.Id;
+        _input = (ModularityInput)sample.CreateInput();
+        Refresh();
+        _sampleRevision = checked(_sampleRevision + 1);
+    }
+
+    private Task SetModeAsync(ChangeEventArgs args)
+    {
+        _input = _input with { Mode = args.Value?.ToString() ?? _input.Mode };
+        Refresh();
+        return Task.CompletedTask;
+    }
+
+
+    private Task SetOptionalAsync(ChangeEventArgs args)
+    {
+        _input = _input with { IncludeOptional = ReadBool(args) };
+        Refresh();
+        return Task.CompletedTask;
+    }
+
+    private Task SetLifecycleAsync(ChangeEventArgs args)
+    {
+        _input = _input with { IncludeLifecycle = ReadBool(args) };
+        Refresh();
+        return Task.CompletedTask;
+    }
+
+    private static bool ReadBool(ChangeEventArgs args) =>
+        args.Value is true || string.Equals(
+            args.Value?.ToString(),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+
+    private void Refresh() => _preview = ModularityRecipeRenderer.Render(_input);
+}

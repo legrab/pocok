@@ -35,6 +35,15 @@ public partial class ShowcaseBufferedTextArea : IDisposable
             _valueCommitter.CancelPending();
     }
 
+    /// <summary>Flushes pending browser-owned text before an explicit action.</summary>
+    public async Task<string> FlushAsync()
+    {
+        string current = _editorValue.CurrentValue;
+        if (_editorValue.HasUncommittedInput)
+            await _valueCommitter.FlushAsync(current);
+        return current;
+    }
+
     private Task OnInputAsync(ChangeEventArgs args)
     {
         _editorValue.SetInput(args.Value?.ToString() ?? string.Empty);
@@ -43,8 +52,7 @@ public partial class ShowcaseBufferedTextArea : IDisposable
 
     private async Task OnBlurAsync(FocusEventArgs _)
     {
-        if (_editorValue.HasUncommittedInput)
-            await _valueCommitter.FlushAsync(_editorValue.CurrentValue);
+        await FlushAsync();
     }
 
     private async Task CommitValueAsync(string value)

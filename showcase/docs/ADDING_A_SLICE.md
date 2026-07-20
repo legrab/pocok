@@ -99,6 +99,16 @@ Keep the browser-owned editing value separate from the page's committed input mo
 
 `Pocok.Showcase.Samples.Tests` enforces the absence of direct `oninput` handlers in sample plugins so new slices inherit this behavior by default.
 
+## Shared Monaco scripting editor
+
+Use `ShowcaseMonacoEditor` only for package-owned source editors that benefit from a language mode. It is Showcase-internal and preserves the same 500 ms buffered commit contract as `ShowcaseBufferedTextArea`.
+
+- Provide a stable language ID and increment `ResetRevision` only for an external sample or engine reset.
+- Keep live editor state circuit-local and flush it before Run, engine changes, sample resets, fallback changes, and disposal.
+- When a run must observe the flushed value, use `ShowcaseExecutionControls.InputResolver` rather than submitting a stale parent model.
+- Supply only small package-owned completion records; do not claim semantic Roslyn or Python language-service behavior.
+- Monaco assets are local. Initialization or interop failure must leave the latest committed value usable through the buffered-textarea fallback.
+- Do not publish the wrapper as a reusable package during Release Readiness.
 ## Manifest checklist
 
 ```json

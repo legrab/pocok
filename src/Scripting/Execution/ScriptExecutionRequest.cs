@@ -1,29 +1,36 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
+
 namespace Pocok.Scripting.Execution;
 
-/// <summary>Defines one isolated JavaScript execution request.</summary>
+/// <summary>Defines one bounded script execution request.</summary>
 public sealed record ScriptExecutionRequest
 {
-    /// <summary>Creates an execution request.</summary>
-    public ScriptExecutionRequest(string identifier, string script)
+    /// <summary>Creates an execution request for an explicit engine.</summary>
+    public ScriptExecutionRequest(ScriptEngineId engineId, string identifier, string source)
     {
+        if (string.IsNullOrWhiteSpace(engineId.Value))
+            throw new ArgumentException("An explicit engine identifier is required.", nameof(engineId));
         ArgumentException.ThrowIfNullOrWhiteSpace(identifier);
-        ArgumentNullException.ThrowIfNull(script);
+        ArgumentNullException.ThrowIfNull(source);
+        EngineId = engineId;
         Identifier = identifier;
-        Script = script;
+        Source = source;
     }
+
+    /// <summary>Gets the selected engine.</summary>
+    public ScriptEngineId EngineId { get; }
 
     /// <summary>Gets the diagnostic request identifier.</summary>
     public string Identifier { get; }
 
-    /// <summary>Gets the JavaScript source.</summary>
-    public string Script { get; }
+    /// <summary>Gets source submitted to the engine.</summary>
+    public string Source { get; }
 
-    /// <summary>Gets or sets whether a non-null result is required.</summary>
+    /// <summary>Gets whether a non-null result is required.</summary>
     public bool ExpectResult { get; init; }
 
-    /// <summary>Gets or sets the explicitly allowed bindings.</summary>
+    /// <summary>Gets explicitly allowed scalar or function bindings.</summary>
     public IReadOnlyList<ScriptBinding> Bindings { get; init; } = [];
 }

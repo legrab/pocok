@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Pocok.Subscriptions</PackageId>
-    <PackageVersion Condition="'$(PocokSubscriptionsPackageVersion)' != ''">$(PocokSubscriptionsPackageVersion)</PackageVersion>
+    <MinVerVersionOverride Condition="'$(PocokSubscriptionsPackageVersion)' != ''">$(PocokSubscriptionsPackageVersion)</MinVerVersionOverride>
     <MinVerTagPrefix>subscriptions-v</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
     <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>

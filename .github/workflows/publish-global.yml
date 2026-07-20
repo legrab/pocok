@@ -26,6 +26,9 @@ jobs:
       - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           global-json-file: global.json
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: '3.14'
       - id: resolve
         name: Resolve and validate synchronized graph
         shell: pwsh
@@ -42,15 +45,18 @@ jobs:
           ./tools/PackageCatalog/Test-GlobalRelease.ps1
       - name: Preflight all exact versions and provenance
         shell: pwsh
-        run: |
-          ./tools/PackageCatalog/Test-GlobalReleasePreflight.ps1 -Tag '${{ github.ref_name }}' -Commit '${{ github.sha }}' -OutputPath artifacts/global-release/preflight-state.json | Out-Host
+        run: ./tools/PackageCatalog/Test-GlobalReleasePreflight.ps1 -Tag '${{ github.ref_name }}' -Commit '${{ github.sha }}' -OutputPath artifacts/global-release/preflight-state.json | Out-Host
       - name: Generate synchronized versions
         shell: pwsh
-        run: |
-          ./tools/PackageCatalog/New-GlobalReleaseVersionsProps.ps1 -Version '${{ steps.resolve.outputs.version }}' -OutputPath artifacts/global-release/release-versions.props
+        run: ./tools/PackageCatalog/New-GlobalReleaseVersionsProps.ps1 -Version '${{ steps.resolve.outputs.version }}' -OutputPath artifacts/global-release/release-versions.props
       - name: Restore, build, and test release graph
         shell: pwsh
-        run: ./tools/Ci/Invoke-PublicReleaseValidation.ps1 -ReleaseVersionsFile artifacts/global-release/release-versions.props
+        run: |
+          $env:DOTNET_HOST_PATH = (Get-Command dotnet).Source
+          $env:POCOK_CSHARP_WORKER_DIRECTORY = Join-Path $env:GITHUB_WORKSPACE 'src/Scripting.CSharp.Worker/bin/Release/net10.0'
+          $env:POCOK_PYTHON_EXECUTABLE = (Get-Command python).Source
+          $env:POCOK_PYTHON_WORKER_PATH = Join-Path $env:GITHUB_WORKSPACE 'src/Scripting.Python/Worker/pocok_worker.py'
+          ./tools/Ci/Invoke-PublicReleaseValidation.ps1 -ReleaseVersionsFile artifacts/global-release/release-versions.props
       - name: Pack synchronized graph
         shell: pwsh
         run: |
@@ -59,7 +65,7 @@ jobs:
           $releaseProps = Join-Path $PWD 'artifacts/global-release/release-versions.props'
           $plan = Get-Content artifacts/global-release/plan.json -Raw | ConvertFrom-Json
           foreach ($package in $plan.packages) {
-            dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=false
+            dotnet pack $package.project --configuration Release --no-build --no-restore --output artifacts/packages -p:PocokReleaseVersionsFile=$releaseProps -p:IncludeExperimental=true
             if ($LASTEXITCODE -ne 0) { throw "Packing $($package.id) failed with exit code $LASTEXITCODE." }
             foreach ($extension in @('nupkg','snupkg')) {
               $path = Join-Path artifacts/packages "$($package.id).${{ steps.resolve.outputs.version }}.$extension"
@@ -106,8 +112,7 @@ jobs:
         shell: pwsh
         env:
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
-        run: |
-          ./tools/PackageCatalog/Invoke-GlobalRelease.ps1 -Tag '${{ github.ref_name }}' -Commit '${{ github.sha }}' -PackagesPath artifacts/packages -ApiKey $env:NUGET_API_KEY -PropagationTimeout '00:15:00' -StatePath artifacts/global-release/final-state.json
+        run: ./tools/PackageCatalog/Invoke-GlobalRelease.ps1 -Tag '${{ github.ref_name }}' -Commit '${{ github.sha }}' -PackagesPath artifacts/packages -ApiKey $env:NUGET_API_KEY -PropagationTimeout '00:15:00' -StatePath artifacts/global-release/final-state.json
       - name: Finalize GitHub release
         shell: bash
         env:

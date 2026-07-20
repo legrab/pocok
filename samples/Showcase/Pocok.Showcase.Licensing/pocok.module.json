@@ -13,6 +13,7 @@
   "metadata": {
     "packageId": "Pocok.Licensing",
     "slug": "licensing",
-    "kind": "showcase-slice"
+    "kind": "showcase-slice",
+    "coveredPackageIds": "Pocok.Licensing;Pocok.AppDefaults.Licensing"
   }
 }

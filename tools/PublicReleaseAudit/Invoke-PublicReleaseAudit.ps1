@@ -203,7 +203,7 @@ foreach ($package in $artifacts) {
             Sort-Object
 
         if (($dependencyIds -join "`n") -ne ($expectedDependencies -join "`n")) {
-            throw "$($package.Name) dependencies differ from its catalog allowlist. Actual: $($dependencyIds -join ', ')"
+            throw "$($package.Name) dependencies differ from its catalog allowlist. Actual: $($dependencyIds -join ', ') | Allowed: $($expectedDependencies -join ', ')"
         }
 
         foreach ($dependency in $dependencies) {

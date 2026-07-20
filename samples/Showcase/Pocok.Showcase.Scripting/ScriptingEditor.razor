@@ -1,11 +1,28 @@
-<ShowcaseCodeAssistEditor Label="@T("Sandbox.CodeLabel")"
-                          @bind-Value:get="Value.Script"
-                          @bind-Value:set="SetScriptAsync"
-                          ShowSuggestionsLabel="@T("Sandbox.ShowSuggestions")"
-                          HideSuggestionsLabel="@T("Sandbox.HideSuggestions")"
-                          Catalog="CodeAssist"
-                          Text="Text"
-                          ResourceNamespace="scripting" />
+@using Pocok.Scripting.Execution
+<div class="field">
+    <label for="script-engine">@T("Fields.Engine")</label>
+    <select id="script-engine" value="@Value.EngineId" @onchange="ChangeEngineAsync">
+        @foreach (ScriptEngineDescriptor descriptor in Engines)
+        {
+            <option value="@descriptor.Id.Value">
+                @descriptor.Language @(!descriptor.IsAvailable ? $"— {descriptor.UnavailableCode}" : null)
+            </option>
+        }
+    </select>
+    @if (Selected is { IsAvailable: false })
+    {
+        <small role="status">@Selected.UnavailableMessage</small>
+    }
+</div>
+
+<ShowcaseMonacoEditor @ref="_monaco"
+                      Label="@T("Sandbox.CodeLabel")"
+                      Language="@Value.EngineId"
+                      Value="@Value.Source"
+                      ValueChanged="SetSourceAsync"
+                      ResetRevision="@ResetRevision"
+                      Completions="@Completions"
+                      FallbackDiagnostic="@T("Sandbox.EditorFallback")" />
 
 <div class="field-grid scripting-options">
     <div class="field checkbox-field">
@@ -13,8 +30,7 @@
         <input id="expect-result"
                type="checkbox"
                checked="@Value.ExpectResult"
-               @onchange="args => SetExpectResultAsync(ReadValue(args, Value.ExpectResult))" />
-        <small>@T("Fields.ExpectResultHelp")</small>
+               @onchange="args => UpdateAsync(Value with { ExpectResult = ReadValue(args, Value.ExpectResult) })" />
     </div>
     <div class="field">
         <label for="timeout">@T("Fields.Timeout")</label>
@@ -24,34 +40,42 @@
                max="2000"
                step="50"
                value="@Value.TimeoutMilliseconds"
-               @onchange="args => SetTimeoutAsync(ReadValue(args, Value.TimeoutMilliseconds))" />
+               @onchange="args => UpdateAsync(Value with { TimeoutMilliseconds = Math.Clamp(ReadValue(args, Value.TimeoutMilliseconds), 50, 2000) })" />
     </div>
-    <div class="field">
-        <label for="statements">@T("Fields.MaxStatements")</label>
-        <input id="statements"
-               type="number"
-               min="100"
-               max="100000"
-               step="100"
-               value="@Value.MaxStatements"
-               @onchange="args => SetMaxStatementsAsync(ReadValue(args, Value.MaxStatements))" />
-    </div>
-    <div class="field">
-        <label for="recursion">@T("Fields.MaxRecursion")</label>
-        <input id="recursion"
-               type="number"
-               min="8"
-               max="128"
-               value="@Value.MaxRecursionDepth"
-               @onchange="args => SetMaxRecursionAsync(ReadValue(args, Value.MaxRecursionDepth))" />
-    </div>
-    <div class="field">
-        <label for="memory">@T("Fields.MaxMemory")</label>
-        <input id="memory"
-               type="number"
-               min="4"
-               max="64"
-               value="@Value.MaxMemoryMegabytes"
-               @onchange="args => SetMaxMemoryAsync(ReadValue(args, Value.MaxMemoryMegabytes))" />
-    </div>
+    @if (Selected?.Capabilities.EnforcesStatementLimit == true)
+    {
+        <div class="field">
+            <label for="statements">@T("Fields.MaxStatements")</label>
+            <input id="statements"
+                   type="number"
+                   min="100"
+                   max="100000"
+                   value="@Value.MaxStatements"
+                   @onchange="args => UpdateAsync(Value with { MaxStatements = Math.Clamp(ReadValue(args, Value.MaxStatements ?? 10000), 100, 100000) })" />
+        </div>
+    }
+    @if (Selected?.Capabilities.EnforcesRecursionLimit == true)
+    {
+        <div class="field">
+            <label for="recursion">@T("Fields.MaxRecursion")</label>
+            <input id="recursion"
+                   type="number"
+                   min="8"
+                   max="128"
+                   value="@Value.MaxRecursionDepth"
+                   @onchange="args => UpdateAsync(Value with { MaxRecursionDepth = Math.Clamp(ReadValue(args, Value.MaxRecursionDepth ?? 64), 8, 128) })" />
+        </div>
+    }
+    @if (Selected?.Capabilities.EnforcesMemoryLimit == true)
+    {
+        <div class="field">
+            <label for="memory">@T("Fields.MaxMemory")</label>
+            <input id="memory"
+                   type="number"
+                   min="4"
+                   max="64"
+                   value="@Value.MaxMemoryMegabytes"
+                   @onchange="args => UpdateAsync(Value with { MaxMemoryMegabytes = Math.Clamp(ReadValue(args, Value.MaxMemoryMegabytes ?? 16), 4, 64) })" />
+        </div>
+    }
 </div>

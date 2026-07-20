@@ -1,136 +1,113 @@
 {
   "Package": {
-    "Name": "Szkriptfuttatás",
-    "Summary": "Teljes JavaScript futtatása a Pocok.Scripting használatával, a visszatérési értékek, korlátok és strukturált hibák megjelenítésével.",
+    "Name": "Scripting",
+    "Summary": "Korlátozott JavaScript-, C#- és Python-adapterek összehasonlítása közös motorfüggetlen futtatóval.",
     "Status": {
       "Available": "Elérhető"
     }
   },
   "Sandbox": {
     "Samples": "Példák",
-    "Title": "JavaScript tesztkörnyezet",
+    "Title": "Többnyelvű szkript-homokozó",
     "Running": "Fut",
     "Ready": "Kész",
-    "CodeLabel": "Teljes JavaScript forrás",
+    "CodeLabel": "Szkript forrása",
     "Run": "Szkript futtatása",
-    "Cancel": "Megszakítás",
+    "Cancel": "Mégse",
     "ExecutionSteps": "Végrehajtási lépések",
-    "ShowSuggestions": "Javaslatok megnyitása",
-    "HideSuggestions": "Javaslatok bezárása"
+    "EditorFallback": "A Monaco nem érhető el; a korlátozott szövegszerkesztő továbbra is használható."
   },
   "Fields": {
+    "Engine": "Nyelvi motor",
     "ExpectResult": "Visszatérési érték szükséges",
-    "ExpectResultHelp": "Bekapcsolva a null és az undefined hiányzó eredményként, strukturált hibával tér vissza.",
     "Timeout": "Időkorlát (ms)",
-    "MaxStatements": "Utasítások legnagyobb száma",
-    "MaxRecursion": "Legnagyobb rekurziós mélység",
+    "MaxStatements": "Utasítások maximuma",
+    "MaxRecursion": "Rekurzió maximuma",
     "MaxMemory": "Memóriakorlát (MiB)"
   },
   "Result": {
-    "Title": "Futtatási eredmény",
-    "Empty": "Futtasd az aktuális szkriptet a visszatérési érték vagy a strukturált hiba megtekintéséhez.",
-    "ScriptPreview": "Futtatott JavaScript",
+    "Title": "Végrehajtási eredmény",
+    "Empty": "Futtasd a forrást az eredmény vagy a biztonságos hiba megtekintéséhez.",
+    "ScriptPreview": "Futtatott forrás",
     "Truncated": "csonkolva",
     "Fields": {
       "ReturnValue": "Visszatérési érték",
-      "ResultType": "Eredmény futásidejű típusa",
-      "ExpectResult": "Visszatérési érték kötelező",
-      "Limits": "Futtatási korlátok",
+      "Engine": "Motor",
+      "ResultType": "Futásidejű eredménytípus",
+      "Limits": "Végrehajtási korlátok",
       "Line": "Hiba sora",
-      "Column": "Hiba oszlopa"
+      "Column": "Hiba oszlopa",
+      "ExpectResult": "Visszatérési érték szükséges"
     }
   },
   "Tips": {
-    "Title": "Mire érdemes figyelni",
-    "Isolation": "Minden futás új Jint motort használ, ezért a szkriptek nem oszthatnak meg módosítható motorállapotot.",
-    "Bounds": "Az időkorlát, az utasításszám, a rekurzió, a forráshossz, a memória, a várakozási sor és a kimenet külön korlátozható.",
-    "ReturnValue": "Az utolsó JavaScript-kifejezés lesz a visszatérési érték. Egy deklaráció önmagában általában undefined értéket ad.",
-    "Failures": "A JavaScript-hibák és a korlátok megsértése a hostban keletkező kivétel helyett strukturált hibaként tér vissza.",
-    "Capabilities": "A host kizárólag külön engedélyezett értékeket és delegáltakat ad át; nincs automatikus környezeti hozzáférés."
+    "Title": "Mire figyelj",
+    "Isolation": "Minden futás friss motor- vagy gyermekfolyamat-állapotot használ.",
+    "Bounds": "Csak a kiválasztott adapter által ténylegesen betartható korlátokat kérjük.",
+    "Failures": "Az ellenőrzési és végrehajtási hibák csak biztonságos diagnosztikát jelenítenek meg.",
+    "Capabilities": "A C# és a Python csak kifejezetten megbízható helyi környezetben engedélyezett."
   },
   "Guide": {
     "More": "További útmutató",
     "Purpose": {
       "Title": "Cél",
-      "Body": "A Pocok.Scripting a host által felügyelt JavaScript-határt ad automatizálási és bővítési pontokhoz anélkül, hogy általános CLR-hozzáférést nyitna."
+      "Body": "A Pocok.Scripting különválasztja a motorfüggetlen vezérlést a nyelvi adapterektől."
     },
     "QuickStart": {
-      "Title": "Első lépések",
-      "Body": "Írj egy teljes szkriptet, és az ellenőrizni kívánt értéket hagyd az utolsó kifejezésként. A példa közvetlenül a ScriptRunner API-t hívja."
-    },
-    "Results": {
-      "Title": "Eredmények",
-      "Body": "Sikeres futáskor az utolsó JavaScript-érték tér vissza. A Showcase a skalár-, tömb- és objektumeredményeket determinisztikusan formázza, a rögzített kivételobjektumokat pedig nem jeleníti meg."
+      "Title": "Gyors kezdés",
+      "Body": "Válassz motort, majd futtasd ugyanannak a példának a megfelelő nyelvi változatát."
     },
     "Bounds": {
-      "Title": "Futtatási korlátok",
-      "Body": "A ScriptRunner korlátozza a futási időt, az utasításszámot, a rekurziót, a forráshosszt, a memóriát és kezeli a megszakítást. A Showcase ezen felül a várakozási sort, a bemenetet és a kimenetet is korlátozza."
-    },
-    "Capabilities": {
-      "Title": "Explicit hozzáférések",
-      "Body": "A host jóváhagyott skalárértékeket és delegáltakat adhat át ScriptBinding használatával. Összetett CLR-objektumok és automatikus CLR-integráció nem érhető el."
-    },
-    "Imports": {
-      "Title": "Importok és modulok",
-      "Body": "A csomag külön megadott modulforrásból képes kommentalapú importokat feloldani. A nyilvános telepítés önálló szkripteket futtat, és nem biztosít tartós modulkatalógust."
-    },
-    "Concurrency": {
-      "Title": "Párhuzamosság",
-      "Body": "A ScriptRunner minden kéréshez új motort hoz létre, ezért párhuzamosan is használható. Minden Showcase-futás saját függőségi hatókört, megszakítási forrást, eredmény- és állapotcsatornát kap."
+      "Title": "Végrehajtási korlátok",
+      "Body": "A futtató végrehajtás előtt ellenőriz, és elutasítja az adott motor által nem betartható kötelező korlátokat."
     },
     "Production": {
       "Title": "Éles használat",
-      "Body": "A szkripteket kezeld nem megbízható bemenetként, tartsd szigorúan a korlátokat, minden delegáltat külön engedélyezz, ne írj titkot a diagnosztikába, és ne tekintsd a folyamaton belüli korlátokat operációs rendszer szintű izolációnak."
+      "Body": "Az ellenőrzők védőkorlátok, nem operációsrendszer-szintű sandboxok. Nyilvános környezetben csak a JavaScript engedélyezett."
     },
     "Snippet": {
-      "RunnerTitle": "Korlátozott szkript futtatása",
-      "ScriptTitle": "Teljes szkript visszatérési értékkel"
+      "RunnerTitle": "Explicit motorok regisztrálása"
     }
-  },
-  "Assist": {
-    "Const": "Nem módosítható helyi változó beszúrása.",
-    "Function": "Teljes függvénydeklaráció beszúrása.",
-    "Return": "return utasítás beszúrása függvénytörzsbe.",
-    "Array": "Tömbátalakítási példa beszúrása.",
-    "Object": "Objektumliterál visszaadása utolsó kifejezésként.",
-    "Reduce": "Tömb összesítése egyetlen értékké.",
-    "Map": "Minden tömbelem átalakítása."
   },
   "Boundaries": {
     "Title": "Határok",
-    "NoClr": "Nincs automatikus CLR- vagy reflexióhozzáférés.",
-    "NoIo": "Nincs hozzáférés a fájlrendszerhez, hálózathoz, böngészőhöz vagy szolgáltatáskonténerhez.",
-    "FreshEngine": "Minden futás új motort és külön szkriptállapotot kap.",
-    "Bounded": "Külön korlát vonatkozik a forráshosszra, futási időre, utasításszámra, rekurzióra, memóriára, várakozási sorra és kimenetre."
+    "Guardrails": "Az ellenőrzés hibára záró védőkorlát, nem operációsrendszer-szintű sandbox.",
+    "NoIo": "A fájlrendszer-, hálózati-, reflection-, folyamat- és környezethozzáférés alapból tiltott.",
+    "Trusted": "A C# és a Python csak megbízható helyi használatra szolgál.",
+    "Bounded": "A forrás, a kimenet, az időkorlát és a támogatott motorspecifikus korlátok behatároltak."
   },
   "Source": {
-    "Title": "Forrásdokumentáció",
-    "Body": "A csomag futtatási korlátainak, hozzáféréseinek, importjainak és biztonsági határainak dokumentációja."
+    "Title": "Source documentation",
+    "Body": "Csomagdokumentáció a motorkontraktusokról, adapterekről, ellenőrzésről és bizalmi határokról."
   },
   "Samples": {
     "arithmetic": {
-      "Name": "Függvény eredménye",
-      "Description": "Függvény definiálása, majd a 12 háromszögszámának visszaadása az utolsó kifejezéssel."
+      "Name": "Számítás",
+      "Description": "Ugyanazt a háromszögszám-eredményt adja vissza mindhárom nyelven."
     },
     "object-result": {
-      "Name": "Objektum- és tömberedmény",
-      "Description": "Összesített és átalakított tömbértékeket tartalmazó objektum visszaadása."
+      "Name": "Strukturált eredmény",
+      "Description": "Azonos objektum- és listaszerkezetet ad vissza."
     },
     "string-result": {
-      "Name": "Sablonsztring",
-      "Description": "JavaScript-sablonsztring visszaadása egy teljes szkriptből."
+      "Name": "Szöveges eredmény",
+      "Description": "Ugyanazt a meghatározott szöveget adja vissza."
     },
     "missing-result": {
       "Name": "Hiányzó eredmény",
-      "Description": "Deklarációval záruló szkript futtatása kötelező eredmény mellett, majd a strukturált hiba megtekintése."
+      "Description": "Eredményt vár olyan forrástól, amely csak értéket deklarál."
     },
     "syntax-error": {
       "Name": "Szintaktikai hiba",
-      "Description": "Érvénytelen JavaScript futtatása, majd a biztonságosan megjelenített hibapozíció ellenőrzése."
+      "Description": "Biztonságos feldolgozói diagnosztikát jelenít meg."
     },
-    "recursion-limit": {
-      "Name": "Rekurziós korlát",
-      "Description": "A beállított rekurziós korlát elérése a hostfolyamat működésének veszélyeztetése nélkül."
+    "bounded-runaway": {
+      "Name": "Korlátozott végtelen futás",
+      "Description": "Időkorlátot vagy motoroldali végrehajtási korlátot vált ki."
+    },
+    "validator-rejection": {
+      "Name": "Ellenőrző általi elutasítás",
+      "Description": "Tiltott, motorspecifikus képességet kér, és végrehajtás előtt megáll."
     }
   }
 }

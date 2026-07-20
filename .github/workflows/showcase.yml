@@ -2,6 +2,8 @@ name: Showcase
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "showcase/**"
       - "samples/Showcase/**"
@@ -34,7 +36,7 @@ jobs:
           dotnet-version: 10.0.x
       - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: Restore
         shell: pwsh
         run: |
@@ -57,19 +59,23 @@ jobs:
         shell: pwsh
         run: |
           Remove-Item Env:PLATFORM -ErrorAction SilentlyContinue
+          $env:DOTNET_HOST_PATH = (Get-Command dotnet).Source
+          $env:POCOK_CSHARP_WORKER_DIRECTORY = Join-Path $env:GITHUB_WORKSPACE 'src/Scripting.CSharp.Worker/bin/Release/net10.0'
+          $env:POCOK_PYTHON_EXECUTABLE = (Get-Command python).Source
+          $env:POCOK_PYTHON_WORKER_PATH = Join-Path $env:GITHUB_WORKSPACE 'src/Scripting.Python/Worker/pocok_worker.py'
           dotnet test showcase/tests/Pocok.Showcase.Tests/Pocok.Showcase.Tests.csproj --configuration Release --no-build --verbosity minimal
           dotnet test samples/Showcase/Pocok.Showcase.Samples.Tests/Pocok.Showcase.Samples.Tests.csproj --configuration Release --no-build --verbosity minimal
       - name: Publish with Bash
         if: runner.os == 'Linux'
-        run: bash showcase/scripts/publish-showcase.sh "${{ runner.temp }}/pocok-showcase" --no-restore
+        run: bash showcase/scripts/publish-showcase.sh "${{ runner.temp }}/pocok-showcase" --no-restore --require-complete
       - name: Publish with PowerShell on Linux
         if: runner.os == 'Linux'
         shell: pwsh
-        run: ./showcase/scripts/publish-showcase.ps1 -OutputPath "${{ runner.temp }}/pocok-showcase-pwsh" -NoRestore
+        run: ./showcase/scripts/publish-showcase.ps1 -OutputPath "${{ runner.temp }}/pocok-showcase-pwsh" -NoRestore -RequireComplete
       - name: Publish with PowerShell on Windows
         if: runner.os == 'Windows'
         shell: pwsh
-        run: ./showcase/scripts/publish-showcase.ps1 -OutputPath "${{ runner.temp }}/pocok-showcase" -NoRestore
+        run: ./showcase/scripts/publish-showcase.ps1 -OutputPath "${{ runner.temp }}/pocok-showcase" -NoRestore -RequireComplete
       - name: Smoke
         run: python showcase/scripts/smoke-showcase.py "${{ runner.temp }}/pocok-showcase"
 
@@ -83,7 +89,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker run --detach --rm --name pocok-showcase-ci -p 8080:8080 pocok-showcase:ci
+          docker run --detach --rm --name pocok-showcase-ci \
+            -e Showcase__RequireCompleteCatalog=true \
+            -p 8080:8080 pocok-showcase:ci
           cleanup() {
             docker logs pocok-showcase-ci || true
             docker stop pocok-showcase-ci || true
@@ -97,16 +105,21 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:8080/health/live >/dev/null
           curl --fail --silent http://127.0.0.1:8080/ >/dev/null
-          curl --fail --silent http://127.0.0.1:8080/packages/conversion >/dev/null
-          curl --fail --silent http://127.0.0.1:8080/packages/scripting >/dev/null
-          curl --fail --silent http://127.0.0.1:8080/packages/licensing >/dev/null
-          curl --fail --silent http://127.0.0.1:8080/packages/readiness >/dev/null
+          for slug in conversion readiness app-defaults app-defaults-logging app-defaults-logging-serilog \
+              modularity-contracts modularity app-defaults-modularity background-work scripting \
+              scripting-javascript scripting-csharp scripting-python localization signals subscriptions \
+              licensing app-defaults-licensing; do
+            curl --fail --silent "http://127.0.0.1:8080/packages/$slug" >/dev/null
+          done
           curl --fail --silent http://127.0.0.1:8080/system >/dev/null
       - name: Non-default port
         shell: bash
         run: |
           set -euo pipefail
-          docker run --detach --rm --name pocok-showcase-port-ci -e PORT=9090 -p 9090:9090 pocok-showcase:ci
+          docker run --detach --rm --name pocok-showcase-port-ci \
+            -e PORT=9090 \
+            -e Showcase__RequireCompleteCatalog=true \
+            -p 9090:9090 pocok-showcase:ci
           cleanup() {
             docker logs pocok-showcase-port-ci || true
             docker stop pocok-showcase-port-ci || true

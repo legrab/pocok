@@ -1,0 +1,58 @@
+{
+  "Package": {
+    "Name": "Modularity",
+    "Summary": "Korlátozott Modularity-konfigurációs és használati receptek generálása.",
+    "Status": {
+      "Available": "Elérhető"
+    }
+  },
+  "Sandbox": {
+    "Samples": "Minták",
+    "Title": "Modularity receptkészítő",
+    "Ready": "Típusos beállításokból generálva"
+  },
+  "Fields": {
+    "Mode": "Recept",
+    "IncludeOptional": "A modul legyen opcionális",
+    "IncludeLifecycle": "Illeszkedő manifest hozzáadása"
+  },
+  "Tips": {
+    "Generated": "A kód kizárólag korlátozott beállításokból készül.",
+    "Ownership": "A recept egyértelművé teszi az életciklus tulajdonjogát."
+  },
+  "Guide": {
+    "More": "További útmutató",
+    "Purpose": {
+      "Title": "Cél",
+      "Body": "Forráspontos kiindulási receptek készítése a generált kód futtatása nélkül."
+    },
+    "Snippet": {
+      "Title": "Generált recept"
+    }
+  },
+  "Boundaries": {
+    "Title": "Korlátok",
+    "Generated": "Csak típusos beállítások generálhatnak kódot.",
+    "NoExecution": "A generált forrás nem fut le.",
+    "Constrained": "Az azonosítók és API-választások engedélyezett készletből származnak.",
+    "Ownership": "A megosztott szerződések és a modulbetöltés felelőssége látható marad."
+  },
+  "Source": {
+    "Title": "Forrásdokumentáció",
+    "Body": "A teljes viselkedési szerződés a csomag dokumentációjában található."
+  },
+  "Samples": {
+    "direct": {
+      "Name": "Közvetlen regisztráció",
+      "Description": "Megbízható modulkönyvtárak közvetlen konfigurálása."
+    },
+    "app-defaults": {
+      "Name": "AppDefaults-regisztráció",
+      "Description": "Modularity alapbeállítások alkalmazása egy gazda builderére."
+    },
+    "manifest": {
+      "Name": "Illeszkedő manifest",
+      "Description": "Egymással összhangban lévő regisztráció és modulmanifest generálása."
+    }
+  }
+}
