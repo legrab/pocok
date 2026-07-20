@@ -1,7 +1,7 @@
 # Pocok Showcase revision and package-composition plan
 
 **Plan date:** 2026-07-18  
-**Status:** Ready for implementation; architecture and validation decisions are closed  
+**Status:** Historical predecessor; local ten-plugin coverage is implemented and remaining bundle/deployment work belongs to `mvp-closure.md`  
 **Scope:** Showcase acceptance ledger, six sample bundles, multi-engine UI, deterministic source composition, browser proof, and Render rollout
 
 ## Execution contract

@@ -1,4 +1,4 @@
-# ADR 0007: Internal shared source without a Common package
+# ADR 0008: Internal shared source without a Common package
 
 - Status: Accepted
 - Date: 2026-07-15

@@ -49,5 +49,5 @@ All state transitions are thread-safe. The source contains no ambient state, log
 process-global registration. Dispose values attached to a `ReadinessFailure` according to their own ownership contract;
 this package does not own them.
 
-See [ADR 0006](https://github.com/legrab/pocok/blob/main/docs/decisions/0007-readiness-lifecycle.md) for transition and
+See [ADR 0007](https://github.com/legrab/pocok/blob/main/docs/decisions/0007-readiness-lifecycle.md) for transition and
 restart rationale.

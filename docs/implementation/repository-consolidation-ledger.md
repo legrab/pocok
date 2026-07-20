@@ -1,5 +1,8 @@
 # Repository consolidation implementation ledger
 
+> **Historical ledger:** Checked items and status statements describe the consolidation phase. Current release eligibility
+> and package shape are authoritative in `eng/packages.json`, `PUBLICATION.md`, and `docs/current-handoff.md`.
+
 > Checked implementation items mean the source change exists. Executable validation is recorded separately and never inferred from a checked design task.
 
 ## Frozen package graph

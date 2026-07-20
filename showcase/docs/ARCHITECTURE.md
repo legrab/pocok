@@ -37,7 +37,7 @@ Each sample project imports `showcase/Showcase.Plugin.targets` and declares a st
 
 ## Catalog modes
 
-Publication generates `Content/package-catalog.json` from the current non-retired entries in `eng/packages.json` and `Content/showcase-slices.json` from discovered plugin manifests. Partial mode is the normal incremental default and marks absent slices as planned. `Showcase:RequireCompleteCatalog=true` makes startup and publication reject missing current slices.
+Publication generates `Content/package-catalog.json` from the current non-retired entries in `eng/packages.json` and `Content/showcase-slices.json` from discovered plugin manifests. Partial mode supports intentionally incomplete local or incremental work and marks absent slices as planned. The canonical smoke path and complete final image use `Showcase:RequireCompleteCatalog=true`, which makes startup and publication reject missing current package coverage.
 
 ## Execution isolation
 

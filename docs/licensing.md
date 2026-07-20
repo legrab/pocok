@@ -24,8 +24,8 @@ shutdown, and repeated operation-level guards are simpler to test and harder to 
 
 | Project | Role | Publication state |
 |---|---|---|
-| `Pocok.Licensing` | License models, signing, optional encryption, verification, runtime validation, DI service, guards | Experimental until the repository release gate passes |
-| `Pocok.AppDefaults.Licensing` | Configuration binding, startup enforcement, periodic reload and enforcement | Experimental until the repository release gate passes |
+| `Pocok.Licensing` | License models, signing, optional encryption, verification, runtime validation, DI service, guards | Active and releasable; publication remains tag- and gate-driven |
+| `Pocok.AppDefaults.Licensing` | Configuration binding, startup enforcement, periodic reload and enforcement | Active and releasable; publication remains tag- and gate-driven |
 | `Pocok.Licensing.Keygen` | Issuer and machine-fingerprint CLI | Self-contained GitHub Release executable; never a NuGet package |
 | `Pocok.Licensing.LicenseChecker` | Standalone diagnostic checker | Self-contained GitHub Release executable; never a NuGet package |
 

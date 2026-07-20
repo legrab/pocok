@@ -37,4 +37,5 @@ is manifest-led and deterministic.
 This is not a sandbox. Plugins execute trusted code in-process. Version 1 is startup-only and deliberately excludes hot
 reload, installation, unload guarantees, child containers, and module dependency graphs.
 
-The package remains non-releasable in `eng/packages.json` until its Linux and Windows fixture matrix passes in CI.
+The package is experimental and releasable in `eng/packages.json`. Its trusted startup-only boundary and Linux/Windows
+clean-room fixture matrix remain mandatory release evidence.

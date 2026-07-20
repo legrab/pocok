@@ -1,18 +1,26 @@
-# Planned package slices
+# Showcase package coverage
 
-The permanent host architecture and the `Pocok.Conversion`, `Pocok.Scripting`, and `Pocok.Licensing` slices are implemented. The immutable package catalog keeps these other current non-retired packages visible in the collapsed **Coming soon** section:
+The current local and canonical Docker publication contains ten package-owned plugins covering all eighteen non-retired
+library packages. No current catalog package belongs in a **Coming soon** section when complete-catalog mode is enabled.
 
-1. `Pocok.Readiness`
-2. `Pocok.AppDefaults`
-3. `Pocok.AppDefaults.Logging`
-4. `Pocok.AppDefaults.Logging.Serilog`
-5. `Pocok.Modularity.Contracts`
-6. `Pocok.Modularity`
-7. `Pocok.AppDefaults.Modularity`
-8. `Pocok.BackgroundWork`
-9. `Pocok.Localization`
-10. `Pocok.Signals`
-11. `Pocok.Subscriptions`
-12. `Pocok.AppDefaults.Licensing`
+| Plugin slug | Covered package IDs | Mode |
+|---|---|---|
+| `app-defaults-logging` | `Pocok.AppDefaults`; `Pocok.AppDefaults.Logging`; `Pocok.AppDefaults.Logging.Serilog` | Bounded real demonstration |
+| `background-work` | `Pocok.BackgroundWork` | Typed recipe builder |
+| `conversion` | `Pocok.Conversion` | Bounded real package path |
+| `licensing` | `Pocok.Licensing`; `Pocok.AppDefaults.Licensing` | Bounded validation demonstration and host-policy guidance |
+| `localization` | `Pocok.Localization` | Bounded real package path |
+| `modularity` | `Pocok.Modularity.Contracts`; `Pocok.Modularity`; `Pocok.AppDefaults.Modularity` | Typed recipe builder |
+| `readiness` | `Pocok.Readiness` | Typed recipe builder |
+| `scripting` | `Pocok.Scripting`; `Pocok.Scripting.JavaScript`; `Pocok.Scripting.CSharp`; `Pocok.Scripting.Python` | JavaScript public; C# and Python trusted-local only |
+| `signals` | `Pocok.Signals` | Typed recipe builder |
+| `subscriptions` | `Pocok.Subscriptions` | Typed recipe builder |
 
-Each slice must remain package-owned, use the shared execution and UI contracts, and pass publication plus readiness before another slice is added. The Licensing slice demonstrates claim validation and links to the broader signing, encryption, key-generation, and license-checker workflows rather than exposing private-key operations in the public deployment. Retired packages, tests, benchmarks, and release tools are not showcase targets.
+Multi-package coverage is declared in `pocok.module.json` through `coveredPackageIds` and validated against the generated
+package catalog. A future non-retired package may appear as planned only when its catalog entry is intentionally added
+before its plugin; complete-catalog publication must reject that incomplete state.
+
+Each plugin remains package-owned, uses shared execution and UI contracts, and passes publication plus startup validation.
+The Licensing plugin demonstrates claim validation and links to the broader signing, encryption, key-generation, and
+license-checker workflows rather than exposing private-key operations in the public deployment. Retired packages, tests,
+benchmarks, and release tools are not Showcase targets.

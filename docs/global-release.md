@@ -31,7 +31,7 @@ The hosted job timeout is 345 minutes. The current schema-v1 workflow rejects mo
 
 The candidate, graph, preflight state, and final state are retained as Actions artifacts. A draft GitHub Release is finalized only after every package is publicly verified. Rerunning the same global tag recomputes public state and continues missing packages when provenance matches.
 
-The current implementation may rebuild candidates on a rerun. It is suitable for the first library-only synchronized prerelease after [`plans/release-readiness.md`](plans/release-readiness.md) expands the graph to exactly eighteen libraries and completes their gates.
+The current implementation may rebuild candidates on a rerun. It is suitable for the current library-only synchronized prerelease graph of exactly eighteen releasable packages. Release-readiness implementation is complete in source; the exact commit still requires the documented rehearsal, CI, provenance, and approval gates before a tag is pushed.
 
 [`plans/mvp-closure.md`](plans/mvp-closure.md) owns the later upgrades:
 
@@ -47,7 +47,7 @@ That work upgrades this workflow rather than creating a competing global release
 
 ## Approval and release command
 
-Only after all Release Readiness gates pass on the exact commit, present the commit, proposed version, target list, dependency order, and zero-push evidence for explicit approval.
+Only after all release-readiness gates pass on the exact commit, present the commit, proposed version, eighteen-package target list, dependency order, and zero-push evidence for explicit approval.
 
 After approval:
 
