@@ -107,14 +107,37 @@ function Get-PocokGlobalReleaseGraph {
 }
 
 function Get-PocokTagCommit {
-    param([Parameter(Mandatory)][string]$Tag, [switch]$AllowMissing)
+    param(
+        [Parameter(Mandatory)]
+        [string] $Tag,
+        [switch] $AllowMissing
+    )
+
     $root = Get-PocokRepositoryRoot
-    $result = & git -C $root rev-parse --verify --quiet "refs/tags/$Tag^{commit}"
-    if ($LASTEXITCODE -ne 0 -or -not $result) {
-        if ($AllowMissing) { return $null }
+    $ref = "refs/tags/$Tag"
+
+    # for-each-ref exits 0 when the ref is absent and returns no output.
+    $existingRef = & git -C $root for-each-ref --format='%(refname)' $ref
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to inspect repository tag '$Tag'."
+    }
+
+    if (-not $existingRef) {
+        if ($AllowMissing) {
+            return $null
+        }
+
         throw "Repository tag '$Tag' does not exist."
     }
-    ([string]$result).Trim()
+
+    $result = & git -C $root rev-parse --verify --quiet "$ref^{commit}"
+
+    if ($LASTEXITCODE -ne 0 -or -not $result) {
+        throw "Repository tag '$Tag' does not resolve to a commit."
+    }
+
+    ([string] $result).Trim()
 }
 
 function Test-PocokReleaseTags {
