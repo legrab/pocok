@@ -9,7 +9,7 @@ function ConvertFrom-PocokGlobalTag {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Tag)
 
-    if ($Tag -notmatch '^GLOBAL-v(?<version>[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)$') {
+    if ($Tag -cnotmatch '^GLOBAL-v(?<version>[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)$') {
         throw "Global release tag '$Tag' must match GLOBAL-v<major.minor.patch[-prerelease]> exactly. Build metadata is not supported."
     }
 
