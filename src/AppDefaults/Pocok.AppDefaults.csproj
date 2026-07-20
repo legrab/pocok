@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Pocok.AppDefaults</PackageId>
-    <PackageVersion Condition="'$(PocokAppDefaultsPackageVersion)' != ''">$(PocokAppDefaultsPackageVersion)</PackageVersion>
+    <MinVerVersionOverride Condition="'$(PocokAppDefaultsPackageVersion)' != ''">$(PocokAppDefaultsPackageVersion)</MinVerVersionOverride>
     <MinVerTagPrefix>appdefaults-v</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
     <MinVerDefaultPreReleaseIdentifiers>alpha.1</MinVerDefaultPreReleaseIdentifiers>
