@@ -109,7 +109,7 @@ function Get-PocokGlobalReleaseGraph {
 function Get-PocokTagCommit {
     param([Parameter(Mandatory)][string]$Tag, [switch]$AllowMissing)
     $root = Get-PocokRepositoryRoot
-    $result = & git -C $root rev-list -n 1 --verify "refs/tags/$Tag" 2>$null
+    $result = & git -C $root rev-parse --verify --quiet "refs/tags/$Tag^{commit}"
     if ($LASTEXITCODE -ne 0 -or -not $result) {
         if ($AllowMissing) { return $null }
         throw "Repository tag '$Tag' does not exist."
