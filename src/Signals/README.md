@@ -1,7 +1,7 @@
 # Pocok.Signals
 
-Compatibility tier: experimental alpha. This package is the neutral live-value slice extracted from the original
-application and is not release-eligible yet.
+Catalog state: experimental and releasable. This is the neutral live-value slice extracted from the original
+application. Alpha publication remains subject to the exact package, API, consumer, and platform gates.
 
 The package defines:
 

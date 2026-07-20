@@ -1,7 +1,7 @@
 # Pocok.BackgroundWork
 
-Compatibility tier: experimental alpha. This package is packable and tested but is not release-eligible until its
-Windows and Ubuntu acceptance gate passes.
+Catalog state: experimental and releasable. The package remains alpha-maturity; `Experimental` describes API stability,
+not a prohibition on publication. Release still requires the exact Windows, Ubuntu, package, API, and consumer gates.
 
 `Pocok.BackgroundWork` provides small lifecycle primitives for event-driven .NET services:
 

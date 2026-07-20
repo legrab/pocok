@@ -1,6 +1,6 @@
-# Future Azure Container Apps deployment
+# Azure Container Apps deployment
 
-The same Stage 1 image can later run in an Azure Container Apps consumption environment. This guide is implementation-ready documentation, not a Stage 1 deployment requirement. Azure credentials and resources are not required by normal CI.
+The canonical ten-plugin image can run in an Azure Container Apps consumption environment. This guide is deployment documentation, not a normal CI requirement. Azure credentials and resources are not required by repository validation.
 
 ## Prerequisites
 
@@ -22,7 +22,7 @@ Azure Container Apps is usage-billed. Consumption grants and free allowances can
 - no volume;
 - `PORT=8080`;
 - `ASPNETCORE_ENVIRONMENT=Production`;
-- `Showcase__RequireCompleteCatalog=false` for Stage 1;
+- `Showcase__RequireCompleteCatalog=true` for the complete final image;
 - startup and liveness probes on `/health/live`;
 - readiness probe on `/health/ready`.
 
@@ -45,7 +45,7 @@ az containerapp create \
   --env-vars \
     PORT=8080 \
     ASPNETCORE_ENVIRONMENT=Production \
-    Showcase__RequireCompleteCatalog=false
+    Showcase__RequireCompleteCatalog=true
 ```
 
 Configure startup, liveness, and readiness probes through a reviewed Container Apps YAML or Bicep resource. Do not deploy without confirming the current CLI/YAML probe schema.

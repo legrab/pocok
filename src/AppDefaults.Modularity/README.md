@@ -20,4 +20,5 @@ The second delegate exposes the underlying `ModuleLoadOptions` for application c
 The package does not alter the loader's startup-only and trusted-code boundaries. Applying the configurator more than
 once to the same builder throws `InvalidOperationException` so conflicting plugin policies cannot be silently ignored.
 
-This package remains non-releasable until the underlying Modularity integration matrix passes on Linux and Windows.
+This package is experimental and releasable. The underlying Modularity integration matrix on Linux and Windows remains
+mandatory release evidence.

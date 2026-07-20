@@ -17,7 +17,7 @@ The public Showcase runs at [pocok-showcase.onrender.com](https://pocok-showcase
    - build context: repository root;
    - health check: `/health/ready`;
    - `ASPNETCORE_ENVIRONMENT=Production`;
-   - `Showcase__RequireCompleteCatalog=false` while the deployment contains only selected package examples.
+   - `Showcase__RequireCompleteCatalog=false` as currently declared by `showcase/render.yaml`; the final ten-plugin image is complete, so a reviewed deployment may tighten this to `true`.
 7. Deploy.
 8. Inspect the build log for restore, tests, publication, and plugin discovery.
 9. Inspect the runtime log for module registration and readiness.
@@ -28,7 +28,13 @@ The public Showcase runs at [pocok-showcase.onrender.com](https://pocok-showcase
     - `/packages/conversion`;
     - `/packages/scripting`;
     - `/packages/licensing`;
+    - `/packages/app-defaults-logging`;
+    - `/packages/background-work`;
     - `/packages/readiness`;
+    - `/packages/localization`;
+    - `/packages/modularity`;
+    - `/packages/signals`;
+    - `/packages/subscriptions`;
     - `/system`.
 
 Render supplies `PORT`. The application validates that value and binds to `0.0.0.0`; do not replace it with a fixed port.
@@ -43,7 +49,7 @@ Render supplies `PORT`. The application validates that value and binds to `0.0.0
 6. Set the health check to `/health/ready`.
 7. Add:
    - `ASPNETCORE_ENVIRONMENT=Production`;
-   - `Showcase__RequireCompleteCatalog=false`.
+   - `Showcase__RequireCompleteCatalog=false` to match the checked-in Blueprint, or `true` when enforcing the complete final catalog.
 8. Add no disk and no database.
 9. Enable automatic deploys from the selected branch after checks pass.
 10. Deploy and verify the same endpoints.
@@ -72,11 +78,11 @@ Verify that Render provides a valid `PORT` value and that the application binds 
 
 ### Plugins are missing
 
-Inspect the publication summary and confirm that the final image contains isolated plugin directories for Conversion, Scripting, and Licensing. Plugin projects must not be referenced directly by the Web host.
+Inspect the publication summary and confirm that the final image contains ten isolated plugin directories covering all eighteen non-retired packages. Plugin projects must not be referenced directly by the Web host.
 
 ### Readiness returns 503
 
-Check module diagnostics and catalog policy on `/system`. Partial catalog mode is required until every catalog package has an installed Showcase plugin.
+Check module diagnostics and catalog policy on `/system`. The final image has complete plugin coverage; strict mode should pass. Partial mode remains useful only for intentionally incomplete local or incremental deployments.
 
 ### Free instance runs out of memory
 

@@ -1,7 +1,7 @@
 # Pocok repository finalization and synchronized prerelease plan
 
 **Plan date:** 2026-07-18  
-**Status:** Ready for implementation; architecture and validation decisions are closed  
+**Status:** Historical predecessor; superseded by `release-readiness.md` and `mvp-closure.md`  
 **Scope:** Package alpha-readiness, Scripting engine split, package/release tooling, synchronized publication, and final MVP evidence
 
 ## Execution contract

@@ -1,23 +1,41 @@
 # Pocok Showcase
 
-A deployable .NET 10 Blazor Web App for browsing Pocok packages and running bounded examples against their public APIs. Implemented packages provide trusted startup plugins with documentation, editable inputs, and structured results. The host remains package-agnostic, while packages without an installed example remain visible in the catalog.
-
+A deployable .NET 10 Blazor Web App for browsing Pocok packages, running bounded examples, and generating constrained
+usage recipes against their public APIs. The host remains package-agnostic: trusted startup plugins own package-specific
+pages, inputs, localization, and results.
 
 The public deployment is available at [pocok-showcase.onrender.com](https://pocok-showcase.onrender.com/).
 
-Installed examples:
+## Installed plugins
 
-- `Pocok.Conversion`: policy-driven conversion through the package API, including collections, enums, temporal values, and structured failures;
-- `Pocok.Scripting`: complete JavaScript execution through the bounded `ScriptRunner`, including returned values, limits, and structured failures;
-- `Pocok.Licensing`: in-memory claim validation for time windows, runtime limits, modules, machine fingerprints, and pre-shared keys.
+The ten current plugins cover all eighteen non-retired library packages:
+
+| Plugin | Covered packages | Interaction |
+|---|---|---|
+| AppDefaults and Logging | `Pocok.AppDefaults`, `Pocok.AppDefaults.Logging`, `Pocok.AppDefaults.Logging.Serilog` | Bounded real logging demonstration and fresh-builder configuration probe |
+| BackgroundWork | `Pocok.BackgroundWork` | Typed source-accurate recipe builder |
+| Conversion | `Pocok.Conversion` | Bounded conversion inputs, policies, results, and structured failures |
+| Licensing | `Pocok.Licensing`, `Pocok.AppDefaults.Licensing` | In-memory claim validation and safe host-policy guidance without exposing signing keys |
+| Localization | `Pocok.Localization` | Bounded real JSON/RESX, fallback, composition, enum, and reload demonstration |
+| Modularity | `Pocok.Modularity.Contracts`, `Pocok.Modularity`, `Pocok.AppDefaults.Modularity` | Typed source-accurate recipe builder |
+| Readiness | `Pocok.Readiness` | Typed lifecycle recipe builder |
+| Scripting | `Pocok.Scripting`, `Pocok.Scripting.JavaScript`, `Pocok.Scripting.CSharp`, `Pocok.Scripting.Python` | Engine-neutral runner; JavaScript public, C# and Python explicitly trusted-local |
+| Signals | `Pocok.Signals` | Typed source-accurate recipe builder |
+| Subscriptions | `Pocok.Subscriptions` | Typed source-accurate recipe builder |
+
+Recipe plugins generate source from typed options and do not compile or execute the generated source. Validation,
+process separation, timeouts, and resource bounds are guardrails rather than an operating-system sandbox.
 
 ## Solution boundaries
 
-- `showcase/Pocok.Showcase.slnx` contains only the reusable Showcase framework, Web host, framework tests, and publication tool.
+- `showcase/Pocok.Showcase.slnx` contains only the reusable Showcase framework, Web host, framework tests, and publication
+  tool.
 - `showcase/Pocok.Showcase.Samples.slnx` contains the package-owned sample plugins and their tests.
 - Neither solution is included in the repository package solutions. The dedicated Showcase workflow validates both.
 
-Building the sample solution stages each plugin under `showcase/src/Pocok.Showcase.Web/plugins/<module-id>`. The Web host discovers that directory at startup without referencing a concrete sample project. The directory is generated and ignored by Git and Docker.
+Building the sample solution stages each plugin under `showcase/src/Pocok.Showcase.Web/plugins/<module-id>`. The Web host
+discovers that directory at startup without referencing a concrete sample project. The directory is generated and ignored
+by Git and Docker.
 
 ## Run locally
 
@@ -50,6 +68,10 @@ python showcase/scripts/smoke-showcase.py /absolute/output
 python showcase/scripts/smoke-showcase.py C:\temp\pocok-showcase
 ```
 
+Set `Showcase__TrustedScriptEnginesEnabled=true` only in a controlled local/private deployment that also supplies the
+runtime and worker paths documented in
+[`samples/Showcase/Pocok.Showcase.Scripting/README.md`](../samples/Showcase/Pocok.Showcase.Scripting/README.md).
+
 ## Validate
 
 ```text
@@ -65,14 +87,14 @@ Build the canonical container from the repository root:
 
 ```text
 docker build -f showcase/Dockerfile -t pocok-showcase .
-docker run --rm -p 8080:8080 pocok-showcase
+docker run --rm -p 8080:8080 -e Showcase__RequireCompleteCatalog=true pocok-showcase
 ```
 
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Adding a slice](docs/ADDING_A_SLICE.md)
-- [Planned slices](docs/PLANNED_SLICES.md)
+- [Package coverage](docs/PLANNED_SLICES.md)
 - [Security](docs/SECURITY.md)
 - [Render](docs/DEPLOY_RENDER.md)
 - [Azure Container Apps](docs/DEPLOY_AZURE_CONTAINER_APPS.md)

@@ -28,7 +28,7 @@ The workflow has planning, Linux validation, Windows validation, public release 
 
 Linux restores, formats, builds, and tests selected projects. It also packs, smoke-tests, and audits selected packages. Windows runs the same affected behavioral tests and samples without duplicate coverage collection.
 
-Public release validation restores, formats, builds, and tests `Pocok.Core.slnx` with `IncludeExperimental=false`. This keeps the non-experimental packaging references and public API snapshots executable before a publication tag reaches the release workflow. The planning job skips it only for documentation-only changes, and the final gate requires it whenever selected.
+Public release validation restores, formats, builds, and tests `Pocok.Core.slnx` with `IncludeExperimental=true`. Experimental now describes API maturity rather than publication exclusion, so this job validates the complete eighteen-library graph and its public API snapshots before a publication tag reaches the release workflow. The planning job skips it only for documentation-only changes, and the final gate requires it whenever selected.
 
 Documentation-only pull requests run repository-owned tooling checks and produce a plan, but do not start the .NET validation jobs.
 

@@ -1,7 +1,7 @@
 # Pocok.Localization
 
-Compatibility tier: experimental alpha. The package is packable and tested but is not release-eligible until its Windows
-and Ubuntu acceptance gate passes.
+Catalog state: experimental and releasable. The package remains alpha-maturity; `Experimental` describes API stability,
+not a prohibition on publication. Release still requires the exact Windows, Ubuntu, package, API, and consumer gates.
 
 `Pocok.Localization` provides deterministic composition over standard .NET `IStringLocalizer` providers, enum-resource
 fallback, resource-file culture parsing, and an external file-backed localizer for JSON and string-only RESX resources.

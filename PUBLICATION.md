@@ -1,8 +1,11 @@
 # Publication policy
 
-> **Current status:** The initial package family is structurally consolidated. Do not tag a package until the executable acceptance commands in this document pass on the exact commit being tagged.
+> **Current status:** `eng/packages.json` contains eighteen non-retired NuGet packages and marks all eighteen releasable.
+> `Active` and `Experimental` describe API maturity; neither state bypasses the release gates below. Do not create or
+> push a tag until the executable acceptance commands pass on the exact commit and release approval is explicit.
 
-All public Pocok packages use nuget.org. Package intent is expressed through IDs, family metadata, and documentation rather than separate authenticated feeds.
+All public Pocok packages use nuget.org. Package intent is expressed through IDs, family metadata, catalog state, and
+documentation rather than separate authenticated feeds.
 
 ## Authority
 
@@ -17,68 +20,75 @@ All public Pocok packages use nuget.org. Package intent is expressed through IDs
 - release-version MSBuild property;
 - clean external-consumer fixture.
 
-Every active packable project must have exactly one catalog entry. A publication tag must match exactly one releasable entry. `tools/PackageCatalog/Resolve-PackageClosure.ps1` resolves the candidate and its transitive internal dependencies in dependency-first order.
+Every active packable project must have exactly one catalog entry. A package-specific publication tag must match exactly
+one releasable entry. `tools/PackageCatalog/Resolve-PackageClosure.ps1` resolves the candidate and its transitive internal
+dependencies in dependency-first order.
 
-## Initial release set and order
+## Current release graph
 
-Release independent tier-zero packages first, in any order:
+The catalog currently describes this internal package graph:
 
 ```text
 Pocok.Conversion
+├── Pocok.Scripting
+│   ├── Pocok.Scripting.JavaScript
+│   ├── Pocok.Scripting.CSharp
+│   └── Pocok.Scripting.Python
+└── Pocok.Signals
+
 Pocok.Readiness
+
+Pocok.BackgroundWork
+└── Pocok.Localization
+
+Pocok.Subscriptions
+
+Pocok.Modularity.Contracts
+└── Pocok.Modularity
+    └── Pocok.AppDefaults.Modularity
+
 Pocok.AppDefaults
-```
-
-After `Pocok.AppDefaults` exists on nuget.org, release:
-
-```text
-Pocok.AppDefaults.Logging
-Pocok.AppDefaults.Logging.Serilog
-```
-
-The two logging packages are alternatives at the provider-policy layer. The Serilog package intentionally depends on `Pocok.AppDefaults`, not on provider-neutral `Pocok.AppDefaults.Logging`.
-
-The Scripting and Licensing release paths are dependency ordered:
-
-```text
-Pocok.Conversion
-└── Pocok.Scripting
+├── Pocok.AppDefaults.Logging
+├── Pocok.AppDefaults.Logging.Serilog
+├── Pocok.AppDefaults.Modularity
+└── Pocok.AppDefaults.Licensing
 
 Pocok.Licensing
-├── Pocok.AppDefaults + Pocok.Licensing
-│   └── Pocok.AppDefaults.Licensing
-├── Licensing.Keygen GitHub release
-└── Licensing.LicenseChecker GitHub release
+└── Pocok.AppDefaults.Licensing
 ```
 
-`Pocok.Licensing` has no internal NuGet dependency. The issuer and checker remain non-packable executables: their tags
-produce self-contained Windows, Linux, and macOS GitHub Release archives and never enter the NuGet package catalog.
+The diagram shows internal dependencies, not a required single publication wave. Independent packages may be released in
+any order. Dependents may be published only after their exact internal dependency versions are publicly resolvable.
 
-The Modularity family is not part of the initial public release. Its projects remain packable for clean-room verification, but `releasable` is false and no publication tag trigger exists.
+`Pocok.AppDefaults.Logging` and `Pocok.AppDefaults.Logging.Serilog` are alternatives at the provider-policy layer. The
+Serilog package intentionally depends on `Pocok.AppDefaults`, not on provider-neutral logging defaults.
+
+`Pocok.Licensing` has no internal NuGet dependency. `Pocok.Licensing.Keygen` and
+`Pocok.Licensing.LicenseChecker` remain non-packable executables: their tags produce self-contained Windows, Linux, and
+macOS GitHub Release archives and never enter the NuGet package catalog.
 
 ## Version resolution
 
-Development builds use MinVer with package-specific prefixes. Release builds additionally generate `artifacts/release-versions.props` before restore.
+Development builds use MinVer with package-specific prefixes. Release builds additionally generate
+`artifacts/release-versions.props` before restore.
 
 The generated file pins:
 
 - the candidate package to the version encoded by its tag;
-- every required internal dependency to its latest valid release tag.
+- every required internal dependency to the latest valid release tag, or to the synchronized global candidate version
+  when the global workflow is used.
 
-The same file is supplied to restore, build, test, and pack. This prevents independently versioned projects from producing a candidate that depends on an unpublished development version of another Pocok package.
+The same file is supplied to restore, build, test, and pack. This prevents independently versioned projects from producing
+a candidate that depends on an unpublished development version of another Pocok package.
 
 ## Candidate closure
 
-The publication workflow builds and tests `Pocok.Core.slnx`, then packs only the candidate and its transitive internal package closure. The package directory is cleaned first, so an audit cannot accidentally pass against stale or unrelated artifacts.
+The package-specific workflow builds and tests `Pocok.Core.slnx`, then packs only the candidate and its transitive
+internal package closure. The package directory is cleaned first, so an audit cannot accidentally pass against stale or
+unrelated artifacts.
 
-The closure is dependency-first. For example:
-
-```text
-Pocok.AppDefaults
-Pocok.AppDefaults.Logging
-```
-
-No retired or experimental package may enter a releasable candidate closure.
+A candidate closure may contain `Active` or `Experimental` packages. It may not contain retired, unknown, or
+`releasable: false` entries.
 
 ## Smoke modes
 
@@ -89,7 +99,9 @@ The candidate consumer restores from:
 - a clean local feed containing only the candidate and its transitive Pocok dependencies;
 - nuget.org for reviewed external dependencies.
 
-Package source mapping forces `Pocok.*` to the local feed. A missing internal package therefore cannot be hidden by an already-published copy. This proves that the generated package closure is complete and that no project reference is required by an external consumer.
+Package source mapping forces `Pocok.*` to the local feed. A missing internal package therefore cannot be hidden by an
+already-published copy. This proves that the generated package closure is complete and that no project reference is
+required by an external consumer.
 
 ### Publication
 
@@ -98,13 +110,15 @@ The candidate consumer restores from:
 - a local feed containing only the exact candidate;
 - nuget.org for exact internal dependency IDs and reviewed external dependency families.
 
-This proves that all internal dependencies required by the candidate are already publicly resolvable. Publication mode is expected to fail when a required dependency has not yet been released.
+This proves that all internal dependencies required by the candidate are already publicly resolvable. Publication mode is
+expected to fail when a required dependency has not yet been released.
 
 Both modes use isolated package caches and generated `NuGet.Config` files. Both must pass before push.
 
 ## Package audit
 
-`tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1` accepts an optional candidate package ID and then audits exactly that closure. It rejects missing, duplicate, stale, and unrelated package artifacts. The audit verifies:
+`tools/PublicReleaseAudit/Invoke-PublicReleaseAudit.ps1` accepts an optional candidate package ID and audits exactly that
+closure. It rejects missing, duplicate, stale, and unrelated package artifacts. The audit verifies:
 
 - package identity and exact file names;
 - license, project URL, repository metadata, and package README declaration;
@@ -115,37 +129,48 @@ Both modes use isolated package caches and generated `NuGet.Config` files. Both 
 - matching symbols packages and portable PDB presence;
 - absence of repository-only files, retired projects, and obvious secret material.
 
-NuGet package validation remains enabled in MSBuild. The final release gate also requires clean installation and sample execution because archive inspection alone cannot prove runtime behavior or debugger Source Link behavior.
+NuGet package validation remains enabled in MSBuild. The final release gate also requires clean installation and sample
+execution because archive inspection alone cannot prove runtime behavior or debugger Source Link behavior.
 
-## Current tag formats
+## Current package-specific tag prefixes
 
-Only these prefixes trigger publication:
+Each prefix below triggers `.github/workflows/publish.yml` when followed by a SemVer-compatible version:
 
 ```text
-conversion-v0.2.0
-readiness-v0.1.0
-appdefaults-v0.1.0
-appdefaults.logging-v0.1.0
-appdefaults.logging.serilog-v0.1.0
-scripting-v0.1.0-alpha.2
-licensing-v0.1.0-alpha.2
-appdefaults.licensing-v0.1.0-alpha.1
+conversion-v<version>
+readiness-v<version>
+appdefaults-v<version>
+appdefaults.logging-v<version>
+appdefaults.logging.serilog-v<version>
+modularity.contracts-v<version>
+modularity-v<version>
+appdefaults.modularity-v<version>
+backgroundwork-v<version>
+scripting-v<version>
+scripting.javascript-v<version>
+scripting.csharp-v<version>
+scripting.python-v<version>
+localization-v<version>
+signals-v<version>
+subscriptions-v<version>
+licensing-v<version>
+appdefaults.licensing-v<version>
 ```
-
-Modularity prefixes are reserved in the package catalog but deliberately absent from `.github/workflows/publish.yml` until the release gate is removed.
 
 The GitHub-only licensing executable prefixes are:
 
 ```text
-licensing.keygen-v0.1.0-alpha.1
-licensing.licensechecker-v0.1.0-alpha.1
+licensing.keygen-v<version>
+licensing.licensechecker-v<version>
 ```
 
 They are handled by `.github/workflows/publish-licensing-tool.yml`, not by the NuGet publication workflow.
 
 ## Retired packages
 
-`Pocok.Primitives` is retired without a forwarding package. Its existing nuget.org listing should be deprecated with a migration link. `Pocok.Hosting` and `Pocok.Conversion.Abstractions` were consolidated before publication and must not be introduced as compatibility packages.
+`Pocok.Primitives` is retired without a forwarding package. Its existing nuget.org listing should be deprecated with a
+migration link. `Pocok.Hosting` and `Pocok.Conversion.Abstractions` were consolidated before publication and must not be
+introduced as compatibility packages.
 
 ## Release gates
 
@@ -164,11 +189,13 @@ A package is releasable only when, on the exact candidate commit:
 - Linux and Windows CI pass;
 - the catalog entry has `releasable: true`.
 
-Modularity additionally requires its real plugin fixture matrix on Linux and Windows before any release eligibility change.
+Modularity additionally retains its trusted startup-only boundary and cross-platform clean-room fixture coverage. Scripting
+adapters retain their engine-specific runtime, worker-integrity, validation, and isolation gates. Licensing tool releases
+additionally require the keygen-to-checker round trip and successful self-contained publication for every declared runtime
+identifier.
 
-Licensing tool releases additionally require the keygen-to-checker round trip and successful self-contained publication
-for every declared runtime identifier. Release archives contain the executable, `LICENSE`, `NOTICE`, and the licensing
-guide; private keys and generated licenses are never release assets.
+Release archives contain the executable, `LICENSE`, `NOTICE`, and the licensing guide; private keys and generated licenses
+are never release assets.
 
 ## Local acceptance
 
@@ -186,13 +213,14 @@ dotnet pack Pocok.slnx --configuration Release --no-build --output artifacts/pac
 
 For an actual candidate, generate release-version props and run both smoke modes for that package before pushing the tag.
 
-## Release command
+## Package-specific release command
 
-Publication is tag-driven. Create and push an annotated tag only after the dependency packages required by the candidate are already available on nuget.org.
+Publication is tag-driven. Create and push an annotated tag only after the dependency packages required by the candidate
+are already available on nuget.org.
 
 ```pwsh
-git tag -a appdefaults-v0.1.0 -m "Release Pocok.AppDefaults 0.1.0"
-git push origin appdefaults-v0.1.0
+git tag -a localization-v0.1.0-alpha.1 -m "Release Pocok.Localization 0.1.0-alpha.1"
+git push origin localization-v0.1.0-alpha.1
 ```
 
 GitHub-only licensing tools use the same annotated-tag discipline:
@@ -203,6 +231,13 @@ git push origin licensing.keygen-v0.1.0-alpha.1
 ```
 
 Never push package artifacts with a wildcard or manually reuse a published version.
+
 ## Synchronized global tags
 
-`GLOBAL-v<major.minor.patch[-prerelease]>` publishes every currently releasable package at one exact version through `.github/workflows/publish-global.yml`. The graph is derived from `eng/packages.json` and released sequentially in dependency-first order. Existing exact versions are skipped only when their nuspec repository commit matches the global tag commit. Conflicting or unprovable equal versions fail before any push. The workflow does not create package-specific tags and requires no PAT. See `docs/global-release.md`.
+`GLOBAL-v<major.minor.patch[-prerelease]>` publishes every currently releasable package at one exact version through
+`.github/workflows/publish-global.yml`. The graph is derived from `eng/packages.json` and released sequentially in
+dependency-first order. Existing exact versions are skipped only when their nuspec repository commit matches the global
+tag commit. Conflicting or unprovable equal versions fail before any push. The workflow does not create package-specific
+tags and requires no PAT.
+
+See [docs/global-release.md](docs/global-release.md) for provenance-safe resume, capacity, approval, and recovery rules.

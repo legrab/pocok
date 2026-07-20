@@ -1,7 +1,7 @@
 # Pocok library release-readiness plan
 
 **Plan date:** 2026-07-20  
-**Status:** Ready for implementation; internal design choices are closed  
+**Status:** Implemented in source; retained for exact rehearsal, approval, and first synchronized release  
 **Depends on:** Current `main` source and executable evidence  
 **Produces:** One approved, synchronized prerelease of every non-retired Pocok library  
 **Followed by:** [`mvp-closure.md`](mvp-closure.md)
@@ -21,6 +21,9 @@ At completion:
 - the Scripting Showcase offers equivalent samples for all three languages through one Showcase-internal Monaco wrapper.
 
 This plan intentionally stops before typed schema-v2 release tooling, Showcase bundle packages, NuGet-backed Showcase composition, public C#/Python execution, and Render rollout. Those belong to [`mvp-closure.md`](mvp-closure.md) or the post-MVP roadmap.
+
+> **Reading note:** References below to “current” or “non-releasable” packages describe the plan baseline before its
+> implementation. The implemented state is summarized above and remains authoritative in `eng/packages.json`.
 
 ## Execution contract
 
