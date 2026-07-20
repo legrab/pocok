@@ -291,6 +291,7 @@ jobs:
     permissions:
       actions: read
       contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -300,6 +301,8 @@ jobs:
         with:
           fetch-depth: 0
           ref: main
+          # A PAT or GitHub App token lets the generated PR run CI without manual approval.
+          token: ${{ secrets.COVERAGE_PR_TOKEN || github.token }}
 
       - name: Download impact plan
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
@@ -317,10 +320,12 @@ jobs:
         shell: pwsh
         run: ./tools/Ci/Update-ReadmeCoverage.ps1
 
-      - name: Commit refreshed coverage
+      - name: Publish refreshed coverage branch
+        id: publish-coverage
         shell: pwsh
         env:
           EXPECTED_SHA: ${{ github.sha }}
+          COVERAGE_BRANCH: update-coverage
         run: |
           git fetch origin main
           $currentMain = [string](& git rev-parse origin/main)
@@ -342,23 +347,81 @@ jobs:
             throw "Could not inspect README changes."
           }
 
+          git switch --create $env:COVERAGE_BRANCH
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not create local coverage branch."
+          }
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add README.md
-          git commit -m 'docs: refresh coverage summary [skip ci]'
+          git commit -m 'docs: refresh coverage summary'
           if ($LASTEXITCODE -ne 0) {
             throw "Could not commit README coverage."
           }
 
-          git push origin HEAD:main
-          if ($LASTEXITCODE -eq 0) {
+          # Do not publish a branch based on an obsolete main commit.
+          git fetch origin main
+          $latestMain = [string](& git rev-parse origin/main)
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not re-resolve origin/main."
+          }
+          $latestMain = $latestMain.Trim()
+          if ($latestMain -ne $env:EXPECTED_SHA) {
+            Write-Warning "Main advanced while preparing coverage; the newer CI run will refresh README."
             return
           }
 
-          git fetch origin main
-          $latestMain = ([string](& git rev-parse origin/main)).Trim()
-          if ($latestMain -ne $env:EXPECTED_SHA) {
-            Write-Warning "Main advanced while publishing coverage; the newer CI run will refresh README."
+          $remoteRef = [string](& git ls-remote --heads origin "refs/heads/$($env:COVERAGE_BRANCH)")
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not inspect the remote coverage branch."
+          }
+
+          $pushArgs = @('push')
+          if (-not [string]::IsNullOrWhiteSpace($remoteRef)) {
+            $remoteSha = ($remoteRef.Trim() -split '\s+')[0]
+            $pushArgs += "--force-with-lease=refs/heads/$($env:COVERAGE_BRANCH):$remoteSha"
+          }
+          $pushArgs += @('origin', "HEAD:refs/heads/$($env:COVERAGE_BRANCH)")
+
+          & git $pushArgs
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not publish the coverage branch."
+          }
+
+          Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value 'published=true'
+
+      - name: Open coverage pull request
+        if: steps.publish-coverage.outputs.published == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.COVERAGE_PR_TOKEN || github.token }}
+          COVERAGE_BRANCH: update-coverage
+        run: |
+          $repository = '${{ github.repository }}'
+          $existingPr = [string](& gh pr list `
+            --repo $repository `
+            --state open `
+            --base main `
+            --head $env:COVERAGE_BRANCH `
+            --json number `
+            --jq '.[0].number')
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not inspect existing coverage pull requests."
+          }
+
+          $existingPr = $existingPr.Trim()
+          if (-not [string]::IsNullOrWhiteSpace($existingPr)) {
+            Write-Host "Updated existing coverage pull request #$existingPr."
             return
           }
-          throw "Could not push README coverage update."
+
+          & gh pr create `
+            --repo $repository `
+            --base main `
+            --head $env:COVERAGE_BRANCH `
+            --title 'docs: refresh coverage summary' `
+            --body 'Automated README coverage refresh generated from the latest successful CI run on main.'
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not create the coverage pull request."
+          }
