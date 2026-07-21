@@ -9,6 +9,7 @@ namespace Pocok.Showcase.Scripting;
 public sealed class ScriptingShowcaseOptions
 {
     public bool TrustedEnginesEnabled { get; init; }
+    public bool RequireTrustedEnginesAvailable { get; init; } = true;
     public int MaximumSourceCharacters { get; init; } = 4_000;
     public int MaximumOutputBytes { get; init; } = 8 * 1_024;
     public int MaximumTimeoutMilliseconds { get; init; } = 2_000;
@@ -24,6 +25,10 @@ public sealed class ScriptingShowcaseOptions
         return new ScriptingShowcaseOptions
         {
             TrustedEnginesEnabled = ReadBoolean(configuration, nameof(TrustedEnginesEnabled), false),
+            RequireTrustedEnginesAvailable = ReadBoolean(
+                configuration,
+                nameof(RequireTrustedEnginesAvailable),
+                true),
             MaximumSourceCharacters = ReadInteger(
                 configuration,
                 nameof(MaximumSourceCharacters),
