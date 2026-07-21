@@ -100,6 +100,7 @@ def main() -> int:
             "ASPNETCORE_ENVIRONMENT": "Production",
             "SHOWCASE_PLUGIN_DIR": str(plugins),
             "Showcase__RequireCompleteCatalog": "true",
+            "Showcase__Scripting__TrustedEnginesEnabled": "false"
         }
     )
 
