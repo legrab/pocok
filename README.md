@@ -47,10 +47,10 @@ Licensing issuer and checker executables remain GitHub Release assets rather tha
 | Pocok.Modularity | 87.35% | 87.35% | 0.00 pp | 95.31% | 95.31% | 0.00 pp |
 | Pocok.Modularity.Contracts | 92.86% | 92.86% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
 | Pocok.Readiness | 93.52% | 93.52% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
-| Pocok.Scripting | 81.05% | 81.05% | 0.00 pp | 87.50% | 87.50% | 0.00 pp |
+| Pocok.Scripting | 80.12% | 80.12% | 0.00 pp | 87.50% | 87.50% | 0.00 pp |
 | Pocok.Scripting.CSharp | 77.18% | 77.18% | 0.00 pp | 92.11% | 92.11% | 0.00 pp |
-| Pocok.Scripting.JavaScript | 66.49% | 66.49% | 0.00 pp | 52.86% | 52.86% | 0.00 pp |
-| Pocok.Scripting.Python | 79.76% | 79.76% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
+| Pocok.Scripting.JavaScript | 65.61% | 65.61% | 0.00 pp | 52.86% | 52.86% | 0.00 pp |
+| Pocok.Scripting.Python | 79.84% | 79.84% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
 | Pocok.Signals | 80.00% | 80.00% | 0.00 pp | 93.57% | 93.57% | 0.00 pp |
 | Pocok.Subscriptions | 100.00% | 100.00% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
 
