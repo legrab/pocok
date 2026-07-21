@@ -25,6 +25,9 @@ public partial class ScriptingPage
     [Inject]
     private ScriptEngineRegistry Registry { get; set; } = default!;
 
+    [Inject]
+    private ScriptingShowcaseOptions ShowcaseOptions { get; set; } = default!;
+
     private IReadOnlyList<ScriptEngineDescriptor> Engines => Registry.Descriptors;
     private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
 
@@ -55,7 +58,20 @@ public partial class ScriptingPage
     private void SelectSample(IShowcaseSample sample)
     {
         _selectedId = sample.Id;
-        _input = (ScriptingInput)sample.CreateInput();
+        var input = (ScriptingInput)sample.CreateInput();
+        _input = input with
+        {
+            TimeoutMilliseconds = Math.Min(input.TimeoutMilliseconds, ShowcaseOptions.MaximumTimeoutMilliseconds),
+            MaxStatements = input.MaxStatements is null
+                ? null
+                : Math.Min(input.MaxStatements.Value, ShowcaseOptions.MaximumStatements),
+            MaxRecursionDepth = input.MaxRecursionDepth is null
+                ? null
+                : Math.Min(input.MaxRecursionDepth.Value, ShowcaseOptions.MaximumRecursionDepth),
+            MaxMemoryMegabytes = input.MaxMemoryMegabytes is null
+                ? null
+                : Math.Min(input.MaxMemoryMegabytes.Value, ShowcaseOptions.MaximumMemoryMegabytes)
+        };
         _sampleRevision = checked(_sampleRevision + 1);
         _progress = [];
         _result = null;

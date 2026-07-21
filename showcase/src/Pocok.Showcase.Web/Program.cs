@@ -22,11 +22,16 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{parsedPort}");
 
 new LoggingDefaultsConfigurator().Configure(builder);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddOptions<ShowcaseOptions>()
     .Bind(builder.Configuration.GetSection(ShowcaseOptions.SectionName))
     .ValidateDataAnnotations()
     .Validate(options => options.RunTimeout > TimeSpan.Zero && options.RunTimeout <= TimeSpan.FromSeconds(30),
         "Showcase run timeout must be greater than zero and no more than 30 seconds.")
+    .Validate(options => options.ScriptingClientExecutionLimit == 0
+        || options.ScriptingClientExecutionWindow > TimeSpan.Zero
+        && options.ScriptingClientExecutionWindow <= TimeSpan.FromDays(1),
+        "Showcase scripting client execution window must be greater than zero and no more than one day when limiting is enabled.")
     .Validate(options => string.IsNullOrWhiteSpace(options.PublicRepositoryBaseUrl)
         || Uri.TryCreate(options.PublicRepositoryBaseUrl, UriKind.Absolute, out Uri? uri)
         && uri.Scheme is "https" or "http",
@@ -80,7 +85,10 @@ builder.Services.AddSingleton<ShowcasePublicLog>();
 ShowcaseInAppLogging.Add(builder.Services, builder.Configuration);
 builder.Services.AddSingleton<ShowcaseRunBuffer>();
 builder.Services.AddSingleton<ShowcaseRunnerState>();
-builder.Services.AddScoped<IShowcaseRunClient, ShowcaseRunClient>();
+builder.Services.AddSingleton<ShowcaseScriptingClientLimiter>();
+builder.Services.AddScoped<ShowcaseClientIdentity>();
+builder.Services.AddScoped<ShowcaseRunClient>();
+builder.Services.AddScoped<IShowcaseRunClient, RateLimitedShowcaseRunClient>();
 builder.Services.AddHostedService<ShowcaseRunnerService>();
 builder.Services.AddHostedService<ShowcaseStartupService>();
 

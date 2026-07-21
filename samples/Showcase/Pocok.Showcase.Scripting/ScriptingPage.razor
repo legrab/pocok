@@ -30,7 +30,12 @@
                                  ValueChanged="SetInputAsync"
                                  Engines="Engines"
                                  ResetRevision="_sampleRevision"
-                                 Text="Context.Text" />
+                                 Text="Context.Text"
+                                 MaximumSourceCharacters="ShowcaseOptions.MaximumSourceCharacters"
+                                 MaximumTimeoutMilliseconds="ShowcaseOptions.MaximumTimeoutMilliseconds"
+                                 MaximumStatements="ShowcaseOptions.MaximumStatements"
+                                 MaximumRecursionDepth="ShowcaseOptions.MaximumRecursionDepth"
+                                 MaximumMemoryMegabytes="ShowcaseOptions.MaximumMemoryMegabytes" />
 
                 <ShowcaseExecutionControls Slice="Context.Slice"
                                            Input="_input"

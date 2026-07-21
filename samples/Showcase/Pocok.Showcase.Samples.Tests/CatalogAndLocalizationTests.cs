@@ -116,20 +116,22 @@ public sealed class CatalogAndLocalizationTests
         }
     }
 
-
     private static ScriptingShowcaseSlice CreateScriptingSlice()
     {
         var registry = new ScriptEngineRegistry(
         [
             new JavaScriptScriptEngineAdapter(),
-            new UnavailableScriptEngineAdapter(ScriptEngineId.CSharp, "C#", "scripting.engine.trusted_only", "C# is trusted/local only."),
+            new UnavailableScriptEngineAdapter(ScriptEngineId.CSharp, "C#", "scripting.engine.trusted_only", "C# requires explicit enablement."),
             new UnavailableScriptEngineAdapter(
                 ScriptEngineId.Python,
                 "Python",
                 "scripting.engine.trusted_only",
-                "Python is trusted/local only.")
+                "Python requires explicit enablement.")
         ]);
-        return new ScriptingShowcaseSlice(new ScriptRunner(registry), registry);
+        return new ScriptingShowcaseSlice(
+            new ScriptRunner(registry),
+            registry,
+            new ScriptingShowcaseOptions());
     }
 
     private static string[] ReadResourceKeys(string path)

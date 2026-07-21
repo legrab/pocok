@@ -35,4 +35,12 @@ public sealed class ShowcaseOptions
 
     [Range(1, 1_000)]
     public int MaximumTemporaryFiles { get; set; } = 32;
+
+    [Range(0, 10_000)]
+    public int ScriptingClientExecutionLimit { get; set; } = 10;
+
+    public TimeSpan ScriptingClientExecutionWindow { get; set; } = TimeSpan.FromMinutes(10);
+
+    [Range(16, 100_000)]
+    public int ScriptingRateLimitMaximumTrackedClients { get; set; } = 2_048;
 }

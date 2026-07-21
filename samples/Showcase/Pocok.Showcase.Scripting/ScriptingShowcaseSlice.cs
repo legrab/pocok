@@ -3,7 +3,6 @@
 
 using System.Collections;
 using System.Globalization;
-using System.Text;
 using System.Text.Json;
 using Pocok.Scripting.Execution;
 using Pocok.Showcase.Contracts;
@@ -13,11 +12,12 @@ namespace Pocok.Showcase.Scripting;
 
 public sealed class ScriptingShowcaseSlice(
     ScriptRunner runner,
-    ScriptEngineRegistry registry) : ShowcaseSlice<ScriptingInput, ScriptingOutput>
+    ScriptEngineRegistry registry,
+    ScriptingShowcaseOptions showcaseOptions) : ShowcaseSlice<ScriptingInput, ScriptingOutput>
 {
-    private const int MaximumSourceBytes = 32 * 1024;
     private static readonly IReadOnlyList<ShowcaseSample<ScriptingInput>> SampleCatalog = CreateSamples();
     private static readonly ShowcaseGuide GuideCatalog = CreateGuide();
+
     private static readonly JsonSerializerOptions ResultJson = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = true
@@ -25,6 +25,9 @@ public sealed class ScriptingShowcaseSlice(
 
     private readonly ScriptRunner _runner = runner ?? throw new ArgumentNullException(nameof(runner));
     private readonly ScriptEngineRegistry _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+
+    private readonly ScriptingShowcaseOptions _showcaseOptions =
+        showcaseOptions ?? throw new ArgumentNullException(nameof(showcaseOptions));
 
     public override ShowcaseSliceDescriptor Descriptor { get; } = new(
         "pocok.showcase.scripting",
@@ -69,6 +72,8 @@ public sealed class ScriptingShowcaseSlice(
                 "The selected engine is not registered.");
         }
 
+        ScriptingInput boundedInput = ApplyServerLimits(input, descriptor);
+
         await context.Progress.ReportAsync(
             "validate",
             $"Validating {descriptor.Language} source and engine capabilities.",
@@ -76,14 +81,14 @@ public sealed class ScriptingShowcaseSlice(
 
         var options = new ScriptExecutionOptions
         {
-            Timeout = TimeSpan.FromMilliseconds(input.TimeoutMilliseconds),
-            MaxSourceCharacters = MaximumSourceBytes,
-            MaxOutputBytes = 32 * 1024,
-            MaxStatements = input.MaxStatements,
-            MaxRecursionDepth = input.MaxRecursionDepth,
-            MaxMemoryBytes = input.MaxMemoryMegabytes is null
+            Timeout = TimeSpan.FromMilliseconds(boundedInput.TimeoutMilliseconds),
+            MaxSourceCharacters = _showcaseOptions.MaximumSourceCharacters,
+            MaxOutputBytes = _showcaseOptions.MaximumOutputBytes,
+            MaxStatements = boundedInput.MaxStatements,
+            MaxRecursionDepth = boundedInput.MaxRecursionDepth,
+            MaxMemoryBytes = boundedInput.MaxMemoryMegabytes is null
                 ? null
-                : input.MaxMemoryMegabytes.Value * 1024L * 1024L
+                : boundedInput.MaxMemoryMegabytes.Value * 1024L * 1024L
         };
 
         await context.Progress.ReportAsync(
@@ -94,10 +99,10 @@ public sealed class ScriptingShowcaseSlice(
         ScriptResult<object?> result = await _runner.ExecuteAsync(
             new ScriptExecutionRequest(
                 new ScriptEngineId(input.EngineId),
-                $"showcase.{input.SampleId}",
-                input.Source)
+                $"showcase.{boundedInput.SampleId}",
+                boundedInput.Source)
             {
-                ExpectResult = input.ExpectResult
+                ExpectResult = boundedInput.ExpectResult
             },
             options,
             cancellationToken).ConfigureAwait(false);
@@ -106,7 +111,7 @@ public sealed class ScriptingShowcaseSlice(
         {
             ScriptFailure failure = result.Failure!;
             return Failed(
-                input,
+                boundedInput,
                 failure.Code,
                 failure.Message,
                 failure.Line,
@@ -122,17 +127,17 @@ public sealed class ScriptingShowcaseSlice(
 
         return new ScriptingOutput(
             true,
-            Headline(result.Value, formatted, input.ExpectResult),
+            Headline(result.Value, formatted, boundedInput.ExpectResult),
             formatted,
             ResultType(result.Value),
-            input.ExpectResult,
-            input.EngineId,
+            boundedInput.ExpectResult,
+            boundedInput.EngineId,
             null,
             null,
             null,
             null,
-            input.Source,
-            FormatLimits(input),
+            boundedInput.Source,
+            FormatLimits(boundedInput),
             ["Tips.Isolation", "Tips.Bounds", "Tips.Capabilities"]);
     }
 
@@ -156,6 +161,7 @@ public sealed class ScriptingShowcaseSlice(
                 true,
                 true));
         }
+
         if (output.FailureColumn is not null)
         {
             fields.Add(new ShowcaseResultField(
@@ -192,10 +198,12 @@ public sealed class ScriptingShowcaseSlice(
             ShowcaseRunStatus.Success,
             output.Headline,
             fields,
-            [new ShowcaseTimelineEvent(
-                DateTimeOffset.UtcNow,
-                output.EngineId,
-                "ScriptRunner returned a successful result.")],
+            [
+                new ShowcaseTimelineEvent(
+                    DateTimeOffset.UtcNow,
+                    output.EngineId,
+                    "ScriptRunner returned a successful result.")
+            ],
             codePreview: output.ScriptPreview,
             elapsed: elapsed,
             tipKeys: output.TipKeys);
@@ -217,6 +225,7 @@ public sealed class ScriptingShowcaseSlice(
                 _ => JsonSerializer.Serialize(element, ResultJson)
             };
         }
+
         if (value is string text)
             return JsonSerializer.Serialize(text);
         if (value is bool boolean)
@@ -240,7 +249,24 @@ public sealed class ScriptingShowcaseSlice(
         }
     }
 
-    private static ScriptingOutput? ValidateInput(ScriptingInput input)
+    private ScriptingInput ApplyServerLimits(
+        ScriptingInput input,
+        ScriptEngineDescriptor descriptor
+    ) =>
+        input with
+        {
+            MaxStatements = descriptor.Capabilities.EnforcesStatementLimit
+                ? input.MaxStatements ?? _showcaseOptions.MaximumStatements
+                : null,
+            MaxRecursionDepth = descriptor.Capabilities.EnforcesRecursionLimit
+                ? input.MaxRecursionDepth ?? _showcaseOptions.MaximumRecursionDepth
+                : null,
+            MaxMemoryMegabytes = descriptor.Capabilities.EnforcesMemoryLimit
+                ? input.MaxMemoryMegabytes ?? _showcaseOptions.MaximumMemoryMegabytes
+                : null
+        };
+
+    private ScriptingOutput? ValidateInput(ScriptingInput input)
     {
         if (string.IsNullOrWhiteSpace(input.Source))
         {
@@ -249,49 +275,86 @@ public sealed class ScriptingShowcaseSlice(
                 "showcase.script-empty",
                 "The script cannot be empty.");
         }
-        if (Encoding.UTF8.GetByteCount(input.Source) > MaximumSourceBytes)
+
+        if (input.Source.Length > _showcaseOptions.MaximumSourceCharacters)
         {
             return Failed(
                 input,
                 "showcase.script-too-large",
-                $"The script exceeds the {MaximumSourceBytes} byte Showcase limit.");
+                $"The script exceeds the {_showcaseOptions.MaximumSourceCharacters.ToString(CultureInfo.InvariantCulture)} " +
+                "character Showcase limit.");
         }
-        if (input.TimeoutMilliseconds is < 50 or > 2_000)
+
+        if (input.TimeoutMilliseconds is < 50
+            || input.TimeoutMilliseconds > _showcaseOptions.MaximumTimeoutMilliseconds)
         {
             return Failed(
                 input,
                 "showcase.timeout-bounds",
-                "Timeout must be between 50 and 2000 milliseconds.");
+                $"Timeout must be between 50 and " +
+                $"{_showcaseOptions.MaximumTimeoutMilliseconds.ToString(CultureInfo.InvariantCulture)} milliseconds.");
+        }
+
+        if (input.MaxStatements is int statements
+            && (statements <= 0 || statements > _showcaseOptions.MaximumStatements))
+        {
+            return Failed(
+                input,
+                "showcase.statement-bounds",
+                $"Statement limit must be no more than " +
+                $"{_showcaseOptions.MaximumStatements.ToString(CultureInfo.InvariantCulture)}.");
+        }
+
+        if (input.MaxRecursionDepth is int recursionDepth
+            && (recursionDepth <= 0 || recursionDepth > _showcaseOptions.MaximumRecursionDepth))
+        {
+            return Failed(
+                input,
+                "showcase.recursion-bounds",
+                $"Recursion limit must be no more than " +
+                $"{_showcaseOptions.MaximumRecursionDepth.ToString(CultureInfo.InvariantCulture)}.");
+        }
+
+        if (input.MaxMemoryMegabytes is int memoryMegabytes
+            && (memoryMegabytes <= 0 || memoryMegabytes > _showcaseOptions.MaximumMemoryMegabytes))
+        {
+            return Failed(
+                input,
+                "showcase.memory-bounds",
+                $"Memory limit must be no more than " +
+                $"{_showcaseOptions.MaximumMemoryMegabytes.ToString(CultureInfo.InvariantCulture)} MiB.");
         }
 
         return null;
     }
 
-    private static ScriptingOutput Failed(
+    private ScriptingOutput Failed(
         ScriptingInput input,
         string code,
         string message,
         int? line = null,
         int? column = null) => new(
-            false,
-            "Script failed safely",
-            null,
-            "n/a",
-            input.ExpectResult,
-            input.EngineId,
-            code,
-            message,
-            line,
-            column,
-            input.Source,
-            FormatLimits(input),
-            ["Tips.Bounds", "Tips.Failures"]);
+        false,
+        "Script failed safely",
+        null,
+        "n/a",
+        input.ExpectResult,
+        input.EngineId,
+        code,
+        message,
+        line,
+        column,
+        input.Source,
+        FormatLimits(input),
+        ["Tips.Bounds", "Tips.Failures"]);
 
-    private static string FormatLimits(ScriptingInput input)
+    private string FormatLimits(ScriptingInput input)
     {
         var limits = new List<string>
         {
-            $"{input.TimeoutMilliseconds.ToString(CultureInfo.InvariantCulture)} ms"
+            $"{input.TimeoutMilliseconds.ToString(CultureInfo.InvariantCulture)} ms",
+            $"{_showcaseOptions.MaximumSourceCharacters.ToString(CultureInfo.InvariantCulture)} characters",
+            $"{_showcaseOptions.MaximumOutputBytes.ToString(CultureInfo.InvariantCulture)} output bytes"
         };
         if (input.MaxStatements is not null)
             limits.Add($"{input.MaxStatements.Value.ToString(CultureInfo.InvariantCulture)} statements");
@@ -394,46 +457,46 @@ public sealed class ScriptingShowcaseSlice(
         string python,
         bool expectResult = true,
         int timeoutMilliseconds = 1_000) => new(
-            id,
-            $"Samples.{id}.Name",
-            $"Samples.{id}.Description",
-            () => new ScriptingInput
+        id,
+        $"Samples.{id}.Name",
+        $"Samples.{id}.Description",
+        () => new ScriptingInput
+        {
+            SampleId = id,
+            EngineId = ScriptEngineId.JavaScript.Value,
+            Source = javaScript,
+            Sources = new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                SampleId = id,
-                EngineId = ScriptEngineId.JavaScript.Value,
-                Source = javaScript,
-                Sources = new Dictionary<string, string>(StringComparer.Ordinal)
-                {
-                    [ScriptEngineId.JavaScript.Value] = javaScript,
-                    [ScriptEngineId.CSharp.Value] = cSharp,
-                    [ScriptEngineId.Python.Value] = python
-                },
-                ExpectResult = expectResult,
-                TimeoutMilliseconds = timeoutMilliseconds
+                [ScriptEngineId.JavaScript.Value] = javaScript,
+                [ScriptEngineId.CSharp.Value] = cSharp,
+                [ScriptEngineId.Python.Value] = python
             },
-            isDefault,
-            expected,
-            "quick-start",
-            "runner");
+            ExpectResult = expectResult,
+            TimeoutMilliseconds = timeoutMilliseconds
+        },
+        isDefault,
+        expected,
+        "quick-start",
+        "runner");
 
     private static ShowcaseGuide CreateGuide() => new(
-    [
-        new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"]),
-        new ShowcaseGuideSection(
-            "quick-start",
-            "Guide.QuickStart.Title",
-            ["Guide.QuickStart.Body"],
-            ["runner"]),
-        new ShowcaseGuideSection("bounds", "Guide.Bounds.Title", ["Guide.Bounds.Body"]),
-        new ShowcaseGuideSection("production", "Guide.Production.Title", ["Guide.Production.Body"])
-    ],
-    [
-        new ShowcaseCodeSnippet(
-            "runner",
-            "Guide.Snippet.RunnerTitle",
-            "csharp",
-            "var registry = new ScriptEngineRegistry(adapters);\n" +
-            "var runner = new ScriptRunner(registry);\n" +
-            "await runner.ExecuteAsync(request, options, cancellationToken);")
-    ]);
+        [
+            new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"]),
+            new ShowcaseGuideSection(
+                "quick-start",
+                "Guide.QuickStart.Title",
+                ["Guide.QuickStart.Body"],
+                ["runner"]),
+            new ShowcaseGuideSection("bounds", "Guide.Bounds.Title", ["Guide.Bounds.Body"]),
+            new ShowcaseGuideSection("production", "Guide.Production.Title", ["Guide.Production.Body"])
+        ],
+        [
+            new ShowcaseCodeSnippet(
+                "runner",
+                "Guide.Snippet.RunnerTitle",
+                "csharp",
+                "var registry = new ScriptEngineRegistry(adapters);\n" +
+                "var runner = new ScriptRunner(registry);\n" +
+                "await runner.ExecuteAsync(request, options, cancellationToken);")
+        ]);
 }

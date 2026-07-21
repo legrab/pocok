@@ -29,8 +29,31 @@ public partial class ScriptingEditor
     [Parameter, EditorRequired]
     public IShowcaseText Text { get; set; } = default!;
 
+    [Parameter]
+    public int MaximumSourceCharacters { get; set; } = 4_000;
+
+    [Parameter]
+    public int MaximumTimeoutMilliseconds { get; set; } = 2_000;
+
+    [Parameter]
+    public int MaximumStatements { get; set; } = 10_000;
+
+    [Parameter]
+    public int MaximumRecursionDepth { get; set; } = 64;
+
+    [Parameter]
+    public int MaximumMemoryMegabytes { get; set; } = 16;
+
     private ScriptEngineDescriptor? Selected =>
         Engines.FirstOrDefault(item => item.Id.Value == Value.EngineId);
+
+    private bool SourceLimitExceeded => Value.Source.Length > MaximumSourceCharacters;
+
+    private string SourceLengthText => string.Format(
+        CultureInfo.CurrentCulture,
+        T(SourceLimitExceeded ? "Sandbox.SourceLengthExceeded" : "Sandbox.SourceLength"),
+        Value.Source.Length,
+        MaximumSourceCharacters);
 
     private IReadOnlyList<ShowcaseMonacoCompletion> Completions => Value.EngineId switch
     {
@@ -77,9 +100,9 @@ public partial class ScriptingEditor
             EngineId = next,
             Source = source ?? string.Empty,
             Sources = sources,
-            MaxStatements = descriptor?.Capabilities.EnforcesStatementLimit == true ? 10_000 : null,
-            MaxRecursionDepth = descriptor?.Capabilities.EnforcesRecursionLimit == true ? 64 : null,
-            MaxMemoryMegabytes = descriptor?.Capabilities.EnforcesMemoryLimit == true ? 16 : null
+            MaxStatements = descriptor?.Capabilities.EnforcesStatementLimit == true ? MaximumStatements : null,
+            MaxRecursionDepth = descriptor?.Capabilities.EnforcesRecursionLimit == true ? MaximumRecursionDepth : null,
+            MaxMemoryMegabytes = descriptor?.Capabilities.EnforcesMemoryLimit == true ? MaximumMemoryMegabytes : null
         });
     }
 

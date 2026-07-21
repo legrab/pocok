@@ -12,3 +12,27 @@ services:
         value: Production
       - key: Showcase__RequireCompleteCatalog
         value: "false"
+      - key: Showcase__Scripting__TrustedEnginesEnabled
+        value: "true"
+      - key: Showcase__Scripting__MaximumSourceCharacters
+        value: "4000"
+      - key: Showcase__Scripting__MaximumOutputBytes
+        value: "8192"
+      - key: Showcase__Scripting__MaximumTimeoutMilliseconds
+        value: "2000"
+      - key: Showcase__Scripting__MaximumStatements
+        value: "10000"
+      - key: Showcase__Scripting__MaximumRecursionDepth
+        value: "64"
+      - key: Showcase__Scripting__MaximumMemoryMegabytes
+        value: "16"
+      - key: Showcase__ScriptingClientExecutionLimit
+        value: "10"
+      - key: Showcase__ScriptingClientExecutionWindow
+        value: "00:10:00"
+      - key: Showcase__ScriptingRateLimitMaximumTrackedClients
+        value: "2048"
+      - key: Showcase__QueueCapacity
+        value: "4"
+      - key: Showcase__RunTimeout
+        value: "00:00:06"
