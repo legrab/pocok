@@ -26,7 +26,7 @@ public interface IScriptEngineAdapter
     /// <summary>Gets the fail-closed validator.</summary>
     public IScriptValidator Validator { get; }
 
-    /// <summary>Executes a token created only by <see cref="ScriptRunner"/>.</summary>
+    /// <summary>Executes a token created only by <see cref="ScriptRunner" />.</summary>
     public ValueTask<ScriptResult<object?>> ExecuteAsync(
         ValidatedScript script,
         ScriptExecutionOptions options,
@@ -36,7 +36,10 @@ public interface IScriptEngineAdapter
 /// <summary>Represents source that passed the selected engine validator.</summary>
 public sealed class ValidatedScript
 {
-    internal ValidatedScript(ScriptExecutionRequest request) => Request = request;
+    internal ValidatedScript(ScriptExecutionRequest request)
+    {
+        Request = request;
+    }
 
     /// <summary>Gets the validated request.</summary>
     public ScriptExecutionRequest Request { get; }

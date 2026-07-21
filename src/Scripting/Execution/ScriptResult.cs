@@ -7,11 +7,18 @@ namespace Pocok.Scripting.Execution;
 /// <summary>Represents either a script result or an expected script failure.</summary>
 public sealed class ScriptResult<T>
 {
-    internal ScriptResult(T? value, ScriptFailure? failure) { Value = value; Failure = failure; }
+    internal ScriptResult(T? value, ScriptFailure? failure)
+    {
+        Value = value;
+        Failure = failure;
+    }
+
     /// <summary>Gets whether execution succeeded.</summary>
     public bool IsSuccess => Failure is null;
+
     /// <summary>Gets the result value.</summary>
     public T? Value { get; }
+
     /// <summary>Gets the expected failure.</summary>
     public ScriptFailure? Failure { get; }
 }
@@ -20,11 +27,15 @@ public sealed class ScriptResult<T>
 public static class ScriptResult
 {
     /// <summary>Creates a successful result.</summary>
-    public static ScriptResult<T> Success<T>(T? value = default) => new(value, null);
+    public static ScriptResult<T> Success<T>(T? value = default)
+    {
+        return new ScriptResult<T>(value, null);
+    }
+
     /// <summary>Creates a failed result.</summary>
     public static ScriptResult<T> Failed<T>(ScriptFailure failure)
     {
         ArgumentNullException.ThrowIfNull(failure);
-        return new(default, failure);
+        return new ScriptResult<T>(default, failure);
     }
 }

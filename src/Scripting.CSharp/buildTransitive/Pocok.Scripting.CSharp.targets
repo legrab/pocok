@@ -1,9 +1,9 @@
 <Project>
   <ItemGroup>
-    <_PocokCSharpWorker Include="$(MSBuildThisFileDirectory)Pocok.Scripting.CSharp.Worker/**/*" />
+    <_PocokCSharpWorker Include="$(MSBuildThisFileDirectory)Pocok.Scripting.CSharp.Worker/**/*"/>
     <Content Include="@(_PocokCSharpWorker)"
              Link="Pocok.Scripting/CSharpWorker/%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest"
-             CopyToPublishDirectory="PreserveNewest" />
+             CopyToPublishDirectory="PreserveNewest"/>
   </ItemGroup>
 </Project>

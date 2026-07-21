@@ -9,17 +9,12 @@ using Pocok.Scripting.Python;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Scripting;
 using Pocok.Showcase.Scripting.Models;
-using Shouldly;
 
 namespace Pocok.Showcase.Samples.Tests;
 
 [TestFixture]
 public sealed class ScriptingShowcaseTests
 {
-    private ScriptEngineRegistry _registry = null!;
-    private ScriptRunner _runner = null!;
-    private ScriptingShowcaseSlice _slice = null!;
-
     [SetUp]
     public void SetUp()
     {
@@ -41,6 +36,10 @@ public sealed class ScriptingShowcaseTests
         _slice = new ScriptingShowcaseSlice(_runner, _registry, new ScriptingShowcaseOptions());
     }
 
+    private ScriptEngineRegistry _registry = null!;
+    private ScriptRunner _runner = null!;
+    private ScriptingShowcaseSlice _slice = null!;
+
     public static IEnumerable<TestCaseData> Samples()
     {
         ScriptEngineRegistry registry = CreateRegistry();
@@ -49,10 +48,8 @@ public sealed class ScriptingShowcaseTests
             registry,
             new ScriptingShowcaseOptions());
         foreach (IShowcaseSample sample in slice.Samples)
-        {
             yield return new TestCaseData(sample.Id, sample.ExpectedHeadlineResult)
                 .SetName($"Sample_{sample.Id}");
-        }
     }
 
     [TestCaseSource(nameof(Samples))]
@@ -120,7 +117,7 @@ public sealed class ScriptingShowcaseTests
             })
             .Build();
 
-        ScriptingShowcaseOptions options = ScriptingShowcaseOptions.FromConfiguration(configuration);
+        var options = ScriptingShowcaseOptions.FromConfiguration(configuration);
 
         options.TrustedEnginesEnabled.ShouldBeTrue();
         options.MaximumSourceCharacters.ShouldBe(4096);
@@ -168,8 +165,7 @@ public sealed class ScriptingShowcaseTests
         ShowcaseRunResult result = await TestSupport.ExecuteAsync(_slice, input);
 
         result.Status.ShouldBe(ShowcaseRunStatus.Success);
-        string limits = result.Fields.Single(
-            field => field.Name == "Result.Fields.Limits").Value!;
+        var limits = result.Fields.Single(field => field.Name == "Result.Fields.Limits").Value!;
         limits.ShouldContain("10000 statements");
         limits.ShouldContain("depth 64");
         limits.ShouldContain("16 MiB");
@@ -216,7 +212,7 @@ public sealed class ScriptingShowcaseTests
         var python = new PythonScriptEngineAdapter();
         if (!csharp.Descriptor.IsAvailable || !python.Descriptor.IsAvailable)
         {
-            string reason = string.Join("; ", new[]
+            var reason = string.Join("; ", new[]
             {
                 csharp.Descriptor.UnavailableMessage,
                 python.Descriptor.UnavailableMessage
@@ -246,7 +242,7 @@ public sealed class ScriptingShowcaseTests
             [ScriptEngineId.Python] = "21 * 2"
         };
 
-        foreach ((ScriptEngineId id, string source) in sources)
+        foreach ((ScriptEngineId id, var source) in sources)
         {
             ScriptExecutionOptions options = id == ScriptEngineId.JavaScript
                 ? new ScriptExecutionOptions
@@ -304,25 +300,28 @@ public sealed class ScriptingShowcaseTests
             new ScriptingShowcaseOptions { TrustedEnginesEnabled = true });
 
         InvalidOperationException exception =
-            await Should.ThrowAsync<InvalidOperationException>(
-                async () => await warmup.StartAsync(CancellationToken.None));
+            await Should.ThrowAsync<InvalidOperationException>(async () =>
+                await warmup.StartAsync(CancellationToken.None));
 
         exception.Message.ShouldContain("csharp");
         exception.Message.ShouldContain("scripting.engine.trusted_only");
     }
 
-    private static ScriptEngineRegistry CreateRegistry() => new(
-    [
-        new JavaScriptScriptEngineAdapter(),
-        new UnavailableScriptEngineAdapter(
-            ScriptEngineId.CSharp,
-            "C#",
-            "scripting.engine.trusted_only",
-            "C# requires explicit enablement."),
-        new UnavailableScriptEngineAdapter(
-            ScriptEngineId.Python,
-            "Python",
-            "scripting.engine.trusted_only",
-            "Python requires explicit enablement.")
-    ]);
+    private static ScriptEngineRegistry CreateRegistry()
+    {
+        return new ScriptEngineRegistry(
+        [
+            new JavaScriptScriptEngineAdapter(),
+            new UnavailableScriptEngineAdapter(
+                ScriptEngineId.CSharp,
+                "C#",
+                "scripting.engine.trusted_only",
+                "C# requires explicit enablement."),
+            new UnavailableScriptEngineAdapter(
+                ScriptEngineId.Python,
+                "Python",
+                "scripting.engine.trusted_only",
+                "Python requires explicit enablement.")
+        ]);
+    }
 }

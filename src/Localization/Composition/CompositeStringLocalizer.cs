@@ -66,11 +66,9 @@ public sealed class CompositeStringLocalizer : IStringLocalizer
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (IStringLocalizer localizer in _localizers)
-        {
             foreach (LocalizedString candidate in localizer.GetAllStrings(includeParentCultures))
                 if (!candidate.ResourceNotFound && seen.Add(candidate.Name))
                     yield return candidate;
-        }
     }
 
     private static LocalizedString Missing(string name)

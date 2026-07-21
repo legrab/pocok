@@ -3,6 +3,7 @@
 
 using Pocok.Conversion;
 using Pocok.Showcase.Components;
+using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Conversion;
 using Pocok.Showcase.Conversion.Models;
 
@@ -23,7 +24,8 @@ public sealed class ConversionCodeTests
     [TestCase("System.IO.File.ReadAllText(\"secret\")")]
     [TestCase("converter.Convert<System.Type>(typeof(string))")]
     [TestCase("converter.Convert<int>(GetValue())")]
-    [TestCase("converter.Convert<int>(\"42\", new ConversionContext(CultureInfo.InvariantCulture, OverflowPolicy.Saturate))")]
+    [TestCase(
+        "converter.Convert<int>(\"42\", new ConversionContext(CultureInfo.InvariantCulture, OverflowPolicy.Saturate))")]
     public void ParserRejectsArbitrarySyntax(string code)
     {
         ConversionCodeParser.Parse(code).IsSuccess.ShouldBeFalse();
@@ -41,7 +43,7 @@ public sealed class ConversionCodeTests
     [TestCase("maximumCollectionItems: 501")]
     public void ParserEnforcesBounds(string policy)
     {
-        string code = $"converter.Convert<int>(\"42\", new ConversionContext(CultureInfo.InvariantCulture, {policy}));";
+        var code = $"converter.Convert<int>(\"42\", new ConversionContext(CultureInfo.InvariantCulture, {policy}));";
         ConversionCodeParser.Parse(code).IsSuccess.ShouldBeFalse();
     }
 
@@ -55,7 +57,7 @@ public sealed class ConversionCodeTests
             TargetType = "int",
             NumericLoss = NumericLossPolicy.RoundToNearest
         };
-        string code = ConversionCodeFormatter.Format(input);
+        var code = ConversionCodeFormatter.Format(input);
         ConversionParseResult parsed = ConversionCodeParser.Parse(code);
         parsed.IsSuccess.ShouldBeTrue(parsed.Error);
         parsed.Input!.NumericLoss.ShouldBe(NumericLossPolicy.RoundToNearest);
@@ -71,7 +73,7 @@ public sealed class ConversionCodeTests
             TargetType = "int"
         };
 
-        string code = ConversionCodeFormatter.Format(input);
+        var code = ConversionCodeFormatter.Format(input);
 
         code.ShouldContain("\"445476\"");
         code.ShouldNotContain("\"42\"");
@@ -88,31 +90,32 @@ public sealed class ConversionCodeTests
             Overflow = OverflowPolicy.Saturate
         };
 
-        string code = ConversionCodeFormatter.Format(input);
+        var code = ConversionCodeFormatter.Format(input);
 
         code.ShouldBe("""
-            converter.Convert<byte>(
-                300,
-                new ConversionContext(
-                    CultureInfo.InvariantCulture,
-                    overflow: OverflowPolicy.Saturate,
-                    nulls: NullPolicy.Preserve,
-                    enums: EnumPolicy.DefinedValuesAndFlags,
-                    numericLoss: NumericLossPolicy.Reject,
-                    numericBooleans: NumericBooleanPolicy.Reject,
-                    temporalText: TemporalTextPolicy.RoundTrip,
-                    maximumDepth: 32
-                )
-            );
-            """);
+                      converter.Convert<byte>(
+                          300,
+                          new ConversionContext(
+                              CultureInfo.InvariantCulture,
+                              overflow: OverflowPolicy.Saturate,
+                              nulls: NullPolicy.Preserve,
+                              enums: EnumPolicy.DefinedValuesAndFlags,
+                              numericLoss: NumericLossPolicy.Reject,
+                              numericBooleans: NumericBooleanPolicy.Reject,
+                              temporalText: TemporalTextPolicy.RoundTrip,
+                              maximumDepth: 32
+                          )
+                      );
+                      """);
     }
 
     [Test]
     public void FormatterCanonicalizesAnEditedSingleLineExpression()
     {
-        const string expression = "converter.Convert<byte>(300, new ConversionContext(CultureInfo.InvariantCulture, overflow: OverflowPolicy.Saturate, nulls: NullPolicy.Preserve, enums: EnumPolicy.DefinedValuesAndFlags, numericLoss: NumericLossPolicy.Reject, numericBooleans: NumericBooleanPolicy.Reject, temporalText: TemporalTextPolicy.RoundTrip, maximumDepth: 32));";
+        const string expression =
+            "converter.Convert<byte>(300, new ConversionContext(CultureInfo.InvariantCulture, overflow: OverflowPolicy.Saturate, nulls: NullPolicy.Preserve, enums: EnumPolicy.DefinedValuesAndFlags, numericLoss: NumericLossPolicy.Reject, numericBooleans: NumericBooleanPolicy.Reject, temporalText: TemporalTextPolicy.RoundTrip, maximumDepth: 32));";
 
-        string formatted = ConversionCodeFormatter.Format(expression);
+        var formatted = ConversionCodeFormatter.Format(expression);
 
         formatted.ShouldContain("converter.Convert<byte>(\n    300,");
         formatted.ShouldContain("\n        overflow: OverflowPolicy.Saturate,");
@@ -128,7 +131,7 @@ public sealed class ConversionCodeTests
     [Test]
     public void LineCommentRemovalPreservesStringContent()
     {
-        string code = "converter.Convert<string>(\"https://example.test\"); // trailing";
+        var code = "converter.Convert<string>(\"https://example.test\"); // trailing";
         ConversionCodeParser.RemoveLineComments(code).ShouldContain("https://example.test");
     }
 
@@ -136,8 +139,8 @@ public sealed class ConversionCodeTests
     public void AutocompleteFiltersAtCursor()
     {
         var slice = new ConversionShowcaseSlice();
-        IReadOnlyList<Pocok.Showcase.Contracts.ShowcaseCodeAssistItem> matches =
-            ShowcaseCodeAssistFilter.Filter(slice.CodeAssist, "OverflowPolicy.Sat", 18, 8);
+        IReadOnlyList<ShowcaseCodeAssistItem> matches =
+            ShowcaseCodeAssistFilter.Filter(slice.CodeAssist, "OverflowPolicy.Sat", 18);
         matches.Count.ShouldBeGreaterThan(0);
         matches[0].Label.ShouldContain("Saturate");
     }

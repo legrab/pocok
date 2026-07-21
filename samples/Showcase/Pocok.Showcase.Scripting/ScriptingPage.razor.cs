@@ -13,28 +13,30 @@ public partial class ScriptingPage
 {
     private ScriptingEditor? _editor;
     private ScriptingInput _input = new();
-    private string _selectedId = string.Empty;
     private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
     private ShowcaseRunResult? _result;
     private bool _running;
     private long _sampleRevision;
+    private string _selectedId = string.Empty;
 
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcasePageContext Context { get; set; } = default!;
 
-    [Inject]
-    private ScriptEngineRegistry Registry { get; set; } = default!;
+    [Inject] private ScriptEngineRegistry Registry { get; set; } = default!;
 
-    [Inject]
-    private ScriptingShowcaseOptions ShowcaseOptions { get; set; } = default!;
+    [Inject] private ScriptingShowcaseOptions ShowcaseOptions { get; set; } = default!;
 
     private IReadOnlyList<ScriptEngineDescriptor> Engines => Registry.Descriptors;
     private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         SelectSample(Context.Samples.Single(static item => item.IsDefault));
+    }
 
-    private string T(string key) => Context.Text.GetText("scripting", key);
+    private string T(string key)
+    {
+        return Context.Text.GetText("scripting", key);
+    }
 
     private Task SetInputAsync(ScriptingInput input)
     {

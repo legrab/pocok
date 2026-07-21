@@ -15,7 +15,8 @@ public sealed class JavaScriptScriptEngineAdapter : IScriptEngineAdapter
     private static readonly ScriptEngineCapabilities Capabilities = new(true, true, true, true, true);
 
     /// <inheritdoc />
-    public ScriptEngineDescriptor Descriptor { get; } = new(ScriptEngineId.JavaScript, "JavaScript", true, Capabilities);
+    public ScriptEngineDescriptor Descriptor { get; } =
+        new(ScriptEngineId.JavaScript, "JavaScript", true, Capabilities);
 
     /// <inheritdoc />
     public IScriptValidator Validator { get; } = new JavaScriptScriptValidator();
@@ -80,7 +81,7 @@ public sealed class JavaScriptScriptEngineAdapter : IScriptEngineAdapter
             }
 
             JsValue evaluated = engine.Evaluate(request.Source, request.Identifier);
-            object? result = evaluated.IsNull() || evaluated.IsUndefined()
+            var result = evaluated.IsNull() || evaluated.IsUndefined()
                 ? null
                 : evaluated.ToObject();
             return ValueTask.FromResult(ScriptResult.Success<object?>(result));

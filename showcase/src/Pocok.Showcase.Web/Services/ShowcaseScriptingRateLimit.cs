@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Channels;
 using Microsoft.Extensions.Options;
 using Pocok.Showcase.Contracts;
 
@@ -19,8 +20,8 @@ public sealed class ShowcaseClientIdentity
         ArgumentNullException.ThrowIfNull(httpContextAccessor);
 
         HttpContext? context = httpContextAccessor.HttpContext;
-        string? address = NormalizeAddress(context?.Connection.RemoteIpAddress);
-        string source = string.IsNullOrWhiteSpace(address)
+        var address = NormalizeAddress(context?.Connection.RemoteIpAddress);
+        var source = string.IsNullOrWhiteSpace(address)
             ? $"circuit:{Guid.NewGuid():N}"
             : $"address:{address}";
 
@@ -38,7 +39,7 @@ public sealed class ShowcaseClientIdentity
         if (address.AddressFamily != AddressFamily.InterNetworkV6)
             return address.ToString();
 
-        byte[] bytes = address.GetAddressBytes();
+        var bytes = address.GetAddressBytes();
         Array.Clear(bytes, 8, 8);
         return $"{new IPAddress(bytes)}/64";
     }
@@ -49,13 +50,17 @@ public sealed class ShowcaseScriptingClientLimiter(
     TimeProvider timeProvider)
 {
     private const string OverflowClientKey = "<overflow>";
+    private readonly object _admissionGate = new();
+
     private readonly ShowcaseOptions _options =
         options?.Value ?? throw new ArgumentNullException(nameof(options));
+
     private readonly TimeProvider _timeProvider =
         timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+
     private readonly ConcurrentDictionary<string, ClientWindow> _windows =
         new(StringComparer.Ordinal);
-    private readonly object _admissionGate = new();
+
     private int _acquisitionCount;
 
     public bool TryAcquire(string clientKey, out TimeSpan retryAfter)
@@ -73,12 +78,12 @@ public sealed class ShowcaseScriptingClientLimiter(
             PruneExpired(now);
 
         ClientWindow window = GetOrAddWindow(clientKey, now);
-        long nowTicks = now.UtcTicks;
-        long windowTicks = _options.ScriptingClientExecutionWindow.Ticks;
+        var nowTicks = now.UtcTicks;
+        var windowTicks = _options.ScriptingClientExecutionWindow.Ticks;
 
         lock (window)
         {
-            long elapsedTicks = nowTicks - window.StartedUtcTicks;
+            var elapsedTicks = nowTicks - window.StartedUtcTicks;
             if (elapsedTicks < 0 || elapsedTicks >= windowTicks)
             {
                 window.StartedUtcTicks = nowTicks;
@@ -109,11 +114,11 @@ public sealed class ShowcaseScriptingClientLimiter(
             if (_windows.TryGetValue(clientKey, out existing))
                 return existing;
 
-            int regularClientCapacity = _options.ScriptingRateLimitMaximumTrackedClients - 1;
+            var regularClientCapacity = _options.ScriptingRateLimitMaximumTrackedClients - 1;
             if (_windows.Count >= regularClientCapacity)
                 PruneExpired(now);
 
-            string boundedKey = _windows.Count < regularClientCapacity
+            var boundedKey = _windows.Count < regularClientCapacity
                 ? clientKey
                 : OverflowClientKey;
             return _windows.GetOrAdd(
@@ -125,8 +130,8 @@ public sealed class ShowcaseScriptingClientLimiter(
 
     private void PruneExpired(DateTimeOffset now)
     {
-        long expirationTicks = now.UtcTicks - checked(_options.ScriptingClientExecutionWindow.Ticks * 2);
-        foreach ((string key, ClientWindow window) in _windows)
+        var expirationTicks = now.UtcTicks - checked(_options.ScriptingClientExecutionWindow.Ticks * 2);
+        foreach ((var key, ClientWindow window) in _windows)
         {
             if (Volatile.Read(ref window.LastSeenUtcTicks) > expirationTicks)
                 continue;
@@ -137,9 +142,9 @@ public sealed class ShowcaseScriptingClientLimiter(
 
     private sealed class ClientWindow(long startedUtcTicks)
     {
-        public long StartedUtcTicks = startedUtcTicks;
-        public long LastSeenUtcTicks = startedUtcTicks;
         public int Count;
+        public long LastSeenUtcTicks = startedUtcTicks;
+        public long StartedUtcTicks = startedUtcTicks;
     }
 }
 
@@ -149,12 +154,15 @@ public sealed class RateLimitedShowcaseRunClient(
     ShowcaseClientIdentity clientIdentity) : IShowcaseRunClient
 {
     private const string ScriptingPackageId = "Pocok.Scripting";
-    private readonly ShowcaseRunClient _inner =
-        inner ?? throw new ArgumentNullException(nameof(inner));
-    private readonly ShowcaseScriptingClientLimiter _limiter =
-        limiter ?? throw new ArgumentNullException(nameof(limiter));
+
     private readonly ShowcaseClientIdentity _clientIdentity =
         clientIdentity ?? throw new ArgumentNullException(nameof(clientIdentity));
+
+    private readonly ShowcaseRunClient _inner =
+        inner ?? throw new ArgumentNullException(nameof(inner));
+
+    private readonly ShowcaseScriptingClientLimiter _limiter =
+        limiter ?? throw new ArgumentNullException(nameof(limiter));
 
     public ValueTask<ShowcaseRunHandle> SubmitAsync(
         IShowcaseSlice slice,
@@ -167,7 +175,7 @@ public sealed class RateLimitedShowcaseRunClient(
         if (string.Equals(slice.Descriptor.PackageId, ScriptingPackageId, StringComparison.Ordinal)
             && !_limiter.TryAcquire(_clientIdentity.Key, out TimeSpan retryAfter))
         {
-            int retrySeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds));
+            var retrySeconds = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds));
             return ValueTask.FromResult(RejectedHandle(ShowcaseRunResult.Rejected(
                 "Run rejected",
                 "showcase.scripting-client-limit",
@@ -178,11 +186,14 @@ public sealed class RateLimitedShowcaseRunClient(
         return _inner.SubmitAsync(slice, input, culture, cancellationToken);
     }
 
-    public ValueTask DisposeAsync() => _inner.DisposeAsync();
+    public ValueTask DisposeAsync()
+    {
+        return _inner.DisposeAsync();
+    }
 
     private static ShowcaseRunHandle RejectedHandle(ShowcaseRunResult result)
     {
-        var progress = System.Threading.Channels.Channel.CreateUnbounded<ShowcaseProgressEvent>();
+        var progress = Channel.CreateUnbounded<ShowcaseProgressEvent>();
         progress.Writer.TryComplete();
         return new ShowcaseRunHandle(
             Task.FromResult(result),

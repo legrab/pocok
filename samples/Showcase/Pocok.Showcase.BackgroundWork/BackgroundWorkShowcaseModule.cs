@@ -13,8 +13,10 @@ public sealed class BackgroundWorkShowcaseModule : IServiceModule
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(context);
-        services.AddSingleton(new ShowcaseResourceRegistration("background-work", context.BaseDirectory, "Content/Locales/BackgroundWork"));
+        services.AddSingleton(new ShowcaseResourceRegistration("background-work", context.BaseDirectory,
+            "Content/Locales/BackgroundWork"));
         services.AddSingleton<BackgroundWorkShowcaseSlice>();
-        services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<BackgroundWorkShowcaseSlice>());
+        services.AddSingleton<IShowcaseSlice>(static provider =>
+            provider.GetRequiredService<BackgroundWorkShowcaseSlice>());
     }
 }

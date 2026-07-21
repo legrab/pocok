@@ -4,7 +4,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Web.Services;
 
@@ -17,7 +16,8 @@ internal static class TestSupport
         get
         {
             var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-            while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "global.json"))) directory = directory.Parent;
+            while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "global.json")))
+                directory = directory.Parent;
             return directory?.FullName ?? throw new InvalidOperationException("Repository root was not found.");
         }
     }
@@ -43,22 +43,28 @@ internal static class TestSupport
         IShowcaseSlice slice,
         object input,
         CultureInfo? culture = null,
-        CancellationToken cancellationToken = default) =>
-        await slice.ExecuteUntypedAsync(input, CreateContext(culture), cancellationToken);
-
-    public static FakeWebHostEnvironment WebEnvironment() => new()
+        CancellationToken cancellationToken = default)
     {
-        ApplicationName = "Pocok.Showcase.Samples.Tests",
-        EnvironmentName = Environments.Production,
-        ContentRootPath = Path.Combine(RepositoryRoot, "showcase", "src", "Pocok.Showcase.Web"),
-        ContentRootFileProvider = new NullFileProvider(),
-        WebRootPath = Path.Combine(RepositoryRoot, "showcase", "src", "Pocok.Showcase.Web", "wwwroot"),
-        WebRootFileProvider = new NullFileProvider()
-    };
+        return await slice.ExecuteUntypedAsync(input, CreateContext(culture), cancellationToken);
+    }
+
+    public static FakeWebHostEnvironment WebEnvironment()
+    {
+        return new FakeWebHostEnvironment
+        {
+            ApplicationName = "Pocok.Showcase.Samples.Tests",
+            EnvironmentName = Environments.Production,
+            ContentRootPath = Path.Combine(RepositoryRoot, "showcase", "src", "Pocok.Showcase.Web"),
+            ContentRootFileProvider = new NullFileProvider(),
+            WebRootPath = Path.Combine(RepositoryRoot, "showcase", "src", "Pocok.Showcase.Web", "wwwroot"),
+            WebRootFileProvider = new NullFileProvider()
+        };
+    }
 
     internal sealed class RecordingProgressWriter : IShowcaseProgressWriter
     {
         public List<ShowcaseProgressEvent> Events { get; } = [];
+
         public ValueTask ReportAsync(string stage, string message, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -70,7 +76,11 @@ internal static class TestSupport
     private sealed class EmptyServiceProvider : IServiceProvider
     {
         public static EmptyServiceProvider Instance { get; } = new();
-        public object? GetService(Type serviceType) => null;
+
+        public object? GetService(Type serviceType)
+        {
+            return null;
+        }
     }
 
     private sealed class TestTemporaryDirectoryFactory : ISafeTemporaryDirectoryFactory
@@ -78,7 +88,7 @@ internal static class TestSupport
         public ValueTask<IAsyncDisposable> CreateAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "pocok-showcase-tests", Guid.NewGuid().ToString("N"));
+            var path = Path.Combine(Path.GetTempPath(), "pocok-showcase-tests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(path);
             return ValueTask.FromResult<IAsyncDisposable>(new TestTemporaryDirectory(path));
         }
@@ -88,7 +98,7 @@ internal static class TestSupport
     {
         public ValueTask DisposeAsync()
         {
-            if (Directory.Exists(path)) Directory.Delete(path, recursive: true);
+            if (Directory.Exists(path)) Directory.Delete(path, true);
             return ValueTask.CompletedTask;
         }
     }
@@ -107,11 +117,22 @@ internal sealed class FakeWebHostEnvironment : IWebHostEnvironment
 internal sealed class FakeLifetime : IHostApplicationLifetime, IDisposable
 {
     private readonly CancellationTokenSource _started = new();
-    private readonly CancellationTokenSource _stopping = new();
     private readonly CancellationTokenSource _stopped = new();
+    private readonly CancellationTokenSource _stopping = new();
+
+    public void Dispose()
+    {
+        _started.Dispose();
+        _stopping.Dispose();
+        _stopped.Dispose();
+    }
+
     public CancellationToken ApplicationStarted => _started.Token;
     public CancellationToken ApplicationStopping => _stopping.Token;
     public CancellationToken ApplicationStopped => _stopped.Token;
-    public void StopApplication() => _stopping.Cancel();
-    public void Dispose() { _started.Dispose(); _stopping.Dispose(); _stopped.Dispose(); }
+
+    public void StopApplication()
+    {
+        _stopping.Cancel();
+    }
 }

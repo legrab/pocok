@@ -9,6 +9,7 @@ public enum ScriptValidationSeverity
 {
     /// <summary>The source cannot execute.</summary>
     Error,
+
     /// <summary>The source is accepted but deserves attention.</summary>
     Warning
 }
@@ -36,7 +37,10 @@ public sealed class ScriptValidationResult
     public IReadOnlyList<ScriptValidationDiagnostic> Diagnostics { get; }
 
     /// <summary>Creates a successful validation result.</summary>
-    public static ScriptValidationResult Valid() => new([]);
+    public static ScriptValidationResult Valid()
+    {
+        return new ScriptValidationResult([]);
+    }
 
     /// <summary>Creates a validation result from diagnostics.</summary>
     public static ScriptValidationResult From(IEnumerable<ScriptValidationDiagnostic> diagnostics)

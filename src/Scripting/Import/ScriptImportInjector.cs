@@ -24,24 +24,30 @@ public sealed class ScriptImportInjector
     {
         ArgumentNullException.ThrowIfNull(script);
         IReadOnlyList<ScriptReference> imports = _syntax.FindImports(script);
-        if (imports.Count == 0) return new(script, [], []);
+        if (imports.Count == 0) return new InjectedScript(script, [], []);
         var resolved = new List<ImportedScriptContent>();
         var diagnostics = new List<ScriptImportDiagnostic>();
         var seen = new HashSet<ScriptReference>();
         foreach (ScriptReference import in imports)
         {
-            ScriptImportResolution resolution = await _resolver.ResolveAsync(import, cancellationToken).ConfigureAwait(false);
+            ScriptImportResolution resolution =
+                await _resolver.ResolveAsync(import, cancellationToken).ConfigureAwait(false);
             diagnostics.AddRange(resolution.Diagnostics);
             foreach (ImportedScriptContent content in resolution.Scripts)
-                if (seen.Add(content.Reference)) resolved.Add(content);
+                if (seen.Add(content.Reference))
+                    resolved.Add(content);
         }
+
         var sections = new List<string>();
         foreach (ImportedScriptContent content in resolved)
         {
             sections.Add(_syntax.ImportedComment(content.Reference, 0));
             sections.Add(_syntax.RemoveImports(content.Content).Trim());
         }
+
         sections.Add(_syntax.RemoveImports(script).Trim());
-        return new(string.Join(Environment.NewLine + Environment.NewLine, sections.Where(static value => value.Length > 0)), imports, diagnostics);
+        return new InjectedScript(
+            string.Join(Environment.NewLine + Environment.NewLine, sections.Where(static value => value.Length > 0)),
+            imports, diagnostics);
     }
 }

@@ -24,7 +24,7 @@ public sealed class ScriptingShowcaseModule : IServiceModule
             context.BaseDirectory,
             "Content/Locales/Scripting"));
 
-        ScriptingShowcaseOptions showcaseOptions =
+        var showcaseOptions =
             ScriptingShowcaseOptions.FromConfiguration(context.Configuration);
         services.AddSingleton(showcaseOptions);
 
@@ -69,16 +69,18 @@ public sealed class ScriptingRuntimeWarmupService(
         (ScriptEngineId.Python, "21 * 2")
     ];
 
-    private readonly ScriptRunner _runner =
-        runner ?? throw new ArgumentNullException(nameof(runner));
     private readonly ScriptEngineRegistry _registry =
         registry ?? throw new ArgumentNullException(nameof(registry));
+
+    private readonly ScriptRunner _runner =
+        runner ?? throw new ArgumentNullException(nameof(runner));
+
     private readonly ScriptingShowcaseOptions _showcaseOptions =
         showcaseOptions ?? throw new ArgumentNullException(nameof(showcaseOptions));
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        foreach ((ScriptEngineId engineId, string source) in WarmupTargets)
+        foreach ((ScriptEngineId engineId, var source) in WarmupTargets)
         {
             if (engineId != ScriptEngineId.JavaScript && !_showcaseOptions.TrustedEnginesEnabled)
                 continue;
@@ -87,7 +89,7 @@ public sealed class ScriptingRuntimeWarmupService(
                 .FirstOrDefault(item => item.Id == engineId);
             if (descriptor is not { IsAvailable: true })
             {
-                string code = descriptor?.UnavailableCode ?? "scripting.engine.not_registered";
+                var code = descriptor?.UnavailableCode ?? "scripting.engine.not_registered";
                 throw new InvalidOperationException(
                     $"Configured scripting engine '{engineId.Value}' is unavailable ({code}).");
             }
@@ -104,18 +106,20 @@ public sealed class ScriptingRuntimeWarmupService(
                 cancellationToken).ConfigureAwait(false);
 
             if (!result.IsSuccess)
-            {
                 throw new InvalidOperationException(
                     $"Scripting runtime warm-up failed for '{engineId.Value}' " +
                     $"({result.Failure!.Code}).");
-            }
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
 
-    private static ScriptExecutionOptions CreateWarmupOptions(ScriptEngineId engineId) =>
-        engineId == ScriptEngineId.JavaScript
+    private static ScriptExecutionOptions CreateWarmupOptions(ScriptEngineId engineId)
+    {
+        return engineId == ScriptEngineId.JavaScript
             ? new ScriptExecutionOptions
             {
                 Timeout = TimeSpan.FromSeconds(10),
@@ -131,4 +135,5 @@ public sealed class ScriptingRuntimeWarmupService(
                 MaxSourceCharacters = 64,
                 MaxOutputBytes = 1_024
             };
+    }
 }

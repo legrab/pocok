@@ -1,7 +1,7 @@
 <div class="package-page">
     <ShowcasePackageHeader Descriptor="Context.Descriptor"
                            Text="Context.Text"
-                           ImplementationStatusText="@T("Package.Status.Available")" />
+                           ImplementationStatusText="@T("Package.Status.Available")"/>
 
     <ShowcasePackageWorkbench>
         <Samples>
@@ -10,15 +10,15 @@
                                   SelectedId="@_selectedId"
                                   SelectedIdChanged="SelectSampleAsync"
                                   Text="Context.Text"
-                                  ResourceNamespace="licensing" />
+                                  ResourceNamespace="licensing"/>
             <ShowcaseProgressPanel Title="@T("Sandbox.ExecutionSteps")"
-                                   Progress="_progress" />
+                                   Progress="_progress"/>
             @if (_result is not null)
             {
                 <ShowcaseTipPanel Title="@T("Tips.Title")"
                                   TipKeys="_result.TipKeys"
                                   Text="Context.Text"
-                                  ResourceNamespace="licensing" />
+                                  ResourceNamespace="licensing"/>
             }
         </Samples>
         <Main>
@@ -28,12 +28,12 @@
                 <LicensingEditor @ref="_editor"
                                  Value="@_input"
                                  ValueChanged="SetInputAsync"
-                                 Text="Context.Text" />
+                                 Text="Context.Text"/>
 
                 <div class="actions">
                     <ShowcaseRunButton Label="@T("Sandbox.Generate")"
                                        CssClass="secondary"
-                                       Clicked="GenerateLicense" />
+                                       Clicked="GenerateLicense"/>
                 </div>
 
                 @if (_generationError is not null)
@@ -51,10 +51,10 @@
                         </dl>
                         <ShowcaseCodeBlock Title="@T("Generation.SignedLicense")"
                                            Code="@_generatedLicense.SignedLicense"
-                                           Language="json" />
+                                           Language="json"/>
                         <ShowcaseCodeBlock Title="@T("Generation.PublicKey")"
                                            Code="@_generatedLicense.PublicKeyPem"
-                                           Language="text" />
+                                           Language="text"/>
                         <p>@T("Generation.ImportHint")</p>
                     </section>
                 }
@@ -69,7 +69,7 @@
                                            ResetKey="@SampleResetKey"
                                            ResultChanged="SetResultAsync"
                                            RunningChanged="SetRunningAsync"
-                                           ProgressChanged="SetProgressAsync" />
+                                           ProgressChanged="SetProgressAsync"/>
             </ShowcaseSandboxFrame>
 
             <ShowcaseResultPanel Title="@T("Result.Title")"
@@ -79,13 +79,13 @@
                                  ResourceNamespace="licensing"
                                  CodePreviewTitle="@T("Result.CodePreview")"
                                  CodePreviewLanguage="csharp"
-                                 TruncatedLabel="@T("Result.Truncated")" />
+                                 TruncatedLabel="@T("Result.Truncated")"/>
         </Main>
         <Guidance>
             <ShowcaseGuideView Guide="Context.Slice.Guide"
                                Text="Context.Text"
                                ResourceNamespace="licensing"
-                               MoreLabel="@T("Guide.More")" />
+                               MoreLabel="@T("Guide.More")"/>
             <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
                 <ul class="compact-list">
                     <li>@T("Boundaries.ClaimsOnly")</li>
@@ -96,7 +96,7 @@
             </ShowcaseBoundariesPanel>
             <ShowcaseSourcePanel Title="@T("Source.Title")"
                                  Body="@T("Source.Body")"
-                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+                                 Path="@Context.Descriptor.SourceDocumentationPath"/>
         </Guidance>
     </ShowcasePackageWorkbench>
 </div>

@@ -3,7 +3,6 @@
 
 using System.Text.Json;
 using Pocok.Scripting.Execution;
-using Shouldly;
 
 namespace Pocok.Scripting.Tests.Execution;
 
@@ -11,11 +10,12 @@ namespace Pocok.Scripting.Tests.Execution;
 public sealed class ScriptRunnerTests
 {
     private static readonly int[] StructuredValues = [1, 2];
+
     [Test]
     public async Task ValidatorRunsBeforeAdapter()
     {
-        var adapter = new FakeAdapter(valid: false);
-        var runner = CreateRunner(adapter);
+        var adapter = new FakeAdapter(false);
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(Request(adapter));
 
@@ -43,7 +43,7 @@ public sealed class ScriptRunnerTests
             "Offline",
             "test.unavailable",
             "The configured runtime is unavailable.");
-        var runner = CreateRunner(adapter);
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(Request(adapter));
 
@@ -63,7 +63,7 @@ public sealed class ScriptRunnerTests
     public async Task UnsupportedEngineSpecificLimitFailsBeforeExecution()
     {
         var adapter = new FakeAdapter();
-        var runner = CreateRunner(adapter);
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(
             Request(adapter),
@@ -76,8 +76,8 @@ public sealed class ScriptRunnerTests
     [Test]
     public async Task MissingCancellationCapabilityFailsBeforeExecution()
     {
-        var adapter = new FakeAdapter(capabilities: new(true, false, false, false, false));
-        var runner = CreateRunner(adapter);
+        var adapter = new FakeAdapter(capabilities: new ScriptEngineCapabilities(true, false, false, false, false));
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(Request(adapter));
 
@@ -90,8 +90,8 @@ public sealed class ScriptRunnerTests
     public async Task DuplicateBindingsFailBeforeValidation()
     {
         var adapter = new FakeAdapter();
-        var runner = CreateRunner(adapter);
-        ScriptBinding binding = ScriptBinding.ForValue("value", 1);
+        ScriptRunner runner = CreateRunner(adapter);
+        var binding = ScriptBinding.ForValue("value", 1);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(
             Request(adapter) with { Bindings = [binding, binding] });
@@ -105,7 +105,7 @@ public sealed class ScriptRunnerTests
     public async Task UnexpectedValidatorExceptionDoesNotLeakDetails()
     {
         var adapter = new FakeAdapter(throwOnValidate: true);
-        var runner = CreateRunner(adapter);
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(Request(adapter));
 
@@ -118,12 +118,12 @@ public sealed class ScriptRunnerTests
     public async Task StructuredResultIsNormalizedToJsonElement()
     {
         var adapter = new FakeAdapter(result: new { answer = 42, values = StructuredValues });
-        var runner = CreateRunner(adapter);
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(Request(adapter));
 
         result.IsSuccess.ShouldBeTrue();
-        var element = result.Value.ShouldBeOfType<JsonElement>();
+        JsonElement element = result.Value.ShouldBeOfType<JsonElement>();
         element.GetProperty("answer").GetInt32().ShouldBe(42);
         element.GetProperty("values").GetArrayLength().ShouldBe(2);
     }
@@ -132,7 +132,7 @@ public sealed class ScriptRunnerTests
     public async Task OversizedOutputFailsAfterAdapterExecution()
     {
         var adapter = new FakeAdapter(result: new string('x', 128));
-        var runner = CreateRunner(adapter);
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(
             Request(adapter),
@@ -146,7 +146,7 @@ public sealed class ScriptRunnerTests
     public async Task UnexpectedAdapterExceptionDoesNotLeakDetails()
     {
         var adapter = new FakeAdapter(throwOnExecute: true);
-        var runner = CreateRunner(adapter);
+        ScriptRunner runner = CreateRunner(adapter);
 
         ScriptResult<object?> result = await runner.ExecuteAsync(Request(adapter));
 
@@ -158,7 +158,7 @@ public sealed class ScriptRunnerTests
     public async Task PreCancelledRequestRemainsCancellation()
     {
         var adapter = new FakeAdapter();
-        var runner = CreateRunner(adapter);
+        ScriptRunner runner = CreateRunner(adapter);
         using var cancellation = new CancellationTokenSource();
         cancellation.Cancel();
 
@@ -166,18 +166,22 @@ public sealed class ScriptRunnerTests
             runner.ExecuteAsync(Request(adapter), cancellationToken: cancellation.Token).AsTask());
     }
 
-    private static ScriptRunner CreateRunner(IScriptEngineAdapter adapter) =>
-        new(new ScriptEngineRegistry([adapter]));
+    private static ScriptRunner CreateRunner(IScriptEngineAdapter adapter)
+    {
+        return new ScriptRunner(new ScriptEngineRegistry([adapter]));
+    }
 
-    private static ScriptExecutionRequest Request(IScriptEngineAdapter adapter) =>
-        new(adapter.Descriptor.Id, "test", "42") { ExpectResult = true };
+    private static ScriptExecutionRequest Request(IScriptEngineAdapter adapter)
+    {
+        return new ScriptExecutionRequest(adapter.Descriptor.Id, "test", "42") { ExpectResult = true };
+    }
 
     private sealed class FakeAdapter : IScriptEngineAdapter, IScriptValidator
     {
-        private readonly bool _valid;
         private readonly object? _result;
         private readonly bool _throwOnExecute;
         private readonly bool _throwOnValidate;
+        private readonly bool _valid;
 
         public FakeAdapter(
             bool valid = true,
@@ -204,6 +208,17 @@ public sealed class ScriptRunnerTests
 
         public IScriptValidator Validator => this;
 
+        public ValueTask<ScriptResult<object?>> ExecuteAsync(
+            ValidatedScript script,
+            ScriptExecutionOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            Executions++;
+            if (_throwOnExecute)
+                throw new InvalidOperationException("private-worker-path");
+            return ValueTask.FromResult(ScriptResult.Success<object?>(_result));
+        }
+
         public ScriptEngineId EngineId => Descriptor.Id;
 
         public ValueTask<ScriptValidationResult> ValidateAsync(
@@ -217,17 +232,6 @@ public sealed class ScriptRunnerTests
             return ValueTask.FromResult(_valid
                 ? ScriptValidationResult.Valid()
                 : ScriptValidationResult.From([new ScriptValidationDiagnostic("test.rejected", "Rejected.")]));
-        }
-
-        public ValueTask<ScriptResult<object?>> ExecuteAsync(
-            ValidatedScript script,
-            ScriptExecutionOptions options,
-            CancellationToken cancellationToken = default)
-        {
-            Executions++;
-            if (_throwOnExecute)
-                throw new InvalidOperationException("private-worker-path");
-            return ValueTask.FromResult(ScriptResult.Success<object?>(_result));
         }
     }
 }

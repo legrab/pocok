@@ -1,14 +1,15 @@
 @page "/packages/{Slug}"
+@using Microsoft.Extensions.Options
 @inject ShowcaseSliceCatalog SliceCatalog
 @inject ShowcasePackageCatalog PackageCatalog
 @inject IShowcaseText Text
 @inject IShowcaseRunClient RunClient
-@inject Microsoft.Extensions.Options.IOptions<ShowcaseOptions> Options
+@inject IOptions<ShowcaseOptions> Options
 
 @if (_slice is not null)
 {
     <PageTitle>@_slice.Descriptor.PackageId · @Text.GetText("shell", "App.Title")</PageTitle>
-    <DynamicComponent Type="_slice.PageComponentType" Parameters="_parameters" />
+    <DynamicComponent Type="_slice.PageComponentType" Parameters="_parameters"/>
 }
 else if (_package is not null)
 {
@@ -28,7 +29,7 @@ else if (_package is not null)
                                  NoSandboxLabel="@Text.GetText("shell", "Package.NoSandbox")"
                                  DocumentationLabel="@Text.GetText("shell", "Package.Documentation")"
                                  DocumentationLinkLabel="@Text.GetText("shell", "Package.DocumentationLink")"
-                                 DocumentationHref="@RepositoryHref(_package.DocumentationPath)" />
+                                 DocumentationHref="@RepositoryHref(_package.DocumentationPath)"/>
 }
 else
 {
@@ -70,25 +71,31 @@ else
         _parameters = new Dictionary<string, object> { ["Context"] = context };
     }
 
-    private ShowcasePackageFact ToFact(ShowcasePackageCatalogEntry package) => new(
-        package.Id,
-        package.Family,
-        package.State,
-        package.Summary,
-        package.DocumentationPath,
-        package.SortOrder,
-        ShowcaseImplementationStatus.Planned,
-        package.Slug);
+    private ShowcasePackageFact ToFact(ShowcasePackageCatalogEntry package)
+    {
+        return new ShowcasePackageFact(
+            package.Id,
+            package.Family,
+            package.State,
+            package.Summary,
+            package.DocumentationPath,
+            package.SortOrder,
+            ShowcaseImplementationStatus.Planned,
+            package.Slug);
+    }
 
-    private string PackageSummary(ShowcasePackageCatalogEntry package) =>
-        Text.GetText("shell", $"Packages.{package.Id.Replace('.', '_')}.Summary");
+    private string PackageSummary(ShowcasePackageCatalogEntry package)
+    {
+        return Text.GetText("shell", $"Packages.{package.Id.Replace('.', '_')}.Summary");
+    }
 
     private string? RepositoryHref(string path)
     {
-        string? baseUrl = Options.Value.PublicRepositoryBaseUrl;
+        var baseUrl = Options.Value.PublicRepositoryBaseUrl;
         if (string.IsNullOrWhiteSpace(baseUrl))
             return null;
 
         return $"{baseUrl.TrimEnd('/')}/blob/main/{path.TrimStart('/')}";
     }
+
 }

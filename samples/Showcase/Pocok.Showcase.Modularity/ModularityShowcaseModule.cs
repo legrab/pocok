@@ -13,8 +13,10 @@ public sealed class ModularityShowcaseModule : IServiceModule
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(context);
-        services.AddSingleton(new ShowcaseResourceRegistration("modularity", context.BaseDirectory, "Content/Locales/Modularity"));
+        services.AddSingleton(new ShowcaseResourceRegistration("modularity", context.BaseDirectory,
+            "Content/Locales/Modularity"));
         services.AddSingleton<ModularityShowcaseSlice>();
-        services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<ModularityShowcaseSlice>());
+        services.AddSingleton<IShowcaseSlice>(static provider =>
+            provider.GetRequiredService<ModularityShowcaseSlice>());
     }
 }

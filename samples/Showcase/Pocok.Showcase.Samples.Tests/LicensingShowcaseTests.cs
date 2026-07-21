@@ -2,7 +2,6 @@
 // Copyright 2026 Pocok contributors
 
 using System.Globalization;
-
 using Pocok.Licensing.Documents;
 using Pocok.Licensing.Validation;
 using Pocok.Showcase.Contracts;
@@ -14,10 +13,13 @@ namespace Pocok.Showcase.Samples.Tests;
 [TestFixture]
 public sealed class LicensingShowcaseTests
 {
-    private LicensingShowcaseSlice _slice = null!;
-
     [SetUp]
-    public void SetUp() => _slice = new LicensingShowcaseSlice();
+    public void SetUp()
+    {
+        _slice = new LicensingShowcaseSlice();
+    }
+
+    private LicensingShowcaseSlice _slice = null!;
 
     public static IEnumerable<TestCaseData> Samples()
     {
@@ -91,8 +93,8 @@ public sealed class LicensingShowcaseTests
     {
         foreach (IShowcaseSample sample in _slice.Samples)
         {
-            object first = sample.CreateInput();
-            object second = sample.CreateInput();
+            var first = sample.CreateInput();
+            var second = sample.CreateInput();
 
             ReferenceEquals(first, second).ShouldBeFalse($"Sample '{sample.Id}' reused its input instance.");
         }
@@ -140,21 +142,21 @@ public sealed class LicensingShowcaseTests
     [Test]
     public void LicenseEditorSectionsAreOpenAndCollapsibleByDefault()
     {
-        string editor = File.ReadAllText(Path.Combine(
+        var editor = File.ReadAllText(Path.Combine(
             TestSupport.RepositoryRoot,
             "samples",
             "Showcase",
             "Pocok.Showcase.Licensing",
             "LicensingEditor.razor"));
 
-        editor.Split("<details class=\"panel collapsible-support editor-section\" open>", StringSplitOptions.None)
+        editor.Split("<details class=\"panel collapsible-support editor-section\" open>")
             .Length.ShouldBe(3);
     }
 
     [Test]
     public void LicenseGenerationUsesAnInteractiveSharedButton()
     {
-        string page = File.ReadAllText(Path.Combine(
+        var page = File.ReadAllText(Path.Combine(
             TestSupport.RepositoryRoot,
             "samples",
             "Showcase",

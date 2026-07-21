@@ -1,7 +1,7 @@
 <div class="package-page">
     <ShowcasePackageHeader Descriptor="Context.Descriptor"
                            Text="Context.Text"
-                           ImplementationStatusText="@T("Package.Status.Available")" />
+                           ImplementationStatusText="@T("Package.Status.Available")"/>
 
     <ShowcasePackageWorkbench>
         <Samples>
@@ -10,7 +10,7 @@
                                   SelectedId="@_selectedId"
                                   SelectedIdChanged="SelectSampleAsync"
                                   Text="Context.Text"
-                                  ResourceNamespace="modularity" />
+                                  ResourceNamespace="modularity"/>
         </Samples>
         <Main>
             <ShowcaseSandboxFrame @key="_sampleRevision"
@@ -20,7 +20,7 @@
                     <div class="field">
                         <label for="recipe-mode">@T("Fields.Mode")</label>
                         <select id="recipe-mode" value="@_input.Mode" @onchange="SetModeAsync">
-                            @foreach (string mode in ModularityRecipeRenderer.Modes)
+                            @foreach (var mode in ModularityRecipeRenderer.Modes)
                             {
                                 <option value="@mode">@mode</option>
                             }
@@ -31,14 +31,14 @@
                         <input id="recipe-optional"
                                type="checkbox"
                                checked="@_input.IncludeOptional"
-                               @onchange="SetOptionalAsync" />
+                               @onchange="SetOptionalAsync"/>
                     </div>
                     <div class="field checkbox-field">
                         <label for="recipe-lifecycle">@T("Fields.IncludeLifecycle")</label>
                         <input id="recipe-lifecycle"
                                type="checkbox"
                                checked="@_input.IncludeLifecycle"
-                               @onchange="SetLifecycleAsync" />
+                               @onchange="SetLifecycleAsync"/>
                     </div>
                 </div>
 
@@ -51,7 +51,7 @@
             <ShowcaseGuideView Guide="Context.Slice.Guide"
                                Text="Context.Text"
                                ResourceNamespace="modularity"
-                               MoreLabel="@T("Guide.More")" />
+                               MoreLabel="@T("Guide.More")"/>
             <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
                 <ul class="compact-list">
                     <li>@T("Boundaries.Generated")</li>
@@ -62,24 +62,28 @@
             </ShowcaseBoundariesPanel>
             <ShowcaseSourcePanel Title="@T("Source.Title")"
                                  Body="@T("Source.Body")"
-                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+                                 Path="@Context.Descriptor.SourceDocumentationPath"/>
         </Guidance>
     </ShowcasePackageWorkbench>
 </div>
 
 @code {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcasePageContext Context { get; set; } = default!;
 
     private ModularityInput _input = new();
     private string _selectedId = string.Empty;
     private string _preview = string.Empty;
     private long _sampleRevision;
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         SelectSample(Context.Samples.Single(static sample => sample.IsDefault));
+    }
 
-    private string T(string key) => Context.Text.GetText("modularity", key);
+    private string T(string key)
+    {
+        return Context.Text.GetText("modularity", key);
+    }
 
     private Task SelectSampleAsync(string id)
     {
@@ -117,11 +121,17 @@
         return Task.CompletedTask;
     }
 
-    private static bool ReadBool(ChangeEventArgs args) =>
-        args.Value is true || string.Equals(
+    private static bool ReadBool(ChangeEventArgs args)
+    {
+        return args.Value is true || string.Equals(
             args.Value?.ToString(),
             "true",
             StringComparison.OrdinalIgnoreCase);
+    }
 
-    private void Refresh() => _preview = ModularityRecipeRenderer.Render(_input);
+    private void Refresh()
+    {
+        _preview = ModularityRecipeRenderer.Render(_input);
+    }
+
 }

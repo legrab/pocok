@@ -6,23 +6,22 @@ using Pocok.AppDefaults;
 using Pocok.AppDefaults.Licensing;
 using Pocok.AppDefaults.Logging;
 using Pocok.AppDefaults.Logging.Serilog;
-using Pocok.Conversion;
-using Pocok.Licensing.Runtime;
-using Pocok.Readiness;
-using Pocok.Scripting.Execution;
-using PublicApiGenerator;
-
-#if INCLUDE_EXPERIMENTAL
 using Pocok.AppDefaults.Modularity;
 using Pocok.BackgroundWork.Coalescing;
+using Pocok.Conversion;
+using Pocok.Licensing.Runtime;
 using Pocok.Localization.Composition;
 using Pocok.Modularity.Contracts;
 using Pocok.Modularity.Loading;
+using Pocok.Readiness;
 using Pocok.Scripting.CSharp;
+using Pocok.Scripting.Execution;
 using Pocok.Scripting.JavaScript;
 using Pocok.Scripting.Python;
 using Pocok.Signals.Sources;
 using Pocok.Subscriptions;
+using PublicApiGenerator;
+#if INCLUDE_EXPERIMENTAL
 #endif
 
 namespace Pocok.Packaging.Tests;
@@ -41,7 +40,6 @@ public class PublicApiTests
         yield return Case(typeof(LicensingApplicationConfigurator).Assembly, "AppDefaults.Licensing");
         yield return Case(typeof(ScriptRunner).Assembly, "Scripting.Execution");
 
-#if INCLUDE_EXPERIMENTAL
         yield return Case(typeof(JavaScriptScriptEngineAdapter).Assembly, "Scripting.JavaScript");
         yield return Case(typeof(CSharpScriptEngineAdapter).Assembly, "Scripting.CSharp");
         yield return Case(typeof(PythonScriptEngineAdapter).Assembly, "Scripting.Python");
@@ -52,6 +50,7 @@ public class PublicApiTests
         yield return Case(typeof(SignalAddress).Assembly, "Signals.Sources");
         yield return Case(typeof(CompositeStringLocalizer).Assembly, "Localization.Composition");
         yield return Case(typeof(KeyedSubscriptionHub<>).Assembly, "Subscriptions");
+#if INCLUDE_EXPERIMENTAL
 #endif
     }
 
@@ -66,6 +65,8 @@ public class PublicApiTests
         await Verify(publicApi).UseParameters(name);
     }
 
-    private static TestCaseData Case(Assembly assembly, string name) =>
-        new TestCaseData(assembly, name) { TestName = $"PublicApi_{name}" };
+    private static TestCaseData Case(Assembly assembly, string name)
+    {
+        return new TestCaseData(assembly, name) { TestName = $"PublicApi_{name}" };
+    }
 }

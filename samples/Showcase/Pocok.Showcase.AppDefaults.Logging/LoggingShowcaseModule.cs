@@ -13,7 +13,8 @@ public sealed class LoggingShowcaseModule : IServiceModule
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(context);
-        services.AddSingleton(new ShowcaseResourceRegistration("app-defaults-logging", context.BaseDirectory, "Content/Locales/Logging"));
+        services.AddSingleton(new ShowcaseResourceRegistration("app-defaults-logging", context.BaseDirectory,
+            "Content/Locales/Logging"));
         services.AddSingleton<LoggingShowcaseSlice>();
         services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<LoggingShowcaseSlice>());
     }

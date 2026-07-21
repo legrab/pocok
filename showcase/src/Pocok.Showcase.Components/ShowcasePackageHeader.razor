@@ -5,14 +5,14 @@
         <p class="lede">@Text.GetText(Descriptor.ResourceNamespace, Descriptor.SummaryKey)</p>
     </div>
     <div class="package-meta">
-        <ShowcaseStateBadge Status="@Descriptor.ImplementationStatus" Text="@StatusText" />
+        <ShowcaseStateBadge Status="@Descriptor.ImplementationStatus" Text="@StatusText"/>
         <span class="mono">@Descriptor.Version</span>
     </div>
 </header>
 
 @code {
-    [Parameter, EditorRequired] public ShowcaseSliceDescriptor Descriptor { get; set; } = default!;
-    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcaseSliceDescriptor Descriptor { get; set; } = default!;
+    [Parameter][EditorRequired] public IShowcaseText Text { get; set; } = default!;
     [Parameter] public string? ImplementationStatusText { get; set; }
 
     private string StatusText => ImplementationStatusText ?? Descriptor.ImplementationStatus.ToString();

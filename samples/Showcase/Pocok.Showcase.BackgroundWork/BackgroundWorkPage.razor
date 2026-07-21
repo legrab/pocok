@@ -1,7 +1,7 @@
 <div class="package-page">
     <ShowcasePackageHeader Descriptor="Context.Descriptor"
                            Text="Context.Text"
-                           ImplementationStatusText="@T("Package.Status.Available")" />
+                           ImplementationStatusText="@T("Package.Status.Available")"/>
 
     <ShowcasePackageWorkbench>
         <Samples>
@@ -10,7 +10,7 @@
                                   SelectedId="@_selectedId"
                                   SelectedIdChanged="SelectSampleAsync"
                                   Text="Context.Text"
-                                  ResourceNamespace="background-work" />
+                                  ResourceNamespace="background-work"/>
         </Samples>
         <Main>
             <ShowcaseSandboxFrame @key="_sampleRevision"
@@ -20,7 +20,7 @@
                     <div class="field">
                         <label for="recipe-mode">@T("Fields.Mode")</label>
                         <select id="recipe-mode" value="@_input.Mode" @onchange="SetModeAsync">
-                            @foreach (string mode in BackgroundWorkRecipeRenderer.Modes)
+                            @foreach (var mode in BackgroundWorkRecipeRenderer.Modes)
                             {
                                 <option value="@mode">@mode</option>
                             }
@@ -33,21 +33,21 @@
                                min="1"
                                max="1000"
                                value="@_input.Capacity"
-                               @onchange="SetCapacityAsync" />
+                               @onchange="SetCapacityAsync"/>
                     </div>
                     <div class="field checkbox-field">
                         <label for="recipe-optional">@T("Fields.IncludeOptional")</label>
                         <input id="recipe-optional"
                                type="checkbox"
                                checked="@_input.IncludeOptional"
-                               @onchange="SetOptionalAsync" />
+                               @onchange="SetOptionalAsync"/>
                     </div>
                     <div class="field checkbox-field">
                         <label for="recipe-lifecycle">@T("Fields.IncludeLifecycle")</label>
                         <input id="recipe-lifecycle"
                                type="checkbox"
                                checked="@_input.IncludeLifecycle"
-                               @onchange="SetLifecycleAsync" />
+                               @onchange="SetLifecycleAsync"/>
                     </div>
                 </div>
 
@@ -60,7 +60,7 @@
             <ShowcaseGuideView Guide="Context.Slice.Guide"
                                Text="Context.Text"
                                ResourceNamespace="background-work"
-                               MoreLabel="@T("Guide.More")" />
+                               MoreLabel="@T("Guide.More")"/>
             <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
                 <ul class="compact-list">
                     <li>@T("Boundaries.Generated")</li>
@@ -71,24 +71,28 @@
             </ShowcaseBoundariesPanel>
             <ShowcaseSourcePanel Title="@T("Source.Title")"
                                  Body="@T("Source.Body")"
-                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+                                 Path="@Context.Descriptor.SourceDocumentationPath"/>
         </Guidance>
     </ShowcasePackageWorkbench>
 </div>
 
 @code {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcasePageContext Context { get; set; } = default!;
 
     private BackgroundWorkInput _input = new();
     private string _selectedId = string.Empty;
     private string _preview = string.Empty;
     private long _sampleRevision;
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         SelectSample(Context.Samples.Single(static sample => sample.IsDefault));
+    }
 
-    private string T(string key) => Context.Text.GetText("background-work", key);
+    private string T(string key)
+    {
+        return Context.Text.GetText("background-work", key);
+    }
 
     private Task SelectSampleAsync(string id)
     {
@@ -113,7 +117,7 @@
 
     private Task SetCapacityAsync(ChangeEventArgs args)
     {
-        if (int.TryParse(args.Value?.ToString(), out int value))
+        if (int.TryParse(args.Value?.ToString(), out var value))
             _input = _input with { Capacity = Math.Clamp(value, 1, 1000) };
         Refresh();
         return Task.CompletedTask;
@@ -133,11 +137,17 @@
         return Task.CompletedTask;
     }
 
-    private static bool ReadBool(ChangeEventArgs args) =>
-        args.Value is true || string.Equals(
+    private static bool ReadBool(ChangeEventArgs args)
+    {
+        return args.Value is true || string.Equals(
             args.Value?.ToString(),
             "true",
             StringComparison.OrdinalIgnoreCase);
+    }
 
-    private void Refresh() => _preview = BackgroundWorkRecipeRenderer.Render(_input);
+    private void Refresh()
+    {
+        _preview = BackgroundWorkRecipeRenderer.Render(_input);
+    }
+
 }

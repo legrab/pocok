@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Pocok.AppDefaults.Modularity;
 using Pocok.Modularity;
 using Pocok.Modularity.Contracts;
+using Pocok.Modularity.Loading;
 using Pocok.Showcase.Contracts;
 
 namespace Pocok.Showcase.Modularity;
@@ -70,13 +71,6 @@ public sealed class ModularityShowcaseSlice : ShowcaseSlice<ModularityInput, Mod
             "recipe")
     ];
 
-    public IReadOnlyList<string> CoveredPackageIds { get; } =
-    [
-        "Pocok.Modularity.Contracts",
-        "Pocok.Modularity",
-        "Pocok.AppDefaults.Modularity"
-    ];
-
     public override ShowcaseSliceDescriptor Descriptor { get; } = new(
         "pocok.showcase.modularity",
         "Pocok.Modularity",
@@ -94,6 +88,7 @@ public sealed class ModularityShowcaseSlice : ShowcaseSlice<ModularityInput, Mod
 
     public override Type PageComponentType => typeof(ModularityPage);
     public override IReadOnlyList<ShowcaseSample<ModularityInput>> TypedSamples => SampleDefinitions;
+
     public override ShowcaseGuide Guide { get; } = new(
         [new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"], ["recipe"])],
         [
@@ -104,24 +99,33 @@ public sealed class ModularityShowcaseSlice : ShowcaseSlice<ModularityInput, Mod
                 "Select a preset and adjust the constrained options.")
         ]);
 
+    public IReadOnlyList<string> CoveredPackageIds { get; } =
+    [
+        "Pocok.Modularity.Contracts",
+        "Pocok.Modularity",
+        "Pocok.AppDefaults.Modularity"
+    ];
+
     public override ValueTask<ModularityOutput> ExecuteAsync(
         ModularityInput input,
         ShowcaseExecutionContext context,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        string code = ModularityRecipeRenderer.Render(input);
+        var code = ModularityRecipeRenderer.Render(input);
         context.Output.Write(code);
         return ValueTask.FromResult(new ModularityOutput(code));
     }
 
-    protected override ShowcaseRunResult CreateRunResult(ModularityOutput output, TimeSpan elapsed) =>
-        new(
+    protected override ShowcaseRunResult CreateRunResult(ModularityOutput output, TimeSpan elapsed)
+    {
+        return new ShowcaseRunResult(
             ShowcaseRunStatus.Success,
             "Recipe generated",
             codePreview: output.Code,
             elapsed: elapsed,
             tipKeys: ["Tips.Generated", "Tips.Ownership"]);
+    }
 }
 
 public static class ModularityRecipeRenderer
@@ -130,50 +134,50 @@ public static class ModularityRecipeRenderer
 
     public static string Render(ModularityInput input)
     {
-        string registration = input.Mode == "app-defaults"
+        var registration = input.Mode == "app-defaults"
             ? """
-                HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-                builder.AddPocokModularityDefaults(
-                    defaults =>
-                    {
-                        defaults.PluginDirectory = "plugins";
-                        defaults.SearchRecursively = true;
-                        defaults.ThrowOnOptionalFailure = false;
-                        defaults.SharedAssemblyNames.Add("Pocok.Modularity.Contracts");
-                    });
-                """
+              HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+              builder.AddPocokModularityDefaults(
+                  defaults =>
+                  {
+                      defaults.PluginDirectory = "plugins";
+                      defaults.SearchRecursively = true;
+                      defaults.ThrowOnOptionalFailure = false;
+                      defaults.SharedAssemblyNames.Add("Pocok.Modularity.Contracts");
+                  });
+              """
             : """
-                HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-                builder.Services.AddPocokModules(builder.Configuration, options =>
-                {
-                    options.AddDirectory("plugins");
-                    options.ShareAssemblyContaining<IServiceModule>();
-                    options.SearchRecursively = true;
-                    options.ThrowOnOptionalFailure = false;
-                });
-                """;
-        string manifest = $$"""
-            {
-              "manifestVersion": 1,
-              "id": "sample.module",
-              "version": "1.0.0",
-              "entryAssembly": "Sample.Module.dll",
-              "required": {{(input.IncludeOptional ? "false" : "true")}},
-              "sharedAssemblies": [ "Pocok.Modularity.Contracts" ],
-              "supportedOperatingSystems": [ "linux", "windows" ],
-              "supportedArchitectures": [ "x64" ]
-            }
-            """;
+              HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+              builder.Services.AddPocokModules(builder.Configuration, options =>
+              {
+                  options.AddDirectory("plugins");
+                  options.ShareAssemblyContaining<IServiceModule>();
+                  options.SearchRecursively = true;
+                  options.ThrowOnOptionalFailure = false;
+              });
+              """;
+        var manifest = $$"""
+                         {
+                           "manifestVersion": 1,
+                           "id": "sample.module",
+                           "version": "1.0.0",
+                           "entryAssembly": "Sample.Module.dll",
+                           "required": {{(input.IncludeOptional ? "false" : "true")}},
+                           "sharedAssemblies": [ "Pocok.Modularity.Contracts" ],
+                           "supportedOperatingSystems": [ "linux", "windows" ],
+                           "supportedArchitectures": [ "x64" ]
+                         }
+                         """;
         const string header = """
-            // Install Pocok.Modularity, Pocok.Modularity.Contracts, and Pocok.AppDefaults.Modularity.
-            using Microsoft.Extensions.DependencyInjection;
-            using Microsoft.Extensions.Hosting;
-            using Pocok.AppDefaults.Modularity;
-            using Pocok.Modularity;
-            using Pocok.Modularity.Contracts;
+                              // Install Pocok.Modularity, Pocok.Modularity.Contracts, and Pocok.AppDefaults.Modularity.
+                              using Microsoft.Extensions.DependencyInjection;
+                              using Microsoft.Extensions.Hosting;
+                              using Pocok.AppDefaults.Modularity;
+                              using Pocok.Modularity;
+                              using Pocok.Modularity.Contracts;
 
-            """;
-        string recipe = input.Mode == "manifest" || input.IncludeLifecycle
+                              """;
+        var recipe = input.Mode == "manifest" || input.IncludeLifecycle
             ? registration + "\n\n// pocok.module.json\n" + manifest
             : registration;
         return header + recipe;
@@ -188,7 +192,7 @@ public static class ModularityRecipeRenderer
             options.ShareAssemblyContaining<IServiceModule>();
         });
         builder.AddPocokModularityDefaults(defaults => defaults.PluginDirectory = "plugins");
-        _ = new Pocok.Modularity.Loading.ModuleManifest
+        _ = new ModuleManifest
         {
             ManifestVersion = 1,
             Id = "sample.module",

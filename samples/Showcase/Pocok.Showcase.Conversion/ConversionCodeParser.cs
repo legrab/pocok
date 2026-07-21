@@ -33,7 +33,7 @@ public static partial class ConversionCodeParser
         if (code.Length > MaximumCodeLength)
             return ConversionParseResult.Failure("Code exceeds the 8 KiB limit.");
 
-        string cleaned = RemoveLineComments(code).Trim();
+        var cleaned = RemoveLineComments(code).Trim();
         if (cleaned.EndsWith(';'))
             cleaned = cleaned[..^1].TrimEnd();
 
@@ -60,7 +60,7 @@ public static partial class ConversionCodeParser
         IReadOnlyList<string> args = SplitTopLevel(arguments, ',');
         if (args.Count is < 1 or > 2 || args.Any(static argument => argument.Length == 0))
             return ConversionParseResult.Failure("Convert accepts one value and an optional approved context.");
-        if (!TryParseValue(args[0], out ConversionSourceKind sourceKind, out string sourceValue, out string? valueError))
+        if (!TryParseValue(args[0], out ConversionSourceKind sourceKind, out var sourceValue, out var valueError))
             return ConversionParseResult.Failure(valueError!);
 
         var input = new ConversionInput
@@ -77,8 +77,14 @@ public static partial class ConversionCodeParser
             ConversionParseResult contextResult = ParseContext(args[1], input);
             if (!contextResult.IsSuccess)
                 return contextResult;
-            input = contextResult.Input! with { Code = code, EditorMode = ConversionEditorMode.Code, SampleId = sampleId };
+            input = contextResult.Input! with
+            {
+                Code = code,
+                EditorMode = ConversionEditorMode.Code,
+                SampleId = sampleId
+            };
         }
+
         return ConversionParseResult.Success(input);
     }
 
@@ -86,11 +92,11 @@ public static partial class ConversionCodeParser
     {
         ArgumentNullException.ThrowIfNull(code);
         var result = new StringBuilder(code.Length);
-        bool inString = false;
-        bool escaped = false;
-        for (int index = 0; index < code.Length; index++)
+        var inString = false;
+        var escaped = false;
+        for (var index = 0; index < code.Length; index++)
         {
-            char current = code[index];
+            var current = code[index];
             if (inString)
             {
                 result.Append(current);
@@ -102,12 +108,14 @@ public static partial class ConversionCodeParser
                     inString = false;
                 continue;
             }
+
             if (current == '"')
             {
                 inString = true;
                 result.Append(current);
                 continue;
             }
+
             if (current == '/' && index + 1 < code.Length && code[index + 1] == '/')
             {
                 while (index < code.Length && code[index] != '\n')
@@ -116,36 +124,40 @@ public static partial class ConversionCodeParser
                     result.Append('\n');
                 continue;
             }
+
             result.Append(current);
         }
+
         return result.ToString();
     }
 
     private static ConversionParseResult ParseContext(string expression, ConversionInput baseline)
     {
-        string trimmed = expression.Trim();
+        var trimmed = expression.Trim();
         if (trimmed == "ConversionContext.Strict")
             return ConversionParseResult.Success(baseline);
 
         const string prefix = "new ConversionContext(";
         if (!trimmed.StartsWith(prefix, StringComparison.Ordinal) || !trimmed.EndsWith(')'))
-            return ConversionParseResult.Failure("Only ConversionContext.Strict or an approved constructor is supported.");
+            return ConversionParseResult.Failure(
+                "Only ConversionContext.Strict or an approved constructor is supported.");
 
         IReadOnlyList<string> arguments = SplitTopLevel(trimmed[prefix.Length..^1], ',');
         if (arguments.Count == 0 || arguments.Any(static argument => argument.Length == 0)
-            || !TryParseCulture(arguments[0], out string culture))
-            return ConversionParseResult.Failure("Use an approved invariant, English, German, or Hungarian culture expression.");
+                                 || !TryParseCulture(arguments[0], out var culture))
+            return ConversionParseResult.Failure(
+                "Use an approved invariant, English, German, or Hungarian culture expression.");
 
         ConversionInput input = baseline with { Culture = culture };
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        for (int index = 1; index < arguments.Count; index++)
+        for (var index = 1; index < arguments.Count; index++)
         {
-            string item = arguments[index].Trim();
-            int colon = item.IndexOf(':');
+            var item = arguments[index].Trim();
+            var colon = item.IndexOf(':');
             if (colon <= 0)
                 return ConversionParseResult.Failure("Policy arguments after culture must be named.");
-            string name = item[..colon].Trim();
-            string value = item[(colon + 1)..].Trim();
+            var name = item[..colon].Trim();
+            var value = item[(colon + 1)..].Trim();
             if (!seen.Add(name))
                 return ConversionParseResult.Failure($"Policy argument '{name}' is duplicated.");
 
@@ -156,11 +168,23 @@ public static partial class ConversionCodeParser
                     "overflow" => input with { Overflow = ParseEnum<OverflowPolicy>(value, nameof(OverflowPolicy)) },
                     "nulls" => input with { Nulls = ParseEnum<NullPolicy>(value, nameof(NullPolicy)) },
                     "enums" => input with { Enums = ParseEnum<EnumPolicy>(value, nameof(EnumPolicy)) },
-                    "numericLoss" => input with { NumericLoss = ParseEnum<NumericLossPolicy>(value, nameof(NumericLossPolicy)) },
-                    "numericBooleans" => input with { NumericBooleans = ParseEnum<NumericBooleanPolicy>(value, nameof(NumericBooleanPolicy)) },
-                    "temporalText" => input with { TemporalText = ParseEnum<TemporalTextPolicy>(value, nameof(TemporalTextPolicy)) },
+                    "numericLoss" => input with
+                    {
+                        NumericLoss = ParseEnum<NumericLossPolicy>(value, nameof(NumericLossPolicy))
+                    },
+                    "numericBooleans" => input with
+                    {
+                        NumericBooleans = ParseEnum<NumericBooleanPolicy>(value, nameof(NumericBooleanPolicy))
+                    },
+                    "temporalText" => input with
+                    {
+                        TemporalText = ParseEnum<TemporalTextPolicy>(value, nameof(TemporalTextPolicy))
+                    },
                     "maximumDepth" => input with { MaximumDepth = ParseBoundedInt(value, 1, 64, name) },
-                    "maximumCollectionItems" => input with { MaximumCollectionItems = ParseBoundedInt(value, 1, 500, name) },
+                    "maximumCollectionItems" => input with
+                    {
+                        MaximumCollectionItems = ParseBoundedInt(value, 1, 500, name)
+                    },
                     _ => throw new FormatException($"Policy argument '{name}' is not supported.")
                 };
             }
@@ -169,13 +193,14 @@ public static partial class ConversionCodeParser
                 return ConversionParseResult.Failure(exception.Message);
             }
         }
+
         return ConversionParseResult.Success(input);
     }
 
     private static T ParseEnum<T>(string expression, string typeName)
         where T : struct, Enum
     {
-        string prefix = typeName + ".";
+        var prefix = typeName + ".";
         if (!expression.StartsWith(prefix, StringComparison.Ordinal)
             || !Enum.TryParse(expression[prefix.Length..], false, out T value)
             || !Enum.IsDefined(value))
@@ -185,7 +210,7 @@ public static partial class ConversionCodeParser
 
     private static int ParseBoundedInt(string expression, int minimum, int maximum, string name)
     {
-        if (!int.TryParse(expression, NumberStyles.None, CultureInfo.InvariantCulture, out int value)
+        if (!int.TryParse(expression, NumberStyles.None, CultureInfo.InvariantCulture, out var value)
             || value < minimum || value > maximum)
             throw new FormatException($"{name} must be between {minimum} and {maximum}.");
         return value;
@@ -193,7 +218,7 @@ public static partial class ConversionCodeParser
 
     private static bool TryParseCulture(string expression, out string culture)
     {
-        string normalized = expression.Trim();
+        var normalized = expression.Trim();
         if (normalized == "CultureInfo.InvariantCulture")
         {
             culture = "invariant";
@@ -212,6 +237,7 @@ public static partial class ConversionCodeParser
             };
             return culture.Length > 0;
         }
+
         culture = string.Empty;
         return false;
     }
@@ -222,7 +248,7 @@ public static partial class ConversionCodeParser
         out string value,
         out string? error)
     {
-        string text = expression.Trim();
+        var text = expression.Trim();
         if (text == "null")
         {
             kind = ConversionSourceKind.Null;
@@ -230,6 +256,7 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
+
         if (text is "true" or "false")
         {
             kind = ConversionSourceKind.Boolean;
@@ -237,8 +264,8 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
+
         if (text.StartsWith('"') && text.EndsWith('"'))
-        {
             try
             {
                 value = JsonSerializer.Deserialize<string>(text) ?? string.Empty;
@@ -253,13 +280,14 @@ public static partial class ConversionCodeParser
                 error = "String literals must be JSON-compatible.";
                 return false;
             }
-        }
+
         if (TryParseArray(text, out kind, out value))
         {
             error = null;
             return true;
         }
-        if (TryStripSuffix(text, "UL", out string unsignedText)
+
+        if (TryStripSuffix(text, "UL", out var unsignedText)
             && ulong.TryParse(unsignedText, NumberStyles.None, CultureInfo.InvariantCulture, out _))
         {
             kind = ConversionSourceKind.UnsignedInteger;
@@ -267,7 +295,8 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
-        if (TryStripSuffix(text, "M", out string decimalText)
+
+        if (TryStripSuffix(text, "M", out var decimalText)
             && decimal.TryParse(decimalText, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
         {
             kind = ConversionSourceKind.Decimal;
@@ -275,8 +304,9 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
-        if ((TryStripSuffix(text, "D", out string floatingText) || TryStripSuffix(text, "F", out floatingText))
-            && double.TryParse(floatingText, NumberStyles.Float, CultureInfo.InvariantCulture, out double suffixedFloating)
+
+        if ((TryStripSuffix(text, "D", out var floatingText) || TryStripSuffix(text, "F", out floatingText))
+            && double.TryParse(floatingText, NumberStyles.Float, CultureInfo.InvariantCulture, out var suffixedFloating)
             && double.IsFinite(suffixedFloating))
         {
             kind = ConversionSourceKind.FloatingPoint;
@@ -284,6 +314,7 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
+
         if (long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out _))
         {
             kind = ConversionSourceKind.Integer;
@@ -291,6 +322,7 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
+
         if (ulong.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out _))
         {
             kind = ConversionSourceKind.UnsignedInteger;
@@ -298,6 +330,7 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
+
         if (decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
         {
             kind = ConversionSourceKind.Decimal;
@@ -305,7 +338,8 @@ public static partial class ConversionCodeParser
             error = null;
             return true;
         }
-        if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double floating)
+
+        if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var floating)
             && double.IsFinite(floating))
         {
             kind = ConversionSourceKind.FloatingPoint;
@@ -323,16 +357,18 @@ public static partial class ConversionCodeParser
     private static bool TryParseArray(string expression, out ConversionSourceKind kind, out string json)
     {
         string body;
-        string? prefix = ArrayPrefixes.FirstOrDefault(candidate => expression.StartsWith(candidate, StringComparison.Ordinal));
+        var prefix =
+            ArrayPrefixes.FirstOrDefault(candidate => expression.StartsWith(candidate, StringComparison.Ordinal));
         if (prefix is not null)
         {
-            string remainder = expression[prefix.Length..].TrimStart();
+            var remainder = expression[prefix.Length..].TrimStart();
             if (!remainder.StartsWith('{') || !remainder.EndsWith('}'))
             {
                 kind = default;
                 json = string.Empty;
                 return false;
             }
+
             body = remainder[1..^1];
         }
         else if (expression.StartsWith('[') && expression.EndsWith(']'))
@@ -355,10 +391,10 @@ public static partial class ConversionCodeParser
         }
 
         var values = new List<object?>(items.Count);
-        bool stringsOnly = true;
-        foreach (string item in items)
+        var stringsOnly = true;
+        foreach (var item in items)
         {
-            string trimmed = item.Trim();
+            var trimmed = item.Trim();
             if (trimmed.Length == 0)
             {
                 if (items.Count == 1)
@@ -367,12 +403,14 @@ public static partial class ConversionCodeParser
                 json = string.Empty;
                 return false;
             }
-            if (!TryParseArrayItem(trimmed, out object? parsed, out bool isString))
+
+            if (!TryParseArrayItem(trimmed, out var parsed, out var isString))
             {
                 kind = default;
                 json = string.Empty;
                 return false;
             }
+
             values.Add(parsed);
             stringsOnly &= isString;
         }
@@ -389,6 +427,7 @@ public static partial class ConversionCodeParser
             value = text[..^suffix.Length];
             return true;
         }
+
         value = string.Empty;
         return false;
     }
@@ -401,14 +440,15 @@ public static partial class ConversionCodeParser
             isString = false;
             return true;
         }
+
         if (text is "true" or "false")
         {
             value = text == "true";
             isString = false;
             return true;
         }
+
         if (text.StartsWith('"') && text.EndsWith('"'))
-        {
             try
             {
                 value = JsonSerializer.Deserialize<string>(text) ?? string.Empty;
@@ -421,25 +461,28 @@ public static partial class ConversionCodeParser
                 isString = false;
                 return false;
             }
-        }
-        if (long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out long signed))
+
+        if (long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var signed))
         {
             value = signed;
             isString = false;
             return true;
         }
-        if (ulong.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out ulong unsigned))
+
+        if (ulong.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var unsigned))
         {
             value = unsigned;
             isString = false;
             return true;
         }
-        if (decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out decimal number))
+
+        if (decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var number))
         {
             value = number;
             isString = false;
             return true;
         }
+
         value = null;
         isString = false;
         return false;
@@ -448,13 +491,13 @@ public static partial class ConversionCodeParser
     internal static IReadOnlyList<string> SplitTopLevel(string value, char separator)
     {
         var result = new List<string>();
-        int start = 0;
-        int depth = 0;
-        bool inString = false;
-        bool escaped = false;
-        for (int index = 0; index < value.Length; index++)
+        var start = 0;
+        var depth = 0;
+        var inString = false;
+        var escaped = false;
+        for (var index = 0; index < value.Length; index++)
         {
-            char current = value[index];
+            var current = value[index];
             if (inString)
             {
                 if (escaped)
@@ -465,35 +508,46 @@ public static partial class ConversionCodeParser
                     inString = false;
                 continue;
             }
+
             if (current == '"')
             {
                 inString = true;
                 continue;
             }
+
             if (current is '(' or '[' or '{')
+            {
                 depth++;
+            }
             else if (current is ')' or ']' or '}')
+            {
                 depth--;
+            }
             else if (current == separator && depth == 0)
             {
                 result.Add(value[start..index].Trim());
                 start = index + 1;
             }
+
             if (depth < 0)
                 return [];
         }
+
         if (inString || depth != 0)
             return [];
         result.Add(value[start..].Trim());
         return result;
     }
 
-    [GeneratedRegex(@"^converter\.Convert<(?<target>[A-Za-z0-9_\[\]]+)>\((?<args>.*)\)$", RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^converter\.Convert<(?<target>[A-Za-z0-9_\[\]]+)>\((?<args>.*)\)$",
+        RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex GenericCall();
 
-    [GeneratedRegex(@"^converter\.Convert\((?<value>.*),\s*typeof\((?<target>[A-Za-z0-9_\[\]]+)\),\s*(?<context>.*)\)$", RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^converter\.Convert\((?<value>.*),\s*typeof\((?<target>[A-Za-z0-9_\[\]]+)\),\s*(?<context>.*)\)$",
+        RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex RuntimeCall();
 
-    [GeneratedRegex(@"^(?:CultureInfo\.GetCultureInfo|new CultureInfo)\(""(?<culture>[A-Za-z-]+)""\)$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^(?:CultureInfo\.GetCultureInfo|new CultureInfo)\(""(?<culture>[A-Za-z-]+)""\)$",
+        RegexOptions.CultureInvariant)]
     private static partial Regex CultureCall();
 }

@@ -10,16 +10,15 @@ namespace Pocok.Showcase.Conversion;
 
 public partial class ConversionPage
 {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
-
     private ConversionEditor? _editor;
     private ConversionInput _input = new();
-    private string _selectedId = string.Empty;
     private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
     private ShowcaseRunResult? _result;
     private bool _running;
     private long _sampleRevision;
+    private string _selectedId = string.Empty;
+
+    [Parameter][EditorRequired] public ShowcasePageContext Context { get; set; } = default!;
 
     private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
 
@@ -29,7 +28,10 @@ public partial class ConversionPage
         SelectSample(sample);
     }
 
-    private string T(string key) => Context.Text.GetText("conversion", key);
+    private string T(string key)
+    {
+        return Context.Text.GetText("conversion", key);
+    }
 
     private Task SelectSampleAsync(string id)
     {

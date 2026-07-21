@@ -3,6 +3,7 @@
 
 using System.Collections.ObjectModel;
 using System.Globalization;
+using Microsoft.Extensions.Localization;
 using Pocok.Localization.FileResources;
 using Pocok.Showcase.Contracts;
 
@@ -10,8 +11,8 @@ namespace Pocok.Showcase.Web.Services;
 
 public sealed class ShowcaseTextCatalog : IShowcaseText, IAsyncDisposable
 {
-    private readonly IReadOnlyDictionary<string, FileStringLocalizer> _localizers;
     private readonly bool _development;
+    private readonly IReadOnlyDictionary<string, FileStringLocalizer> _localizers;
 
     public ShowcaseTextCatalog(
         IEnumerable<ShowcaseResourceRegistration> registrations,
@@ -39,6 +40,12 @@ public sealed class ShowcaseTextCatalog : IShowcaseText, IAsyncDisposable
         _localizers = new ReadOnlyDictionary<string, FileStringLocalizer>(localizers);
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        foreach (FileStringLocalizer localizer in _localizers.Values)
+            await localizer.DisposeAsync().ConfigureAwait(false);
+    }
+
     public string GetText(string resourceNamespace, string key)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceNamespace);
@@ -46,7 +53,7 @@ public sealed class ShowcaseTextCatalog : IShowcaseText, IAsyncDisposable
         if (!_localizers.TryGetValue(resourceNamespace, out FileStringLocalizer? localizer))
             return _development ? $"[{resourceNamespace}:{key}]" : key;
 
-        var value = localizer[key];
+        LocalizedString value = localizer[key];
         return value.ResourceNotFound && _development ? $"[{resourceNamespace}:{key}]" : value.Value;
     }
 
@@ -64,11 +71,5 @@ public sealed class ShowcaseTextCatalog : IShowcaseText, IAsyncDisposable
         {
             CultureInfo.CurrentUICulture = previous;
         }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        foreach (FileStringLocalizer localizer in _localizers.Values)
-            await localizer.DisposeAsync().ConfigureAwait(false);
     }
 }

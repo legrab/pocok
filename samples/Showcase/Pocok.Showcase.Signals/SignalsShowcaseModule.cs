@@ -13,7 +13,8 @@ public sealed class SignalsShowcaseModule : IServiceModule
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(context);
-        services.AddSingleton(new ShowcaseResourceRegistration("signals", context.BaseDirectory, "Content/Locales/Signals"));
+        services.AddSingleton(new ShowcaseResourceRegistration("signals", context.BaseDirectory,
+            "Content/Locales/Signals"));
         services.AddSingleton<SignalsShowcaseSlice>();
         services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<SignalsShowcaseSlice>());
     }

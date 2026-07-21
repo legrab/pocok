@@ -29,7 +29,8 @@ public sealed record LocalizationOutput(
     string Culture,
     bool Reloaded);
 
-public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput, LocalizationOutput>, IShowcasePackageCoverage
+public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput, LocalizationOutput>,
+    IShowcasePackageCoverage
 {
     private static readonly IReadOnlyList<ShowcaseSample<LocalizationInput>> SampleDefinitions =
     [
@@ -71,8 +72,6 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
             "localizer")
     ];
 
-    public IReadOnlyList<string> CoveredPackageIds { get; } = ["Pocok.Localization"];
-
     public override ShowcaseSliceDescriptor Descriptor { get; } = new(
         "pocok.showcase.localization",
         "Pocok.Localization",
@@ -90,6 +89,7 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
 
     public override Type PageComponentType => typeof(LocalizationPage);
     public override IReadOnlyList<ShowcaseSample<LocalizationInput>> TypedSamples => SampleDefinitions;
+
     public override ShowcaseGuide Guide { get; } = new(
         [new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"], ["localizer"])],
         [
@@ -99,6 +99,8 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
                 "csharp",
                 "await using var localizer = new FileStringLocalizer(options);")
         ]);
+
+    public IReadOnlyList<string> CoveredPackageIds { get; } = ["Pocok.Localization"];
 
     public override async ValueTask<LocalizationOutput> ExecuteAsync(
         LocalizationInput input,
@@ -116,7 +118,7 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
                 input.Culture,
                 "Only en-US and hu-HU are supported.")
         };
-        string root = Path.Combine(
+        var root = Path.Combine(
             Path.GetTempPath(),
             "pocok-showcase-localization",
             Guid.NewGuid().ToString("N"));
@@ -150,19 +152,19 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
                     ["DemoStatus.Ready"] = culture.TwoLetterISOLanguageName == "hu" ? "Kész" : "Ready"
                 });
             var composite = new CompositeStringLocalizer([json, fallback]);
-            string greeting = composite["Greeting", "Pocok"].Value;
-            string jsonGreeting = json["Greeting", "Pocok"].Value;
-            string resxGreeting = resx["Greeting", "Pocok"].Value;
-            bool missing = composite["Missing"].ResourceNotFound;
-            string enumText = DemoStatus.Ready.Translate(fallback);
-            bool reloaded = false;
+            var greeting = composite["Greeting", "Pocok"].Value;
+            var jsonGreeting = json["Greeting", "Pocok"].Value;
+            var resxGreeting = resx["Greeting", "Pocok"].Value;
+            var missing = composite["Missing"].ResourceNotFound;
+            var enumText = DemoStatus.Ready.Translate(fallback);
+            var reloaded = false;
 
             if (input.Reload)
             {
-                string next = culture.TwoLetterISOLanguageName == "hu"
+                var next = culture.TwoLetterISOLanguageName == "hu"
                     ? "Szia újra {0}"
                     : "Hello again {0}";
-                string path = Path.Combine(
+                var path = Path.Combine(
                     root,
                     $"JsonMessages.{culture.TwoLetterISOLanguageName}.json");
                 await File.WriteAllTextAsync(
@@ -196,8 +198,9 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
         }
     }
 
-    protected override ShowcaseRunResult CreateRunResult(LocalizationOutput output, TimeSpan elapsed) =>
-        new(
+    protected override ShowcaseRunResult CreateRunResult(LocalizationOutput output, TimeSpan elapsed)
+    {
+        return new ShowcaseRunResult(
             ShowcaseRunStatus.Success,
             output.Greeting,
             [
@@ -211,6 +214,7 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
             codePreview: "FileStringLocalizer + CompositeStringLocalizer + ReloadAsync",
             elapsed: elapsed,
             tipKeys: ["Tips.Fallback", "Tips.Reload"]);
+    }
 
     private static async Task WriteResourcesAsync(string root, CancellationToken cancellationToken)
     {
@@ -242,7 +246,7 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
         try
         {
             if (Directory.Exists(path))
-                Directory.Delete(path, recursive: true);
+                Directory.Delete(path, true);
         }
         catch (IOException)
         {
@@ -260,9 +264,9 @@ public sealed class LocalizationShowcaseSlice : ShowcaseSlice<LocalizationInput,
     private sealed class DictionaryStringLocalizer(
         IReadOnlyDictionary<string, string> values) : IStringLocalizer
     {
-        public LocalizedString this[string name] => values.TryGetValue(name, out string? value)
+        public LocalizedString this[string name] => values.TryGetValue(name, out var value)
             ? new LocalizedString(name, value)
-            : new LocalizedString(name, name, resourceNotFound: true);
+            : new LocalizedString(name, name, true);
 
         public LocalizedString this[string name, params object[] arguments]
         {

@@ -67,10 +67,10 @@ public sealed class ScriptingShowcaseOptions
         string key,
         bool fallback)
     {
-        string? configured = configuration[key];
+        var configured = configuration[key];
         if (string.IsNullOrWhiteSpace(configured))
             return fallback;
-        if (bool.TryParse(configured, out bool value))
+        if (bool.TryParse(configured, out var value))
             return value;
 
         throw new InvalidOperationException($"{key} must be either true or false.");
@@ -83,16 +83,14 @@ public sealed class ScriptingShowcaseOptions
         int minimum,
         int maximum)
     {
-        string? configured = configuration[key];
+        var configured = configuration[key];
         if (string.IsNullOrWhiteSpace(configured))
             return fallback;
 
-        if (int.TryParse(configured, NumberStyles.None, CultureInfo.InvariantCulture, out int value)
+        if (int.TryParse(configured, NumberStyles.None, CultureInfo.InvariantCulture, out var value)
             && value >= minimum
             && value <= maximum)
-        {
             return value;
-        }
 
         throw new InvalidOperationException(
             $"{key} must be an integer between {minimum.ToString(CultureInfo.InvariantCulture)} " +

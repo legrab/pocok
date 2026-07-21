@@ -1,13 +1,14 @@
+@using Pocok.Showcase.Web.Components.Layout
 @inject IShowcaseText Text
 
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
+        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
     </Found>
     <NotFound>
         <PageTitle>@Text.GetText("shell", "Errors.NotFoundTitle") · @Text.GetText("shell", "App.Title")</PageTitle>
-        <LayoutView Layout="typeof(Layout.MainLayout)">
+        <LayoutView Layout="typeof(MainLayout)">
             <section class="panel">
                 <h1>@Text.GetText("shell", "Errors.NotFoundTitle")</h1>
                 <p>@Text.GetText("shell", "Errors.NotFoundText")</p>

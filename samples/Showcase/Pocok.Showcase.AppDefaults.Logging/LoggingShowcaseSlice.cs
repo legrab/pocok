@@ -79,13 +79,6 @@ public sealed class LoggingShowcaseSlice : ShowcaseSlice<LoggingInput, LoggingOu
             "logging")
     ];
 
-    public IReadOnlyList<string> CoveredPackageIds { get; } =
-    [
-        "Pocok.AppDefaults",
-        "Pocok.AppDefaults.Logging",
-        "Pocok.AppDefaults.Logging.Serilog"
-    ];
-
     public override ShowcaseSliceDescriptor Descriptor { get; } = new(
         "pocok.showcase.app-defaults-logging",
         "Pocok.AppDefaults.Logging",
@@ -103,6 +96,7 @@ public sealed class LoggingShowcaseSlice : ShowcaseSlice<LoggingInput, LoggingOu
 
     public override Type PageComponentType => typeof(LoggingPage);
     public override IReadOnlyList<ShowcaseSample<LoggingInput>> TypedSamples => SampleDefinitions;
+
     public override ShowcaseGuide Guide { get; } = new(
         [new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"], ["logging"])],
         [
@@ -113,23 +107,30 @@ public sealed class LoggingShowcaseSlice : ShowcaseSlice<LoggingInput, LoggingOu
                 "logger.LogInformation(\"Processed item {ItemId}\", 42);")
         ]);
 
+    public IReadOnlyList<string> CoveredPackageIds { get; } =
+    [
+        "Pocok.AppDefaults",
+        "Pocok.AppDefaults.Logging",
+        "Pocok.AppDefaults.Logging.Serilog"
+    ];
+
     public override async ValueTask<LoggingOutput> ExecuteAsync(
         LoggingInput input,
         ShowcaseExecutionContext context,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        int count = Math.Clamp(input.EventCount, 1, 20);
+        var count = Math.Clamp(input.EventCount, 1, 20);
         ILoggerFactory factory = context.Services.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
         ILogger logger = factory.CreateLogger("Pocok.Showcase.Logging.Demo.Component");
         var events = new List<LoggingEventOutput>(count);
 
-        for (int index = 0; index < count; index++)
+        for (var index = 0; index < count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            int eventId = 100 + index;
+            var eventId = 100 + index;
             const string template = "Processed item {ItemId} for {Package}";
-            string message = $"Processed item {index + 1} for Pocok";
+            var message = $"Processed item {index + 1} for Pocok";
             Exception? exception = input.IncludeException
                 ? new InvalidOperationException("Synthetic failure without sensitive details.")
                 : null;
@@ -157,7 +158,7 @@ public sealed class LoggingShowcaseSlice : ShowcaseSlice<LoggingInput, LoggingOu
                 properties));
         }
 
-        string probe = ProbeConfigurators();
+        var probe = ProbeConfigurators();
         await context.Progress.ReportAsync(
             "complete",
             "Structured logging and AppDefaults probes completed.",
@@ -187,7 +188,7 @@ public sealed class LoggingShowcaseSlice : ShowcaseSlice<LoggingInput, LoggingOu
 
     private static string FormatRecord(LoggingEventOutput item)
     {
-        string properties = string.Join(
+        var properties = string.Join(
             ", ",
             item.Properties.Select(static pair => $"{pair.Key}={pair.Value}"));
         return $"{item.Timestamp} | {item.Category} | {item.Template} | {item.Message} | {properties}";

@@ -12,7 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Scripting/Pocok.Scripting.csproj"/>
-    <None Include="Worker/pocok_worker.py" Pack="true" PackagePath="buildTransitive/Pocok.Scripting.Python.Worker/" />
-    <None Include="buildTransitive/Pocok.Scripting.Python.targets" Pack="true" PackagePath="buildTransitive/" />
+    <None Include="Worker/pocok_worker.py" Pack="true" PackagePath="buildTransitive/Pocok.Scripting.Python.Worker/"/>
+    <None Include="buildTransitive/Pocok.Scripting.Python.targets" Pack="true" PackagePath="buildTransitive/"/>
   </ItemGroup>
 </Project>

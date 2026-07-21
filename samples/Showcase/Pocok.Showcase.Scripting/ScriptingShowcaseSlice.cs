@@ -23,8 +23,9 @@ public sealed class ScriptingShowcaseSlice(
         WriteIndented = true
     };
 
-    private readonly ScriptRunner _runner = runner ?? throw new ArgumentNullException(nameof(runner));
     private readonly ScriptEngineRegistry _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+
+    private readonly ScriptRunner _runner = runner ?? throw new ArgumentNullException(nameof(runner));
 
     private readonly ScriptingShowcaseOptions _showcaseOptions =
         showcaseOptions ?? throw new ArgumentNullException(nameof(showcaseOptions));
@@ -65,12 +66,10 @@ public sealed class ScriptingShowcaseSlice(
         ScriptEngineDescriptor? descriptor = _registry.Descriptors
             .FirstOrDefault(item => item.Id.Value == input.EngineId);
         if (descriptor is null)
-        {
             return Failed(
                 input,
                 "scripting.engine.unknown",
                 "The selected engine is not registered.");
-        }
 
         ScriptingInput boundedInput = ApplyServerLimits(input, descriptor);
 
@@ -118,7 +117,7 @@ public sealed class ScriptingShowcaseSlice(
                 failure.Column);
         }
 
-        string formatted = FormatResult(result.Value);
+        var formatted = FormatResult(result.Value);
         context.Output.Write(formatted);
         await context.Progress.ReportAsync(
             "complete",
@@ -154,22 +153,18 @@ public sealed class ScriptingShowcaseSlice(
         if (output.IsSuccess)
             fields.Insert(0, new ShowcaseResultField("Result.Fields.ReturnValue", output.Result, true, true));
         if (output.FailureLine is not null)
-        {
             fields.Add(new ShowcaseResultField(
                 "Result.Fields.Line",
                 output.FailureLine.Value.ToString(CultureInfo.InvariantCulture),
                 true,
                 true));
-        }
 
         if (output.FailureColumn is not null)
-        {
             fields.Add(new ShowcaseResultField(
                 "Result.Fields.Column",
                 output.FailureColumn.Value.ToString(CultureInfo.InvariantCulture),
                 true,
                 true));
-        }
 
         if (!output.IsSuccess)
         {
@@ -214,7 +209,6 @@ public sealed class ScriptingShowcaseSlice(
         if (value is null)
             return "null";
         if (value is JsonElement element)
-        {
             return element.ValueKind switch
             {
                 JsonValueKind.String => JsonSerializer.Serialize(element.GetString()),
@@ -224,7 +218,6 @@ public sealed class ScriptingShowcaseSlice(
                 JsonValueKind.Number => element.GetRawText(),
                 _ => JsonSerializer.Serialize(element, ResultJson)
             };
-        }
 
         if (value is string text)
             return JsonSerializer.Serialize(text);
@@ -251,9 +244,9 @@ public sealed class ScriptingShowcaseSlice(
 
     private ScriptingInput ApplyServerLimits(
         ScriptingInput input,
-        ScriptEngineDescriptor descriptor
-    ) =>
-        input with
+        ScriptEngineDescriptor descriptor)
+    {
+        return input with
         {
             MaxStatements = descriptor.Capabilities.EnforcesStatementLimit
                 ? input.MaxStatements ?? _showcaseOptions.MaximumStatements
@@ -265,65 +258,54 @@ public sealed class ScriptingShowcaseSlice(
                 ? input.MaxMemoryMegabytes ?? _showcaseOptions.MaximumMemoryMegabytes
                 : null
         };
+    }
 
     private ScriptingOutput? ValidateInput(ScriptingInput input)
     {
         if (string.IsNullOrWhiteSpace(input.Source))
-        {
             return Failed(
                 input,
                 "showcase.script-empty",
                 "The script cannot be empty.");
-        }
 
         if (input.Source.Length > _showcaseOptions.MaximumSourceCharacters)
-        {
             return Failed(
                 input,
                 "showcase.script-too-large",
                 $"The script exceeds the {_showcaseOptions.MaximumSourceCharacters.ToString(CultureInfo.InvariantCulture)} " +
                 "character Showcase limit.");
-        }
 
         if (input.TimeoutMilliseconds is < 50
             || input.TimeoutMilliseconds > _showcaseOptions.MaximumTimeoutMilliseconds)
-        {
             return Failed(
                 input,
                 "showcase.timeout-bounds",
                 $"Timeout must be between 50 and " +
                 $"{_showcaseOptions.MaximumTimeoutMilliseconds.ToString(CultureInfo.InvariantCulture)} milliseconds.");
-        }
 
         if (input.MaxStatements is int statements
             && (statements <= 0 || statements > _showcaseOptions.MaximumStatements))
-        {
             return Failed(
                 input,
                 "showcase.statement-bounds",
                 $"Statement limit must be no more than " +
                 $"{_showcaseOptions.MaximumStatements.ToString(CultureInfo.InvariantCulture)}.");
-        }
 
         if (input.MaxRecursionDepth is int recursionDepth
             && (recursionDepth <= 0 || recursionDepth > _showcaseOptions.MaximumRecursionDepth))
-        {
             return Failed(
                 input,
                 "showcase.recursion-bounds",
                 $"Recursion limit must be no more than " +
                 $"{_showcaseOptions.MaximumRecursionDepth.ToString(CultureInfo.InvariantCulture)}.");
-        }
 
         if (input.MaxMemoryMegabytes is int memoryMegabytes
             && (memoryMegabytes <= 0 || memoryMegabytes > _showcaseOptions.MaximumMemoryMegabytes))
-        {
             return Failed(
                 input,
                 "showcase.memory-bounds",
                 $"Memory limit must be no more than " +
                 $"{_showcaseOptions.MaximumMemoryMegabytes.ToString(CultureInfo.InvariantCulture)} MiB.");
-        }
 
         return null;
     }
@@ -333,20 +315,23 @@ public sealed class ScriptingShowcaseSlice(
         string code,
         string message,
         int? line = null,
-        int? column = null) => new(
-        false,
-        "Script failed safely",
-        null,
-        "n/a",
-        input.ExpectResult,
-        input.EngineId,
-        code,
-        message,
-        line,
-        column,
-        input.Source,
-        FormatLimits(input),
-        ["Tips.Bounds", "Tips.Failures"]);
+        int? column = null)
+    {
+        return new ScriptingOutput(
+            false,
+            "Script failed safely",
+            null,
+            "n/a",
+            input.ExpectResult,
+            input.EngineId,
+            code,
+            message,
+            line,
+            column,
+            input.Source,
+            FormatLimits(input),
+            ["Tips.Bounds", "Tips.Failures"]);
+    }
 
     private string FormatLimits(ScriptingInput input)
     {
@@ -372,81 +357,89 @@ public sealed class ScriptingShowcaseSlice(
         if (IsStructured(value))
             return "Structured result";
 
-        string singleLine = formatted.ReplaceLineEndings(" ").Trim();
+        var singleLine = formatted.ReplaceLineEndings(" ").Trim();
         return singleLine.Length <= 160
             ? singleLine
             : string.Concat(singleLine.AsSpan(0, 160), "…");
     }
 
-    private static bool IsStructured(object? value) => value switch
+    private static bool IsStructured(object? value)
     {
-        JsonElement { ValueKind: JsonValueKind.Array or JsonValueKind.Object } => true,
-        IDictionary => true,
-        IEnumerable when value is not string => true,
-        _ => false
-    };
+        return value switch
+        {
+            JsonElement { ValueKind: JsonValueKind.Array or JsonValueKind.Object } => true,
+            IDictionary => true,
+            IEnumerable when value is not string => true,
+            _ => false
+        };
+    }
 
-    private static string ResultType(object? value) => value switch
+    private static string ResultType(object? value)
     {
-        null => "null",
-        JsonElement element => element.ValueKind.ToString(),
-        _ => value.GetType().Name
-    };
+        return value switch
+        {
+            null => "null",
+            JsonElement element => element.ValueKind.ToString(),
+            _ => value.GetType().Name
+        };
+    }
 
-    private static IReadOnlyList<ShowcaseSample<ScriptingInput>> CreateSamples() =>
-    [
-        Sample(
-            "arithmetic",
-            "78",
-            true,
-            "function triangular(value) { return value * (value + 1) / 2; }\ntriangular(12);",
-            "int Triangular(int value) => value * (value + 1) / 2;\nTriangular(12)",
-            "def triangular(value):\n    return value * (value + 1) // 2\ntriangular(12)"),
-        Sample(
-            "object-result",
-            "Structured result",
-            false,
-            "({ count: 3, values: [2, 4, 8] });",
-            "new { count = 3, values = new[] { 2, 4, 8 } }",
-            "{\"count\": 3, \"values\": [2, 4, 8]}"),
-        Sample(
-            "string-result",
-            "\"Executed by Pocok.Scripting\"",
-            false,
-            "`Executed by Pocok.Scripting`;",
-            "\"Executed by Pocok.Scripting\"",
-            "'Executed by Pocok.Scripting'"),
-        Sample(
-            "missing-result",
-            "Script failed safely",
-            false,
-            "const message = 'missing';",
-            "var message = \"missing\";",
-            "message = 'missing'",
-            expectResult: true),
-        Sample(
-            "syntax-error",
-            "Script failed safely",
-            false,
-            "function broken( {",
-            "var broken = ;",
-            "def broken(:"),
-        Sample(
-            "bounded-runaway",
-            "Script failed safely",
-            false,
-            "while (true) { }",
-            "while (true) { }",
-            "while True:\n    pass",
-            timeoutMilliseconds: 100),
-        Sample(
-            "validator-rejection",
-            "Script failed safely",
-            false,
-            "eval('1');",
-            "System.IO.File.ReadAllText(\"x\")",
-            "open('x').read()")
-    ];
+    private static IReadOnlyList<ShowcaseSample<ScriptingInput>> CreateSamples()
+    {
+        return
+        [
+            Sample(
+                "arithmetic",
+                "78",
+                true,
+                "function triangular(value) { return value * (value + 1) / 2; }\ntriangular(12);",
+                "int Triangular(int value) => value * (value + 1) / 2;\nTriangular(12)",
+                "def triangular(value):\n    return value * (value + 1) // 2\ntriangular(12)"),
+            Sample(
+                "object-result",
+                "Structured result",
+                false,
+                "({ count: 3, values: [2, 4, 8] });",
+                "new { count = 3, values = new[] { 2, 4, 8 } }",
+                "{\"count\": 3, \"values\": [2, 4, 8]}"),
+            Sample(
+                "string-result",
+                "\"Executed by Pocok.Scripting\"",
+                false,
+                "`Executed by Pocok.Scripting`;",
+                "\"Executed by Pocok.Scripting\"",
+                "'Executed by Pocok.Scripting'"),
+            Sample(
+                "missing-result",
+                "Script failed safely",
+                false,
+                "const message = 'missing';",
+                "var message = \"missing\";",
+                "message = 'missing'"),
+            Sample(
+                "syntax-error",
+                "Script failed safely",
+                false,
+                "function broken( {",
+                "var broken = ;",
+                "def broken(:"),
+            Sample(
+                "bounded-runaway",
+                "Script failed safely",
+                false,
+                "while (true) { }",
+                "while (true) { }",
+                "while True:\n    pass",
+                timeoutMilliseconds: 100),
+            Sample(
+                "validator-rejection",
+                "Script failed safely",
+                false,
+                "eval('1');",
+                "System.IO.File.ReadAllText(\"x\")",
+                "open('x').read()")
+        ];
+    }
 
     private static ShowcaseSample<ScriptingInput> Sample(
         string id,
@@ -456,47 +449,53 @@ public sealed class ScriptingShowcaseSlice(
         string cSharp,
         string python,
         bool expectResult = true,
-        int timeoutMilliseconds = 1_000) => new(
-        id,
-        $"Samples.{id}.Name",
-        $"Samples.{id}.Description",
-        () => new ScriptingInput
-        {
-            SampleId = id,
-            EngineId = ScriptEngineId.JavaScript.Value,
-            Source = javaScript,
-            Sources = new Dictionary<string, string>(StringComparer.Ordinal)
+        int timeoutMilliseconds = 1_000)
+    {
+        return new ShowcaseSample<ScriptingInput>(
+            id,
+            $"Samples.{id}.Name",
+            $"Samples.{id}.Description",
+            () => new ScriptingInput
             {
-                [ScriptEngineId.JavaScript.Value] = javaScript,
-                [ScriptEngineId.CSharp.Value] = cSharp,
-                [ScriptEngineId.Python.Value] = python
+                SampleId = id,
+                EngineId = ScriptEngineId.JavaScript.Value,
+                Source = javaScript,
+                Sources = new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    [ScriptEngineId.JavaScript.Value] = javaScript,
+                    [ScriptEngineId.CSharp.Value] = cSharp,
+                    [ScriptEngineId.Python.Value] = python
+                },
+                ExpectResult = expectResult,
+                TimeoutMilliseconds = timeoutMilliseconds
             },
-            ExpectResult = expectResult,
-            TimeoutMilliseconds = timeoutMilliseconds
-        },
-        isDefault,
-        expected,
-        "quick-start",
-        "runner");
+            isDefault,
+            expected,
+            "quick-start",
+            "runner");
+    }
 
-    private static ShowcaseGuide CreateGuide() => new(
-        [
-            new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"]),
-            new ShowcaseGuideSection(
-                "quick-start",
-                "Guide.QuickStart.Title",
-                ["Guide.QuickStart.Body"],
-                ["runner"]),
-            new ShowcaseGuideSection("bounds", "Guide.Bounds.Title", ["Guide.Bounds.Body"]),
-            new ShowcaseGuideSection("production", "Guide.Production.Title", ["Guide.Production.Body"])
-        ],
-        [
-            new ShowcaseCodeSnippet(
-                "runner",
-                "Guide.Snippet.RunnerTitle",
-                "csharp",
-                "var registry = new ScriptEngineRegistry(adapters);\n" +
-                "var runner = new ScriptRunner(registry);\n" +
-                "await runner.ExecuteAsync(request, options, cancellationToken);")
-        ]);
+    private static ShowcaseGuide CreateGuide()
+    {
+        return new ShowcaseGuide(
+            [
+                new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"]),
+                new ShowcaseGuideSection(
+                    "quick-start",
+                    "Guide.QuickStart.Title",
+                    ["Guide.QuickStart.Body"],
+                    ["runner"]),
+                new ShowcaseGuideSection("bounds", "Guide.Bounds.Title", ["Guide.Bounds.Body"]),
+                new ShowcaseGuideSection("production", "Guide.Production.Title", ["Guide.Production.Body"])
+            ],
+            [
+                new ShowcaseCodeSnippet(
+                    "runner",
+                    "Guide.Snippet.RunnerTitle",
+                    "csharp",
+                    "var registry = new ScriptEngineRegistry(adapters);\n" +
+                    "var runner = new ScriptRunner(registry);\n" +
+                    "await runner.ExecuteAsync(request, options, cancellationToken);")
+            ]);
+    }
 }

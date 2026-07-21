@@ -1,0 +1,94 @@
+<Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/Conversion.Benchmarks/Pocok.Conversion.Benchmarks.csproj"/>
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Conversion.Console/Pocok.Conversion.Console.csproj"/>
+    <Project Path="samples/Conversion.Trimmed/Pocok.Conversion.Trimmed.csproj"/>
+    <Project Path="samples/AppDefaults.Console/Pocok.AppDefaults.Console.csproj"/>
+    <Project Path="samples/Readiness.Console/Pocok.Readiness.Console.csproj"/>
+    <Project Path="samples/BackgroundWork.Console/Pocok.BackgroundWork.Console.csproj"/>
+    <Project Path="samples/Licensing.Console/Pocok.Licensing.Console.csproj"/>
+    <Project Path="samples/Operations.Worker/Pocok.Operations.Worker.csproj"/>
+    <Project Path="samples/Scripting.Console/Pocok.Scripting.Console.csproj"/>
+    <Project Path="samples/Signals.Console/Pocok.Signals.Console.csproj"/>
+    <Project Path="samples/Localization.Console/Pocok.Localization.Console.csproj"/>
+    <Project Path="samples/Subscriptions.Console/Pocok.Subscriptions.Console.csproj"/>
+    <Project Path="samples/ModularCommunicator.Contracts/Pocok.ModularCommunicator.Contracts.csproj"/>
+    <Project Path="samples/ModularCommunicator.EchoPlugin/Pocok.ModularCommunicator.EchoPlugin.csproj"/>
+    <Project Path="samples/ModularCommunicator.Host/Pocok.ModularCommunicator.Host.csproj"/>
+  </Folder>
+  <Folder Name="/showcase/" />
+  <Folder Name="/showcase/src/">
+    <Project Path="showcase/src/Pocok.Showcase.Contracts/Pocok.Showcase.Contracts.csproj" />
+    <Project Path="showcase/src/Pocok.Showcase.Components/Pocok.Showcase.Components.csproj" />
+    <Project Path="showcase/src/Pocok.Showcase.Web/Pocok.Showcase.Web.csproj" />
+  </Folder>
+  <Folder Name="/showcase/tests/">
+    <Project Path="samples/Showcase/Pocok.Showcase.Samples.Tests/Pocok.Showcase.Samples.Tests.csproj"/>
+    <Project Path="showcase/tests/Pocok.Showcase.Tests/Pocok.Showcase.Tests.csproj" />
+  </Folder>
+  <Folder Name="/showcase/tools/">
+    <Project Path="showcase/tools/Pocok.Showcase.PublishTool/Pocok.Showcase.PublishTool.csproj" />
+  </Folder>
+  <Folder Name="/showcase/samples/">
+    <Project Path="samples/Showcase/Pocok.Showcase.Conversion/Pocok.Showcase.Conversion.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.Scripting/Pocok.Showcase.Scripting.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.Licensing/Pocok.Showcase.Licensing.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.AppDefaults.Logging/Pocok.Showcase.AppDefaults.Logging.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.Localization/Pocok.Showcase.Localization.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.Readiness/Pocok.Showcase.Readiness.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.BackgroundWork/Pocok.Showcase.BackgroundWork.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.Modularity/Pocok.Showcase.Modularity.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.Signals/Pocok.Showcase.Signals.csproj"/>
+    <Project Path="samples/Showcase/Pocok.Showcase.Subscriptions/Pocok.Showcase.Subscriptions.csproj"/>
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Licensing/Pocok.Licensing.csproj"/>
+    <Project Path="src/AppDefaults.Licensing/Pocok.AppDefaults.Licensing.csproj"/>
+    <Project Path="src/Licensing.Keygen/Pocok.Licensing.Keygen.csproj"/>
+    <Project Path="src/Licensing.LicenseChecker/Pocok.Licensing.LicenseChecker.csproj"/>
+    <Project Path="src/AppDefaults/Pocok.AppDefaults.csproj"/>
+    <Project Path="src/AppDefaults.Logging/Pocok.AppDefaults.Logging.csproj"/>
+    <Project Path="src/AppDefaults.Logging.Serilog/Pocok.AppDefaults.Logging.Serilog.csproj"/>
+    <Project Path="src/AppDefaults.Modularity/Pocok.AppDefaults.Modularity.csproj"/>
+    <Project Path="src/Conversion/Pocok.Conversion.csproj"/>
+    <Project Path="src/Readiness/Pocok.Readiness.csproj"/>
+    <Project Path="src/BackgroundWork/Pocok.BackgroundWork.csproj"/>
+    <Project Path="src/Scripting/Pocok.Scripting.csproj"/>
+    <Project Path="src/Scripting.JavaScript/Pocok.Scripting.JavaScript.csproj"/>
+    <Project Path="src/Scripting.CSharp/Pocok.Scripting.CSharp.csproj"/>
+    <Project Path="src/Scripting.CSharp.Worker/Pocok.Scripting.CSharp.Worker.csproj"/>
+    <Project Path="src/Scripting.Python/Pocok.Scripting.Python.csproj"/>
+    <Project Path="src/Signals/Pocok.Signals.csproj"/>
+    <Project Path="src/Localization/Pocok.Localization.csproj"/>
+    <Project Path="src/Subscriptions/Pocok.Subscriptions.csproj"/>
+    <Project Path="src/Modularity.Contracts/Pocok.Modularity.Contracts.csproj"/>
+    <Project Path="src/Modularity/Pocok.Modularity.csproj"/>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Unit/Licensing.Tests/Pocok.Licensing.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Licensing.Tests/Pocok.AppDefaults.Licensing.Tests.csproj"/>
+    <Project Path="tests/Fixtures/Modularity.Contracts/Pocok.Modularity.FixtureContracts.csproj"/>
+    <Project Path="tests/Fixtures/Modularity.Dependency/Pocok.Modularity.FixtureDependency.csproj"/>
+    <Project Path="tests/Fixtures/Modularity.Plugin/Pocok.Modularity.FixturePlugin.csproj"/>
+    <Project Path="tests/Integration/Modularity.Tests/Pocok.Modularity.Integration.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Tests/Pocok.AppDefaults.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Logging.Tests/Pocok.AppDefaults.Logging.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Logging.Serilog.Tests/Pocok.AppDefaults.Logging.Serilog.Tests.csproj"/>
+    <Project Path="tests/Unit/AppDefaults.Modularity.Tests/Pocok.AppDefaults.Modularity.Tests.csproj"/>
+    <Project Path="tests/Architecture/Pocok.Architecture.Tests.csproj"/>
+    <Project Path="tests/Packaging/Pocok.Packaging.Tests.csproj"/>
+    <Project Path="tests/Unit/Conversion.Tests/Pocok.Conversion.Tests.csproj"/>
+    <Project Path="tests/Unit/Readiness.Tests/Pocok.Readiness.Tests.csproj"/>
+    <Project Path="tests/Unit/Modularity.Contracts.Tests/Pocok.Modularity.Contracts.Tests.csproj"/>
+    <Project Path="tests/Unit/BackgroundWork.Tests/Pocok.BackgroundWork.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.Tests/Pocok.Scripting.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.JavaScript.Tests/Pocok.Scripting.JavaScript.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.CSharp.Tests/Pocok.Scripting.CSharp.Tests.csproj"/>
+    <Project Path="tests/Unit/Scripting.Python.Tests/Pocok.Scripting.Python.Tests.csproj"/>
+    <Project Path="tests/Unit/Signals.Tests/Pocok.Signals.Tests.csproj"/>
+    <Project Path="tests/Unit/Localization.Tests/Pocok.Localization.Tests.csproj"/>
+    <Project Path="tests/Unit/Subscriptions.Tests/Pocok.Subscriptions.Tests.csproj"/>
+  </Folder>
+</Solution>

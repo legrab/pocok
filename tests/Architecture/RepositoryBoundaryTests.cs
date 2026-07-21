@@ -140,13 +140,13 @@ public sealed class RepositoryBoundaryTests
         string referencedPath,
         XElement reference)
     {
-        string root = RepositoryRoot.Path;
-        string adapter = Path.GetFullPath(Path.Combine(
+        var root = RepositoryRoot.Path;
+        var adapter = Path.GetFullPath(Path.Combine(
             root,
             "src",
             "Scripting.CSharp",
             "Pocok.Scripting.CSharp.csproj"));
-        string worker = Path.GetFullPath(Path.Combine(
+        var worker = Path.GetFullPath(Path.Combine(
             root,
             "src",
             "Scripting.CSharp.Worker",

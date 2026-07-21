@@ -8,8 +8,8 @@ namespace Pocok.Showcase.Web.Services;
 
 public sealed class ShowcaseRuntimeInfo
 {
-    private readonly TimeProvider _timeProvider;
     private readonly DateTimeOffset _startedAt;
+    private readonly TimeProvider _timeProvider;
 
     public ShowcaseRuntimeInfo(TimeProvider timeProvider)
     {
@@ -18,8 +18,8 @@ public sealed class ShowcaseRuntimeInfo
         _startedAt = timeProvider.GetUtcNow();
         Assembly assembly = typeof(ShowcaseRuntimeInfo).Assembly;
         ApplicationVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? assembly.GetName().Version?.ToString()
-            ?? "unknown";
+                             ?? assembly.GetName().Version?.ToString()
+                             ?? "unknown";
     }
 
     public string ApplicationVersion { get; }

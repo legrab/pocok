@@ -31,14 +31,12 @@ foreach (ScriptEngineDescriptor descriptor in registry.Descriptors)
 
     var options = new ScriptExecutionOptions { Timeout = TimeSpan.FromSeconds(5) };
     if (descriptor.Id == ScriptEngineId.JavaScript)
-    {
         options = options with
         {
             MaxStatements = 1_000,
             MaxRecursionDepth = 32,
             MaxMemoryBytes = 8 * 1024 * 1024
         };
-    }
 
     ScriptResult<int> result = await runner.ExecuteAsync<int>(
         new ScriptExecutionRequest(descriptor.Id, "console", sources[descriptor.Id])

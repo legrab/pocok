@@ -21,7 +21,7 @@
         <section class="sandbox-nav" aria-labelledby="sandbox-nav-title">
             <p id="sandbox-nav-title">@Text.GetText("shell", "Navigation.Sandboxes")</p>
             <nav class="sandbox-nav-scroll" aria-label="@Text.GetText("shell", "Navigation.Sandboxes")">
-                @foreach (IShowcaseSlice slice in SliceCatalog.Installed)
+                @foreach (var slice in SliceCatalog.Installed)
                 {
                     <NavLink href="@($"/packages/{slice.Descriptor.Slug}")">
                         @Text.GetText(slice.Descriptor.ResourceNamespace, slice.Descriptor.DisplayNameKey)
@@ -46,7 +46,7 @@
         </button>
         @if (_logBuffer is not null && UiState.LogConsoleVisible)
         {
-            <ShowcaseLogConsole Buffer="_logBuffer" />
+            <ShowcaseLogConsole Buffer="_logBuffer"/>
         }
         <div class="nav-footer">
             <p>@Text.GetText("shell", "Footer.Tagline")</p>
@@ -71,8 +71,8 @@
     {
         get
         {
-            string relative = Navigation.ToBaseRelativePath(Navigation.Uri);
-            int suffix = relative.IndexOfAny(['?', '#']);
+            var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+            var suffix = relative.IndexOfAny(['?', '#']);
             return suffix < 0 ? relative : relative[..suffix];
         }
     }
@@ -93,7 +93,7 @@
         if (!firstRender)
             return;
         _theme = await JS.InvokeAsync<string>("pocokShowcaseTheme.current");
-        bool logConsoleVisible = await JS.InvokeAsync<bool>(
+        var logConsoleVisible = await JS.InvokeAsync<bool>(
             "pocokShowcasePreferences.feature",
             "log-console",
             true);
@@ -110,8 +110,8 @@
 
     private string CultureUrl(string culture)
     {
-        string relative = Navigation.ToBaseRelativePath(Navigation.Uri);
-        string returnUrl = "/" + relative;
+        var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var returnUrl = "/" + relative;
         return $"/culture/set?culture={Uri.EscapeDataString(culture)}&returnUrl={Uri.EscapeDataString(returnUrl)}";
     }
 
@@ -121,13 +121,19 @@
         PublicLog.ThemeChanged(_theme);
     }
 
-    private void OnUiStateChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnUiStateChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => LogCurrentPage();
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        LogCurrentPage();
+    }
 
     private void LogCurrentPage()
     {
-        string relative = CurrentRelativePath;
+        var relative = CurrentRelativePath;
         if (relative.Length == 0)
         {
             PublicLog.PageOpened("Home");
@@ -143,11 +149,12 @@
         const string packagePrefix = "packages/";
         if (relative.StartsWith(packagePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            string slug = relative[packagePrefix.Length..].TrimEnd('/');
+            var slug = relative[packagePrefix.Length..].TrimEnd('/');
             PublicLog.PageOpened(SliceCatalog.FindBySlug(slug)?.Descriptor.PackageId ?? "Package");
             return;
         }
 
         PublicLog.PageOpened("Page");
     }
+
 }

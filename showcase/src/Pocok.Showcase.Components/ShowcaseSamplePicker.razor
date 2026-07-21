@@ -5,7 +5,7 @@
     </summary>
     <div class="collapsible-support-content sample-picker-content">
         <div class="sample-grid">
-            @foreach (IShowcaseSample sample in Samples)
+            @foreach (var sample in Samples)
             {
                 <button type="button"
                         class="sample-option @(sample.Id == SelectedId ? "is-selected" : null)"
@@ -23,9 +23,9 @@
     private readonly string _titleId = $"sample-picker-{Guid.NewGuid():N}";
 
     [Parameter] public string Title { get; set; } = "Samples";
-    [Parameter, EditorRequired] public IReadOnlyList<IShowcaseSample> Samples { get; set; } = Array.Empty<IShowcaseSample>();
+    [Parameter][EditorRequired] public IReadOnlyList<IShowcaseSample> Samples { get; set; } = Array.Empty<IShowcaseSample>();
     [Parameter] public string? SelectedId { get; set; }
     [Parameter] public EventCallback<string> SelectedIdChanged { get; set; }
-    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
-    [Parameter, EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public IShowcaseText Text { get; set; } = default!;
+    [Parameter][EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
 }

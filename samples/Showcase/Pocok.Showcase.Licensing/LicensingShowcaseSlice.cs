@@ -38,22 +38,20 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
     public static GeneratedLicenseOutput GenerateLicense(LicensingInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
-        if (!TryCreateLicense(input, out LicenseDocument? license, out string? error))
+        if (!TryCreateLicense(input, out LicenseDocument? license, out var error))
             throw new FormatException(error ?? "The license claims are invalid.");
 
         const string keyId = "showcase-ephemeral";
-        (string privateKeyPem, string publicKeyPem) = LicenseCryptography.CreateSigningKeyPair();
-        string signedLicense = LicenseCryptography.Sign(license!, keyId, privateKeyPem);
+        var (privateKeyPem, publicKeyPem) = LicenseCryptography.CreateSigningKeyPair();
+        var signedLicense = LicenseCryptography.Sign(license!, keyId, privateKeyPem);
         var trustedKeys = new Dictionary<string, string>(StringComparer.Ordinal)
         {
             [keyId] = publicKeyPem
         };
         LicenseValidationResult verified = LicenseReader.ReadAndVerify(signedLicense, trustedKeys);
         if (!verified.IsValid)
-        {
             throw new InvalidOperationException(
                 $"The generated license could not be verified: {verified.Code}.");
-        }
 
         return new GeneratedLicenseOutput(keyId, signedLicense, publicKeyPem);
     }
@@ -72,11 +70,9 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
             "Parsing license claims and runtime facts.",
             cancellationToken).ConfigureAwait(false);
 
-        if (!TryCreateLicense(input, out LicenseDocument? license, out string? inputError) ||
+        if (!TryCreateLicense(input, out LicenseDocument? license, out var inputError) ||
             !TryCreateContext(input, out LicenseValidationContext? validationContext, out inputError))
-        {
             return Rejected(input, inputError ?? "The licensing input is invalid.");
-        }
 
         await context.Progress.ReportAsync(
             "execute",
@@ -84,9 +80,9 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
             cancellationToken).ConfigureAwait(false);
 
         LicenseValidationResult result = LicenseValidator.Validate(license!, validationContext!);
-        string claims = FormatClaims(license!);
-        string runtime = FormatRuntime(validationContext!);
-        string preview = CreateCodePreview(license!, validationContext!);
+        var claims = FormatClaims(license!);
+        var runtime = FormatRuntime(validationContext!);
+        var preview = CreateCodePreview(license!, validationContext!);
 
         context.Output.Write(result.Code.ToString());
         await context.Progress.ReportAsync(
@@ -120,7 +116,6 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
         };
 
         if (!output.InputAccepted)
-        {
             return new ShowcaseRunResult(
                 ShowcaseRunStatus.Rejected,
                 output.Headline,
@@ -129,10 +124,8 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
                 codePreview: output.CodePreview,
                 elapsed: elapsed,
                 tipKeys: output.TipKeys);
-        }
 
         if (!output.IsValid)
-        {
             return new ShowcaseRunResult(
                 ShowcaseRunStatus.ExpectedFailure,
                 output.Headline,
@@ -141,13 +134,15 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
                 codePreview: output.CodePreview,
                 elapsed: elapsed,
                 tipKeys: output.TipKeys);
-        }
 
         return new ShowcaseRunResult(
             ShowcaseRunStatus.Success,
             output.Headline,
             fields,
-            [new ShowcaseTimelineEvent(DateTimeOffset.UtcNow, "licensing", "LicenseValidator returned a valid result.")],
+            [
+                new ShowcaseTimelineEvent(DateTimeOffset.UtcNow, "licensing",
+                    "LicenseValidator returned a valid result.")
+            ],
             codePreview: output.CodePreview,
             elapsed: elapsed,
             tipKeys: output.TipKeys);
@@ -162,9 +157,7 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
         if (!TryParseRequiredUtc(input.IssuedAtUtc, "Issued at", out DateTimeOffset issuedAt, out error) ||
             !TryParseOptionalUtc(input.ValidFromUtc, "Valid from", out DateTimeOffset? validFrom, out error) ||
             !TryParseOptionalUtc(input.ValidUntilUtc, "Valid until", out DateTimeOffset? validUntil, out error))
-        {
             return false;
-        }
 
         if (input.MaximumProcessRuntimeMinutes is < 0 or > 10_080)
         {
@@ -172,8 +165,8 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
             return false;
         }
 
-        string[] modules = SplitIdentifiers(input.LicensedModules ?? string.Empty);
-        string[] machines = SplitIdentifiers(input.LicensedMachineFingerprint ?? string.Empty);
+        var modules = SplitIdentifiers(input.LicensedModules ?? string.Empty);
+        var machines = SplitIdentifiers(input.LicensedMachineFingerprint ?? string.Empty);
         string? pskHash;
         try
         {
@@ -217,6 +210,7 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
             error = "Process runtime must be between 0 and 10080 minutes.";
             return false;
         }
+
         if (!TryParseRequiredUtc(input.UtcNow, "Current UTC time", out DateTimeOffset utcNow, out error))
             return false;
 
@@ -275,21 +269,31 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
         return false;
     }
 
-    private static string[] SplitIdentifiers(string value) => value
-        .Split([',', ';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-        .Distinct(StringComparer.OrdinalIgnoreCase)
-        .ToArray();
+    private static string[] SplitIdentifiers(string value)
+    {
+        return value
+            .Split([',', ';', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
 
-    private static string? EmptyToNull(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    private static string? EmptyToNull(string value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
 
     private static string FormatClaims(LicenseDocument license)
     {
-        string modules = license.AllModules
+        var modules = license.AllModules
             ? "all modules"
-            : license.Modules.Count == 0 ? "no modules" : string.Join(", ", license.Modules);
-        string machine = license.MachineFingerprints.Count == 0 ? "any machine" : $"{license.MachineFingerprints.Count} machine(s)";
-        string psk = license.PresharedKeyHash is null ? "no PSK" : "PSK required";
-        string runtime = license.MaximumProcessRuntime is null
+            : license.Modules.Count == 0
+                ? "no modules"
+                : string.Join(", ", license.Modules);
+        var machine = license.MachineFingerprints.Count == 0
+            ? "any machine"
+            : $"{license.MachineFingerprints.Count} machine(s)";
+        var psk = license.PresharedKeyHash is null ? "no PSK" : "PSK required";
+        var runtime = license.MaximumProcessRuntime is null
             ? "unlimited process runtime"
             : $"max {license.MaximumProcessRuntime.Value.TotalMinutes:0} min";
         return $"{modules}; {machine}; {psk}; {runtime}";
@@ -297,69 +301,82 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
 
     private static string FormatRuntime(LicenseValidationContext context)
     {
-        string module = context.RequiredModule ?? "license-wide";
-        string machine = context.MachineFingerprint is null ? "no machine fingerprint" : "machine fingerprint supplied";
-        string psk = context.PresharedKey is null ? "no PSK supplied" : "PSK supplied";
+        var module = context.RequiredModule ?? "license-wide";
+        var machine = context.MachineFingerprint is null ? "no machine fingerprint" : "machine fingerprint supplied";
+        var psk = context.PresharedKey is null ? "no PSK supplied" : "PSK supplied";
         return $"{context.UtcNow:O}; runtime {context.ProcessRuntime.TotalMinutes:0} min; {module}; {machine}; {psk}";
     }
 
     private static string CreateCodePreview(LicenseDocument license, LicenseValidationContext context)
     {
-        string modules = license.AllModules
+        var modules = license.AllModules
             ? "AllModules = true"
             : $"Modules = [{string.Join(", ", license.Modules.Select(Quote))}]";
-        string requiredModule = context.RequiredModule is null ? "null" : Quote(context.RequiredModule);
+        var requiredModule = context.RequiredModule is null ? "null" : Quote(context.RequiredModule);
         return $$"""
-            LicenseDocument license = new()
-            {
-                LicenseId = {{Quote(license.LicenseId)}},
-                {{modules}},
-                ValidUntilUtc = {{FormatNullableDate(license.ValidUntilUtc)}}
-            };
+                 LicenseDocument license = new()
+                 {
+                     LicenseId = {{Quote(license.LicenseId)}},
+                     {{modules}},
+                     ValidUntilUtc = {{FormatNullableDate(license.ValidUntilUtc)}}
+                 };
 
-            LicenseValidationResult result = LicenseValidator.Validate(
-                license,
-                new LicenseValidationContext
-                {
-                    UtcNow = DateTimeOffset.Parse({{Quote(context.UtcNow.ToString("O", CultureInfo.InvariantCulture))}}),
-                    ProcessRuntime = TimeSpan.FromMinutes({{context.ProcessRuntime.TotalMinutes.ToString("0", CultureInfo.InvariantCulture)}}),
-                    RequiredModule = {{requiredModule}}
-                });
-            """;
+                 LicenseValidationResult result = LicenseValidator.Validate(
+                     license,
+                     new LicenseValidationContext
+                     {
+                         UtcNow = DateTimeOffset.Parse({{Quote(context.UtcNow.ToString("O", CultureInfo.InvariantCulture))}}),
+                         ProcessRuntime = TimeSpan.FromMinutes({{context.ProcessRuntime.TotalMinutes.ToString("0", CultureInfo.InvariantCulture)}}),
+                         RequiredModule = {{requiredModule}}
+                     });
+                 """;
     }
 
-    private static string Quote(string value) => $"\"{value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
-
-    private static string FormatNullableDate(DateTimeOffset? value) => value is null
-        ? "null"
-        : $"DateTimeOffset.Parse({Quote(value.Value.ToString("O", CultureInfo.InvariantCulture))})";
-
-    private static LicensingOutput Rejected(LicensingInput input, string message) => new(
-        false,
-        false,
-        "Input rejected",
-        "showcase.licensing-input",
-        message,
-        input.LicenseId,
-        EmptyToNull(input.RequiredModule),
-        "Input could not be converted into license claims.",
-        "Input could not be converted into runtime facts.",
-        "// Fix the highlighted input and run validation again.",
-        ["Tips.ExpectedFailures"]);
-
-    private static string Headline(LicenseValidationCode code) => code switch
+    private static string Quote(string value)
     {
-        LicenseValidationCode.Valid => "License valid",
-        LicenseValidationCode.NotYetValid => "License not active yet",
-        LicenseValidationCode.Expired => "License expired",
-        LicenseValidationCode.RuntimeExceeded => "Runtime limit exceeded",
-        LicenseValidationCode.MachineMismatch => "Machine mismatch",
-        LicenseValidationCode.PresharedKeyRequired => "Pre-shared key required",
-        LicenseValidationCode.PresharedKeyMismatch => "Pre-shared key mismatch",
-        LicenseValidationCode.ModuleMissing => "Module missing",
-        LicenseValidationCode.Malformed => "License claims malformed",
-        _ => code.ToString()
-    };
+        return
+            $"\"{value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
+    }
+
+    private static string FormatNullableDate(DateTimeOffset? value)
+    {
+        return value is null
+            ? "null"
+            : $"DateTimeOffset.Parse({Quote(value.Value.ToString("O", CultureInfo.InvariantCulture))})";
+    }
+
+    private static LicensingOutput Rejected(LicensingInput input, string message)
+    {
+        return new LicensingOutput(
+            false,
+            false,
+            "Input rejected",
+            "showcase.licensing-input",
+            message,
+            input.LicenseId,
+            EmptyToNull(input.RequiredModule),
+            "Input could not be converted into license claims.",
+            "Input could not be converted into runtime facts.",
+            "// Fix the highlighted input and run validation again.",
+            ["Tips.ExpectedFailures"]);
+    }
+
+    private static string Headline(LicenseValidationCode code)
+    {
+        return code switch
+        {
+            LicenseValidationCode.Valid => "License valid",
+            LicenseValidationCode.NotYetValid => "License not active yet",
+            LicenseValidationCode.Expired => "License expired",
+            LicenseValidationCode.RuntimeExceeded => "Runtime limit exceeded",
+            LicenseValidationCode.MachineMismatch => "Machine mismatch",
+            LicenseValidationCode.PresharedKeyRequired => "Pre-shared key required",
+            LicenseValidationCode.PresharedKeyMismatch => "Pre-shared key mismatch",
+            LicenseValidationCode.ModuleMissing => "Module missing",
+            LicenseValidationCode.Malformed => "License claims malformed",
+            _ => code.ToString()
+        };
+    }
 
     private static List<string> TipsFor(LicenseValidationCode code)
     {
@@ -373,23 +390,26 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
         return tips;
     }
 
-    private static IReadOnlyList<ShowcaseSample<LicensingInput>> CreateSamples() =>
-    [
-        Sample("valid-module", "License valid", isDefault: true),
-        Sample("missing-module", "Module missing", requiredModule: "Admin"),
-        Sample("expired", "License expired", utcNow: "2027-01-01T00:00:00Z"),
-        Sample("runtime-exceeded", "Runtime limit exceeded", processRuntimeMinutes: 121),
-        Sample(
-            "machine-mismatch",
-            "Machine mismatch",
-            licensedMachine: MachineA,
-            currentMachine: MachineB),
-        Sample(
-            "psk-mismatch",
-            "Pre-shared key mismatch",
-            licensePsk: "correct-high-entropy-demo-key",
-            suppliedPsk: "wrong-demo-key")
-    ];
+    private static IReadOnlyList<ShowcaseSample<LicensingInput>> CreateSamples()
+    {
+        return
+        [
+            Sample("valid-module", "License valid", true),
+            Sample("missing-module", "Module missing", requiredModule: "Admin"),
+            Sample("expired", "License expired", utcNow: "2027-01-01T00:00:00Z"),
+            Sample("runtime-exceeded", "Runtime limit exceeded", processRuntimeMinutes: 121),
+            Sample(
+                "machine-mismatch",
+                "Machine mismatch",
+                licensedMachine: MachineA,
+                currentMachine: MachineB),
+            Sample(
+                "psk-mismatch",
+                "Pre-shared key mismatch",
+                licensePsk: "correct-high-entropy-demo-key",
+                suppliedPsk: "wrong-demo-key")
+        ];
+    }
 
     private static ShowcaseSample<LicensingInput> Sample(
         string id,
@@ -401,53 +421,59 @@ public sealed class LicensingShowcaseSlice : ShowcaseSlice<LicensingInput, Licen
         string licensedMachine = "",
         string currentMachine = "",
         string licensePsk = "",
-        string suppliedPsk = "") => new(
-        id,
-        $"Samples.{id}.Name",
-        $"Samples.{id}.Description",
-        () => new LicensingInput
-        {
-            SampleId = id,
-            RequiredModule = requiredModule,
-            UtcNow = utcNow,
-            ProcessRuntimeMinutes = processRuntimeMinutes,
-            LicensedMachineFingerprint = licensedMachine,
-            CurrentMachineFingerprint = currentMachine,
-            LicensePresharedKey = licensePsk,
-            SuppliedPresharedKey = suppliedPsk
-        },
-        isDefault,
-        expected,
-        "quick-start",
-        "validator");
-
-    private static ShowcaseGuide CreateGuide() => new(
-    [
-        new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"]),
-        new ShowcaseGuideSection(
+        string suppliedPsk = "")
+    {
+        return new ShowcaseSample<LicensingInput>(
+            id,
+            $"Samples.{id}.Name",
+            $"Samples.{id}.Description",
+            () => new LicensingInput
+            {
+                SampleId = id,
+                RequiredModule = requiredModule,
+                UtcNow = utcNow,
+                ProcessRuntimeMinutes = processRuntimeMinutes,
+                LicensedMachineFingerprint = licensedMachine,
+                CurrentMachineFingerprint = currentMachine,
+                LicensePresharedKey = licensePsk,
+                SuppliedPresharedKey = suppliedPsk
+            },
+            isDefault,
+            expected,
             "quick-start",
-            "Guide.QuickStart.Title",
-            ["Guide.QuickStart.Body"],
-            ["validator"]),
-        new ShowcaseGuideSection("claims", "Guide.Claims.Title", ["Guide.Claims.Body"]),
-        new ShowcaseGuideSection("signatures", "Guide.Signatures.Title", ["Guide.Signatures.Body"]),
-        new ShowcaseGuideSection("runtime", "Guide.Runtime.Title", ["Guide.Runtime.Body"]),
-        new ShowcaseGuideSection("production", "Guide.Production.Title", ["Guide.Production.Body"])
-    ],
-    [
-        new ShowcaseCodeSnippet(
-            "validator",
-            "Guide.Snippet.ValidatorTitle",
-            "csharp",
-            """
-            LicenseValidationResult result = LicenseValidator.Validate(
-                verifiedLicense,
-                new LicenseValidationContext
-                {
-                    UtcNow = clock.GetUtcNow(),
-                    ProcessRuntime = processRuntime,
-                    RequiredModule = "Reporting"
-                });
-            """)
-    ]);
+            "validator");
+    }
+
+    private static ShowcaseGuide CreateGuide()
+    {
+        return new ShowcaseGuide(
+            [
+                new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"]),
+                new ShowcaseGuideSection(
+                    "quick-start",
+                    "Guide.QuickStart.Title",
+                    ["Guide.QuickStart.Body"],
+                    ["validator"]),
+                new ShowcaseGuideSection("claims", "Guide.Claims.Title", ["Guide.Claims.Body"]),
+                new ShowcaseGuideSection("signatures", "Guide.Signatures.Title", ["Guide.Signatures.Body"]),
+                new ShowcaseGuideSection("runtime", "Guide.Runtime.Title", ["Guide.Runtime.Body"]),
+                new ShowcaseGuideSection("production", "Guide.Production.Title", ["Guide.Production.Body"])
+            ],
+            [
+                new ShowcaseCodeSnippet(
+                    "validator",
+                    "Guide.Snippet.ValidatorTitle",
+                    "csharp",
+                    """
+                    LicenseValidationResult result = LicenseValidator.Validate(
+                        verifiedLicense,
+                        new LicenseValidationContext
+                        {
+                            UtcNow = clock.GetUtcNow(),
+                            ProcessRuntime = processRuntime,
+                            RequiredModule = "Reporting"
+                        });
+                    """)
+            ]);
+    }
 }

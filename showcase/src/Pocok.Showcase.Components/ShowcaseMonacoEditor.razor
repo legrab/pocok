@@ -12,7 +12,7 @@
                                   ValueChanged="@ValueChanged"
                                   class="code-editor"
                                   aria-label="@Label"
-                                  spellcheck="false" />
+                                  spellcheck="false"/>
     }
     else
     {
@@ -21,6 +21,6 @@
                               Id="@_id"
                               CssClass="code-editor showcase-monaco-surface"
                               ConstructionOptions="CreateOptions"
-                              OnDidChangeModelContent="@(_ => OnContentChangedAsync())" />
+                              OnDidChangeModelContent="@(_ => OnContentChangedAsync())"/>
     }
 </div>

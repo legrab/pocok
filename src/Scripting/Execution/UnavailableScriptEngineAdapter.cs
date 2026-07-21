@@ -11,21 +11,36 @@ public sealed class UnavailableScriptEngineAdapter : IScriptEngineAdapter, IScri
     public UnavailableScriptEngineAdapter(ScriptEngineId id, string language, string code, string message,
         ScriptEngineCapabilities? capabilities = null)
     {
-        Descriptor = new(id, language, false, capabilities ?? new(false, false, false, false, false), code, message);
+        Descriptor = new ScriptEngineDescriptor(id, language, false,
+            capabilities ?? new ScriptEngineCapabilities(false, false, false, false, false), code, message);
     }
+
     /// <inheritdoc />
     public ScriptEngineDescriptor Descriptor { get; }
+
     /// <inheritdoc />
     public IScriptValidator Validator => this;
-    /// <inheritdoc />
-    public ScriptEngineId EngineId => Descriptor.Id;
-    /// <inheritdoc />
-    public ValueTask<ScriptValidationResult> ValidateAsync(ScriptExecutionRequest request, ScriptExecutionOptions options,
-        CancellationToken cancellationToken = default) => ValueTask.FromResult(ScriptValidationResult.From([
-            new(Descriptor.UnavailableCode ?? "scripting.engine.unavailable", Descriptor.UnavailableMessage ?? "The engine is unavailable.")
-        ]));
+
     /// <inheritdoc />
     public ValueTask<ScriptResult<object?>> ExecuteAsync(ValidatedScript script, ScriptExecutionOptions options,
-        CancellationToken cancellationToken = default) => ValueTask.FromResult(ScriptResult.Failed<object?>(new(
-            Descriptor.UnavailableCode ?? "scripting.engine.unavailable", Descriptor.UnavailableMessage ?? "The engine is unavailable.")));
+        CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(ScriptResult.Failed<object?>(new ScriptFailure(
+            Descriptor.UnavailableCode ?? "scripting.engine.unavailable",
+            Descriptor.UnavailableMessage ?? "The engine is unavailable.")));
+    }
+
+    /// <inheritdoc />
+    public ScriptEngineId EngineId => Descriptor.Id;
+
+    /// <inheritdoc />
+    public ValueTask<ScriptValidationResult> ValidateAsync(ScriptExecutionRequest request,
+        ScriptExecutionOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        return ValueTask.FromResult(ScriptValidationResult.From([
+            new ScriptValidationDiagnostic(Descriptor.UnavailableCode ?? "scripting.engine.unavailable",
+                Descriptor.UnavailableMessage ?? "The engine is unavailable.")
+        ]));
+    }
 }

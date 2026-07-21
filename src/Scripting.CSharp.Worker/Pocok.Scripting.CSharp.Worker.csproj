@@ -5,21 +5,21 @@
     <AssemblyName>Pocok.Scripting.CSharp.Worker</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting"/>
   </ItemGroup>
   <Target Name="WritePrivateWorkerManifest" AfterTargets="Build">
     <ItemGroup>
       <!-- Hash the execution-critical root payload. Satellite resource assemblies remain in their
            culture directories but are optional localization assets. -->
       <_WorkerManifestFiles Include="$(TargetDir)*"
-                            Exclude="$(TargetDir)worker.sha256" />
+                            Exclude="$(TargetDir)worker.sha256"/>
     </ItemGroup>
     <GetFileHash Files="@(_WorkerManifestFiles)" Algorithm="SHA256">
-      <Output TaskParameter="Items" ItemName="_HashedWorkerManifestFiles" />
+      <Output TaskParameter="Items" ItemName="_HashedWorkerManifestFiles"/>
     </GetFileHash>
     <WriteLinesToFile File="$(TargetDir)worker.sha256"
                       Overwrite="true"
                       WriteOnlyWhenDifferent="true"
-                      Lines="@(_HashedWorkerManifestFiles->'%(FileHash)  %(Filename)%(Extension)')" />
+                      Lines="@(_HashedWorkerManifestFiles->'%(FileHash)  %(Filename)%(Extension)')"/>
   </Target>
 </Project>

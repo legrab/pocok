@@ -1,5 +1,5 @@
 <section class="guide" aria-label="Guide">
-    @foreach (ShowcaseGuideSection guideSection in Guide.Sections.Take(PrimarySectionCount))
+    @foreach (var guideSection in Guide.Sections.Take(PrimarySectionCount))
     {
         <details class="panel collapsible-support guide-primary" open>
             <summary>@Text.GetText(ResourceNamespace, guideSection.TitleKey)</summary>
@@ -9,7 +9,7 @@
                                           Text="Text"
                                           ResourceNamespace="@ResourceNamespace"
                                           ShowTitle="false"
-                                          Embedded="true" />
+                                          Embedded="true"/>
             </div>
         </details>
     }
@@ -18,13 +18,13 @@
         <details class="guide-more">
             <summary>@MoreLabel</summary>
             <div class="guide-more-content">
-                @foreach (ShowcaseGuideSection guideSection in Guide.Sections.Skip(PrimarySectionCount))
+                @foreach (var guideSection in Guide.Sections.Skip(PrimarySectionCount))
                 {
                     <ShowcaseGuideSectionView Section="guideSection"
                                               Snippets="Guide.Snippets"
                                               Text="Text"
                                               ResourceNamespace="@ResourceNamespace"
-                                              Compact="true" />
+                                              Compact="true"/>
                 }
             </div>
         </details>
@@ -34,8 +34,8 @@
 @code {
     private const int PrimarySectionCount = 2;
 
-    [Parameter, EditorRequired] public ShowcaseGuide Guide { get; set; } = ShowcaseGuide.Empty;
-    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
-    [Parameter, EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public ShowcaseGuide Guide { get; set; } = ShowcaseGuide.Empty;
+    [Parameter][EditorRequired] public IShowcaseText Text { get; set; } = default!;
+    [Parameter][EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
     [Parameter] public string MoreLabel { get; set; } = "More guidance";
 }

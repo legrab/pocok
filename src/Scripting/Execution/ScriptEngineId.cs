@@ -13,7 +13,8 @@ public readonly record struct ScriptEngineId
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         value = value.Trim().ToLowerInvariant();
         if (value.Any(static c => !char.IsAsciiLetterOrDigit(c) && c is not '-' and not '_'))
-            throw new ArgumentException("Engine identifiers may contain only ASCII letters, digits, hyphens, and underscores.", nameof(value));
+            throw new ArgumentException(
+                "Engine identifiers may contain only ASCII letters, digits, hyphens, and underscores.", nameof(value));
         Value = value;
     }
 
@@ -30,5 +31,8 @@ public readonly record struct ScriptEngineId
     public static ScriptEngineId Python => new("python");
 
     /// <inheritdoc />
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }

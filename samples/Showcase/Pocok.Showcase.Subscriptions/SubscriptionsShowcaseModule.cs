@@ -13,8 +13,10 @@ public sealed class SubscriptionsShowcaseModule : IServiceModule
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(context);
-        services.AddSingleton(new ShowcaseResourceRegistration("subscriptions", context.BaseDirectory, "Content/Locales/Subscriptions"));
+        services.AddSingleton(new ShowcaseResourceRegistration("subscriptions", context.BaseDirectory,
+            "Content/Locales/Subscriptions"));
         services.AddSingleton<SubscriptionsShowcaseSlice>();
-        services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<SubscriptionsShowcaseSlice>());
+        services.AddSingleton<IShowcaseSlice>(static provider =>
+            provider.GetRequiredService<SubscriptionsShowcaseSlice>());
     }
 }

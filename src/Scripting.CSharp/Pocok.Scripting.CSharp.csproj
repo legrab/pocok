@@ -14,38 +14,38 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Scripting/Pocok.Scripting.csproj" />
+    <ProjectReference Include="../Scripting/Pocok.Scripting.csproj"/>
     <ProjectReference Include="../Scripting.CSharp.Worker/Pocok.Scripting.CSharp.Worker.csproj"
                       ReferenceOutputAssembly="false"
-                      PrivateAssets="all" />
+                      PrivateAssets="all"/>
     <None Include="buildTransitive/Pocok.Scripting.CSharp.targets"
           Pack="true"
-          PackagePath="buildTransitive/" />
+          PackagePath="buildTransitive/"/>
   </ItemGroup>
 
   <Target Name="PackPrivateCSharpWorker">
-    <RemoveDir Directories="$(WorkerPublishDir)" />
+    <RemoveDir Directories="$(WorkerPublishDir)"/>
     <MSBuild Projects="../Scripting.CSharp.Worker/Pocok.Scripting.CSharp.Worker.csproj"
              Targets="Publish"
-             Properties="Configuration=$(Configuration);PublishDir=$(WorkerPublishDir);SelfContained=false;UseAppHost=false;NoBuild=true;NoRestore=true" />
+             Properties="Configuration=$(Configuration);PublishDir=$(WorkerPublishDir);SelfContained=false;UseAppHost=false;NoBuild=true;NoRestore=true"/>
     <Error Condition="!Exists('$(WorkerPublishDir)Pocok.Scripting.CSharp.Worker.dll')"
-           Text="The private C# worker publish output is missing." />
+           Text="The private C# worker publish output is missing."/>
     <ItemGroup>
       <!-- Hash the execution-critical root payload. Satellite resource assemblies remain packaged
            below their culture directories but are optional localization assets. -->
       <_WorkerIntegrityFiles Include="$(WorkerPublishDir)*"
-                             Exclude="$(WorkerPublishDir)worker.sha256" />
+                             Exclude="$(WorkerPublishDir)worker.sha256"/>
     </ItemGroup>
     <GetFileHash Files="@(_WorkerIntegrityFiles)" Algorithm="SHA256">
-      <Output TaskParameter="Items" ItemName="_HashedWorkerIntegrityFiles" />
+      <Output TaskParameter="Items" ItemName="_HashedWorkerIntegrityFiles"/>
     </GetFileHash>
     <WriteLinesToFile File="$(WorkerPublishDir)worker.sha256"
                       Overwrite="true"
                       WriteOnlyWhenDifferent="true"
-                      Lines="@(_HashedWorkerIntegrityFiles->'%(FileHash)  %(Filename)%(Extension)')" />
+                      Lines="@(_HashedWorkerIntegrityFiles->'%(FileHash)  %(Filename)%(Extension)')"/>
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(WorkerPublishDir)**/*"
-                              PackagePath="buildTransitive/Pocok.Scripting.CSharp.Worker/%(RecursiveDir)%(Filename)%(Extension)" />
+                              PackagePath="buildTransitive/Pocok.Scripting.CSharp.Worker/%(RecursiveDir)%(Filename)%(Extension)"/>
     </ItemGroup>
   </Target>
 </Project>

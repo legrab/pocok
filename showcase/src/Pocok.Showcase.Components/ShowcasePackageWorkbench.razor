@@ -13,12 +13,9 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired]
-    public RenderFragment Samples { get; set; } = default!;
+    [Parameter][EditorRequired] public RenderFragment Samples { get; set; } = default!;
 
-    [Parameter, EditorRequired]
-    public RenderFragment Main { get; set; } = default!;
+    [Parameter][EditorRequired] public RenderFragment Main { get; set; } = default!;
 
-    [Parameter, EditorRequired]
-    public RenderFragment Guidance { get; set; } = default!;
+    [Parameter][EditorRequired] public RenderFragment Guidance { get; set; } = default!;
 }

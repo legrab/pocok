@@ -2,7 +2,7 @@
 
 @code {
     [Parameter] public ShowcaseImplementationStatus Status { get; set; }
-    [Parameter, EditorRequired] public string Text { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string Text { get; set; } = string.Empty;
 
     private string CssClass => Status switch
     {
@@ -17,4 +17,5 @@
         ShowcaseImplementationStatus.Failed => "!",
         _ => "·"
     };
+
 }

@@ -1,5 +1,5 @@
 <ol class="timeline">
-    @foreach (ShowcaseTimelineEvent item in Timeline)
+    @foreach (var item in Timeline)
     {
         <li><span class="mono">@item.Kind</span><span>@item.Message</span></li>
     }

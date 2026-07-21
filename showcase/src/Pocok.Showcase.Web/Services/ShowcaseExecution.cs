@@ -26,8 +26,15 @@ public sealed class ShowcaseRunnerState
 
     public bool IsAccepting => Volatile.Read(ref _accepting) == 1;
 
-    internal void StartAccepting() => Volatile.Write(ref _accepting, 1);
-    internal void StopAccepting() => Volatile.Write(ref _accepting, 0);
+    internal void StartAccepting()
+    {
+        Volatile.Write(ref _accepting, 1);
+    }
+
+    internal void StopAccepting()
+    {
+        Volatile.Write(ref _accepting, 0);
+    }
 }
 
 public sealed class ShowcaseRunBuffer
@@ -74,15 +81,18 @@ public sealed class ShowcaseRunBuffer
         return null;
     }
 
-    internal void Complete() => _channel.Writer.TryComplete();
+    internal void Complete()
+    {
+        _channel.Writer.TryComplete();
+    }
 }
 
 public sealed class ShowcaseRunClient : IShowcaseRunClient
 {
+    private readonly CancellationTokenSource _lifetimeCancellation = new();
+    private readonly ShowcaseOptions _options;
     private readonly ShowcaseRunBuffer _queue;
     private readonly ShowcaseRunnerState _state;
-    private readonly ShowcaseOptions _options;
-    private readonly CancellationTokenSource _lifetimeCancellation = new();
     private int _disposed;
 
     public ShowcaseRunClient(
@@ -146,8 +156,8 @@ public sealed class ShowcaseRunClient : IShowcaseRunClient
                 "showcase.input-too-large",
                 $"The input exceeds the {_options.MaximumInputBytes.ToString(CultureInfo.InvariantCulture)} byte limit.")));
 
-        CultureInfo safeCulture = CultureInfo.ReadOnly((CultureInfo)culture.Clone());
-        CultureInfo safeUiCulture = CultureInfo.ReadOnly((CultureInfo)culture.Clone());
+        var safeCulture = CultureInfo.ReadOnly((CultureInfo)culture.Clone());
+        var safeUiCulture = CultureInfo.ReadOnly((CultureInfo)culture.Clone());
         var progress = Channel.CreateBounded<ShowcaseProgressEvent>(new BoundedChannelOptions(32)
         {
             SingleReader = true,
@@ -155,7 +165,8 @@ public sealed class ShowcaseRunClient : IShowcaseRunClient
             FullMode = BoundedChannelFullMode.DropOldest,
             AllowSynchronousContinuations = false
         });
-        var completion = new TaskCompletionSource<ShowcaseRunResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completion =
+            new TaskCompletionSource<ShowcaseRunResult>(TaskCreationOptions.RunContinuationsAsynchronously);
         var ownedCancellation = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken,
             _lifetimeCancellation.Token);
@@ -191,9 +202,11 @@ public sealed class ShowcaseRunClient : IShowcaseRunClient
         return ValueTask.CompletedTask;
     }
 
-    private static bool IsSupportedCulture(CultureInfo culture) =>
-        culture.Equals(CultureInfo.InvariantCulture)
-        || culture.TwoLetterISOLanguageName is "en" or "hu";
+    private static bool IsSupportedCulture(CultureInfo culture)
+    {
+        return culture.Equals(CultureInfo.InvariantCulture)
+               || culture.TwoLetterISOLanguageName is "en" or "hu";
+    }
 
     private static ShowcaseRunHandle CompletedHandle(ShowcaseRunResult result)
     {
@@ -212,14 +225,15 @@ public sealed class ShowcaseRunnerService : BackgroundService
         LogLevel.Error,
         new EventId(1, nameof(LogRunFailure)),
         "Showcase run {CorrelationId} failed.");
-    private readonly ShowcaseRunBuffer _queue;
-    private readonly ShowcaseRunnerState _state;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IOptions<ShowcaseOptions> _options;
+
     private readonly IHostApplicationLifetime _lifetime;
-    private readonly TimeProvider _timeProvider;
     private readonly ILogger<ShowcaseRunnerService> _logger;
+    private readonly IOptions<ShowcaseOptions> _options;
     private readonly ShowcasePublicLog _publicLog;
+    private readonly ShowcaseRunBuffer _queue;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ShowcaseRunnerState _state;
+    private readonly TimeProvider _timeProvider;
 
     public ShowcaseRunnerService(
         ShowcaseRunBuffer queue,
@@ -274,7 +288,7 @@ public sealed class ShowcaseRunnerService : BackgroundService
 
     private async Task ExecuteEnvelopeAsync(ShowcaseRunEnvelope envelope, CancellationToken stoppingToken)
     {
-        string correlationId = Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+        var correlationId = Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
         _publicLog.RunStarted(envelope.Slice.Descriptor.PackageId);
         await using AsyncServiceScope scope = _scopeFactory.CreateAsyncScope();
         using var timeout = new CancellationTokenSource(_options.Value.RunTimeout);
@@ -328,8 +342,7 @@ public sealed class ShowcaseRunnerService : BackgroundService
                 [
                     new ShowcaseDiagnostic(
                         "showcase.cancelled",
-                        "The run was cancelled.",
-                        "info")
+                        "The run was cancelled.")
                 ]));
         }
         catch (Exception exception)
@@ -369,7 +382,7 @@ public sealed class ShowcaseRunnerService : BackgroundService
                 Message = SanitizeText(diagnostic.Message, 1_000) ?? string.Empty
             })
             .ToArray();
-        string? code = SanitizeText(result.CodePreview, 16_384);
+        var code = SanitizeText(result.CodePreview, 16_384);
 
         return new ShowcaseRunResult(
             result.Status,
@@ -388,7 +401,7 @@ public sealed class ShowcaseRunnerService : BackgroundService
         if (value is null)
             return null;
 
-        string safe = value.Replace(Path.GetTempPath(), "<temporary-directory>/", StringComparison.OrdinalIgnoreCase);
+        var safe = value.Replace(Path.GetTempPath(), "<temporary-directory>/", StringComparison.OrdinalIgnoreCase);
         safe = Regex.Replace(
             safe,
             @"(?i)\b(private[_ -]?key|password|secret|token)\s*[:=]\s*\S+",
@@ -401,8 +414,8 @@ public sealed class ShowcaseRunnerService : BackgroundService
 
 public sealed class BoundedOutputWriter : IBoundedOutputWriter
 {
-    private readonly int _maximumCharacters;
     private readonly StringBuilder _builder = new();
+    private readonly int _maximumCharacters;
 
     public BoundedOutputWriter(int maximumCharacters)
     {
@@ -418,7 +431,7 @@ public sealed class BoundedOutputWriter : IBoundedOutputWriter
         if (IsTruncated)
             return;
 
-        int remaining = _maximumCharacters - _builder.Length;
+        var remaining = _maximumCharacters - _builder.Length;
         if (remaining <= 0)
         {
             IsTruncated = true;
@@ -441,13 +454,16 @@ public sealed class BoundedOutputWriter : IBoundedOutputWriter
         Write(Environment.NewLine);
     }
 
-    public string GetContent() => _builder.ToString();
+    public string GetContent()
+    {
+        return _builder.ToString();
+    }
 }
 
 internal sealed class ShowcaseProgressWriter : IShowcaseProgressWriter
 {
-    private readonly ChannelWriter<ShowcaseProgressEvent> _writer;
     private readonly TimeProvider _timeProvider;
+    private readonly ChannelWriter<ShowcaseProgressEvent> _writer;
 
     public ShowcaseProgressWriter(ChannelWriter<ShowcaseProgressEvent> writer, TimeProvider timeProvider)
     {
@@ -477,7 +493,7 @@ internal sealed class SafeTemporaryDirectoryFactory : ISafeTemporaryDirectoryFac
     public ValueTask<IAsyncDisposable> CreateAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        string root = Path.Combine(
+        var root = Path.Combine(
             Path.GetTempPath(),
             "pocok-showcase",
             Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture));
@@ -487,8 +503,8 @@ internal sealed class SafeTemporaryDirectoryFactory : ISafeTemporaryDirectoryFac
 
     private sealed class TemporaryDirectory : IAsyncDisposable
     {
-        private readonly string _path;
         private readonly int _maximumFiles;
+        private readonly string _path;
 
         public TemporaryDirectory(string path, int maximumFiles)
         {
@@ -502,11 +518,11 @@ internal sealed class SafeTemporaryDirectoryFactory : ISafeTemporaryDirectoryFac
             {
                 if (Directory.Exists(_path))
                 {
-                    int count = Directory.EnumerateFiles(_path, "*", SearchOption.AllDirectories)
+                    var count = Directory.EnumerateFiles(_path, "*", SearchOption.AllDirectories)
                         .Take(_maximumFiles + 1)
                         .Count();
                     if (count <= _maximumFiles)
-                        Directory.Delete(_path, recursive: true);
+                        Directory.Delete(_path, true);
                 }
             }
             catch (IOException)

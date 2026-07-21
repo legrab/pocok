@@ -13,8 +13,10 @@ public sealed class LocalizationShowcaseModule : IServiceModule
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(context);
-        services.AddSingleton(new ShowcaseResourceRegistration("localization", context.BaseDirectory, "Content/Locales/Localization"));
+        services.AddSingleton(new ShowcaseResourceRegistration("localization", context.BaseDirectory,
+            "Content/Locales/Localization"));
         services.AddSingleton<LocalizationShowcaseSlice>();
-        services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<LocalizationShowcaseSlice>());
+        services.AddSingleton<IShowcaseSlice>(static provider =>
+            provider.GetRequiredService<LocalizationShowcaseSlice>());
     }
 }
