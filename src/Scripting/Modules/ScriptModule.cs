@@ -17,8 +17,10 @@ public sealed record ScriptModule
         ArgumentException.ThrowIfNullOrWhiteSpace(content);
         Content = content;
     }
+
     /// <summary>Gets the reference.</summary>
     public ScriptReference Reference { get; }
+
     /// <summary>Gets source content.</summary>
     public string Content { get; }
 }

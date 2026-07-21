@@ -71,11 +71,6 @@ public sealed class ReadinessShowcaseSlice : ShowcaseSlice<ReadinessInput, Readi
             "recipe")
     ];
 
-    public IReadOnlyList<string> CoveredPackageIds { get; } =
-    [
-        "Pocok.Readiness"
-    ];
-
     public override ShowcaseSliceDescriptor Descriptor { get; } = new(
         "pocok.showcase.readiness",
         "Pocok.Readiness",
@@ -93,6 +88,7 @@ public sealed class ReadinessShowcaseSlice : ShowcaseSlice<ReadinessInput, Readi
 
     public override Type PageComponentType => typeof(ReadinessPage);
     public override IReadOnlyList<ShowcaseSample<ReadinessInput>> TypedSamples => SampleDefinitions;
+
     public override ShowcaseGuide Guide { get; } = new(
         [new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"], ["recipe"])],
         [
@@ -103,24 +99,31 @@ public sealed class ReadinessShowcaseSlice : ShowcaseSlice<ReadinessInput, Readi
                 "Select a preset and adjust the constrained options.")
         ]);
 
+    public IReadOnlyList<string> CoveredPackageIds { get; } =
+    [
+        "Pocok.Readiness"
+    ];
+
     public override ValueTask<ReadinessOutput> ExecuteAsync(
         ReadinessInput input,
         ShowcaseExecutionContext context,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        string code = ReadinessRecipeRenderer.Render(input);
+        var code = ReadinessRecipeRenderer.Render(input);
         context.Output.Write(code);
         return ValueTask.FromResult(new ReadinessOutput(code));
     }
 
-    protected override ShowcaseRunResult CreateRunResult(ReadinessOutput output, TimeSpan elapsed) =>
-        new(
+    protected override ShowcaseRunResult CreateRunResult(ReadinessOutput output, TimeSpan elapsed)
+    {
+        return new ShowcaseRunResult(
             ShowcaseRunStatus.Success,
             "Recipe generated",
             codePreview: output.Code,
             elapsed: elapsed,
             tipKeys: ["Tips.Generated", "Tips.Ownership"]);
+    }
 }
 
 public static class ReadinessRecipeRenderer
@@ -129,32 +132,33 @@ public static class ReadinessRecipeRenderer
 
     public static string Render(ReadinessInput input)
     {
-        string transition = input.Mode switch
+        var transition = input.Mode switch
         {
-            "failure" => "readiness.MarkFailed(cycle, new ReadinessFailure(\"startup.failed\", \"Startup failed safely.\"));",
+            "failure" =>
+                "readiness.MarkFailed(cycle, new ReadinessFailure(\"startup.failed\", \"Startup failed safely.\"));",
             "shutdown" => "readiness.MarkReady(cycle);\nreadiness.BeginShutdown();\nreadiness.MarkStopped();",
             _ => "readiness.MarkReady(cycle);\nawait signal.WaitUntilReadyAsync(cancellationToken);"
         };
-        int timeoutSeconds = Math.Clamp(input.Capacity, 1, 60);
-        string cancellation = input.IncludeOptional
+        var timeoutSeconds = Math.Clamp(input.Capacity, 1, 60);
+        var cancellation = input.IncludeOptional
             ? $$"""
 
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds({{timeoutSeconds}}));
-            CancellationToken cancellationToken = timeout.Token;
-            """
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds({{timeoutSeconds}}));
+                CancellationToken cancellationToken = timeout.Token;
+                """
             : "\nCancellationToken cancellationToken = CancellationToken.None;";
-        string lifecycle = input.IncludeLifecycle
+        var lifecycle = input.IncludeLifecycle
             ? "\nReadinessSnapshot snapshot = signal.Snapshot;\nConsole.WriteLine($\"{snapshot.State} #{snapshot.Sequence}\");"
             : string.Empty;
         return $$"""
-            // Install Pocok.Readiness.
-            using Pocok.Readiness;
+                 // Install Pocok.Readiness.
+                 using Pocok.Readiness;
 
-            var readiness = new ReadinessSource();
-            IReadinessSignal signal = readiness;{{cancellation}}
-            ReadinessCycle cycle = readiness.BeginStartup();
-            {{transition}}{{lifecycle}}
-            """;
+                 var readiness = new ReadinessSource();
+                 IReadinessSignal signal = readiness;{{cancellation}}
+                 ReadinessCycle cycle = readiness.BeginStartup();
+                 {{transition}}{{lifecycle}}
+                 """;
     }
 
     internal static async Task CompileProofAsync(CancellationToken cancellationToken)

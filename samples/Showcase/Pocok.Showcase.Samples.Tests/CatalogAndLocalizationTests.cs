@@ -21,16 +21,20 @@ using Pocok.Showcase.Web.Services;
 
 namespace Pocok.Showcase.Samples.Tests;
 
-[TestFixture, NonParallelizable]
+[TestFixture]
+[NonParallelizable]
 public sealed class CatalogAndLocalizationTests
 {
-    private static IShowcaseSlice[] AllSlices() =>
-    [
-        new ConversionShowcaseSlice(), CreateScriptingSlice(), new LicensingShowcaseSlice(),
-        new LoggingShowcaseSlice(), new LocalizationShowcaseSlice(), new ReadinessShowcaseSlice(),
-        new BackgroundWorkShowcaseSlice(), new ModularityShowcaseSlice(), new SignalsShowcaseSlice(),
-        new SubscriptionsShowcaseSlice()
-    ];
+    private static IShowcaseSlice[] AllSlices()
+    {
+        return
+        [
+            new ConversionShowcaseSlice(), CreateScriptingSlice(), new LicensingShowcaseSlice(),
+            new LoggingShowcaseSlice(), new LocalizationShowcaseSlice(), new ReadinessShowcaseSlice(),
+            new BackgroundWorkShowcaseSlice(), new ModularityShowcaseSlice(), new SignalsShowcaseSlice(),
+            new SubscriptionsShowcaseSlice()
+        ];
+    }
 
     [Test]
     public void PartialCatalogAcceptsOneInstalledSlice()
@@ -39,7 +43,8 @@ public sealed class CatalogAndLocalizationTests
         var catalog = new ShowcaseSliceCatalog([new ConversionShowcaseSlice()], packages,
             Options.Create(new ShowcaseOptions { RequireCompleteCatalog = false }));
         catalog.Installed.Count.ShouldBe(1);
-        catalog.CreateFacts(packages).Count(item => item.ImplementationStatus == ShowcaseImplementationStatus.Planned).ShouldBe(17);
+        catalog.CreateFacts(packages).Count(item => item.ImplementationStatus == ShowcaseImplementationStatus.Planned)
+            .ShouldBe(17);
     }
 
     [Test]
@@ -49,7 +54,8 @@ public sealed class CatalogAndLocalizationTests
         var catalog = new ShowcaseSliceCatalog(AllSlices(), packages,
             Options.Create(new ShowcaseOptions { RequireCompleteCatalog = true }));
         catalog.Installed.Count.ShouldBe(10);
-        catalog.CreateFacts(packages).Count(fact => fact.ImplementationStatus == ShowcaseImplementationStatus.Available).ShouldBe(18);
+        catalog.CreateFacts(packages).Count(fact => fact.ImplementationStatus == ShowcaseImplementationStatus.Available)
+            .ShouldBe(18);
     }
 
     [Test]
@@ -60,7 +66,7 @@ public sealed class CatalogAndLocalizationTests
             AllSlices(),
             packages,
             Options.Create(new ShowcaseOptions { RequireCompleteCatalog = true }));
-        string[] covered = catalog.CreateFacts(packages)
+        var covered = catalog.CreateFacts(packages)
             .Where(fact => fact.ImplementationStatus == ShowcaseImplementationStatus.Available)
             .Select(fact => fact.Id)
             .Order(StringComparer.Ordinal)
@@ -93,13 +99,16 @@ public sealed class CatalogAndLocalizationTests
             text.GetText("localization", "Sandbox.Run").ShouldBe("Erőforrások betöltése");
             text.GetText("shell", "Navigation.Home").ShouldBe("Főoldal");
         }
-        finally { CultureInfo.CurrentUICulture = previous; }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 
     [Test]
     public void AllTenPluginLocalizationsHaveMatchingKeys()
     {
-        string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
+        var samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
         (string Directory, string BaseName)[] resources =
         [
             ("Pocok.Showcase.Conversion", "Conversion"), ("Pocok.Showcase.Scripting", "Scripting"),
@@ -108,33 +117,36 @@ public sealed class CatalogAndLocalizationTests
             ("Pocok.Showcase.BackgroundWork", "BackgroundWork"), ("Pocok.Showcase.Modularity", "Modularity"),
             ("Pocok.Showcase.Signals", "Signals"), ("Pocok.Showcase.Subscriptions", "Subscriptions")
         ];
-        foreach ((string directory, string baseName) in resources)
+        foreach (var (directory, baseName) in resources)
         {
-            string localeRoot = Path.Combine(samplesRoot, directory, "Content", "Locales");
+            var localeRoot = Path.Combine(samplesRoot, directory, "Content", "Locales");
             ReadResourceKeys(Path.Combine(localeRoot, $"{baseName}.json"))
                 .ShouldBe(ReadResourceKeys(Path.Combine(localeRoot, $"{baseName}.hu.json")));
         }
     }
-
 
     private static ScriptingShowcaseSlice CreateScriptingSlice()
     {
         var registry = new ScriptEngineRegistry(
         [
             new JavaScriptScriptEngineAdapter(),
-            new UnavailableScriptEngineAdapter(ScriptEngineId.CSharp, "C#", "scripting.engine.trusted_only", "C# is trusted/local only."),
+            new UnavailableScriptEngineAdapter(ScriptEngineId.CSharp, "C#", "scripting.engine.trusted_only",
+                "C# requires explicit enablement."),
             new UnavailableScriptEngineAdapter(
                 ScriptEngineId.Python,
                 "Python",
                 "scripting.engine.trusted_only",
-                "Python is trusted/local only.")
+                "Python requires explicit enablement.")
         ]);
-        return new ScriptingShowcaseSlice(new ScriptRunner(registry), registry);
+        return new ScriptingShowcaseSlice(
+            new ScriptRunner(registry),
+            registry,
+            new ScriptingShowcaseOptions());
     }
 
     private static string[] ReadResourceKeys(string path)
     {
-        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        using var document = JsonDocument.Parse(File.ReadAllText(path));
         return EnumerateKeys(document.RootElement, string.Empty).Order(StringComparer.Ordinal).ToArray();
     }
 
@@ -142,9 +154,10 @@ public sealed class CatalogAndLocalizationTests
     {
         foreach (JsonProperty property in element.EnumerateObject())
         {
-            string key = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}.{property.Name}";
+            var key = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}.{property.Name}";
             if (property.Value.ValueKind == JsonValueKind.Object)
-                foreach (string nested in EnumerateKeys(property.Value, key)) yield return nested;
+                foreach (var nested in EnumerateKeys(property.Value, key))
+                    yield return nested;
             else yield return key;
         }
     }

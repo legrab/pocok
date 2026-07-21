@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
-  <PropertyGroup><IsPackable>false</IsPackable><AddRazorSupportForMvc>true</AddRazorSupportForMvc><ShowcasePluginId>pocok.showcase.scripting</ShowcasePluginId></PropertyGroup>
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <ShowcasePluginId>pocok.showcase.scripting</ShowcasePluginId>
+  </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <ProjectReference Include="../../../showcase/src/Pocok.Showcase.Contracts/Pocok.Showcase.Contracts.csproj"/>

@@ -4,7 +4,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Channels;
-using Microsoft.AspNetCore.Components;
 
 namespace Pocok.Showcase.Contracts;
 
@@ -108,8 +107,16 @@ public sealed class ShowcaseSample<TInput> : IShowcaseSample
     public string ExpectedHeadlineResult { get; }
     public string? GuideAnchor { get; }
     public string? CodeSnippetId { get; }
-    public TInput CreateTypedInput() => _inputFactory();
-    public object CreateInput() => CreateTypedInput();
+
+    public object CreateInput()
+    {
+        return CreateTypedInput();
+    }
+
+    public TInput CreateTypedInput()
+    {
+        return _inputFactory();
+    }
 }
 
 public sealed record ShowcaseGuideSection(
@@ -199,8 +206,11 @@ public sealed record ShowcaseRunResult
     public bool IsTruncated { get; }
     public IReadOnlyList<string> TipKeys { get; }
 
-    public static ShowcaseRunResult Rejected(string headline, string code, string message) =>
-        new(ShowcaseRunStatus.Rejected, headline, diagnostics: [new ShowcaseDiagnostic(code, message, "warning")]);
+    public static ShowcaseRunResult Rejected(string headline, string code, string message)
+    {
+        return new ShowcaseRunResult(ShowcaseRunStatus.Rejected, headline,
+            diagnostics: [new ShowcaseDiagnostic(code, message, "warning")]);
+    }
 }
 
 public interface IShowcaseText
@@ -300,8 +310,6 @@ public abstract class ShowcaseSlice<TInput, TOutput> : IShowcaseSlice<TInput, TO
         ShowcaseExecutionContext context,
         CancellationToken cancellationToken);
 
-    protected abstract ShowcaseRunResult CreateRunResult(TOutput output, TimeSpan elapsed);
-
     public async ValueTask<ShowcaseRunResult> ExecuteUntypedAsync(
         object input,
         ShowcaseExecutionContext context,
@@ -320,6 +328,8 @@ public abstract class ShowcaseSlice<TInput, TOutput> : IShowcaseSlice<TInput, TO
         TimeSpan elapsed = context.TimeProvider.GetElapsedTime(started);
         return CreateRunResult(output, elapsed);
     }
+
+    protected abstract ShowcaseRunResult CreateRunResult(TOutput output, TimeSpan elapsed);
 }
 
 public sealed class ShowcaseRunHandle : IAsyncDisposable
@@ -341,12 +351,16 @@ public sealed class ShowcaseRunHandle : IAsyncDisposable
 
     public Task<ShowcaseRunResult> Completion { get; }
     public ChannelReader<ShowcaseProgressEvent> Progress { get; }
-    public void Cancel() => _cancellation.Cancel();
 
     public ValueTask DisposeAsync()
     {
         _cancellation.Dispose();
         return ValueTask.CompletedTask;
+    }
+
+    public void Cancel()
+    {
+        _cancellation.Cancel();
     }
 }
 

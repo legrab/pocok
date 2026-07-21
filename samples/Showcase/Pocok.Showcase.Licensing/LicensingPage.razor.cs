@@ -10,18 +10,17 @@ namespace Pocok.Showcase.Licensing;
 
 public partial class LicensingPage
 {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
-
     private LicensingEditor? _editor;
-    private LicensingInput _input = new();
-    private string _selectedId = string.Empty;
-    private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
-    private ShowcaseRunResult? _result;
     private GeneratedLicenseOutput? _generatedLicense;
     private string? _generationError;
+    private LicensingInput _input = new();
+    private IReadOnlyList<ShowcaseProgressEvent> _progress = [];
+    private ShowcaseRunResult? _result;
     private bool _running;
     private long _sampleRevision;
+    private string _selectedId = string.Empty;
+
+    [Parameter][EditorRequired] public ShowcasePageContext Context { get; set; } = default!;
 
     private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
 
@@ -31,7 +30,10 @@ public partial class LicensingPage
         SelectSample(sample);
     }
 
-    private string T(string key) => Context.Text.GetText("licensing", key);
+    private string T(string key)
+    {
+        return Context.Text.GetText("licensing", key);
+    }
 
     private Task SelectSampleAsync(string id)
     {

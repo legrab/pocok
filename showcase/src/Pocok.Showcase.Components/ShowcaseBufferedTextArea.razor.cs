@@ -17,17 +17,20 @@ public partial class ShowcaseBufferedTextArea : IDisposable
         _valueCommitter = new DebouncedValueCommitter<string>(InputDebounceDelay, CommitValueAsync);
     }
 
-    [Parameter]
-    public string? Id { get; set; }
+    [Parameter] public string? Id { get; set; }
 
-    [Parameter]
-    public string Value { get; set; } = string.Empty;
+    [Parameter] public string Value { get; set; } = string.Empty;
 
-    [Parameter]
-    public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    public void Dispose()
+    {
+        _valueCommitter.Dispose();
+        GC.SuppressFinalize(this);
+    }
 
     protected override void OnParametersSet()
     {
@@ -38,7 +41,7 @@ public partial class ShowcaseBufferedTextArea : IDisposable
     /// <summary>Flushes pending browser-owned text before an explicit action.</summary>
     public async Task<string> FlushAsync()
     {
-        string current = _editorValue.CurrentValue;
+        var current = _editorValue.CurrentValue;
         if (_editorValue.HasUncommittedInput)
             await _valueCommitter.FlushAsync(current);
         return current;
@@ -62,11 +65,5 @@ public partial class ShowcaseBufferedTextArea : IDisposable
 
         await ValueChanged.InvokeAsync(value);
         _editorValue.MarkCommitted(value);
-    }
-
-    public void Dispose()
-    {
-        _valueCommitter.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

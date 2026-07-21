@@ -15,7 +15,9 @@
     "Run": "Run script",
     "Cancel": "Cancel",
     "ExecutionSteps": "Execution steps",
-    "EditorFallback": "Monaco is unavailable; the bounded text editor remains active."
+    "EditorFallback": "Monaco is unavailable; the bounded text editor remains active.",
+    "SourceLength": "{0:N0} / {1:N0} characters",
+    "SourceLengthExceeded": "{0:N0} / {1:N0} characters — shorten the script before running."
   },
   "Fields": {
     "Engine": "Language engine",
@@ -45,7 +47,7 @@
     "Isolation": "Each run uses fresh engine or child-process state.",
     "Bounds": "Only limits reported by the selected adapter are requested.",
     "Failures": "Validation and execution failures expose safe diagnostics only.",
-    "Capabilities": "C# and Python require an explicitly trusted local deployment."
+    "Capabilities": "C# and Python run only when explicitly enabled and available in the deployment."
   },
   "Guide": {
     "More": "More guidance",
@@ -63,7 +65,7 @@
     },
     "Production": {
       "Title": "Production notes",
-      "Body": "Validators are guardrails, not an operating-system sandbox. Public deployments enable JavaScript only."
+      "Body": "Validators and child processes are guardrails, not an operating-system sandbox. Public demos need strict source, output, timeout, queue, and client-rate limits and must not contain secrets."
     },
     "Snippet": {
       "RunnerTitle": "Register explicit engines"
@@ -73,7 +75,7 @@
     "Title": "Boundaries",
     "Guardrails": "Validation is fail-closed guardrail logic, not an OS sandbox.",
     "NoIo": "Filesystem, network, reflection, process, and environment access are denied by default.",
-    "Trusted": "C# and Python are trusted/local only.",
+    "Trusted": "C# and Python require explicit deployment opt-in and tightly bounded, secret-free hosting.",
     "Bounded": "Source, output, timeout, and supported engine limits are bounded."
   },
   "Source": {

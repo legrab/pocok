@@ -10,11 +10,14 @@ namespace Pocok.Showcase.Samples.Tests;
 [TestFixture]
 public sealed class ConversionShowcaseTests
 {
+    [SetUp]
+    public void SetUp()
+    {
+        _slice = new ConversionShowcaseSlice();
+    }
+
     private static readonly int[] DeterministicValues = [1, 2];
     private ConversionShowcaseSlice _slice = null!;
-
-    [SetUp]
-    public void SetUp() => _slice = new ConversionShowcaseSlice();
 
     public static IEnumerable<TestCaseData> Samples()
     {
@@ -35,8 +38,8 @@ public sealed class ConversionShowcaseTests
     public void SamplesCreateFreshInputs()
     {
         IShowcaseSample sample = _slice.Samples.Single(item => item.IsDefault);
-        object first = sample.CreateInput();
-        object second = sample.CreateInput();
+        var first = sample.CreateInput();
+        var second = sample.CreateInput();
         ReferenceEquals(first, second).ShouldBeFalse();
     }
 

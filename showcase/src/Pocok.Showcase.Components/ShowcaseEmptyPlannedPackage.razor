@@ -6,7 +6,7 @@
 
 <div class="package-layout">
     <section class="panel">
-        <ShowcaseStateBadge Status="ShowcaseImplementationStatus.Planned" Text="@PlannedLabel" />
+        <ShowcaseStateBadge Status="ShowcaseImplementationStatus.Planned" Text="@PlannedLabel"/>
         <h2>@Heading</h2>
         <p>@Message</p>
         <p>@ContributorGuidance</p>
@@ -22,9 +22,12 @@
     <aside class="panel facts-panel">
         <h2>@FactsHeading</h2>
         <dl>
-            <dt>@FamilyLabel</dt><dd>@Package.Family</dd>
-            <dt>@PackageStateLabel</dt><dd>@Package.State</dd>
-            <dt>@SandboxLabel</dt><dd>@NoSandboxLabel</dd>
+            <dt>@FamilyLabel</dt>
+            <dd>@Package.Family</dd>
+            <dt>@PackageStateLabel</dt>
+            <dd>@Package.State</dd>
+            <dt>@SandboxLabel</dt>
+            <dd>@NoSandboxLabel</dd>
             <dt>@DocumentationLabel</dt>
             <dd>
                 @if (!string.IsNullOrWhiteSpace(DocumentationHref))
@@ -41,20 +44,20 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public ShowcasePackageFact Package { get; set; } = default!;
-    [Parameter, EditorRequired] public string Summary { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string PlannedLabel { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string Heading { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string Message { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string ContributorGuidance { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string ContributorGuideLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public ShowcasePackageFact Package { get; set; } = default!;
+    [Parameter][EditorRequired] public string Summary { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string PlannedLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string Heading { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string Message { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string ContributorGuidance { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string ContributorGuideLabel { get; set; } = string.Empty;
     [Parameter] public string? ContributorGuideHref { get; set; }
-    [Parameter, EditorRequired] public string FactsHeading { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string FamilyLabel { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string PackageStateLabel { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string SandboxLabel { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string NoSandboxLabel { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string DocumentationLabel { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public string DocumentationLinkLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string FactsHeading { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string FamilyLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string PackageStateLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string SandboxLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string NoSandboxLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string DocumentationLabel { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string DocumentationLinkLabel { get; set; } = string.Empty;
     [Parameter] public string? DocumentationHref { get; set; }
 }

@@ -2,7 +2,6 @@
 // Copyright 2026 Pocok contributors
 
 using Pocok.Scripting.Execution;
-using Pocok.Scripting.Python;
 using Shouldly;
 
 namespace Pocok.Scripting.Python.Tests;

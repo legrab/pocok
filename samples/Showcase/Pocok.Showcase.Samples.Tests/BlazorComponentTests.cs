@@ -33,14 +33,17 @@ public sealed class BlazorComponentTests
     [TestCase(typeof(ConversionPage))]
     [TestCase(typeof(ScriptingPage))]
     [TestCase(typeof(LicensingPage))]
-    public void PluginPagesRemainBlazorComponents(Type pageType) =>
+    public void PluginPagesRemainBlazorComponents(Type pageType)
+    {
         typeof(IComponent).IsAssignableFrom(pageType).ShouldBeTrue();
+    }
 
     [Test]
     public void SharedModeSwitchExposesAStringSelectionContract()
     {
         typeof(IComponent).IsAssignableFrom(typeof(ShowcaseModeSwitch)).ShouldBeTrue();
         typeof(ShowcaseModeSwitch).GetProperty("SelectedValue")!.PropertyType.ShouldBe(typeof(string));
-        typeof(ShowcaseModeSwitch).GetProperty("SelectedValueChanged")!.PropertyType.ShouldBe(typeof(EventCallback<string>));
+        typeof(ShowcaseModeSwitch).GetProperty("SelectedValueChanged")!.PropertyType.ShouldBe(
+            typeof(EventCallback<string>));
     }
 }

@@ -15,20 +15,17 @@
         }
     </dl>
     <div class="card-actions">
-        <ShowcaseStateBadge Status="@ImplementationStatus" Text="@ImplementationLabel" />
+        <ShowcaseStateBadge Status="@ImplementationStatus" Text="@ImplementationLabel"/>
         <a class="text-link" href="/packages/@Package.Slug">@Text.GetText("shell", "Actions.Open")</a>
     </div>
 </article>
 
 @code {
-    [Parameter, EditorRequired]
-    public ShowcasePackageCatalogEntry Package { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcasePackageCatalogEntry Package { get; set; } = default!;
 
-    [Parameter]
-    public IShowcaseSlice? Slice { get; set; }
+    [Parameter] public IShowcaseSlice? Slice { get; set; }
 
-    [Parameter, EditorRequired]
-    public IShowcaseText Text { get; set; } = default!;
+    [Parameter][EditorRequired] public IShowcaseText Text { get; set; } = default!;
 
     private ShowcaseImplementationStatus ImplementationStatus => Slice is null
         ? ShowcaseImplementationStatus.Planned
@@ -41,17 +38,24 @@
         _ => Text.GetText("shell", "Package.Planned")
     };
 
-    private string FamilyLabel(string family) => family switch
+    private string FamilyLabel(string family)
     {
-        "Capability" => Text.GetText("shell", "Home.Capability"),
-        "MaintainerDefaults" => Text.GetText("shell", "Home.MaintainerDefaults"),
-        _ => family
-    };
+        return family switch
+        {
+            "Capability" => Text.GetText("shell", "Home.Capability"),
+            "MaintainerDefaults" => Text.GetText("shell", "Home.MaintainerDefaults"),
+            _ => family
+        };
+    }
 
-    private string StateLabel(string state) => state switch
+    private string StateLabel(string state)
     {
-        "Active" => Text.GetText("shell", "Package.Active"),
-        "Experimental" => Text.GetText("shell", "Package.Experimental"),
-        _ => state
-    };
+        return state switch
+        {
+            "Active" => Text.GetText("shell", "Package.Active"),
+            "Experimental" => Text.GetText("shell", "Package.Experimental"),
+            _ => state
+        };
+    }
+
 }

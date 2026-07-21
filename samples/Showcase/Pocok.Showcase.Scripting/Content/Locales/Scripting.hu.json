@@ -15,7 +15,9 @@
     "Run": "Szkript futtatása",
     "Cancel": "Mégse",
     "ExecutionSteps": "Végrehajtási lépések",
-    "EditorFallback": "A Monaco nem érhető el; a korlátozott szövegszerkesztő továbbra is használható."
+    "EditorFallback": "A Monaco nem érhető el; a korlátozott szövegszerkesztő továbbra is használható.",
+    "SourceLength": "{0:N0} / {1:N0} karakter",
+    "SourceLengthExceeded": "{0:N0} / {1:N0} karakter — futtatás előtt rövidítsd le a szkriptet."
   },
   "Fields": {
     "Engine": "Nyelvi motor",
@@ -45,7 +47,7 @@
     "Isolation": "Minden futás friss motor- vagy gyermekfolyamat-állapotot használ.",
     "Bounds": "Csak a kiválasztott adapter által ténylegesen betartható korlátokat kérjük.",
     "Failures": "Az ellenőrzési és végrehajtási hibák csak biztonságos diagnosztikát jelenítenek meg.",
-    "Capabilities": "A C# és a Python csak kifejezetten megbízható helyi környezetben engedélyezett."
+    "Capabilities": "A C# és a Python csak akkor fut, ha a környezetben kifejezetten engedélyezve van és elérhető."
   },
   "Guide": {
     "More": "További útmutató",
@@ -63,7 +65,7 @@
     },
     "Production": {
       "Title": "Éles használat",
-      "Body": "Az ellenőrzők védőkorlátok, nem operációsrendszer-szintű sandboxok. Nyilvános környezetben csak a JavaScript engedélyezett."
+      "Body": "Az ellenőrzők és a gyermekfolyamatok védőkorlátok, nem operációsrendszer-szintű sandboxok. Nyilvános bemutatóhoz szigorú forrás-, kimenet-, idő-, sor- és kliensenkénti korlátok szükségesek, és a környezet nem tartalmazhat titkokat."
     },
     "Snippet": {
       "RunnerTitle": "Explicit motorok regisztrálása"
@@ -72,12 +74,12 @@
   "Boundaries": {
     "Title": "Határok",
     "Guardrails": "Az ellenőrzés hibára záró védőkorlát, nem operációsrendszer-szintű sandbox.",
-    "NoIo": "A fájlrendszer-, hálózati-, reflection-, folyamat- és környezethozzáférés alapból tiltott.",
-    "Trusted": "A C# és a Python csak megbízható helyi használatra szolgál.",
+    "NoIo": "A fájlrendszer-, hálózati-, reflexiós-, folyamat- és környezethozzáférés alapból tiltott.",
+    "Trusted": "A C# és a Python explicit engedélyezést, szigorú korlátokat és titkok nélküli futtatókörnyezetet igényel.",
     "Bounded": "A forrás, a kimenet, az időkorlát és a támogatott motorspecifikus korlátok behatároltak."
   },
   "Source": {
-    "Title": "Source documentation",
+    "Title": "Forrásdokumentáció",
     "Body": "Csomagdokumentáció a motorkontraktusokról, adapterekről, ellenőrzésről és bizalmi határokról."
   },
   "Samples": {

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "entryAssembly": "Pocok.Showcase.Scripting.dll",
   "required": true,
+  "configurationSection": "Showcase:Scripting",
   "sharedAssemblies": [
     "Pocok.Showcase.Contracts",
     "Pocok.Showcase.Components",

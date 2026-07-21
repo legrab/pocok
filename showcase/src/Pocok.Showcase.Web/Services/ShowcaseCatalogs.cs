@@ -29,12 +29,13 @@ public sealed class ShowcasePackageCatalog
     public ShowcasePackageCatalog(IWebHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(environment);
-        string path = Path.Combine(environment.ContentRootPath, "Content", "package-catalog.json");
+        var path = Path.Combine(environment.ContentRootPath, "Content", "package-catalog.json");
         using FileStream stream = File.OpenRead(path);
         PackageCatalogDocument document = JsonSerializer.Deserialize<PackageCatalogDocument>(
-            stream,
-            SerializerOptions)
-            ?? throw new InvalidOperationException("The showcase package catalog is empty.");
+                                              stream,
+                                              SerializerOptions)
+                                          ?? throw new InvalidOperationException(
+                                              "The showcase package catalog is empty.");
 
         ShowcasePackageCatalogEntry[] packages = document.Packages
             .OrderBy(package => package.SortOrder)
@@ -47,11 +48,9 @@ public sealed class ShowcasePackageCatalog
         ValidateUnique(packages, package => package.Id, "package id", StringComparer.Ordinal);
         ValidateUnique(packages, package => package.Slug, "slug", StringComparer.OrdinalIgnoreCase);
         foreach (ShowcasePackageCatalogEntry package in packages)
-        {
             if (string.IsNullOrWhiteSpace(package.Slug)
                 || package.Slug.Any(character => !char.IsAsciiLetterOrDigit(character) && character != '-'))
                 throw new InvalidOperationException($"Package '{package.Id}' has an unsafe showcase slug.");
-        }
 
         Packages = new ReadOnlyCollection<ShowcasePackageCatalogEntry>(packages);
         _byId = new ReadOnlyDictionary<string, ShowcasePackageCatalogEntry>(
@@ -63,11 +62,15 @@ public sealed class ShowcasePackageCatalog
     public IReadOnlyList<ShowcasePackageCatalogEntry> Packages { get; }
     public IReadOnlyList<ShowcasePackageCatalogEntry> Current => Packages;
 
-    public ShowcasePackageCatalogEntry? Find(string packageId) =>
-        _byId.TryGetValue(packageId, out ShowcasePackageCatalogEntry? package) ? package : null;
+    public ShowcasePackageCatalogEntry? Find(string packageId)
+    {
+        return _byId.TryGetValue(packageId, out ShowcasePackageCatalogEntry? package) ? package : null;
+    }
 
-    public ShowcasePackageCatalogEntry? FindBySlug(string slug) =>
-        _bySlug.TryGetValue(slug, out ShowcasePackageCatalogEntry? package) ? package : null;
+    public ShowcasePackageCatalogEntry? FindBySlug(string slug)
+    {
+        return _bySlug.TryGetValue(slug, out ShowcasePackageCatalogEntry? package) ? package : null;
+    }
 
     private static void ValidateUnique(
         IEnumerable<ShowcasePackageCatalogEntry> packages,
@@ -75,13 +78,14 @@ public sealed class ShowcasePackageCatalog
         string label,
         StringComparer comparer)
     {
-        string[] duplicates = packages
+        var duplicates = packages
             .GroupBy(selector, comparer)
             .Where(group => group.Count() > 1)
             .Select(group => group.Key)
             .ToArray();
         if (duplicates.Length > 0)
-            throw new InvalidOperationException($"The showcase package catalog contains duplicate {label}s: {string.Join(", ", duplicates)}.");
+            throw new InvalidOperationException(
+                $"The showcase package catalog contains duplicate {label}s: {string.Join(", ", duplicates)}.");
     }
 
     private sealed record PackageCatalogDocument(IReadOnlyList<ShowcasePackageCatalogEntry> Packages);
@@ -89,8 +93,8 @@ public sealed class ShowcasePackageCatalog
 
 public sealed class ShowcaseSliceCatalog
 {
-    private readonly ReadOnlyDictionary<string, IShowcaseSlice> _bySlug;
     private readonly ReadOnlyDictionary<string, IShowcaseSlice> _byPackageId;
+    private readonly ReadOnlyDictionary<string, IShowcaseSlice> _bySlug;
 
     public ShowcaseSliceCatalog(
         IEnumerable<IShowcaseSlice> slices,
@@ -111,19 +115,15 @@ public sealed class ShowcaseSliceCatalog
 
         var byPackageId = new Dictionary<string, IShowcaseSlice>(StringComparer.Ordinal);
         foreach (IShowcaseSlice slice in installed)
-        {
-            foreach (string packageId in CoveredPackageIds(slice))
+            foreach (var packageId in CoveredPackageIds(slice))
                 byPackageId.Add(packageId, slice);
-        }
 
         _byPackageId = new ReadOnlyDictionary<string, IShowcaseSlice>(byPackageId);
 
         var bySlug = new Dictionary<string, IShowcaseSlice>(StringComparer.OrdinalIgnoreCase);
         foreach (ShowcasePackageCatalogEntry package in packages.Packages)
-        {
             if (byPackageId.TryGetValue(package.Id, out IShowcaseSlice? owner))
                 bySlug.Add(package.Slug, owner);
-        }
 
         _bySlug = new ReadOnlyDictionary<string, IShowcaseSlice>(bySlug);
     }
@@ -131,11 +131,15 @@ public sealed class ShowcaseSliceCatalog
     public IReadOnlyList<IShowcaseSlice> Installed { get; }
     public IReadOnlyList<IShowcaseSlice> All => Installed;
 
-    public IShowcaseSlice? FindBySlug(string slug) =>
-        _bySlug.TryGetValue(slug, out IShowcaseSlice? slice) ? slice : null;
+    public IShowcaseSlice? FindBySlug(string slug)
+    {
+        return _bySlug.TryGetValue(slug, out IShowcaseSlice? slice) ? slice : null;
+    }
 
-    public IShowcaseSlice? FindByPackageId(string packageId) =>
-        _byPackageId.TryGetValue(packageId, out IShowcaseSlice? slice) ? slice : null;
+    public IShowcaseSlice? FindByPackageId(string packageId)
+    {
+        return _byPackageId.TryGetValue(packageId, out IShowcaseSlice? slice) ? slice : null;
+    }
 
     public IReadOnlyList<ShowcasePackageFact> CreateFacts(ShowcasePackageCatalog packages)
     {
@@ -169,26 +173,33 @@ public sealed class ShowcaseSliceCatalog
         {
             slice.Descriptor.Validate();
             if (!typeof(IComponent).IsAssignableFrom(slice.PageComponentType))
-                throw new InvalidOperationException($"Page type '{slice.PageComponentType}' does not implement IComponent.");
+                throw new InvalidOperationException(
+                    $"Page type '{slice.PageComponentType}' does not implement IComponent.");
             if (slice.Samples.Count(sample => sample.IsDefault) != 1)
-                throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' must have exactly one default sample.");
-            if (slice.Samples.Select(sample => sample.Id).Distinct(StringComparer.Ordinal).Count() != slice.Samples.Count)
-                throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' contains duplicate sample ids.");
+                throw new InvalidOperationException(
+                    $"Slice '{slice.Descriptor.PackageId}' must have exactly one default sample.");
+            if (slice.Samples.Select(sample => sample.Id).Distinct(StringComparer.Ordinal).Count() !=
+                slice.Samples.Count)
+                throw new InvalidOperationException(
+                    $"Slice '{slice.Descriptor.PackageId}' contains duplicate sample ids.");
 
             IReadOnlyList<string> coverage = CoveredPackageIds(slice);
             if (!coverage.Contains(slice.Descriptor.PackageId, StringComparer.Ordinal))
-                throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' must cover its primary package.");
+                throw new InvalidOperationException(
+                    $"Slice '{slice.Descriptor.PackageId}' must cover its primary package.");
 
-            foreach (string packageId in coverage)
+            foreach (var packageId in coverage)
             {
                 if (packages.Find(packageId) is null)
-                    throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' covers unknown package '{packageId}'.");
+                    throw new InvalidOperationException(
+                        $"Slice '{slice.Descriptor.PackageId}' covers unknown package '{packageId}'.");
                 if (!owners.TryAdd(packageId, slice))
                     throw new InvalidOperationException($"Package '{packageId}' has more than one Showcase owner.");
             }
 
             ShowcasePackageCatalogEntry primary = packages.Find(slice.Descriptor.PackageId)
-                ?? throw new InvalidOperationException($"Slice '{slice.Descriptor.PackageId}' is absent from the package catalog.");
+                                                  ?? throw new InvalidOperationException(
+                                                      $"Slice '{slice.Descriptor.PackageId}' is absent from the package catalog.");
             if (!string.Equals(primary.Slug, slice.Descriptor.Slug, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException(
                     $"Slice '{slice.Descriptor.PackageId}' uses slug '{slice.Descriptor.Slug}', but the package catalog uses '{primary.Slug}'.");
@@ -196,12 +207,13 @@ public sealed class ShowcaseSliceCatalog
 
         if (requireCompleteCatalog)
         {
-            string[] missing = packages.Packages
+            var missing = packages.Packages
                 .Where(package => !owners.ContainsKey(package.Id))
                 .Select(package => package.Id)
                 .ToArray();
             if (missing.Length > 0)
-                throw new InvalidOperationException($"Strict showcase catalog is missing: {string.Join(", ", missing)}.");
+                throw new InvalidOperationException(
+                    $"Strict showcase catalog is missing: {string.Join(", ", missing)}.");
         }
     }
 
@@ -234,7 +246,7 @@ public sealed class ShowcaseSliceCatalog
         string label,
         StringComparer comparer)
     {
-        string[] duplicates = installed
+        var duplicates = installed
             .GroupBy(selector, comparer)
             .Where(group => group.Count() > 1)
             .Select(group => group.Key)

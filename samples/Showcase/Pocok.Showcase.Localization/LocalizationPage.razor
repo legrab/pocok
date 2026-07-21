@@ -1,7 +1,7 @@
 <div class="package-page">
     <ShowcasePackageHeader Descriptor="Context.Descriptor"
                            Text="Context.Text"
-                           ImplementationStatusText="@T("Package.Status.Available")" />
+                           ImplementationStatusText="@T("Package.Status.Available")"/>
 
     <ShowcasePackageWorkbench>
         <Samples>
@@ -10,7 +10,7 @@
                                   SelectedId="@_selectedId"
                                   SelectedIdChanged="SelectSampleAsync"
                                   Text="Context.Text"
-                                  ResourceNamespace="localization" />
+                                  ResourceNamespace="localization"/>
         </Samples>
         <Main>
             <ShowcaseSandboxFrame @key="_sampleRevision"
@@ -29,14 +29,14 @@
                         <input id="watch"
                                type="checkbox"
                                checked="@_input.WatchForChanges"
-                               @onchange="SetWatchAsync" />
+                               @onchange="SetWatchAsync"/>
                     </div>
                     <div class="field checkbox-field">
                         <label for="reload">@T("Fields.Reload")</label>
                         <input id="reload"
                                type="checkbox"
                                checked="@_input.Reload"
-                               @onchange="SetReloadAsync" />
+                               @onchange="SetReloadAsync"/>
                     </div>
                 </div>
 
@@ -48,7 +48,7 @@
                                            CancelLabel="@T("Sandbox.Cancel")"
                                            ResetKey="@SampleResetKey"
                                            ResultChanged="SetResultAsync"
-                                           RunningChanged="SetRunningAsync" />
+                                           RunningChanged="SetRunningAsync"/>
             </ShowcaseSandboxFrame>
 
             <ShowcaseResultPanel Title="@T("Result.Title")"
@@ -58,13 +58,13 @@
                                  ResourceNamespace="localization"
                                  CodePreviewTitle="@T("Result.Code")"
                                  CodePreviewLanguage="csharp"
-                                 TruncatedLabel="@T("Result.Truncated")" />
+                                 TruncatedLabel="@T("Result.Truncated")"/>
         </Main>
         <Guidance>
             <ShowcaseGuideView Guide="Context.Slice.Guide"
                                Text="Context.Text"
                                ResourceNamespace="localization"
-                               MoreLabel="@T("Guide.More")" />
+                               MoreLabel="@T("Guide.More")"/>
             <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
                 <ul class="compact-list">
                     <li>@T("Boundaries.Temp")</li>
@@ -78,8 +78,7 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcasePageContext Context { get; set; } = default!;
 
     private LocalizationInput _input = new();
     private string _selectedId = string.Empty;
@@ -89,10 +88,15 @@
 
     private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         Select(Context.Samples.Single(static sample => sample.IsDefault));
+    }
 
-    private string T(string key) => Context.Text.GetText("localization", key);
+    private string T(string key)
+    {
+        return Context.Text.GetText("localization", key);
+    }
 
     private Task SelectSampleAsync(string id)
     {
@@ -126,11 +130,13 @@
         return Task.CompletedTask;
     }
 
-    private static bool ReadBool(ChangeEventArgs args) =>
-        args.Value is true || string.Equals(
+    private static bool ReadBool(ChangeEventArgs args)
+    {
+        return args.Value is true || string.Equals(
             args.Value?.ToString(),
             "true",
             StringComparison.OrdinalIgnoreCase);
+    }
 
     private Task SetResultAsync(ShowcaseRunResult? result)
     {
@@ -143,4 +149,5 @@
         _running = running;
         return Task.CompletedTask;
     }
+
 }

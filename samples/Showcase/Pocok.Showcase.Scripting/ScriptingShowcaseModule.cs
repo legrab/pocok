@@ -24,28 +24,27 @@ public sealed class ScriptingShowcaseModule : IServiceModule
             context.BaseDirectory,
             "Content/Locales/Scripting"));
 
-        bool trustedEnginesEnabled = string.Equals(
-            Environment.GetEnvironmentVariable("Showcase__TrustedScriptEnginesEnabled"),
-            "true",
-            StringComparison.OrdinalIgnoreCase);
+        var showcaseOptions =
+            ScriptingShowcaseOptions.FromConfiguration(context.Configuration);
+        services.AddSingleton(showcaseOptions);
 
         IScriptEngineAdapter[] adapters =
         [
             new JavaScriptScriptEngineAdapter(),
-            trustedEnginesEnabled
+            showcaseOptions.TrustedEnginesEnabled
                 ? new CSharpScriptEngineAdapter()
                 : new UnavailableScriptEngineAdapter(
                     ScriptEngineId.CSharp,
                     "C#",
                     "scripting.engine.trusted_only",
-                    "C# is available only in explicitly trusted local deployments."),
-            trustedEnginesEnabled
+                    "C# is available only in explicitly trusted deployments."),
+            showcaseOptions.TrustedEnginesEnabled
                 ? new PythonScriptEngineAdapter()
                 : new UnavailableScriptEngineAdapter(
                     ScriptEngineId.Python,
                     "Python",
                     "scripting.engine.trusted_only",
-                    "Python is available only in explicitly trusted local deployments.")
+                    "Python is available only in explicitly trusted deployments.")
         ];
 
         services.AddSingleton(new ScriptEngineRegistry(adapters));
@@ -58,37 +57,83 @@ public sealed class ScriptingShowcaseModule : IServiceModule
     }
 }
 
-public sealed class ScriptingRuntimeWarmupService(ScriptRunner runner) : IHostedService
+public sealed class ScriptingRuntimeWarmupService(
+    ScriptRunner runner,
+    ScriptEngineRegistry registry,
+    ScriptingShowcaseOptions showcaseOptions) : IHostedService
 {
-    private readonly ScriptRunner _runner = runner ?? throw new ArgumentNullException(nameof(runner));
+    private static readonly (ScriptEngineId EngineId, string Source)[] WarmupTargets =
+    [
+        (ScriptEngineId.JavaScript, "21 * 2;"),
+        (ScriptEngineId.CSharp, "21 * 2"),
+        (ScriptEngineId.Python, "21 * 2")
+    ];
+
+    private readonly ScriptEngineRegistry _registry =
+        registry ?? throw new ArgumentNullException(nameof(registry));
+
+    private readonly ScriptRunner _runner =
+        runner ?? throw new ArgumentNullException(nameof(runner));
+
+    private readonly ScriptingShowcaseOptions _showcaseOptions =
+        showcaseOptions ?? throw new ArgumentNullException(nameof(showcaseOptions));
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        ScriptResult<object?> result = await _runner.ExecuteAsync(
-            new ScriptExecutionRequest(
-                ScriptEngineId.JavaScript,
-                "showcase-warmup",
-                "0;")
-            {
-                ExpectResult = true
-            },
-            new ScriptExecutionOptions
-            {
-                Timeout = TimeSpan.FromSeconds(10),
-                MaxSourceCharacters = 16,
-                MaxOutputBytes = 1_024,
-                MaxStatements = 10,
-                MaxRecursionDepth = 8,
-                MaxMemoryBytes = 4 * 1024 * 1024
-            },
-            cancellationToken).ConfigureAwait(false);
-
-        if (!result.IsSuccess)
+        foreach ((ScriptEngineId engineId, var source) in WarmupTargets)
         {
-            throw new InvalidOperationException(
-                $"The scripting runtime warm-up failed: {result.Failure!.Code}.");
+            if (engineId != ScriptEngineId.JavaScript && !_showcaseOptions.TrustedEnginesEnabled)
+                continue;
+
+            ScriptEngineDescriptor? descriptor = _registry.Descriptors
+                .FirstOrDefault(item => item.Id == engineId);
+            if (descriptor is not { IsAvailable: true })
+            {
+                var code = descriptor?.UnavailableCode ?? "scripting.engine.not_registered";
+                throw new InvalidOperationException(
+                    $"Configured scripting engine '{engineId.Value}' is unavailable ({code}).");
+            }
+
+            ScriptResult<object?> result = await _runner.ExecuteAsync(
+                new ScriptExecutionRequest(
+                    engineId,
+                    $"showcase-warmup.{engineId.Value}",
+                    source)
+                {
+                    ExpectResult = true
+                },
+                CreateWarmupOptions(engineId),
+                cancellationToken).ConfigureAwait(false);
+
+            if (!result.IsSuccess)
+                throw new InvalidOperationException(
+                    $"Scripting runtime warm-up failed for '{engineId.Value}' " +
+                    $"({result.Failure!.Code}).");
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    private static ScriptExecutionOptions CreateWarmupOptions(ScriptEngineId engineId)
+    {
+        return engineId == ScriptEngineId.JavaScript
+            ? new ScriptExecutionOptions
+            {
+                Timeout = TimeSpan.FromSeconds(10),
+                MaxSourceCharacters = 64,
+                MaxOutputBytes = 1_024,
+                MaxStatements = 100,
+                MaxRecursionDepth = 16,
+                MaxMemoryBytes = 4 * 1_024 * 1_024
+            }
+            : new ScriptExecutionOptions
+            {
+                Timeout = TimeSpan.FromSeconds(10),
+                MaxSourceCharacters = 64,
+                MaxOutputBytes = 1_024
+            };
+    }
 }

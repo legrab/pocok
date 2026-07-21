@@ -74,11 +74,6 @@ public sealed class SignalsShowcaseSlice : ShowcaseSlice<SignalsInput, SignalsOu
             "recipe")
     ];
 
-    public IReadOnlyList<string> CoveredPackageIds { get; } =
-    [
-        "Pocok.Signals"
-    ];
-
     public override ShowcaseSliceDescriptor Descriptor { get; } = new(
         "pocok.showcase.signals",
         "Pocok.Signals",
@@ -96,6 +91,7 @@ public sealed class SignalsShowcaseSlice : ShowcaseSlice<SignalsInput, SignalsOu
 
     public override Type PageComponentType => typeof(SignalsPage);
     public override IReadOnlyList<ShowcaseSample<SignalsInput>> TypedSamples => SampleDefinitions;
+
     public override ShowcaseGuide Guide { get; } = new(
         [new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"], ["recipe"])],
         [
@@ -106,24 +102,31 @@ public sealed class SignalsShowcaseSlice : ShowcaseSlice<SignalsInput, SignalsOu
                 "Select a preset and adjust the constrained options.")
         ]);
 
+    public IReadOnlyList<string> CoveredPackageIds { get; } =
+    [
+        "Pocok.Signals"
+    ];
+
     public override ValueTask<SignalsOutput> ExecuteAsync(
         SignalsInput input,
         ShowcaseExecutionContext context,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        string code = SignalsRecipeRenderer.Render(input);
+        var code = SignalsRecipeRenderer.Render(input);
         context.Output.Write(code);
         return ValueTask.FromResult(new SignalsOutput(code));
     }
 
-    protected override ShowcaseRunResult CreateRunResult(SignalsOutput output, TimeSpan elapsed) =>
-        new(
+    protected override ShowcaseRunResult CreateRunResult(SignalsOutput output, TimeSpan elapsed)
+    {
+        return new ShowcaseRunResult(
             ShowcaseRunStatus.Success,
             "Recipe generated",
             codePreview: output.Code,
             elapsed: elapsed,
             tipKeys: ["Tips.Generated", "Tips.Ownership"]);
+    }
 }
 
 public static class SignalsRecipeRenderer
@@ -132,62 +135,62 @@ public static class SignalsRecipeRenderer
 
     public static string Render(SignalsInput input)
     {
-        string staleAfter = input.IncludeOptional
+        var staleAfter = input.IncludeOptional
             ? "TimeSpan.FromSeconds(30)"
             : "null";
-        string runtimeDeclaration = input.IncludeLifecycle
+        var runtimeDeclaration = input.IncludeLifecycle
             ? "var runtime = new SignalRuntime("
             : "await using var runtime = new SignalRuntime(";
-        string runtimeTry = input.IncludeLifecycle ? "\ntry\n{" : string.Empty;
-        string connectionDeclaration = input.IncludeLifecycle
+        var runtimeTry = input.IncludeLifecycle ? "\ntry\n{" : string.Empty;
+        var connectionDeclaration = input.IncludeLifecycle
             ? "SignalConnection<double> signal = connected.Value!;"
             : "await using SignalConnection<double> signal = connected.Value!;";
-        string connectionTry = input.IncludeLifecycle ? "\ntry\n{" : string.Empty;
-        string setup = $$"""
-            SignalSourceFactory factory = ResolveSourceAsync;
-            {{runtimeDeclaration}}
-                factory,
-                new SignalRuntimeOptions(
-                    subscriberCapacity: {{Math.Clamp(input.Capacity, 1, 256)}},
-                    reconnectDelay: TimeSpan.FromSeconds(2),
-                    staleAfter: {{staleAfter}}));{{runtimeTry}}
-            SignalAddress address = new(new SourceId("plant"), "temperature/outlet");
-            SignalResult<SignalConnection<double>> connected = await runtime.ConnectAsync<double>(address, cancellationToken);
-            if (!connected.IsSuccess) return;
-            {{connectionDeclaration}}{{connectionTry}}
-            """;
-        string operation = input.Mode switch
+        var connectionTry = input.IncludeLifecycle ? "\ntry\n{" : string.Empty;
+        var setup = $$"""
+                      SignalSourceFactory factory = ResolveSourceAsync;
+                      {{runtimeDeclaration}}
+                          factory,
+                          new SignalRuntimeOptions(
+                              subscriberCapacity: {{Math.Clamp(input.Capacity, 1, 256)}},
+                              reconnectDelay: TimeSpan.FromSeconds(2),
+                              staleAfter: {{staleAfter}}));{{runtimeTry}}
+                      SignalAddress address = new(new SourceId("plant"), "temperature/outlet");
+                      SignalResult<SignalConnection<double>> connected = await runtime.ConnectAsync<double>(address, cancellationToken);
+                      if (!connected.IsSuccess) return;
+                      {{connectionDeclaration}}{{connectionTry}}
+                      """;
+        var operation = input.Mode switch
         {
             "write" => """
-                SignalResult<SignalWriteResult<double>> result = await signal.WriteAsync(
-                    21.5,
-                    SignalWriteConsistency.Acknowledged,
-                    cancellationToken);
-                """,
+                       SignalResult<SignalWriteResult<double>> result = await signal.WriteAsync(
+                           21.5,
+                           SignalWriteConsistency.Acknowledged,
+                           cancellationToken);
+                       """,
             "subscribe" => """
-                await foreach (SignalSample<double> sample in signal.Samples(cancellationToken))
-                {
-                    if (!sample.HasValue || sample.Quality is SignalQuality.Bad or SignalQuality.Failed) continue;
-                    Console.WriteLine($"{sample.Value} at {sample.ObservedAt:O}");
-                }
-                """,
+                           await foreach (SignalSample<double> sample in signal.Samples(cancellationToken))
+                           {
+                               if (!sample.HasValue || sample.Quality is SignalQuality.Bad or SignalQuality.Failed) continue;
+                               Console.WriteLine($"{sample.Value} at {sample.ObservedAt:O}");
+                           }
+                           """,
             _ => """
-                SignalResult<SignalSample<double>> result = await signal.ReadAsync(cancellationToken);
-                if (result.IsSuccess && result.Value!.HasValue)
-                    Console.WriteLine($"{result.Value.Value} ({result.Value.Quality})");
-                """
+                 SignalResult<SignalSample<double>> result = await signal.ReadAsync(cancellationToken);
+                 if (result.IsSuccess && result.Value!.HasValue)
+                     Console.WriteLine($"{result.Value.Value} ({result.Value.Quality})");
+                 """
         };
-        string disposal = input.IncludeLifecycle
+        var disposal = input.IncludeLifecycle
             ? "\n}\nfinally\n{\n    await signal.DisposeAsync();\n}\n}\nfinally\n{\n    await runtime.DisposeAsync();\n}"
             : string.Empty;
         const string header = """
-            // Install Pocok.Signals.
-            using Pocok.Signals.Operations;
-            using Pocok.Signals.Runtime;
-            using Pocok.Signals.Sources;
-            using Pocok.Signals.Writing;
+                              // Install Pocok.Signals.
+                              using Pocok.Signals.Operations;
+                              using Pocok.Signals.Runtime;
+                              using Pocok.Signals.Sources;
+                              using Pocok.Signals.Writing;
 
-            """;
+                              """;
         return header + setup + "\n" + operation + disposal;
     }
 

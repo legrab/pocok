@@ -5,8 +5,8 @@ namespace Pocok.Showcase.Components;
 
 internal sealed class BufferedEditorValue
 {
-    private string _parameterValue = string.Empty;
     private bool _initialized;
+    private string _parameterValue = string.Empty;
 
     public string CurrentValue { get; private set; } = string.Empty;
 
@@ -62,8 +62,24 @@ internal sealed class DebouncedValueCommitter<T>(
     Func<T, Task> commitAsync) : IDisposable
 {
     private readonly object _gate = new();
-    private CancellationTokenSource? _pending;
     private bool _disposed;
+    private CancellationTokenSource? _pending;
+
+    public void Dispose()
+    {
+        CancellationTokenSource? pending;
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            pending = _pending;
+            _pending = null;
+        }
+
+        pending?.Cancel();
+    }
 
     public async Task ScheduleAsync(T value)
     {
@@ -109,22 +125,6 @@ internal sealed class DebouncedValueCommitter<T>(
         CancellationTokenSource? pending;
         lock (_gate)
         {
-            pending = _pending;
-            _pending = null;
-        }
-
-        pending?.Cancel();
-    }
-
-    public void Dispose()
-    {
-        CancellationTokenSource? pending;
-        lock (_gate)
-        {
-            if (_disposed)
-                return;
-
-            _disposed = true;
             pending = _pending;
             _pending = null;
         }

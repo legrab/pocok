@@ -11,12 +11,12 @@ namespace Pocok.Showcase.Components;
 public partial class ShowcaseCodeAssistEditor : IDisposable
 {
     private static readonly TimeSpan InputDebounceDelay = TimeSpan.FromMilliseconds(500);
+    private readonly BufferedEditorValue _editorValue = new();
     private readonly string _id = $"showcase-editor-{Guid.NewGuid():N}";
     private readonly string _suggestionsId = $"showcase-suggestions-{Guid.NewGuid():N}";
-    private readonly BufferedEditorValue _editorValue = new();
     private readonly DebouncedValueCommitter<string> _valueCommitter;
-    private IReadOnlyList<ShowcaseCodeAssistItem> _suggestions = Array.Empty<ShowcaseCodeAssistItem>();
     private int _selectedIndex;
+    private IReadOnlyList<ShowcaseCodeAssistItem> _suggestions = Array.Empty<ShowcaseCodeAssistItem>();
     private bool _suggestionsOpen;
 
     public ShowcaseCodeAssistEditor()
@@ -24,38 +24,35 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
         _valueCommitter = new DebouncedValueCommitter<string>(InputDebounceDelay, CommitValueAsync);
     }
 
-    [Inject]
-    private IJSRuntime JavaScript { get; set; } = default!;
+    [Inject] private IJSRuntime JavaScript { get; set; } = default!;
+
+    [Parameter] public string Label { get; set; } = "Constrained code editor";
+
+    [Parameter] public string ShowSuggestionsLabel { get; set; } = "Show suggestions";
+
+    [Parameter] public string HideSuggestionsLabel { get; set; } = "Hide suggestions";
+
+    [Parameter] public string ActionLabel { get; set; } = "Apply";
+
+    [Parameter] public EventCallback<string> ActionRequested { get; set; }
+
+    [Parameter] public string Value { get; set; } = string.Empty;
+
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
     [Parameter]
-    public string Label { get; set; } = "Constrained code editor";
-
-    [Parameter]
-    public string ShowSuggestionsLabel { get; set; } = "Show suggestions";
-
-    [Parameter]
-    public string HideSuggestionsLabel { get; set; } = "Hide suggestions";
-
-    [Parameter]
-    public string ActionLabel { get; set; } = "Apply";
-
-    [Parameter]
-    public EventCallback<string> ActionRequested { get; set; }
-
-    [Parameter]
-    public string Value { get; set; } = string.Empty;
-
-    [Parameter]
-    public EventCallback<string> ValueChanged { get; set; }
-
-    [Parameter, EditorRequired]
+    [EditorRequired]
     public ShowcaseCodeAssistCatalog Catalog { get; set; } = ShowcaseCodeAssistCatalog.Empty;
 
-    [Parameter, EditorRequired]
-    public IShowcaseText Text { get; set; } = default!;
+    [Parameter][EditorRequired] public IShowcaseText Text { get; set; } = default!;
 
-    [Parameter, EditorRequired]
-    public string ResourceNamespace { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
+
+    public void Dispose()
+    {
+        _valueCommitter.Dispose();
+        GC.SuppressFinalize(this);
+    }
 
     protected override void OnParametersSet()
     {
@@ -69,7 +66,7 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
     /// <summary>Flushes pending browser-owned text before an explicit action.</summary>
     public async Task<string> FlushAsync()
     {
-        string current = _editorValue.CurrentValue;
+        var current = _editorValue.CurrentValue;
         if (_editorValue.HasUncommittedInput)
             await _valueCommitter.FlushAsync(current);
         return current;
@@ -86,7 +83,7 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
 
     private async Task InvokeActionAsync()
     {
-        string current = await FlushAsync();
+        var current = await FlushAsync();
         CloseSuggestions();
         await ActionRequested.InvokeAsync(current);
     }
@@ -106,8 +103,8 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
 
     private async Task RefreshSuggestionsAsync()
     {
-        int cursor = await JavaScript.InvokeAsync<int>("pocokShowcase.getCursor", _id);
-        _suggestions = ShowcaseCodeAssistFilter.Filter(Catalog, _editorValue.CurrentValue, cursor, 8);
+        var cursor = await JavaScript.InvokeAsync<int>("pocokShowcase.getCursor", _id);
+        _suggestions = ShowcaseCodeAssistFilter.Filter(Catalog, _editorValue.CurrentValue, cursor);
         _selectedIndex = 0;
     }
 
@@ -136,7 +133,7 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
 
     private async Task InsertAsync(ShowcaseCodeAssistItem item)
     {
-        string next = await JavaScript.InvokeAsync<string>("pocokShowcase.insertCompletion", _id, item.InsertText);
+        var next = await JavaScript.InvokeAsync<string>("pocokShowcase.insertCompletion", _id, item.InsertText);
         _editorValue.SetInput(next);
         CloseSuggestions();
         await _valueCommitter.FlushAsync(next);
@@ -156,11 +153,5 @@ public partial class ShowcaseCodeAssistEditor : IDisposable
         _suggestionsOpen = false;
         _suggestions = Array.Empty<ShowcaseCodeAssistItem>();
         _selectedIndex = 0;
-    }
-
-    public void Dispose()
-    {
-        _valueCommitter.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

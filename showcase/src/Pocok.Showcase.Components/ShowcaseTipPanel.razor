@@ -4,7 +4,7 @@
         <summary>@Title</summary>
         <div class="collapsible-support-content">
             <ul>
-                @foreach (string key in TipKeys)
+                @foreach (var key in TipKeys)
                 {
                     <li>@Text.GetText(ResourceNamespace, key)</li>
                 }
@@ -16,6 +16,6 @@
 @code {
     [Parameter] public string Title { get; set; } = "Tip";
     [Parameter] public IReadOnlyList<string> TipKeys { get; set; } = Array.Empty<string>();
-    [Parameter, EditorRequired] public IShowcaseText Text { get; set; } = default!;
-    [Parameter, EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
+    [Parameter][EditorRequired] public IShowcaseText Text { get; set; } = default!;
+    [Parameter][EditorRequired] public string ResourceNamespace { get; set; } = string.Empty;
 }

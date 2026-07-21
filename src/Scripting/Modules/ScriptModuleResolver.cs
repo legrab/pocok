@@ -20,17 +20,22 @@ public sealed class ScriptModuleResolver
     }
 
     /// <summary>Resolves one root and all reachable imports.</summary>
-    public async ValueTask<ScriptImportResolution> ResolveAsync(ScriptReference root, CancellationToken cancellationToken = default)
+    public async ValueTask<ScriptImportResolution> ResolveAsync(ScriptReference root,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(root);
         if (root.EngineId != _syntax.EngineId)
-            return new([], [new(root, "scripting.import.engine_mismatch", "The import syntax does not match the referenced engine.")]);
+            return new ScriptImportResolution([],
+            [
+                new ScriptImportDiagnostic(root, "scripting.import.engine_mismatch",
+                    "The import syntax does not match the referenced engine.")
+            ]);
         var visited = new HashSet<ScriptReference>();
         var active = new HashSet<ScriptReference>();
         var scripts = new List<ImportedScriptContent>();
         var diagnostics = new List<ScriptImportDiagnostic>();
         await CollectAsync(root, visited, active, scripts, diagnostics, cancellationToken).ConfigureAwait(false);
-        return new(scripts, diagnostics);
+        return new ScriptImportResolution(scripts, diagnostics);
     }
 
     private async ValueTask CollectAsync(ScriptReference reference, HashSet<ScriptReference> visited,
@@ -40,20 +45,25 @@ public sealed class ScriptModuleResolver
         cancellationToken.ThrowIfCancellationRequested();
         if (!visited.Add(reference))
         {
-            if (active.Contains(reference)) diagnostics.Add(new(reference, "scripting.import.cycle",
-                $"Import cycle detected at {reference.Name} from {reference.Module}."));
+            if (active.Contains(reference))
+                diagnostics.Add(new ScriptImportDiagnostic(reference, "scripting.import.cycle",
+                    $"Import cycle detected at {reference.Name} from {reference.Module}."));
             return;
         }
+
         ScriptModule? module = await _source.FindAsync(reference, cancellationToken).ConfigureAwait(false);
         if (module is null)
         {
-            diagnostics.Add(new(reference, "scripting.import.missing", $"Script {reference.Name} from {reference.Module} was not found."));
+            diagnostics.Add(new ScriptImportDiagnostic(reference, "scripting.import.missing",
+                $"Script {reference.Name} from {reference.Module} was not found."));
             return;
         }
+
         active.Add(reference);
         foreach (ScriptReference imported in _syntax.FindImports(module.Content))
-            await CollectAsync(imported, visited, active, scripts, diagnostics, cancellationToken).ConfigureAwait(false);
+            await CollectAsync(imported, visited, active, scripts, diagnostics, cancellationToken)
+                .ConfigureAwait(false);
         active.Remove(reference);
-        scripts.Add(new(reference, module.Content));
+        scripts.Add(new ImportedScriptContent(reference, module.Content));
     }
 }

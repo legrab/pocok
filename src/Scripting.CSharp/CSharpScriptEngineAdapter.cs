@@ -17,7 +17,7 @@ public sealed class CSharpScriptEngineAdapter : IScriptEngineAdapter
     {
         _options = options ?? new CSharpScriptEngineOptions();
         _client = new CSharpWorkerClient(_options);
-        (bool available, string? code, string? message) = _client.Availability;
+        var (available, code, message) = _client.Availability;
         Descriptor = new ScriptEngineDescriptor(
             ScriptEngineId.CSharp,
             "C#",
@@ -44,11 +44,9 @@ public sealed class CSharpScriptEngineAdapter : IScriptEngineAdapter
         ArgumentNullException.ThrowIfNull(options);
 
         if (script.Request.Bindings.Any(static item => item.Function is not null))
-        {
             return ScriptResult.Failed<object?>(new ScriptFailure(
                 "scripting.binding.unsupported",
                 "Function bindings cannot cross the C# worker boundary."));
-        }
 
         var bindings = script.Request.Bindings.ToDictionary(
             static item => item.Name,
@@ -81,14 +79,17 @@ public sealed class CSharpScriptEngineAdapter : IScriptEngineAdapter
             diagnostics));
     }
 
-    private static ScriptValidationDiagnostic ToDiagnostic(CSharpWorkerDiagnostic item) => new(
-        item.Code,
-        item.Message,
-        item.Severity.Equals("warning", StringComparison.OrdinalIgnoreCase)
-            ? ScriptValidationSeverity.Warning
-            : ScriptValidationSeverity.Error,
-        item.Line,
-        item.Column);
+    private static ScriptValidationDiagnostic ToDiagnostic(CSharpWorkerDiagnostic item)
+    {
+        return new ScriptValidationDiagnostic(
+            item.Code,
+            item.Message,
+            item.Severity.Equals("warning", StringComparison.OrdinalIgnoreCase)
+                ? ScriptValidationSeverity.Warning
+                : ScriptValidationSeverity.Error,
+            item.Line,
+            item.Column);
+    }
 
     private sealed class CSharpScriptValidator(
         CSharpWorkerClient client,
@@ -102,14 +103,12 @@ public sealed class CSharpScriptEngineAdapter : IScriptEngineAdapter
             CancellationToken cancellationToken = default)
         {
             if (request.Bindings.Any(static item => item.Function is not null))
-            {
                 return ScriptValidationResult.From(
                 [
                     new ScriptValidationDiagnostic(
                         "scripting.binding.unsupported",
                         "Function bindings cannot cross the C# worker boundary.")
                 ]);
-            }
 
             var bindings = request.Bindings.ToDictionary(
                 static item => item.Name,

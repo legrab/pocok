@@ -1,9 +1,10 @@
-<section class="panel result-panel status-border-@(Result?.Status.ToString().ToLowerInvariant() ?? "empty")" aria-live="polite">
+<section class="panel result-panel status-border-@(Result?.Status.ToString().ToLowerInvariant() ?? "empty")"
+         aria-live="polite">
     <div class="panel-heading">
         <h2>@Title</h2>
         @if (Result is not null)
         {
-            <ShowcaseRunStatus Status="Result.Status" Text="Text" ResourceNamespace="@StatusResourceNamespace" />
+            <ShowcaseRunStatus Status="Result.Status" Text="Text" ResourceNamespace="@StatusResourceNamespace"/>
         }
     </div>
     @if (Result is null)
@@ -13,48 +14,42 @@
     else
     {
         <p class="result-headline">@Result.Headline</p>
-        <ShowcaseStructuredFields Fields="Result.Fields" Text="Text" ResourceNamespace="@ResourceNamespace" />
+        <ShowcaseStructuredFields Fields="Result.Fields" Text="Text" ResourceNamespace="@ResourceNamespace"/>
         @if (Result.Diagnostics.Count > 0)
         {
-            <ShowcaseDiagnostics Diagnostics="Result.Diagnostics" />
+            <ShowcaseDiagnostics Diagnostics="Result.Diagnostics"/>
         }
+
         @if (Result.Timeline.Count > 0)
         {
-            <ShowcaseTimeline Timeline="Result.Timeline" />
+            <ShowcaseTimeline Timeline="Result.Timeline"/>
         }
+
         @if (!string.IsNullOrWhiteSpace(Result.CodePreview))
         {
-            <ShowcaseCodeBlock Title="@CodePreviewTitle" Code="@Result.CodePreview" Language="@CodePreviewLanguage" />
+            <ShowcaseCodeBlock Title="@CodePreviewTitle" Code="@Result.CodePreview" Language="@CodePreviewLanguage"/>
         }
+
         <p class="muted mono">@Result.Elapsed.TotalMilliseconds.ToString("0.###", CultureInfo.InvariantCulture) ms@(Result.IsTruncated ? $" · {TruncatedLabel}" : string.Empty)</p>
     }
 </section>
 
 @code {
-    [Parameter]
-    public string Title { get; set; } = "Result";
+    [Parameter] public string Title { get; set; } = "Result";
 
-    [Parameter]
-    public string EmptyText { get; set; } = "Run a sample to see its result.";
+    [Parameter] public string EmptyText { get; set; } = "Run a sample to see its result.";
 
-    [Parameter]
-    public ShowcaseRunResult? Result { get; set; }
+    [Parameter] public ShowcaseRunResult? Result { get; set; }
 
-    [Parameter]
-    public IShowcaseText? Text { get; set; }
+    [Parameter] public IShowcaseText? Text { get; set; }
 
-    [Parameter]
-    public string ResourceNamespace { get; set; } = string.Empty;
+    [Parameter] public string ResourceNamespace { get; set; } = string.Empty;
 
-    [Parameter]
-    public string StatusResourceNamespace { get; set; } = "shell";
+    [Parameter] public string StatusResourceNamespace { get; set; } = "shell";
 
-    [Parameter]
-    public string CodePreviewTitle { get; set; } = "Code preview";
+    [Parameter] public string CodePreviewTitle { get; set; } = "Code preview";
 
-    [Parameter]
-    public string CodePreviewLanguage { get; set; } = "text";
+    [Parameter] public string CodePreviewLanguage { get; set; } = "text";
 
-    [Parameter]
-    public string TruncatedLabel { get; set; } = "truncated";
+    [Parameter] public string TruncatedLabel { get; set; } = "truncated";
 }

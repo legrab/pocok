@@ -17,10 +17,10 @@ internal sealed class CSharpWorkerClient
     {
         ArgumentNullException.ThrowIfNull(options);
         _dotnetHost = ResolveDotNetHost(options.DotNetHostPath);
-        string? configuredWorkerDirectory = options.WorkerDirectory ??
-            Environment.GetEnvironmentVariable("POCOK_CSHARP_WORKER_DIRECTORY");
+        var configuredWorkerDirectory = options.WorkerDirectory ??
+                                        Environment.GetEnvironmentVariable("POCOK_CSHARP_WORKER_DIRECTORY");
         _workerDirectory = Path.GetFullPath(configuredWorkerDirectory ??
-            Path.Combine(AppContext.BaseDirectory, "Pocok.Scripting", "CSharpWorker"));
+                                            Path.Combine(AppContext.BaseDirectory, "Pocok.Scripting", "CSharpWorker"));
         Availability = ValidateAssets(_dotnetHost, _workerDirectory);
     }
 
@@ -33,7 +33,6 @@ internal sealed class CSharpWorkerClient
         CancellationToken cancellationToken)
     {
         if (!Availability.Available)
-        {
             return new CSharpWorkerResponse(
                 false,
                 null,
@@ -42,9 +41,8 @@ internal sealed class CSharpWorkerClient
                 null,
                 null,
                 null);
-        }
 
-        string workerAssembly = Path.Combine(_workerDirectory, "Pocok.Scripting.CSharp.Worker.dll");
+        var workerAssembly = Path.Combine(_workerDirectory, "Pocok.Scripting.CSharp.Worker.dll");
         var start = new ProcessStartInfo(_dotnetHost!)
         {
             WorkingDirectory = _workerDirectory,
@@ -72,7 +70,7 @@ internal sealed class CSharpWorkerClient
         using var process = new Process { StartInfo = start };
         process.Start();
 
-        string payload = JsonSerializer.Serialize(request);
+        var payload = JsonSerializer.Serialize(request);
         await process.StandardInput.WriteAsync(payload.AsMemory(), cancellationToken).ConfigureAwait(false);
         process.StandardInput.Close();
 
@@ -91,11 +89,10 @@ internal sealed class CSharpWorkerClient
                 timeoutSource.Token);
 
             await process.WaitForExitAsync(timeoutSource.Token).ConfigureAwait(false);
-            string output = await stdout.ConfigureAwait(false);
+            var output = await stdout.ConfigureAwait(false);
             _ = await stderr.ConfigureAwait(false);
 
             if (process.ExitCode != 0)
-            {
                 return new CSharpWorkerResponse(
                     false,
                     null,
@@ -104,17 +101,16 @@ internal sealed class CSharpWorkerClient
                     null,
                     null,
                     null);
-            }
 
             return JsonSerializer.Deserialize<CSharpWorkerResponse>(output) ??
-                new CSharpWorkerResponse(
-                    false,
-                    null,
-                    "scripting.csharp.protocol",
-                    "The C# worker returned an empty response.",
-                    null,
-                    null,
-                    null);
+                   new CSharpWorkerResponse(
+                       false,
+                       null,
+                       "scripting.csharp.protocol",
+                       "The C# worker returned an empty response.",
+                       null,
+                       null,
+                       null);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -149,14 +145,14 @@ internal sealed class CSharpWorkerClient
 
     private static void CopyEnvironmentVariable(ProcessStartInfo start, string name)
     {
-        string? value = Environment.GetEnvironmentVariable(name);
+        var value = Environment.GetEnvironmentVariable(name);
         if (!string.IsNullOrWhiteSpace(value))
             start.Environment[name] = value;
     }
 
     private static string? ResolveDotNetHost(string? configured)
     {
-        string? value = configured ?? Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+        var value = configured ?? Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
         return !string.IsNullOrWhiteSpace(value) && File.Exists(value)
             ? Path.GetFullPath(value)
             : null;
@@ -167,77 +163,63 @@ internal sealed class CSharpWorkerClient
         string workerDirectory)
     {
         if (dotnetHost is null)
-        {
             return (false,
                 "scripting.csharp.dotnet_unavailable",
                 "Configure DotNetHostPath or DOTNET_HOST_PATH.");
-        }
 
         if (!Directory.Exists(workerDirectory))
-        {
             return (false,
                 "scripting.csharp.worker_missing",
                 "Private C# worker assets are missing.");
-        }
 
-        string manifestPath = Path.Combine(workerDirectory, "worker.sha256");
+        var manifestPath = Path.Combine(workerDirectory, "worker.sha256");
         if (!File.Exists(manifestPath))
-        {
             return (false,
                 "scripting.csharp.worker_manifest_missing",
                 "The C# worker manifest is missing.");
-        }
 
-        string directoryPrefix = workerDirectory.TrimEnd(
+        var directoryPrefix = workerDirectory.TrimEnd(
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
         StringComparison pathComparison = OperatingSystem.IsWindows()
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
-        int verifiedFiles = 0;
+        var verifiedFiles = 0;
 
-        foreach (string line in File.ReadLines(manifestPath))
+        foreach (var line in File.ReadLines(manifestPath))
         {
             if (string.IsNullOrWhiteSpace(line))
                 continue;
 
-            string[] parts = line.Split("  ", 2, StringSplitOptions.None);
+            var parts = line.Split("  ", 2);
             if (parts.Length != 2 || parts[0].Length != 64)
-            {
                 return (false,
                     "scripting.csharp.worker_manifest_invalid",
                     "The C# worker manifest is invalid.");
-            }
 
-            string relative = parts[1]
+            var relative = parts[1]
                 .Replace('\\', Path.DirectorySeparatorChar)
                 .Replace('/', Path.DirectorySeparatorChar);
-            string path = Path.GetFullPath(Path.Combine(workerDirectory, relative));
+            var path = Path.GetFullPath(Path.Combine(workerDirectory, relative));
             if (!path.StartsWith(directoryPrefix, pathComparison) || !File.Exists(path))
-            {
                 return (false,
                     "scripting.csharp.worker_asset_missing",
                     "A private C# worker asset is missing.");
-            }
 
-            string hash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
+            var hash = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
             if (!hash.Equals(parts[0], StringComparison.OrdinalIgnoreCase))
-            {
                 return (false,
                     "scripting.csharp.worker_hash_invalid",
                     "A private C# worker asset failed integrity validation.");
-            }
 
             verifiedFiles++;
         }
 
         if (verifiedFiles == 0 ||
             !File.Exists(Path.Combine(workerDirectory, "Pocok.Scripting.CSharp.Worker.dll")))
-        {
             return (false,
                 "scripting.csharp.worker_manifest_invalid",
                 "The C# worker manifest contains no executable worker assets.");
-        }
 
         return (true, null, null);
     }
@@ -252,7 +234,7 @@ internal sealed class CSharpWorkerClient
 
         while (true)
         {
-            int read = await reader.ReadAsync(buffer.AsMemory(), cancellationToken).ConfigureAwait(false);
+            var read = await reader.ReadAsync(buffer.AsMemory(), cancellationToken).ConfigureAwait(false);
             if (read == 0)
                 return builder.ToString();
             if (builder.Length + read > maximumCharacters)
@@ -267,7 +249,7 @@ internal sealed class CSharpWorkerClient
         try
         {
             if (!process.HasExited)
-                process.Kill(entireProcessTree: true);
+                process.Kill(true);
         }
         catch (Exception)
         {

@@ -4,7 +4,6 @@
 using Pocok.Scripting.Execution;
 using Pocok.Scripting.Import;
 using Pocok.Scripting.Modules;
-using Shouldly;
 
 namespace Pocok.Scripting.Tests.Import;
 
@@ -90,8 +89,10 @@ public sealed class ScriptImportTests
             .ShouldBe(["real"]);
     }
 
-    private static ScriptModule Module(string name, string content) =>
-        new(ScriptEngineId.JavaScript, name, "Test", content);
+    private static ScriptModule Module(string name, string content)
+    {
+        return new ScriptModule(ScriptEngineId.JavaScript, name, "Test", content);
+    }
 
     private sealed class FakeSyntax(ScriptEngineId engineId) : IScriptImportSyntax
     {
@@ -107,18 +108,23 @@ public sealed class ScriptImportTests
                 .Where(static line => line.StartsWith("#import ", StringComparison.Ordinal))
                 .Select(line =>
                 {
-                    string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     return new ScriptReference(engineId, parts[1], parts[3]);
                 })
                 .ToArray();
         }
 
-        public string RemoveImports(string content) => string.Join(
-            '\n',
-            content.Split('\n').Where(static line =>
-                !line.TrimStart().StartsWith("#import ", StringComparison.Ordinal)));
+        public string RemoveImports(string content)
+        {
+            return string.Join(
+                '\n',
+                content.Split('\n').Where(static line =>
+                    !line.TrimStart().StartsWith("#import ", StringComparison.Ordinal)));
+        }
 
-        public string ImportedComment(ScriptReference reference, int depth) =>
-            $"// imported {reference.Name} from {reference.Module}";
+        public string ImportedComment(ScriptReference reference, int depth)
+        {
+            return $"// imported {reference.Name} from {reference.Module}";
+        }
     }
 }

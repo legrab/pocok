@@ -20,12 +20,20 @@
 </section>
 
 <section class="metric-grid" aria-label="@Text.GetText("shell", "Home.States")">
-    <div class="metric"><strong>@PackageCatalog.Packages.Count</strong><span>@Text.GetText("shell", "Home.Known")</span></div>
-    <div class="metric"><strong>@SliceCatalog.Installed.Count</strong><span>@Text.GetText("shell", "Home.Available")</span></div>
+    <div class="metric"><strong>@PackageCatalog.Packages.Count</strong><span>@Text.GetText("shell", "Home.Known")</span>
+    </div>
+    <div class="metric">
+        <strong>@SliceCatalog.Installed.Count</strong><span>@Text.GetText("shell", "Home.Available")</span></div>
     <div class="metric"><strong>@PlannedCount</strong><span>@Text.GetText("shell", "Home.Planned")</span></div>
-    <div class="metric"><strong>@PackageCatalog.Packages.Count(package => package.State == "Active")</strong><span>@Text.GetText("shell", "Package.Active")</span></div>
-    <div class="metric"><strong>@PackageCatalog.Packages.Count(package => package.State == "Experimental")</strong><span>@Text.GetText("shell", "Package.Experimental")</span></div>
-    <div class="metric"><strong>@SliceCatalog.Installed.Count / @PackageCatalog.Packages.Count</strong><span>@Text.GetText("shell", "Home.Loaded")</span></div>
+    <div class="metric">
+        <strong>@PackageCatalog.Packages.Count(package => package.State == "Active")</strong><span>@Text.GetText("shell", "Package.Active")</span>
+    </div>
+    <div class="metric">
+        <strong>@PackageCatalog.Packages.Count(package => package.State == "Experimental")</strong><span>@Text.GetText("shell", "Package.Experimental")</span>
+    </div>
+    <div class="metric">
+        <strong>@SliceCatalog.Installed.Count / @PackageCatalog.Packages.Count</strong><span>@Text.GetText("shell", "Home.Loaded")</span>
+    </div>
 </section>
 
 <section class="start-panel panel">
@@ -38,7 +46,7 @@
 <section class="package-browser" aria-label="@Text.GetText("shell", "Navigation.Home")">
     <div class="filter-bar" aria-label="@Text.GetText("shell", "Home.Families")">
         <span>@Text.GetText("shell", "Home.Families")</span>
-        @foreach (string family in Families)
+        @foreach (var family in Families)
         {
             <button type="button"
                     class="filter-button @(_selectedFamily == family ? "is-selected" : null)"
@@ -57,11 +65,11 @@
                 <span class="mono muted">@VisibleAvailablePackages.Count()</span>
             </div>
             <div class="package-grid">
-                @foreach (ShowcasePackageCatalogEntry package in VisibleAvailablePackages)
+                @foreach (var package in VisibleAvailablePackages)
                 {
                     <ShowcasePackageCard Package="package"
                                          Slice="@SliceCatalog.FindByPackageId(package.Id)"
-                                         Text="Text" />
+                                         Text="Text"/>
                 }
             </div>
         </section>
@@ -75,9 +83,9 @@
                 </summary>
                 <div class="coming-soon-content">
                     <div class="package-grid">
-                        @foreach (ShowcasePackageCatalogEntry package in VisiblePlannedPackages)
+                        @foreach (var package in VisiblePlannedPackages)
                         {
-                            <ShowcasePackageCard Package="package" Text="Text" />
+                            <ShowcasePackageCard Package="package" Text="Text"/>
                         }
                     </div>
                 </div>
@@ -93,23 +101,30 @@
     private string FeaturedSlicePath => $"/packages/{FeaturedSlice.Descriptor.Slug}";
     private int PlannedCount => PackageCatalog.Packages.Count - SliceCatalog.Installed.Count;
     private string[] Families => ["*", .. PackageCatalog.Packages.Select(package => package.Family).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal)];
+
     private IEnumerable<ShowcasePackageCatalogEntry> VisiblePackages => _selectedFamily == "*"
         ? PackageCatalog.Packages
         : PackageCatalog.Packages.Where(package => package.Family == _selectedFamily);
+
     private IEnumerable<ShowcasePackageCatalogEntry> VisibleAvailablePackages => VisiblePackages
         .Where(package => SliceCatalog.FindByPackageId(package.Id) is not null)
         .OrderBy(package => SliceCatalog.FindByPackageId(package.Id)!.Descriptor.SortOrder)
         .ThenBy(package => package.Id, StringComparer.Ordinal);
+
     private IEnumerable<ShowcasePackageCatalogEntry> VisiblePlannedPackages => VisiblePackages
         .Where(package => SliceCatalog.FindByPackageId(package.Id) is null)
         .OrderBy(package => package.SortOrder)
         .ThenBy(package => package.Id, StringComparer.Ordinal);
 
-    private string FamilyLabel(string family) => family switch
+    private string FamilyLabel(string family)
     {
-        "*" => Text.GetText("shell", "Home.AllFamilies"),
-        "Capability" => Text.GetText("shell", "Home.Capability"),
-        "MaintainerDefaults" => Text.GetText("shell", "Home.MaintainerDefaults"),
-        _ => family
-    };
+        return family switch
+        {
+            "*" => Text.GetText("shell", "Home.AllFamilies"),
+            "Capability" => Text.GetText("shell", "Home.Capability"),
+            "MaintainerDefaults" => Text.GetText("shell", "Home.MaintainerDefaults"),
+            _ => family
+        };
+    }
+
 }

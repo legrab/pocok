@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><OutputType>Exe</OutputType><IsPackable>false</IsPackable></PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Scripting/Pocok.Scripting.csproj"/>
     <ProjectReference Include="../../src/Scripting.JavaScript/Pocok.Scripting.JavaScript.csproj"/>

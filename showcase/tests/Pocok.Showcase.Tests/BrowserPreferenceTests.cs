@@ -24,7 +24,7 @@ public sealed class BrowserPreferenceTests
         string app = ReadWebFile("Components", "App.razor");
 
         app.IndexOf("<script src=\"theme.js\"></script>", StringComparison.Ordinal)
-            .ShouldBeLessThan(app.IndexOf("<Routes @rendermode=\"InteractiveServer\" />", StringComparison.Ordinal));
+            .ShouldBeLessThan(app.IndexOf("<Routes @rendermode=\"InteractiveServer\"/>", StringComparison.Ordinal));
     }
 
     private static string ReadWebFile(params string[] segments) =>

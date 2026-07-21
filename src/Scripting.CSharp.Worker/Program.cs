@@ -44,7 +44,7 @@ string[] bannedCapabilityNames =
     "ThreadPool"
 ];
 
-string input = await Console.In.ReadToEndAsync();
+var input = await Console.In.ReadToEndAsync();
 WorkerRequest? request;
 try
 {
@@ -65,6 +65,7 @@ if (request is null || string.IsNullOrWhiteSpace(request.Operation))
         "The worker request is missing."));
     return;
 }
+
 if (request.ProtocolVersion != SupportedProtocolVersion)
 {
     await WriteAsync(WorkerResponse.Fail(
@@ -73,11 +74,11 @@ if (request.ProtocolVersion != SupportedProtocolVersion)
     return;
 }
 
-string[] allowedImports = request.AllowedImports?
+var allowedImports = request.AllowedImports?
     .Where(static value => !string.IsNullOrWhiteSpace(value))
     .Distinct(StringComparer.Ordinal)
     .ToArray() ?? [];
-string[] allowedReferencePaths = request.AllowedReferencePaths?
+var allowedReferencePaths = request.AllowedReferencePaths?
     .Where(static value => !string.IsNullOrWhiteSpace(value))
     .Select(Path.GetFullPath)
     .Distinct(OperatingSystem.IsWindows()
@@ -96,8 +97,7 @@ if (policy.Any(static item => item.Severity == "error"))
     return;
 }
 
-foreach (string referencePath in allowedReferencePaths)
-{
+foreach (var referencePath in allowedReferencePaths)
     if (!File.Exists(referencePath) ||
         !string.Equals(Path.GetExtension(referencePath), ".dll", StringComparison.OrdinalIgnoreCase))
     {
@@ -106,18 +106,15 @@ foreach (string referencePath in allowedReferencePaths)
             "A configured C# metadata reference is unavailable."));
         return;
     }
-}
 
 ScriptOptions scriptOptions = ScriptOptions.Default
     .WithReferences(GetDefaultReferences())
     .WithImports(defaultImports.Concat(allowedImports));
 if (allowedReferencePaths.Length > 0)
-{
     scriptOptions = scriptOptions.AddReferences(
         allowedReferencePaths.Select(static path => MetadataReference.CreateFromFile(path)));
-}
 
-var script = CSharpScript.Create<object?>(
+Script<object?>? script = CSharpScript.Create<object?>(
     request.Source,
     scriptOptions,
     typeof(ScriptGlobals));
@@ -145,6 +142,7 @@ if (request.Operation == "validate")
         diagnostics));
     return;
 }
+
 if (request.Operation != "execute")
 {
     await WriteAsync(WorkerResponse.Fail(
@@ -156,7 +154,7 @@ if (request.Operation != "execute")
 try
 {
     ScriptState<object?> state = await script.RunAsync(new ScriptGlobals(request.Bindings));
-    object? value = state.ReturnValue;
+    var value = state.ReturnValue;
     if (request.ExpectResult && value is null)
     {
         await WriteAsync(WorkerResponse.Fail(
@@ -203,7 +201,7 @@ static IReadOnlyList<MetadataReference> GetDefaultReferences()
         "System.Text.Json"
     ];
     var allowed = new HashSet<string>(allowedAssemblyNames, StringComparer.OrdinalIgnoreCase);
-    string[] platformAssemblies = ((string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))?
+    var platformAssemblies = ((string?)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))?
         .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries) ?? [];
     MetadataReference[] references = platformAssemblies
         .Where(path => allowed.Contains(Path.GetFileNameWithoutExtension(path)))
@@ -236,28 +234,22 @@ static IReadOnlyList<WorkerDiagnostic> ValidatePolicy(
 
     foreach (UsingDirectiveSyntax directive in tree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>())
     {
-        string name = directive.Name?.ToString() ?? string.Empty;
+        var name = directive.Name?.ToString() ?? string.Empty;
         if (bannedRoots.Any(root => name.StartsWith(root, StringComparison.Ordinal)) ||
             (!defaultImports.Contains(name, StringComparer.Ordinal) &&
              !allowedImports.Contains(name, StringComparer.Ordinal)))
-        {
             result.Add(At(
                 "scripting.csharp.import_denied",
                 "The requested namespace is not allowlisted.",
                 directive));
-        }
     }
 
     foreach (SyntaxTrivia trivia in tree.GetRoot().DescendantTrivia(descendIntoTrivia: true))
-    {
         if (trivia.GetStructure() is ReferenceDirectiveTriviaSyntax or LoadDirectiveTriviaSyntax)
-        {
             result.Add(At(
                 "scripting.csharp.directive_denied",
                 "#r and #load are not allowed.",
                 trivia.GetStructure()!));
-        }
-    }
 
     foreach (SyntaxNode node in tree.GetRoot().DescendantNodesAndSelf())
     {
@@ -266,42 +258,36 @@ static IReadOnlyList<WorkerDiagnostic> ValidatePolicy(
             FunctionPointerTypeSyntax or
             StackAllocArrayCreationExpressionSyntax or
             TypeOfExpressionSyntax)
-        {
             result.Add(At(
                 "scripting.csharp.unsafe_denied",
                 "Unsafe and native code are not allowed.",
                 node));
-        }
 
         if (node is IdentifierNameSyntax identifier &&
             identifier.Identifier.ValueText == "dynamic")
-        {
             result.Add(At(
                 "scripting.csharp.dynamic_denied",
                 "Dynamic dispatch is not allowed.",
                 node));
-        }
 
         if (node is MemberAccessExpressionSyntax member)
         {
-            string expression = member.ToString().Replace("global::", string.Empty, StringComparison.Ordinal);
-            string memberName = member.Name.Identifier.ValueText;
+            var expression = member.ToString().Replace("global::", string.Empty, StringComparison.Ordinal);
+            var memberName = member.Name.Identifier.ValueText;
             if (bannedRoots.Any(root => expression.StartsWith(root + ".", StringComparison.Ordinal)) ||
                 bannedCapabilityNames.Contains(memberName, StringComparer.Ordinal) ||
                 bannedCapabilityNames.Any(name =>
                     expression.StartsWith(name + ".", StringComparison.Ordinal) ||
                     expression.Contains("." + name + ".", StringComparison.Ordinal)))
-            {
                 result.Add(At(
                     "scripting.csharp.capability_denied",
                     "The source requests a denied host capability.",
                     node));
-            }
         }
 
         if (node is ObjectCreationExpressionSyntax creation)
         {
-            string typeName = creation.Type.ToString().Replace("global::", string.Empty, StringComparison.Ordinal);
+            var typeName = creation.Type.ToString().Replace("global::", string.Empty, StringComparison.Ordinal);
             if (!bannedCapabilityNames.Contains(typeName, StringComparer.Ordinal) &&
                 !bannedRoots.Any(root => typeName.StartsWith(root + ".", StringComparison.Ordinal)))
                 continue;
@@ -315,12 +301,10 @@ static IReadOnlyList<WorkerDiagnostic> ValidatePolicy(
             bannedCapabilityNames.Any(name =>
                 attribute.Name.ToString().Equals(name, StringComparison.Ordinal) ||
                 attribute.Name.ToString().Equals(name + "Attribute", StringComparison.Ordinal)))
-        {
             result.Add(At(
                 "scripting.csharp.native_denied",
                 "Native interop attributes are not allowed.",
                 node));
-        }
     }
 
     return result
@@ -354,8 +338,10 @@ static WorkerDiagnostic ToDiagnostic(Diagnostic diagnostic)
         diagnostic.Location == Location.None ? null : span.StartLinePosition.Character + 1);
 }
 
-static Task WriteAsync(WorkerResponse response) =>
-    Console.Out.WriteAsync(JsonSerializer.Serialize(response));
+static Task WriteAsync(WorkerResponse response)
+{
+    return Console.Out.WriteAsync(JsonSerializer.Serialize(response));
+}
 
 internal sealed record WorkerRequest(
     int ProtocolVersion,
@@ -375,8 +361,10 @@ internal sealed record WorkerResponse(
     int? Column,
     IReadOnlyList<WorkerDiagnostic>? Diagnostics)
 {
-    public static WorkerResponse Fail(string code, string message) =>
-        new(false, null, code, message, null, null, null);
+    public static WorkerResponse Fail(string code, string message)
+    {
+        return new WorkerResponse(false, null, code, message, null, null, null);
+    }
 
     public static WorkerResponse Fail(IReadOnlyList<WorkerDiagnostic> diagnostics)
     {

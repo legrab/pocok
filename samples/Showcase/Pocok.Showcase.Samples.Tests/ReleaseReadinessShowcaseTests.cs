@@ -12,7 +12,8 @@ using Pocok.Showcase.Subscriptions;
 
 namespace Pocok.Showcase.Samples.Tests;
 
-[TestFixture, NonParallelizable]
+[TestFixture]
+[NonParallelizable]
 public sealed class ReleaseReadinessShowcaseTests
 {
     public static IEnumerable<TestCaseData> Samples()
@@ -49,17 +50,20 @@ public sealed class ReleaseReadinessShowcaseTests
     public void RecipeRenderersUseCurrentPublicApiNames()
     {
         ReadinessRecipeRenderer.Render(new ReadinessInput()).ShouldContain("ReadinessSource");
-        BackgroundWorkRecipeRenderer.Render(new BackgroundWorkInput { Mode = "debounce" }).ShouldContain("DebouncedTaskRunner");
+        BackgroundWorkRecipeRenderer.Render(new BackgroundWorkInput { Mode = "debounce" })
+            .ShouldContain("DebouncedTaskRunner");
         ModularityRecipeRenderer.Render(new ModularityInput { Mode = "manifest" }).ShouldContain("pocok.module.json");
         SignalsRecipeRenderer.Render(new SignalsInput { Mode = "subscribe" }).ShouldContain("SignalQuality");
-        SubscriptionsRecipeRenderer.Render(new SubscriptionsInput { Mode = "filter-map" }).ShouldContain("WithValueMapper");
+        SubscriptionsRecipeRenderer.Render(new SubscriptionsInput { Mode = "filter-map" })
+            .ShouldContain("WithValueMapper");
     }
 
     [Test]
     public async Task LoggingSampleEmitsOnlyBoundedSafeRecords()
     {
         var slice = new LoggingShowcaseSlice();
-        ShowcaseRunResult result = await TestSupport.ExecuteAsync(slice, new LoggingInput { EventCount = 25, IncludeException = true });
+        ShowcaseRunResult result =
+            await TestSupport.ExecuteAsync(slice, new LoggingInput { EventCount = 25, IncludeException = true });
         result.Status.ShouldBe(ShowcaseRunStatus.Success);
         result.Fields.Count.ShouldBe(20);
         result.Fields.ShouldAllBe(field => !field.Value!.Contains(" at ", StringComparison.Ordinal));
@@ -69,10 +73,12 @@ public sealed class ReleaseReadinessShowcaseTests
     public async Task LocalizationSampleUsesRealProvidersAndDoesNotExposeTheTemporaryPath()
     {
         var slice = new LocalizationShowcaseSlice();
-        ShowcaseRunResult result = await TestSupport.ExecuteAsync(slice, new LocalizationInput { Culture = "hu-HU", Reload = false });
+        ShowcaseRunResult result =
+            await TestSupport.ExecuteAsync(slice, new LocalizationInput { Culture = "hu-HU", Reload = false });
         result.Status.ShouldBe(ShowcaseRunStatus.Success);
         result.Headline.ShouldBe("Szia Pocok");
-        result.Fields.ShouldAllBe(field => !field.Value!.Contains(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase));
+        result.Fields.ShouldAllBe(field =>
+            !field.Value!.Contains(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase));
     }
 
     [Test]

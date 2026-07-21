@@ -4,7 +4,6 @@
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using Pocok.Modularity.Catalog;
-using Pocok.Modularity.Loading;
 using Pocok.Readiness;
 using Pocok.Showcase.Contracts;
 
@@ -16,19 +15,21 @@ public sealed class ShowcaseStartupService : IHostedService
         LogLevel.Information,
         new EventId(1, nameof(LogReady)),
         "Pocok Showcase is ready with {SliceCount} installed slice(s).");
+
     private static readonly Action<ILogger, Exception?> LogStartupFailure = LoggerMessage.Define(
         LogLevel.Critical,
         new EventId(2, nameof(LogStartupFailure)),
         "Pocok Showcase startup validation failed.");
+
+    private readonly ILogger<ShowcaseStartupService> _logger;
+    private readonly IModuleCatalog _modules;
+    private readonly IOptions<ShowcaseOptions> _options;
+    private readonly ShowcasePackageCatalog _packages;
+    private readonly ShowcasePublicLog _publicLog;
     private readonly ReadinessSource _readiness;
     private readonly ShowcaseRunnerState _runner;
     private readonly ShowcaseSliceCatalog _slices;
-    private readonly ShowcasePackageCatalog _packages;
     private readonly ShowcaseTextCatalog _text;
-    private readonly IModuleCatalog _modules;
-    private readonly IOptions<ShowcaseOptions> _options;
-    private readonly ILogger<ShowcaseStartupService> _logger;
-    private readonly ShowcasePublicLog _publicLog;
     private ReadinessCycle? _cycle;
 
     public ShowcaseStartupService(
@@ -83,6 +84,7 @@ public sealed class ShowcaseStartupService : IHostedService
             _readiness.BeginShutdown();
             _readiness.MarkStopped();
         }
+
         return Task.CompletedTask;
     }
 
@@ -93,7 +95,8 @@ public sealed class ShowcaseStartupService : IHostedService
         if (_packages.Current.Count == 0)
             throw new InvalidOperationException("The generated package catalog is empty.");
         if (_slices.All.Count == 0)
-            throw new InvalidOperationException("No showcase slices were registered. Build showcase/Pocok.Showcase.Samples.slnx to stage local plugins, or set SHOWCASE_PLUGIN_DIR to a published plugin directory.");
+            throw new InvalidOperationException(
+                "No showcase slices were registered. Build showcase/Pocok.Showcase.Samples.slnx to stage local plugins, or set SHOWCASE_PLUGIN_DIR to a published plugin directory.");
         ModuleDescriptor[] requiredFailures = _modules.Modules
             .Where(static module => module.Required && module.Status != ModuleStatus.Registered)
             .ToArray();
@@ -102,20 +105,24 @@ public sealed class ShowcaseStartupService : IHostedService
 
         foreach (IShowcaseSlice slice in _slices.All)
         {
-            if (!_text.Contains(slice.Descriptor.ResourceNamespace, slice.Descriptor.DisplayNameKey, CultureInfo.InvariantCulture))
-                throw new InvalidOperationException($"Missing invariant display name for {slice.Descriptor.PackageId}.");
-            if (!_text.Contains(slice.Descriptor.ResourceNamespace, slice.Descriptor.SummaryKey, CultureInfo.InvariantCulture))
+            if (!_text.Contains(slice.Descriptor.ResourceNamespace, slice.Descriptor.DisplayNameKey,
+                    CultureInfo.InvariantCulture))
+                throw new InvalidOperationException(
+                    $"Missing invariant display name for {slice.Descriptor.PackageId}.");
+            if (!_text.Contains(slice.Descriptor.ResourceNamespace, slice.Descriptor.SummaryKey,
+                    CultureInfo.InvariantCulture))
                 throw new InvalidOperationException($"Missing invariant summary for {slice.Descriptor.PackageId}.");
         }
 
         if (_options.Value.RequireCompleteCatalog)
         {
-            string[] missing = _packages.Current
+            var missing = _packages.Current
                 .Where(package => _slices.FindByPackageId(package.Id) is null)
                 .Select(static package => package.Id)
                 .ToArray();
             if (missing.Length > 0)
-                throw new InvalidOperationException($"Strict catalog coverage is missing: {string.Join(", ", missing)}.");
+                throw new InvalidOperationException(
+                    $"Strict catalog coverage is missing: {string.Join(", ", missing)}.");
         }
     }
 }

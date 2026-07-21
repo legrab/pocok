@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
+using Microsoft.Extensions.Configuration;
 using Pocok.Scripting.CSharp;
 using Pocok.Scripting.Execution;
 using Pocok.Scripting.JavaScript;
@@ -8,17 +9,12 @@ using Pocok.Scripting.Python;
 using Pocok.Showcase.Contracts;
 using Pocok.Showcase.Scripting;
 using Pocok.Showcase.Scripting.Models;
-using Shouldly;
 
 namespace Pocok.Showcase.Samples.Tests;
 
 [TestFixture]
 public sealed class ScriptingShowcaseTests
 {
-    private ScriptEngineRegistry _registry = null!;
-    private ScriptRunner _runner = null!;
-    private ScriptingShowcaseSlice _slice = null!;
-
     [SetUp]
     public void SetUp()
     {
@@ -29,26 +25,31 @@ public sealed class ScriptingShowcaseTests
                 ScriptEngineId.CSharp,
                 "C#",
                 "scripting.engine.trusted_only",
-                "C# is trusted/local only."),
+                "C# requires explicit enablement."),
             new UnavailableScriptEngineAdapter(
                 ScriptEngineId.Python,
                 "Python",
                 "scripting.engine.trusted_only",
-                "Python is trusted/local only.")
+                "Python requires explicit enablement.")
         ]);
         _runner = new ScriptRunner(_registry);
-        _slice = new ScriptingShowcaseSlice(_runner, _registry);
+        _slice = new ScriptingShowcaseSlice(_runner, _registry, new ScriptingShowcaseOptions());
     }
+
+    private ScriptEngineRegistry _registry = null!;
+    private ScriptRunner _runner = null!;
+    private ScriptingShowcaseSlice _slice = null!;
 
     public static IEnumerable<TestCaseData> Samples()
     {
         ScriptEngineRegistry registry = CreateRegistry();
-        var slice = new ScriptingShowcaseSlice(new ScriptRunner(registry), registry);
+        var slice = new ScriptingShowcaseSlice(
+            new ScriptRunner(registry),
+            registry,
+            new ScriptingShowcaseOptions());
         foreach (IShowcaseSample sample in slice.Samples)
-        {
             yield return new TestCaseData(sample.Id, sample.ExpectedHeadlineResult)
                 .SetName($"Sample_{sample.Id}");
-        }
     }
 
     [TestCaseSource(nameof(Samples))]
@@ -74,7 +75,7 @@ public sealed class ScriptingShowcaseTests
     }
 
     [Test]
-    public void PublicDescriptorsKeepTrustedEnginesUnavailable()
+    public void DefaultDescriptorsKeepOptInEnginesUnavailable()
     {
         _registry.Descriptors.Single(item => item.Id == ScriptEngineId.JavaScript).IsAvailable.ShouldBeTrue();
         _registry.Descriptors.Single(item => item.Id == ScriptEngineId.CSharp).IsAvailable.ShouldBeFalse();
@@ -95,12 +96,92 @@ public sealed class ScriptingShowcaseTests
     [Test]
     public async Task OversizedSourceIsRejectedBeforeEngineExecution()
     {
-        var input = new ScriptingInput { Source = new string('x', 40_000) };
+        var input = new ScriptingInput { Source = new string('x', 4_001) };
 
         ShowcaseRunResult result = await TestSupport.ExecuteAsync(_slice, input);
 
         result.Status.ShouldBe(ShowcaseRunStatus.Rejected);
         result.Diagnostics.Single().Code.ShouldBe("showcase.script-too-large");
+    }
+
+    [Test]
+    public void ModuleScopedConfigurationIsParsed()
+    {
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["TrustedEnginesEnabled"] = "true",
+                ["MaximumSourceCharacters"] = "4096",
+                ["MaximumOutputBytes"] = "16384",
+                ["MaximumTimeoutMilliseconds"] = "2500"
+            })
+            .Build();
+
+        var options = ScriptingShowcaseOptions.FromConfiguration(configuration);
+
+        options.TrustedEnginesEnabled.ShouldBeTrue();
+        options.MaximumSourceCharacters.ShouldBe(4096);
+        options.MaximumOutputBytes.ShouldBe(16384);
+        options.MaximumTimeoutMilliseconds.ShouldBe(2500);
+    }
+
+    [Test]
+    public async Task ConfiguredSourceLimitIsApplied()
+    {
+        var options = new ScriptingShowcaseOptions { MaximumSourceCharacters = 512 };
+        var slice = new ScriptingShowcaseSlice(_runner, _registry, options);
+        var input = new ScriptingInput { Source = new string('x', 513) };
+
+        ShowcaseRunResult result = await TestSupport.ExecuteAsync(slice, input);
+
+        result.Status.ShouldBe(ShowcaseRunStatus.Rejected);
+        result.Diagnostics.Single().Code.ShouldBe("showcase.script-too-large");
+    }
+
+    [Test]
+    public async Task ConfiguredTimeoutCeilingIsApplied()
+    {
+        var options = new ScriptingShowcaseOptions { MaximumTimeoutMilliseconds = 500 };
+        var slice = new ScriptingShowcaseSlice(_runner, _registry, options);
+        var input = new ScriptingInput { Source = "1;", TimeoutMilliseconds = 501 };
+
+        ShowcaseRunResult result = await TestSupport.ExecuteAsync(slice, input);
+
+        result.Status.ShouldBe(ShowcaseRunStatus.Rejected);
+        result.Diagnostics.Single().Code.ShouldBe("showcase.timeout-bounds");
+    }
+
+    [Test]
+    public async Task MissingJavaScriptLimitsUseConfiguredServerCeilings()
+    {
+        var input = new ScriptingInput
+        {
+            Source = "1;",
+            MaxStatements = null,
+            MaxRecursionDepth = null,
+            MaxMemoryMegabytes = null
+        };
+
+        ShowcaseRunResult result = await TestSupport.ExecuteAsync(_slice, input);
+
+        result.Status.ShouldBe(ShowcaseRunStatus.Success);
+        var limits = result.Fields.Single(field => field.Name == "Result.Fields.Limits").Value!;
+        limits.ShouldContain("10000 statements");
+        limits.ShouldContain("depth 64");
+        limits.ShouldContain("16 MiB");
+    }
+
+    [Test]
+    public async Task ConfiguredStatementCeilingIsApplied()
+    {
+        var options = new ScriptingShowcaseOptions { MaximumStatements = 500 };
+        var slice = new ScriptingShowcaseSlice(_runner, _registry, options);
+        var input = new ScriptingInput { Source = "1;", MaxStatements = 501 };
+
+        ShowcaseRunResult result = await TestSupport.ExecuteAsync(slice, input);
+
+        result.Status.ShouldBe(ShowcaseRunStatus.Rejected);
+        result.Diagnostics.Single().Code.ShouldBe("showcase.statement-bounds");
     }
 
     [Test]
@@ -125,19 +206,19 @@ public sealed class ScriptingShowcaseTests
     }
 
     [Test]
-    public async Task TrustedLocalAdaptersProduceEquivalentArithmeticWhenConfigured()
+    public async Task OptInAdaptersProduceEquivalentArithmeticWhenConfigured()
     {
         var csharp = new CSharpScriptEngineAdapter();
         var python = new PythonScriptEngineAdapter();
         if (!csharp.Descriptor.IsAvailable || !python.Descriptor.IsAvailable)
         {
-            string reason = string.Join("; ", new[]
+            var reason = string.Join("; ", new[]
             {
                 csharp.Descriptor.UnavailableMessage,
                 python.Descriptor.UnavailableMessage
             }.Where(static value => !string.IsNullOrWhiteSpace(value)));
             Assert.Ignore(string.IsNullOrWhiteSpace(reason)
-                ? "Trusted local scripting engines are unavailable."
+                ? "Explicitly enabled scripting engines are unavailable."
                 : reason);
         }
 
@@ -148,6 +229,12 @@ public sealed class ScriptingShowcaseTests
             python
         ]);
         var runner = new ScriptRunner(registry);
+        var warmup = new ScriptingRuntimeWarmupService(
+            runner,
+            registry,
+            new ScriptingShowcaseOptions { TrustedEnginesEnabled = true });
+        await warmup.StartAsync(CancellationToken.None);
+
         var sources = new Dictionary<ScriptEngineId, string>
         {
             [ScriptEngineId.JavaScript] = "21 * 2;",
@@ -155,7 +242,7 @@ public sealed class ScriptingShowcaseTests
             [ScriptEngineId.Python] = "21 * 2"
         };
 
-        foreach ((ScriptEngineId id, string source) in sources)
+        foreach ((ScriptEngineId id, var source) in sources)
         {
             ScriptExecutionOptions options = id == ScriptEngineId.JavaScript
                 ? new ScriptExecutionOptions
@@ -179,9 +266,12 @@ public sealed class ScriptingShowcaseTests
     }
 
     [Test]
-    public async Task RuntimeWarmupUsesTheExplicitJavaScriptRegistry()
+    public async Task RuntimeWarmupUsesTheConfiguredEngineSet()
     {
-        var warmup = new ScriptingRuntimeWarmupService(_runner);
+        var warmup = new ScriptingRuntimeWarmupService(
+            _runner,
+            _registry,
+            new ScriptingShowcaseOptions());
 
         await warmup.StartAsync(CancellationToken.None);
 
@@ -201,18 +291,37 @@ public sealed class ScriptingShowcaseTests
         result.Value.ShouldBe(42);
     }
 
-    private static ScriptEngineRegistry CreateRegistry() => new(
-    [
-        new JavaScriptScriptEngineAdapter(),
-        new UnavailableScriptEngineAdapter(
-            ScriptEngineId.CSharp,
-            "C#",
-            "scripting.engine.trusted_only",
-            "C# is trusted/local only."),
-        new UnavailableScriptEngineAdapter(
-            ScriptEngineId.Python,
-            "Python",
-            "scripting.engine.trusted_only",
-            "Python is trusted/local only.")
-    ]);
+    [Test]
+    public async Task RuntimeWarmupFailsWhenAnEnabledTrustedEngineIsUnavailable()
+    {
+        var warmup = new ScriptingRuntimeWarmupService(
+            _runner,
+            _registry,
+            new ScriptingShowcaseOptions { TrustedEnginesEnabled = true });
+
+        InvalidOperationException exception =
+            await Should.ThrowAsync<InvalidOperationException>(async () =>
+                await warmup.StartAsync(CancellationToken.None));
+
+        exception.Message.ShouldContain("csharp");
+        exception.Message.ShouldContain("scripting.engine.trusted_only");
+    }
+
+    private static ScriptEngineRegistry CreateRegistry()
+    {
+        return new ScriptEngineRegistry(
+        [
+            new JavaScriptScriptEngineAdapter(),
+            new UnavailableScriptEngineAdapter(
+                ScriptEngineId.CSharp,
+                "C#",
+                "scripting.engine.trusted_only",
+                "C# requires explicit enablement."),
+            new UnavailableScriptEngineAdapter(
+                ScriptEngineId.Python,
+                "Python",
+                "scripting.engine.trusted_only",
+                "Python requires explicit enablement.")
+        ]);
+    }
 }

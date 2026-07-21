@@ -1,7 +1,7 @@
 @if (Fields.Count > 0)
 {
     <dl class="structured-fields">
-        @foreach (ShowcaseResultField field in Fields)
+        @foreach (var field in Fields)
         {
             <div>
                 <dt>@Name(field)</dt>
@@ -12,16 +12,17 @@
 }
 
 @code {
-    [Parameter]
-    public IReadOnlyList<ShowcaseResultField> Fields { get; set; } = Array.Empty<ShowcaseResultField>();
+    [Parameter] public IReadOnlyList<ShowcaseResultField> Fields { get; set; } = Array.Empty<ShowcaseResultField>();
 
-    [Parameter]
-    public IShowcaseText? Text { get; set; }
+    [Parameter] public IShowcaseText? Text { get; set; }
 
-    [Parameter]
-    public string ResourceNamespace { get; set; } = string.Empty;
+    [Parameter] public string ResourceNamespace { get; set; } = string.Empty;
 
-    private string Name(ShowcaseResultField field) => field.LocalizeName && Text is not null
-        ? Text.GetText(ResourceNamespace, field.Name)
-        : field.Name;
+    private string Name(ShowcaseResultField field)
+    {
+        return field.LocalizeName && Text is not null
+            ? Text.GetText(ResourceNamespace, field.Name)
+            : field.Name;
+    }
+
 }

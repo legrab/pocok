@@ -19,7 +19,7 @@ public sealed class PythonScriptEngineAdapter : IScriptEngineAdapter
     {
         _options = options ?? new PythonScriptEngineOptions();
         _client = new PythonWorkerClient(_options);
-        (bool available, string? code, string? message) = _client.Probe();
+        var (available, code, message) = _client.Probe();
         Descriptor = new ScriptEngineDescriptor(
             ScriptEngineId.Python,
             "Python",
@@ -46,11 +46,9 @@ public sealed class PythonScriptEngineAdapter : IScriptEngineAdapter
         ArgumentNullException.ThrowIfNull(options);
 
         if (script.Request.Bindings.Any(static item => item.Function is not null))
-        {
             return ScriptResult.Failed<object?>(new ScriptFailure(
                 "scripting.binding.unsupported",
                 "Function bindings cannot cross the Python worker boundary."));
-        }
 
         PythonWorkerResponse response = await _client.SendAsync(
             "execute",
@@ -80,14 +78,12 @@ public sealed class PythonScriptEngineAdapter : IScriptEngineAdapter
             CancellationToken cancellationToken = default)
         {
             if (request.Bindings.Any(static item => item.Function is not null))
-            {
                 return ScriptValidationResult.From(
                 [
                     new ScriptValidationDiagnostic(
                         "scripting.binding.unsupported",
                         "Function bindings cannot cross the Python worker boundary.")
                 ]);
-            }
 
             PythonWorkerResponse response = await client.SendAsync(
                 "validate",
@@ -119,32 +115,29 @@ internal sealed class PythonWorkerClient
     public PythonWorkerClient(PythonScriptEngineOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        string? configured = options.PythonExecutable ??
-            Environment.GetEnvironmentVariable("POCOK_PYTHON_EXECUTABLE");
+        var configured = options.PythonExecutable ??
+                         Environment.GetEnvironmentVariable("POCOK_PYTHON_EXECUTABLE");
         _pythonExecutable = !string.IsNullOrWhiteSpace(configured) && File.Exists(configured)
             ? Path.GetFullPath(configured)
             : null;
-        string? configuredWorkerPath = options.WorkerPath ??
-            Environment.GetEnvironmentVariable("POCOK_PYTHON_WORKER_PATH");
+        var configuredWorkerPath = options.WorkerPath ??
+                                   Environment.GetEnvironmentVariable("POCOK_PYTHON_WORKER_PATH");
         _workerPath = Path.GetFullPath(configuredWorkerPath ??
-            Path.Combine(AppContext.BaseDirectory, "Pocok.Scripting", "PythonWorker", "pocok_worker.py"));
+                                       Path.Combine(AppContext.BaseDirectory, "Pocok.Scripting", "PythonWorker",
+                                           "pocok_worker.py"));
     }
 
     public (bool Available, string? Code, string? Message) Probe()
     {
         if (_pythonExecutable is null)
-        {
             return (false,
                 "scripting.python.executable_unavailable",
                 "Configure PythonExecutable or POCOK_PYTHON_EXECUTABLE.");
-        }
 
         if (!File.Exists(_workerPath))
-        {
             return (false,
                 "scripting.python.worker_missing",
                 "The private Python worker is missing.");
-        }
 
         try
         {
@@ -161,13 +154,13 @@ internal sealed class PythonWorkerClient
             process.StandardInput.Close();
             if (!process.WaitForExit(3_000))
             {
-                process.Kill(entireProcessTree: true);
+                process.Kill(true);
                 return (false,
                     "scripting.python.probe_timeout",
                     "CPython probing timed out.");
             }
 
-            string[] lines = process.StandardOutput.ReadToEnd()
+            var lines = process.StandardOutput.ReadToEnd()
                 .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
             _ = process.StandardError.ReadToEnd();
 
@@ -196,7 +189,6 @@ internal sealed class PythonWorkerClient
         CancellationToken cancellationToken)
     {
         if (_pythonExecutable is null || !File.Exists(_workerPath))
-        {
             return new PythonWorkerResponse(
                 false,
                 null,
@@ -204,7 +196,6 @@ internal sealed class PythonWorkerClient
                 "Python is unavailable.",
                 null,
                 null);
-        }
 
         var payload = new
         {
@@ -246,11 +237,10 @@ internal sealed class PythonWorkerClient
                 timeoutSource.Token);
 
             await process.WaitForExitAsync(timeoutSource.Token).ConfigureAwait(false);
-            string output = await stdout.ConfigureAwait(false);
+            var output = await stdout.ConfigureAwait(false);
             _ = await stderr.ConfigureAwait(false);
 
             if (process.ExitCode != 0)
-            {
                 return new PythonWorkerResponse(
                     false,
                     null,
@@ -258,16 +248,15 @@ internal sealed class PythonWorkerClient
                     "Python execution failed safely.",
                     null,
                     null);
-            }
 
             return JsonSerializer.Deserialize<PythonWorkerResponse>(output, JsonOptions) ??
-                new PythonWorkerResponse(
-                    false,
-                    null,
-                    "scripting.python.protocol",
-                    "Python returned an empty response.",
-                    null,
-                    null);
+                   new PythonWorkerResponse(
+                       false,
+                       null,
+                       "scripting.python.protocol",
+                       "Python returned an empty response.",
+                       null,
+                       null);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -326,7 +315,7 @@ internal sealed class PythonWorkerClient
 
     private static void CopyEnvironmentVariable(ProcessStartInfo start, string name)
     {
-        string? value = Environment.GetEnvironmentVariable(name);
+        var value = Environment.GetEnvironmentVariable(name);
         if (!string.IsNullOrWhiteSpace(value))
             start.Environment[name] = value;
     }
@@ -341,7 +330,7 @@ internal sealed class PythonWorkerClient
 
         while (true)
         {
-            int read = await reader.ReadAsync(buffer.AsMemory(), cancellationToken).ConfigureAwait(false);
+            var read = await reader.ReadAsync(buffer.AsMemory(), cancellationToken).ConfigureAwait(false);
             if (read == 0)
                 return builder.ToString();
             if (builder.Length + read > maximumCharacters)
@@ -356,7 +345,7 @@ internal sealed class PythonWorkerClient
         try
         {
             if (!process.HasExited)
-                process.Kill(entireProcessTree: true);
+                process.Kill(true);
         }
         catch (Exception)
         {

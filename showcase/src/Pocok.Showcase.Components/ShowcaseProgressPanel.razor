@@ -7,7 +7,7 @@
         </summary>
         <div class="collapsible-support-content" aria-live="polite" aria-atomic="false">
             <ol class="timeline progress-timeline">
-                @foreach (ShowcaseProgressEvent progress in Progress)
+                @foreach (var progress in Progress)
                 {
                     <li><span class="mono">@progress.Stage</span><span>@progress.Message</span></li>
                 }

@@ -17,7 +17,7 @@ public static class ShowcaseCodeAssistFilter
         ArgumentNullException.ThrowIfNull(text);
         ArgumentOutOfRangeException.ThrowIfLessThan(maximumItems, 1);
         cursor = Math.Clamp(cursor, 0, text.Length);
-        string token = ReadToken(text, cursor);
+        var token = ReadToken(text, cursor);
 
         IEnumerable<ShowcaseCodeAssistItem> query = catalog.Items;
         if (token.Length > 0)
@@ -49,6 +49,8 @@ public static class ShowcaseCodeAssistFilter
         return 2;
     }
 
-    private static bool IsTokenCharacter(char character) =>
-        char.IsLetterOrDigit(character) || character is '.' or '_' or ':' or '<' or '>';
+    private static bool IsTokenCharacter(char character)
+    {
+        return char.IsLetterOrDigit(character) || character is '.' or '_' or ':' or '<' or '>';
+    }
 }

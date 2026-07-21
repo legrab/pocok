@@ -1,7 +1,7 @@
 <div class="package-page">
     <ShowcasePackageHeader Descriptor="Context.Descriptor"
                            Text="Context.Text"
-                           ImplementationStatusText="@T("Package.Status.Available")" />
+                           ImplementationStatusText="@T("Package.Status.Available")"/>
 
     <ShowcasePackageWorkbench>
         <Samples>
@@ -10,15 +10,15 @@
                                   SelectedId="@_selectedId"
                                   SelectedIdChanged="SelectSampleAsync"
                                   Text="Context.Text"
-                                  ResourceNamespace="scripting" />
+                                  ResourceNamespace="scripting"/>
             <ShowcaseProgressPanel Title="@T("Sandbox.ExecutionSteps")"
-                                   Progress="_progress" />
+                                   Progress="_progress"/>
             @if (_result is not null)
             {
                 <ShowcaseTipPanel Title="@T("Tips.Title")"
                                   TipKeys="_result.TipKeys"
                                   Text="Context.Text"
-                                  ResourceNamespace="scripting" />
+                                  ResourceNamespace="scripting"/>
             }
         </Samples>
         <Main>
@@ -30,7 +30,12 @@
                                  ValueChanged="SetInputAsync"
                                  Engines="Engines"
                                  ResetRevision="_sampleRevision"
-                                 Text="Context.Text" />
+                                 Text="Context.Text"
+                                 MaximumSourceCharacters="ShowcaseOptions.MaximumSourceCharacters"
+                                 MaximumTimeoutMilliseconds="ShowcaseOptions.MaximumTimeoutMilliseconds"
+                                 MaximumStatements="ShowcaseOptions.MaximumStatements"
+                                 MaximumRecursionDepth="ShowcaseOptions.MaximumRecursionDepth"
+                                 MaximumMemoryMegabytes="ShowcaseOptions.MaximumMemoryMegabytes"/>
 
                 <ShowcaseExecutionControls Slice="Context.Slice"
                                            Input="_input"
@@ -42,7 +47,7 @@
                                            ResetKey="@SampleResetKey"
                                            ResultChanged="SetResultAsync"
                                            RunningChanged="SetRunningAsync"
-                                           ProgressChanged="SetProgressAsync" />
+                                           ProgressChanged="SetProgressAsync"/>
             </ShowcaseSandboxFrame>
 
             <ShowcaseResultPanel Title="@T("Result.Title")"
@@ -52,13 +57,13 @@
                                  ResourceNamespace="scripting"
                                  CodePreviewTitle="@T("Result.ScriptPreview")"
                                  CodePreviewLanguage="@_input.EngineId"
-                                 TruncatedLabel="@T("Result.Truncated")" />
+                                 TruncatedLabel="@T("Result.Truncated")"/>
         </Main>
         <Guidance>
             <ShowcaseGuideView Guide="Context.Slice.Guide"
                                Text="Context.Text"
                                ResourceNamespace="scripting"
-                               MoreLabel="@T("Guide.More")" />
+                               MoreLabel="@T("Guide.More")"/>
             <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
                 <ul class="compact-list">
                     <li>@T("Boundaries.Guardrails")</li>
@@ -69,7 +74,7 @@
             </ShowcaseBoundariesPanel>
             <ShowcaseSourcePanel Title="@T("Source.Title")"
                                  Body="@T("Source.Body")"
-                                 Path="@Context.Descriptor.SourceDocumentationPath" />
+                                 Path="@Context.Descriptor.SourceDocumentationPath"/>
         </Guidance>
     </ShowcasePackageWorkbench>
 </div>

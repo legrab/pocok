@@ -1,5 +1,5 @@
 <ul class="diagnostics">
-    @foreach (ShowcaseDiagnostic diagnostic in Diagnostics)
+    @foreach (var diagnostic in Diagnostics)
     {
         <li class="diagnostic-@diagnostic.Severity"><span class="mono">@diagnostic.Code</span> @diagnostic.Message</li>
     }

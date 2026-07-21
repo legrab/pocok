@@ -1,8 +1,7 @@
-@using Pocok.Scripting.Execution
 <div class="field">
     <label for="script-engine">@T("Fields.Engine")</label>
     <select id="script-engine" value="@Value.EngineId" @onchange="ChangeEngineAsync">
-        @foreach (ScriptEngineDescriptor descriptor in Engines)
+        @foreach (var descriptor in Engines)
         {
             <option value="@descriptor.Id.Value">
                 @descriptor.Language @(!descriptor.IsAvailable ? $"— {descriptor.UnavailableCode}" : null)
@@ -22,7 +21,12 @@
                       ValueChanged="SetSourceAsync"
                       ResetRevision="@ResetRevision"
                       Completions="@Completions"
-                      FallbackDiagnostic="@T("Sandbox.EditorFallback")" />
+                      FallbackDiagnostic="@T("Sandbox.EditorFallback")"/>
+
+<small class="@(SourceLimitExceeded ? "diagnostic warning" : null)"
+       role="@(SourceLimitExceeded ? "status" : null)">
+    @SourceLengthText
+</small>
 
 <div class="field-grid scripting-options">
     <div class="field checkbox-field">
@@ -30,17 +34,17 @@
         <input id="expect-result"
                type="checkbox"
                checked="@Value.ExpectResult"
-               @onchange="args => UpdateAsync(Value with { ExpectResult = ReadValue(args, Value.ExpectResult) })" />
+               @onchange="args => UpdateAsync(Value with { ExpectResult = ReadValue(args, Value.ExpectResult) })"/>
     </div>
     <div class="field">
         <label for="timeout">@T("Fields.Timeout")</label>
         <input id="timeout"
                type="number"
                min="50"
-               max="2000"
+               max="@MaximumTimeoutMilliseconds"
                step="50"
                value="@Value.TimeoutMilliseconds"
-               @onchange="args => UpdateAsync(Value with { TimeoutMilliseconds = Math.Clamp(ReadValue(args, Value.TimeoutMilliseconds), 50, 2000) })" />
+               @onchange="args => UpdateAsync(Value with { TimeoutMilliseconds = Math.Clamp(ReadValue(args, Value.TimeoutMilliseconds), 50, MaximumTimeoutMilliseconds) })"/>
     </div>
     @if (Selected?.Capabilities.EnforcesStatementLimit == true)
     {
@@ -49,9 +53,9 @@
             <input id="statements"
                    type="number"
                    min="100"
-                   max="100000"
+                   max="@MaximumStatements"
                    value="@Value.MaxStatements"
-                   @onchange="args => UpdateAsync(Value with { MaxStatements = Math.Clamp(ReadValue(args, Value.MaxStatements ?? 10000), 100, 100000) })" />
+                   @onchange="args => UpdateAsync(Value with { MaxStatements = Math.Clamp(ReadValue(args, Value.MaxStatements ?? MaximumStatements), 100, MaximumStatements) })"/>
         </div>
     }
     @if (Selected?.Capabilities.EnforcesRecursionLimit == true)
@@ -61,9 +65,9 @@
             <input id="recursion"
                    type="number"
                    min="8"
-                   max="128"
+                   max="@MaximumRecursionDepth"
                    value="@Value.MaxRecursionDepth"
-                   @onchange="args => UpdateAsync(Value with { MaxRecursionDepth = Math.Clamp(ReadValue(args, Value.MaxRecursionDepth ?? 64), 8, 128) })" />
+                   @onchange="args => UpdateAsync(Value with { MaxRecursionDepth = Math.Clamp(ReadValue(args, Value.MaxRecursionDepth ?? MaximumRecursionDepth), 8, MaximumRecursionDepth) })"/>
         </div>
     }
     @if (Selected?.Capabilities.EnforcesMemoryLimit == true)
@@ -73,9 +77,9 @@
             <input id="memory"
                    type="number"
                    min="4"
-                   max="64"
+                   max="@MaximumMemoryMegabytes"
                    value="@Value.MaxMemoryMegabytes"
-                   @onchange="args => UpdateAsync(Value with { MaxMemoryMegabytes = Math.Clamp(ReadValue(args, Value.MaxMemoryMegabytes ?? 16), 4, 64) })" />
+                   @onchange="args => UpdateAsync(Value with { MaxMemoryMegabytes = Math.Clamp(ReadValue(args, Value.MaxMemoryMegabytes ?? MaximumMemoryMegabytes), 4, MaximumMemoryMegabytes) })"/>
         </div>
     }
 </div>

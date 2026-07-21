@@ -1,13 +1,16 @@
 @page "/system"
+@using Microsoft.Extensions.Options
+@using Pocok.Modularity.Catalog
+@using Pocok.Readiness
 @implements IDisposable
 @inject ShowcaseSliceCatalog SliceCatalog
 @inject ShowcasePackageCatalog PackageCatalog
-@inject Pocok.Modularity.Catalog.IModuleCatalog ModuleCatalog
-@inject Pocok.Readiness.ReadinessSource Readiness
+@inject IModuleCatalog ModuleCatalog
+@inject ReadinessSource Readiness
 @inject IWebHostEnvironment Environment
 @inject ShowcaseRunBuffer RunQueue
 @inject ShowcaseRuntimeInfo Runtime
-@inject Microsoft.Extensions.Options.IOptions<ShowcaseOptions> Options
+@inject IOptions<ShowcaseOptions> Options
 @inject IShowcaseText Text
 @inject IEnumerable<ShowcaseLogBuffer> LogBuffers
 @inject ShowcaseUiState UiState
@@ -35,7 +38,7 @@
                 <input id="log-console-toggle"
                        type="checkbox"
                        checked="@UiState.LogConsoleVisible"
-                       @onchange="SetLogConsoleVisibility" />
+                       @onchange="SetLogConsoleVisibility"/>
             </label>
         </section>
     }
@@ -43,27 +46,42 @@
     <section class="panel">
         <h2>@Text.GetText("shell", "System.Application")</h2>
         <dl>
-            <dt>@Text.GetText("shell", "System.ApplicationVersion")</dt><dd class="mono">@Runtime.ApplicationVersion</dd>
-            <dt>@Text.GetText("shell", "System.DotNet")</dt><dd>@Runtime.FrameworkDescription</dd>
-            <dt>@Text.GetText("shell", "System.OperatingSystem")</dt><dd>@Runtime.OperatingSystem</dd>
-            <dt>@Text.GetText("shell", "System.Architecture")</dt><dd>@Runtime.Architecture</dd>
-            <dt>@Text.GetText("shell", "System.Environment")</dt><dd>@Environment.EnvironmentName</dd>
-            <dt>@Text.GetText("shell", "System.Uptime")</dt><dd>@FormatUptime(Runtime.Uptime)</dd>
-            <dt>@Text.GetText("shell", "System.Culture")</dt><dd class="mono">@CultureInfo.CurrentUICulture.Name</dd>
+            <dt>@Text.GetText("shell", "System.ApplicationVersion")</dt>
+            <dd class="mono">@Runtime.ApplicationVersion</dd>
+            <dt>@Text.GetText("shell", "System.DotNet")</dt>
+            <dd>@Runtime.FrameworkDescription</dd>
+            <dt>@Text.GetText("shell", "System.OperatingSystem")</dt>
+            <dd>@Runtime.OperatingSystem</dd>
+            <dt>@Text.GetText("shell", "System.Architecture")</dt>
+            <dd>@Runtime.Architecture</dd>
+            <dt>@Text.GetText("shell", "System.Environment")</dt>
+            <dd>@Environment.EnvironmentName</dd>
+            <dt>@Text.GetText("shell", "System.Uptime")</dt>
+            <dd>@FormatUptime(Runtime.Uptime)</dd>
+            <dt>@Text.GetText("shell", "System.Culture")</dt>
+            <dd class="mono">@CultureInfo.CurrentUICulture.Name</dd>
         </dl>
     </section>
 
     <section class="panel">
         <h2>@Text.GetText("shell", "System.Readiness")</h2>
         <dl>
-            <dt>@Text.GetText("shell", "System.ReadinessState")</dt><dd>@Readiness.State</dd>
-            <dt>@Text.GetText("shell", "System.ReadinessSequence")</dt><dd>@Readiness.Snapshot.Sequence</dd>
-            <dt>@Text.GetText("shell", "System.CatalogPolicy")</dt><dd>@Text.GetText("shell", Options.Value.RequireCompleteCatalog ? "System.Strict" : "System.Partial")</dd>
-            <dt>@Text.GetText("shell", "System.KnownPackages")</dt><dd>@PackageCatalog.Packages.Count</dd>
-            <dt>@Text.GetText("shell", "System.InstalledSlices")</dt><dd>@SliceCatalog.Installed.Count</dd>
-            <dt>@Text.GetText("shell", "System.PlannedSlices")</dt><dd>@(PackageCatalog.Packages.Count - SliceCatalog.Installed.Count)</dd>
-            <dt>@Text.GetText("shell", "System.QueueDepth")</dt><dd>@RunQueue.Depth</dd>
-            <dt>@Text.GetText("shell", "System.QueueCapacity")</dt><dd>@RunQueue.Capacity</dd>
+            <dt>@Text.GetText("shell", "System.ReadinessState")</dt>
+            <dd>@Readiness.State</dd>
+            <dt>@Text.GetText("shell", "System.ReadinessSequence")</dt>
+            <dd>@Readiness.Snapshot.Sequence</dd>
+            <dt>@Text.GetText("shell", "System.CatalogPolicy")</dt>
+            <dd>@Text.GetText("shell", Options.Value.RequireCompleteCatalog ? "System.Strict" : "System.Partial")</dd>
+            <dt>@Text.GetText("shell", "System.KnownPackages")</dt>
+            <dd>@PackageCatalog.Packages.Count</dd>
+            <dt>@Text.GetText("shell", "System.InstalledSlices")</dt>
+            <dd>@SliceCatalog.Installed.Count</dd>
+            <dt>@Text.GetText("shell", "System.PlannedSlices")</dt>
+            <dd>@(PackageCatalog.Packages.Count - SliceCatalog.Installed.Count)</dd>
+            <dt>@Text.GetText("shell", "System.QueueDepth")</dt>
+            <dd>@RunQueue.Depth</dd>
+            <dt>@Text.GetText("shell", "System.QueueCapacity")</dt>
+            <dd>@RunQueue.Capacity</dd>
         </dl>
     </section>
 
@@ -131,7 +149,7 @@
 
     private static string FormatUptime(TimeSpan uptime)
     {
-        string clock = uptime.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
+        var clock = uptime.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture);
         return uptime.TotalDays >= 1
             ? $"{(int)uptime.TotalDays}d {clock}"
             : clock;
@@ -139,11 +157,15 @@
 
     private async Task SetLogConsoleVisibility(ChangeEventArgs args)
     {
-        bool visible = args.Value is true || string.Equals(args.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+        var visible = args.Value is true || string.Equals(args.Value?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
         await JS.InvokeVoidAsync("pocokShowcasePreferences.setFeature", "log-console", visible);
         UiState.SetLogConsoleVisible(visible);
         PublicLog.ConsoleVisibilityChanged(visible);
     }
 
-    private void OnUiStateChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnUiStateChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
 }

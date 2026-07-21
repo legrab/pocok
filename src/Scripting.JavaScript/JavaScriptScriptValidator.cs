@@ -12,6 +12,7 @@ namespace Pocok.Scripting.JavaScript;
 public sealed partial class JavaScriptScriptValidator : IScriptValidator
 {
     private static readonly ParserOptions StrictParserOptions = new() { Tolerant = false };
+
     /// <inheritdoc />
     public ScriptEngineId EngineId => ScriptEngineId.JavaScript;
 
@@ -41,7 +42,7 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
             ]));
         }
 
-        string code = StripTriviaAndStrings(request.Source);
+        var code = StripTriviaAndStrings(request.Source);
         var diagnostics = new List<ScriptValidationDiagnostic>();
 
         AddIf(EvalCallRegex().IsMatch(code),
@@ -56,13 +57,11 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
 
         foreach (Match alias in EvalAliasRegex().Matches(code))
         {
-            string escapedAlias = Regex.Escape(alias.Groups["alias"].Value);
+            var escapedAlias = Regex.Escape(alias.Groups["alias"].Value);
             if (Regex.IsMatch(code, $@"\b{escapedAlias}\s*\(", RegexOptions.CultureInvariant))
-            {
                 diagnostics.Add(new ScriptValidationDiagnostic(
                     "scripting.javascript.eval_alias",
                     "Aliasing eval is not allowed."));
-            }
         }
 
         return ValueTask.FromResult(ScriptValidationResult.From(diagnostics));
@@ -78,8 +77,8 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
     {
         ArgumentNullException.ThrowIfNull(source);
         var result = new StringBuilder(source.Length);
-        int index = 0;
-        ScanCode(source, ref index, result, stopAtTemplateBrace: false);
+        var index = 0;
+        ScanCode(source, ref index, result, false);
         return result.ToString();
     }
 
@@ -89,11 +88,11 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
         StringBuilder result,
         bool stopAtTemplateBrace)
     {
-        int braceDepth = stopAtTemplateBrace ? 1 : 0;
+        var braceDepth = stopAtTemplateBrace ? 1 : 0;
         while (index < source.Length)
         {
-            char character = source[index];
-            char next = index + 1 < source.Length ? source[index + 1] : '\0';
+            var character = source[index];
+            var next = index + 1 < source.Length ? source[index + 1] : '\0';
 
             if (character == '/' && next == '/')
             {
@@ -104,6 +103,7 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
                     result.Append(' ');
                     index++;
                 }
+
                 continue;
             }
 
@@ -119,9 +119,11 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
                         index += 2;
                         break;
                     }
+
                     result.Append(source[index] is '\r' or '\n' ? source[index] : ' ');
                     index++;
                 }
+
                 continue;
             }
 
@@ -140,7 +142,9 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
             if (stopAtTemplateBrace)
             {
                 if (character == '{')
+                {
                     braceDepth++;
+                }
                 else if (character == '}' && --braceDepth == 0)
                 {
                     result.Append(character);
@@ -164,7 +168,7 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
         index++;
         while (index < source.Length)
         {
-            char character = source[index];
+            var character = source[index];
             result.Append(character is '\r' or '\n' ? character : ' ');
             index++;
             if (character == '\\' && index < source.Length)
@@ -173,6 +177,7 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
                 index++;
                 continue;
             }
+
             if (character == quote)
                 return;
         }
@@ -187,8 +192,8 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
         index++;
         while (index < source.Length)
         {
-            char character = source[index];
-            char next = index + 1 < source.Length ? source[index + 1] : '\0';
+            var character = source[index];
+            var next = index + 1 < source.Length ? source[index + 1] : '\0';
             if (character == '\\')
             {
                 result.Append(' ');
@@ -198,19 +203,22 @@ public sealed partial class JavaScriptScriptValidator : IScriptValidator
                     result.Append(source[index] is '\r' or '\n' ? source[index] : ' ');
                     index++;
                 }
+
                 continue;
             }
+
             if (character == '`')
             {
                 result.Append(' ');
                 index++;
                 return;
             }
+
             if (character == '$' && next == '{')
             {
                 result.Append("${");
                 index += 2;
-                ScanCode(source, ref index, result, stopAtTemplateBrace: true);
+                ScanCode(source, ref index, result, true);
                 continue;
             }
 

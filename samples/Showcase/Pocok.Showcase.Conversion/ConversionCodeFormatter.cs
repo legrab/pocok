@@ -13,7 +13,7 @@ public static class ConversionCodeFormatter
     public static string Format(ConversionInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
-        string value = FormatValue(input);
+        var value = FormatValue(input);
         var lines = new List<string>
         {
             $"converter.Convert<{input.TargetType}>(",
@@ -28,11 +28,12 @@ public static class ConversionCodeFormatter
         {
             lines.Add("    new ConversionContext(");
             List<string> contextArguments = ContextArguments(input);
-            for (int index = 0; index < contextArguments.Count; index++)
+            for (var index = 0; index < contextArguments.Count; index++)
             {
-                string suffix = index == contextArguments.Count - 1 ? string.Empty : ",";
+                var suffix = index == contextArguments.Count - 1 ? string.Empty : ",";
                 lines.Add($"        {contextArguments[index]}{suffix}");
             }
+
             lines.Add("    )");
         }
 
@@ -64,16 +65,18 @@ public static class ConversionCodeFormatter
             $"items={input.MaximumCollectionItems.ToString(CultureInfo.InvariantCulture)}");
     }
 
-    private static bool IsStrict(ConversionInput input) =>
-        input.Culture == "invariant"
-        && input.Overflow == OverflowPolicy.Fail
-        && input.Nulls == NullPolicy.Preserve
-        && input.Enums == EnumPolicy.DefinedValuesAndFlags
-        && input.NumericLoss == NumericLossPolicy.Reject
-        && input.NumericBooleans == NumericBooleanPolicy.Reject
-        && input.TemporalText == TemporalTextPolicy.RoundTrip
-        && input.MaximumDepth == 32
-        && input.MaximumCollectionItems == 10_000;
+    private static bool IsStrict(ConversionInput input)
+    {
+        return input.Culture == "invariant"
+               && input.Overflow == OverflowPolicy.Fail
+               && input.Nulls == NullPolicy.Preserve
+               && input.Enums == EnumPolicy.DefinedValuesAndFlags
+               && input.NumericLoss == NumericLossPolicy.Reject
+               && input.NumericBooleans == NumericBooleanPolicy.Reject
+               && input.TemporalText == TemporalTextPolicy.RoundTrip
+               && input.MaximumDepth == 32
+               && input.MaximumCollectionItems == 10_000;
+    }
 
     private static List<string> ContextArguments(ConversionInput input)
     {
@@ -89,58 +92,67 @@ public static class ConversionCodeFormatter
             $"maximumDepth: {input.MaximumDepth.ToString(CultureInfo.InvariantCulture)}"
         };
         if (input.MaximumCollectionItems != 10_000)
-        {
             arguments.Add(
                 $"maximumCollectionItems: {input.MaximumCollectionItems.ToString(CultureInfo.InvariantCulture)}");
-        }
 
         return arguments;
     }
 
-    private static string FormatValue(ConversionInput input) => input.SourceKind switch
+    private static string FormatValue(ConversionInput input)
     {
-        ConversionSourceKind.Null => "null",
-        ConversionSourceKind.Boolean => bool.TryParse(input.SourceValue, out bool boolean) && boolean ? "true" : "false",
-        ConversionSourceKind.Integer => input.SourceValue,
-        ConversionSourceKind.UnsignedInteger => input.SourceValue + "UL",
-        ConversionSourceKind.Decimal => input.SourceValue + "m",
-        ConversionSourceKind.FloatingPoint => input.SourceValue + "d",
-        ConversionSourceKind.TextArray => FormatArray(input.SourceValue, false),
-        ConversionSourceKind.ObjectArray => FormatArray(input.SourceValue, true),
-        _ => JsonSerializer.Serialize(input.SourceValue)
-    };
+        return input.SourceKind switch
+        {
+            ConversionSourceKind.Null => "null",
+            ConversionSourceKind.Boolean => bool.TryParse(input.SourceValue, out var boolean) && boolean
+                ? "true"
+                : "false",
+            ConversionSourceKind.Integer => input.SourceValue,
+            ConversionSourceKind.UnsignedInteger => input.SourceValue + "UL",
+            ConversionSourceKind.Decimal => input.SourceValue + "m",
+            ConversionSourceKind.FloatingPoint => input.SourceValue + "d",
+            ConversionSourceKind.TextArray => FormatArray(input.SourceValue, false),
+            ConversionSourceKind.ObjectArray => FormatArray(input.SourceValue, true),
+            _ => JsonSerializer.Serialize(input.SourceValue)
+        };
+    }
 
     private static string FormatArray(string value, bool objectArray)
     {
         try
         {
             JsonElement[] items = JsonSerializer.Deserialize<JsonElement[]>(value) ?? [];
-            string values = string.Join(", ", items.Select(FormatArrayItem));
+            var values = string.Join(", ", items.Select(FormatArrayItem));
             return objectArray ? $"new object?[] {{ {values} }}" : $"new[] {{ {values} }}";
         }
         catch (JsonException)
         {
-            string[] items = value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            var items = value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             return $"new[] {{ {string.Join(", ", items.Select(static item => JsonSerializer.Serialize(item)))} }}";
         }
     }
 
-    private static string FormatArrayItem(JsonElement item) => item.ValueKind switch
+    private static string FormatArrayItem(JsonElement item)
     {
-        JsonValueKind.String => JsonSerializer.Serialize(item.GetString() ?? string.Empty),
-        JsonValueKind.Number => item.GetRawText(),
-        JsonValueKind.True => "true",
-        JsonValueKind.False => "false",
-        JsonValueKind.Null => "null",
-        _ => throw new FormatException("Only scalar array values are supported.")
-    };
+        return item.ValueKind switch
+        {
+            JsonValueKind.String => JsonSerializer.Serialize(item.GetString() ?? string.Empty),
+            JsonValueKind.Number => item.GetRawText(),
+            JsonValueKind.True => "true",
+            JsonValueKind.False => "false",
+            JsonValueKind.Null => "null",
+            _ => throw new FormatException("Only scalar array values are supported.")
+        };
+    }
 
-    private static string FormatCulture(string culture) => culture switch
+    private static string FormatCulture(string culture)
     {
-        "invariant" => "CultureInfo.InvariantCulture",
-        "en" or "en-US" => "CultureInfo.GetCultureInfo(\"en-US\")",
-        "de" or "de-DE" => "CultureInfo.GetCultureInfo(\"de-DE\")",
-        "hu" or "hu-HU" => "CultureInfo.GetCultureInfo(\"hu-HU\")",
-        _ => throw new ArgumentOutOfRangeException(nameof(culture), culture, "Unsupported showcase culture.")
-    };
+        return culture switch
+        {
+            "invariant" => "CultureInfo.InvariantCulture",
+            "en" or "en-US" => "CultureInfo.GetCultureInfo(\"en-US\")",
+            "de" or "de-DE" => "CultureInfo.GetCultureInfo(\"de-DE\")",
+            "hu" or "hu-HU" => "CultureInfo.GetCultureInfo(\"hu-HU\")",
+            _ => throw new ArgumentOutOfRangeException(nameof(culture), culture, "Unsupported showcase culture.")
+        };
+    }
 }

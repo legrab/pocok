@@ -1,7 +1,7 @@
 <div class="package-page">
     <ShowcasePackageHeader Descriptor="Context.Descriptor"
                            Text="Context.Text"
-                           ImplementationStatusText="@T("Package.Status.Available")" />
+                           ImplementationStatusText="@T("Package.Status.Available")"/>
 
     <ShowcasePackageWorkbench>
         <Samples>
@@ -10,7 +10,7 @@
                                   SelectedId="@_selectedId"
                                   SelectedIdChanged="SelectSampleAsync"
                                   Text="Context.Text"
-                                  ResourceNamespace="app-defaults-logging" />
+                                  ResourceNamespace="app-defaults-logging"/>
         </Samples>
         <Main>
             <ShowcaseSandboxFrame @key="_sampleRevision"
@@ -20,7 +20,7 @@
                     <div class="field">
                         <label for="log-level">@T("Fields.Level")</label>
                         <select id="log-level" value="@_input.Level" @onchange="SetLevelAsync">
-                            @foreach (LogLevel level in Enum.GetValues<LogLevel>())
+                            @foreach (var level in Enum.GetValues<LogLevel>())
                             {
                                 <option value="@level">@level</option>
                             }
@@ -33,21 +33,21 @@
                                min="1"
                                max="20"
                                value="@_input.EventCount"
-                               @onchange="SetCountAsync" />
+                               @onchange="SetCountAsync"/>
                     </div>
                     <div class="field checkbox-field">
                         <label for="log-property">@T("Fields.Property")</label>
                         <input id="log-property"
                                type="checkbox"
                                checked="@_input.IncludeProperty"
-                               @onchange="SetPropertyAsync" />
+                               @onchange="SetPropertyAsync"/>
                     </div>
                     <div class="field checkbox-field">
                         <label for="log-exception">@T("Fields.Exception")</label>
                         <input id="log-exception"
                                type="checkbox"
                                checked="@_input.IncludeException"
-                               @onchange="SetExceptionAsync" />
+                               @onchange="SetExceptionAsync"/>
                     </div>
                 </div>
 
@@ -59,7 +59,7 @@
                                            CancelLabel="@T("Sandbox.Cancel")"
                                            ResetKey="@SampleResetKey"
                                            ResultChanged="SetResultAsync"
-                                           RunningChanged="SetRunningAsync" />
+                                           RunningChanged="SetRunningAsync"/>
             </ShowcaseSandboxFrame>
 
             <ShowcaseResultPanel Title="@T("Result.Title")"
@@ -69,13 +69,13 @@
                                  ResourceNamespace="app-defaults-logging"
                                  CodePreviewTitle="@T("Result.Probe")"
                                  CodePreviewLanguage="csharp"
-                                 TruncatedLabel="@T("Result.Truncated")" />
+                                 TruncatedLabel="@T("Result.Truncated")"/>
         </Main>
         <Guidance>
             <ShowcaseGuideView Guide="Context.Slice.Guide"
                                Text="Context.Text"
                                ResourceNamespace="app-defaults-logging"
-                               MoreLabel="@T("Guide.More")" />
+                               MoreLabel="@T("Guide.More")"/>
             <ShowcaseBoundariesPanel Title="@T("Boundaries.Title")">
                 <ul class="compact-list">
                     <li>@T("Boundaries.Host")</li>
@@ -89,8 +89,7 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired]
-    public ShowcasePageContext Context { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcasePageContext Context { get; set; } = default!;
 
     private LoggingInput _input = new();
     private string _selectedId = string.Empty;
@@ -100,10 +99,15 @@
 
     private string SampleResetKey => _sampleRevision.ToString(CultureInfo.InvariantCulture);
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         Select(Context.Samples.Single(static sample => sample.IsDefault));
+    }
 
-    private string T(string key) => Context.Text.GetText("app-defaults-logging", key);
+    private string T(string key)
+    {
+        return Context.Text.GetText("app-defaults-logging", key);
+    }
 
     private Task SelectSampleAsync(string id)
     {
@@ -128,7 +132,7 @@
 
     private Task SetCountAsync(ChangeEventArgs args)
     {
-        if (int.TryParse(args.Value?.ToString(), out int value))
+        if (int.TryParse(args.Value?.ToString(), out var value))
             _input = _input with { EventCount = Math.Clamp(value, 1, 20) };
         return Task.CompletedTask;
     }
@@ -145,11 +149,13 @@
         return Task.CompletedTask;
     }
 
-    private static bool ReadBool(ChangeEventArgs args) =>
-        args.Value is true || string.Equals(
+    private static bool ReadBool(ChangeEventArgs args)
+    {
+        return args.Value is true || string.Equals(
             args.Value?.ToString(),
             "true",
             StringComparison.OrdinalIgnoreCase);
+    }
 
     private Task SetResultAsync(ShowcaseRunResult? result)
     {
@@ -162,4 +168,5 @@
         _running = running;
         return Task.CompletedTask;
     }
+
 }

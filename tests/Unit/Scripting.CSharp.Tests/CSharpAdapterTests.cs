@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Pocok contributors
 
-using Pocok.Scripting.CSharp;
 using Pocok.Scripting.Execution;
 using Shouldly;
 
@@ -56,14 +55,14 @@ public sealed class CSharpAdapterTests
     [Test]
     public void InvalidWorkerManifestIsTruthfullyUnavailable()
     {
-        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         try
         {
             File.WriteAllText(Path.Combine(directory, "Pocok.Scripting.CSharp.Worker.dll"), "not-an-assembly");
             File.WriteAllText(Path.Combine(directory, "worker.sha256"), new string('0', 64) +
-                "  Pocok.Scripting.CSharp.Worker.dll");
-            string fakeHost = Path.Combine(directory, "dotnet");
+                                                                        "  Pocok.Scripting.CSharp.Worker.dll");
+            var fakeHost = Path.Combine(directory, "dotnet");
             File.WriteAllText(fakeHost, string.Empty);
 
             var adapter = new CSharpScriptEngineAdapter(new CSharpScriptEngineOptions
@@ -77,7 +76,7 @@ public sealed class CSharpAdapterTests
         }
         finally
         {
-            Directory.Delete(directory, recursive: true);
+            Directory.Delete(directory, true);
         }
     }
 

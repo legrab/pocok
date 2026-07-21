@@ -9,8 +9,10 @@ public sealed record PythonScriptEngineOptions
 {
     /// <summary>Gets the explicit CPython executable.</summary>
     public string? PythonExecutable { get; init; }
+
     /// <summary>Gets the explicit private worker path.</summary>
     public string? WorkerPath { get; init; }
+
     /// <summary>Gets allowlisted standard-library imports.</summary>
     public IReadOnlyList<string> AllowedImports { get; init; } = [];
 }

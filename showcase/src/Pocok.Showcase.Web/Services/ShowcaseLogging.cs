@@ -2,6 +2,8 @@
 // Copyright 2026 Pocok contributors
 
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text;
 using System.Threading.Channels;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +15,7 @@ public static class ShowcaseInAppLogging
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
-        bool enabled = configuration.GetValue<bool?>(
+        var enabled = configuration.GetValue<bool?>(
             $"{ShowcaseOptions.SectionName}:{nameof(ShowcaseOptions.InAppLogConsoleEnabled)}") ?? true;
         if (!enabled)
             return false;
@@ -58,7 +60,6 @@ public sealed class ShowcaseLogSubscription : IAsyncDisposable
 public sealed class ShowcaseLogBuffer
 {
     private readonly object _gate = new();
-    private readonly int _capacity;
     private readonly LinkedList<ShowcaseLogRecord> _records = [];
     private readonly Dictionary<long, ChannelWriter<long>> _subscribers = [];
     private long _nextSequence;
@@ -67,10 +68,10 @@ public sealed class ShowcaseLogBuffer
     public ShowcaseLogBuffer(IOptions<ShowcaseOptions> options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        _capacity = options.Value.InAppLogCapacity;
+        Capacity = options.Value.InAppLogCapacity;
     }
 
-    public int Capacity => _capacity;
+    public int Capacity { get; }
 
     public ShowcaseLogRecord Append(
         DateTimeOffset timestamp,
@@ -88,10 +89,10 @@ public sealed class ShowcaseLogBuffer
         ShowcaseLogRecord record;
         lock (_gate)
         {
-            long sequence = checked(++_nextSequence);
+            var sequence = checked(++_nextSequence);
             record = new ShowcaseLogRecord(sequence, timestamp, level, category, eventId, message, properties);
             _records.AddFirst(record);
-            if (_records.Count > _capacity)
+            if (_records.Count > Capacity)
                 _records.RemoveLast();
             subscribers = [.. _subscribers.Values];
         }
@@ -133,7 +134,10 @@ public sealed class ShowcaseLogBuffer
     private void RemoveSubscription(long id, ChannelWriter<long> writer)
     {
         lock (_gate)
+        {
             _subscribers.Remove(id);
+        }
+
         writer.TryComplete();
     }
 }
@@ -141,6 +145,7 @@ public sealed class ShowcaseLogBuffer
 public sealed class ShowcaseLogProvider : ILoggerProvider
 {
     public const string AllowedCategoryPrefix = "Pocok.Showcase.Public.";
+
     private static readonly HashSet<string> AllowedProperties = new(StringComparer.Ordinal)
     {
         "Culture",
@@ -150,9 +155,10 @@ public sealed class ShowcaseLogProvider : ILoggerProvider
         "Theme",
         "Visible"
     };
+
     private readonly ShowcaseLogBuffer _buffer;
-    private readonly TimeProvider _timeProvider;
     private readonly ShowcaseOptions _options;
+    private readonly TimeProvider _timeProvider;
 
     public ShowcaseLogProvider(
         ShowcaseLogBuffer buffer,
@@ -164,16 +170,21 @@ public sealed class ShowcaseLogProvider : ILoggerProvider
         _options = options.Value;
     }
 
-    public ILogger CreateLogger(string categoryName) => new ShowcaseLogger(this, categoryName);
+    public ILogger CreateLogger(string categoryName)
+    {
+        return new ShowcaseLogger(this, categoryName);
+    }
 
     public void Dispose()
     {
     }
 
-    private bool IsEnabled(string category, LogLevel level) =>
-        level >= _options.InAppLogMinimumLevel
-        && level != LogLevel.None
-        && category.StartsWith(AllowedCategoryPrefix, StringComparison.Ordinal);
+    private bool IsEnabled(string category, LogLevel level)
+    {
+        return level >= _options.InAppLogMinimumLevel
+               && level != LogLevel.None
+               && category.StartsWith(AllowedCategoryPrefix, StringComparison.Ordinal);
+    }
 
     private void Write<TState>(
         string category,
@@ -185,19 +196,16 @@ public sealed class ShowcaseLogProvider : ILoggerProvider
         if (!IsEnabled(category, level))
             return;
 
-        string message = Sanitize(formatter(state, null), _options.InAppLogMaximumTextLength);
+        var message = Sanitize(formatter(state, null), _options.InAppLogMaximumTextLength);
         if (message.Length == 0)
             return;
 
         var properties = new Dictionary<string, string>(StringComparer.Ordinal);
         if (state is IEnumerable<KeyValuePair<string, object?>> values)
-        {
-            foreach ((string key, object? value) in values)
-            {
+            foreach (var (key, value) in values)
                 if (AllowedProperties.Contains(key) && value is not null)
-                    properties[key] = Sanitize(Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty, 80);
-            }
-        }
+                    properties[key] = Sanitize(Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty,
+                        80);
 
         _buffer.Append(
             _timeProvider.GetUtcNow(),
@@ -210,18 +218,18 @@ public sealed class ShowcaseLogProvider : ILoggerProvider
 
     internal static string ShortenCategory(string category)
     {
-        string[] parts = category.Split('.', StringSplitOptions.RemoveEmptyEntries);
+        var parts = category.Split('.', StringSplitOptions.RemoveEmptyEntries);
         return parts.Length <= 2 ? category : $"…{parts[^2]}.{parts[^1]}";
     }
 
     internal static string Sanitize(string value, int maximumLength)
     {
-        var result = new System.Text.StringBuilder(Math.Min(value.Length, maximumLength));
-        bool previousWasSpace = false;
-        foreach (char character in value)
+        var result = new StringBuilder(Math.Min(value.Length, maximumLength));
+        var previousWasSpace = false;
+        foreach (var character in value)
         {
-            char safe = char.IsControl(character) ? ' ' : character;
-            bool isSpace = char.IsWhiteSpace(safe);
+            var safe = char.IsControl(character) ? ' ' : character;
+            var isSpace = char.IsWhiteSpace(safe);
             if (isSpace && previousWasSpace)
                 continue;
             if (result.Length == maximumLength)
@@ -229,14 +237,21 @@ public sealed class ShowcaseLogProvider : ILoggerProvider
             result.Append(safe);
             previousWasSpace = isSpace;
         }
+
         return result.ToString().Trim();
     }
 
     private sealed class ShowcaseLogger(ShowcaseLogProvider provider, string category) : ILogger
     {
-        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return null;
+        }
 
-        public bool IsEnabled(LogLevel logLevel) => provider.IsEnabled(category, logLevel);
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return provider.IsEnabled(category, logLevel);
+        }
 
         public void Log<TState>(
             LogLevel logLevel,
@@ -257,37 +272,45 @@ public sealed class ShowcasePublicLog
         LogLevel.Information,
         new EventId(100, nameof(LogInitializing)),
         "Initializing the bounded Showcase host.");
+
     private static readonly Action<ILogger, int, Exception?> LogCatalog = LoggerMessage.Define<int>(
         LogLevel.Information,
         new EventId(101, nameof(LogCatalog)),
         "Validated {InstalledCount} installed sandbox(es).");
+
     private static readonly Action<ILogger, Exception?> LogRunner = LoggerMessage.Define(
         LogLevel.Information,
         new EventId(102, nameof(LogRunner)),
         "The bounded sample runner is accepting work.");
+
     private static readonly Action<ILogger, Exception?> LogReady = LoggerMessage.Define(
         LogLevel.Information,
         new EventId(103, nameof(LogReady)),
         "Showcase startup completed.");
+
     private static readonly Action<ILogger, string, Exception?> LogTheme = LoggerMessage.Define<string>(
         LogLevel.Information,
         new EventId(104, nameof(LogTheme)),
         "Theme changed to {Theme}.");
+
     private static readonly Action<ILogger, bool, Exception?> LogConsole = LoggerMessage.Define<bool>(
         LogLevel.Information,
         new EventId(105, nameof(LogConsole)),
         "In-app console visibility changed to {Visible}.");
+
     private static readonly Action<ILogger, string, Exception?> LogPage = LoggerMessage.Define<string>(
         LogLevel.Information,
         new EventId(106, nameof(LogPage)),
         "Opened {Page}.");
+
     private static readonly Action<ILogger, string, Exception?> LogRun = LoggerMessage.Define<string>(
         LogLevel.Information,
         new EventId(107, nameof(LogRun)),
         "Running the {Package} sample.");
-    private readonly ILogger _shellLogger;
-    private readonly ILogger _navigationLogger;
+
     private readonly ILogger _executionLogger;
+    private readonly ILogger _navigationLogger;
+    private readonly ILogger _shellLogger;
 
     public ShowcasePublicLog(ILoggerFactory loggerFactory)
     {
@@ -297,29 +320,58 @@ public sealed class ShowcasePublicLog
         _executionLogger = loggerFactory.CreateLogger(ShowcaseLogProvider.AllowedCategoryPrefix + "Execution");
     }
 
-    public void Initializing() => LogInitializing(_shellLogger, null);
-    public void CatalogValidated(int installedCount) => LogCatalog(_shellLogger, installedCount, null);
-    public void RunnerReady() => LogRunner(_shellLogger, null);
-    public void Ready() => LogReady(_shellLogger, null);
-    public void ThemeChanged(string theme) => LogTheme(_shellLogger, theme, null);
-    public void ConsoleVisibilityChanged(bool visible) => LogConsole(_shellLogger, visible, null);
-    public void PageOpened(string page) => LogPage(_navigationLogger, page, null);
-    public void RunStarted(string package) => LogRun(_executionLogger, package, null);
+    public void Initializing()
+    {
+        LogInitializing(_shellLogger, null);
+    }
+
+    public void CatalogValidated(int installedCount)
+    {
+        LogCatalog(_shellLogger, installedCount, null);
+    }
+
+    public void RunnerReady()
+    {
+        LogRunner(_shellLogger, null);
+    }
+
+    public void Ready()
+    {
+        LogReady(_shellLogger, null);
+    }
+
+    public void ThemeChanged(string theme)
+    {
+        LogTheme(_shellLogger, theme, null);
+    }
+
+    public void ConsoleVisibilityChanged(bool visible)
+    {
+        LogConsole(_shellLogger, visible, null);
+    }
+
+    public void PageOpened(string page)
+    {
+        LogPage(_navigationLogger, page, null);
+    }
+
+    public void RunStarted(string package)
+    {
+        LogRun(_executionLogger, package, null);
+    }
 }
 
 public sealed class ShowcaseUiState
 {
-    private bool _logConsoleVisible = true;
+    public bool LogConsoleVisible { get; private set; } = true;
 
     public event Action? Changed;
 
-    public bool LogConsoleVisible => _logConsoleVisible;
-
     public void SetLogConsoleVisible(bool visible)
     {
-        if (_logConsoleVisible == visible)
+        if (LogConsoleVisible == visible)
             return;
-        _logConsoleVisible = visible;
+        LogConsoleVisible = visible;
         Changed?.Invoke();
     }
 }

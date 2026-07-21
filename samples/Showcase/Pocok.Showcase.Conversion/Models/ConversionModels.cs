@@ -74,6 +74,13 @@ public sealed record ConversionOutput(
 
 public sealed record ConversionParseResult(bool IsSuccess, ConversionInput? Input, string? Error)
 {
-    public static ConversionParseResult Success(ConversionInput input) => new(true, input, null);
-    public static ConversionParseResult Failure(string error) => new(false, null, error);
+    public static ConversionParseResult Success(ConversionInput input)
+    {
+        return new ConversionParseResult(true, input, null);
+    }
+
+    public static ConversionParseResult Failure(string error)
+    {
+        return new ConversionParseResult(false, null, error);
+    }
 }

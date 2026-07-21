@@ -18,12 +18,16 @@ public sealed record ScriptReference
         Name = Normalize(name, nameof(name));
         Module = Normalize(module, nameof(module));
     }
+
     /// <summary>Gets the owning engine.</summary>
     public ScriptEngineId EngineId { get; }
+
     /// <summary>Gets the script name.</summary>
     public string Name { get; }
+
     /// <summary>Gets the logical module.</summary>
     public string Module { get; }
+
     private static string Normalize(string value, string parameterName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value, parameterName);

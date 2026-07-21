@@ -13,7 +13,8 @@ public sealed class ReadinessShowcaseModule : IServiceModule
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(context);
-        services.AddSingleton(new ShowcaseResourceRegistration("readiness", context.BaseDirectory, "Content/Locales/Readiness"));
+        services.AddSingleton(new ShowcaseResourceRegistration("readiness", context.BaseDirectory,
+            "Content/Locales/Readiness"));
         services.AddSingleton<ReadinessShowcaseSlice>();
         services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<ReadinessShowcaseSlice>());
     }

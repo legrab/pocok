@@ -18,16 +18,23 @@ public sealed class ScriptEngineRegistry
         {
             ArgumentNullException.ThrowIfNull(adapter);
             if (adapter.Validator.EngineId != adapter.Descriptor.Id)
-                throw new ArgumentException($"Validator and adapter engine IDs differ for {adapter.Descriptor.Id}.", nameof(adapters));
+                throw new ArgumentException($"Validator and adapter engine IDs differ for {adapter.Descriptor.Id}.",
+                    nameof(adapters));
             if (!map.TryAdd(adapter.Descriptor.Id, adapter))
-                throw new ArgumentException($"Engine {adapter.Descriptor.Id} is registered more than once.", nameof(adapters));
+                throw new ArgumentException($"Engine {adapter.Descriptor.Id} is registered more than once.",
+                    nameof(adapters));
         }
+
         _adapters = map;
     }
 
     /// <summary>Gets descriptors in ordinal ID order.</summary>
     public IReadOnlyList<ScriptEngineDescriptor> Descriptors =>
-        _adapters.Values.Select(static item => item.Descriptor).OrderBy(static item => item.Id.Value, StringComparer.Ordinal).ToArray();
+        _adapters.Values.Select(static item => item.Descriptor)
+            .OrderBy(static item => item.Id.Value, StringComparer.Ordinal).ToArray();
 
-    internal bool TryGet(ScriptEngineId id, out IScriptEngineAdapter adapter) => _adapters.TryGetValue(id, out adapter!);
+    internal bool TryGet(ScriptEngineId id, out IScriptEngineAdapter adapter)
+    {
+        return _adapters.TryGetValue(id, out adapter!);
+    }
 }

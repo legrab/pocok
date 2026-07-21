@@ -12,27 +12,28 @@ namespace Pocok.Showcase.Conversion;
 
 public partial class ConversionEditor
 {
-    private ShowcaseBufferedTextArea? _sourceValueEditor;
     private ShowcaseCodeAssistEditor? _codeEditor;
     private string? _formatError;
+    private ShowcaseBufferedTextArea? _sourceValueEditor;
 
-    [Parameter, EditorRequired]
-    public ConversionInput Value { get; set; } = new();
+    [Parameter][EditorRequired] public ConversionInput Value { get; set; } = new();
+
+    [Parameter] public EventCallback<ConversionInput> ValueChanged { get; set; }
 
     [Parameter]
-    public EventCallback<ConversionInput> ValueChanged { get; set; }
-
-    [Parameter, EditorRequired]
+    [EditorRequired]
     public ShowcaseCodeAssistCatalog CodeAssist { get; set; } = ShowcaseCodeAssistCatalog.Empty;
 
-    [Parameter, EditorRequired]
-    public IShowcaseText Text { get; set; } = default!;
+    [Parameter][EditorRequired] public IShowcaseText Text { get; set; } = default!;
 
     private int DisplayedMaximumItems => Value.MaximumCollectionItems == 10_000
         ? 500
         : Value.MaximumCollectionItems;
 
-    private static string ReadString(ChangeEventArgs args) => args.Value?.ToString() ?? string.Empty;
+    private static string ReadString(ChangeEventArgs args)
+    {
+        return args.Value?.ToString() ?? string.Empty;
+    }
 
     private static T ReadValue<T>(ChangeEventArgs args, T fallback)
     {
@@ -42,10 +43,15 @@ public partial class ConversionEditor
     }
 
     private static TEnum ReadEnum<TEnum>(ChangeEventArgs args, TEnum fallback)
-        where TEnum : struct, Enum =>
-        Enum.TryParse(ReadString(args), out TEnum value) ? value : fallback;
+        where TEnum : struct, Enum
+    {
+        return Enum.TryParse(ReadString(args), out TEnum value) ? value : fallback;
+    }
 
-    private string T(string key) => Text.GetText("conversion", key);
+    private string T(string key)
+    {
+        return Text.GetText("conversion", key);
+    }
 
     /// <summary>Flushes the active browser-owned editor value before an explicit action.</summary>
     public async Task FlushAsync()
@@ -58,20 +64,23 @@ public partial class ConversionEditor
         ConversionInput input = Value;
         if (Value.EditorMode == ConversionEditorMode.Fields && _sourceValueEditor is not null)
         {
-            string sourceValue = await _sourceValueEditor.FlushAsync();
+            var sourceValue = await _sourceValueEditor.FlushAsync();
             return input with { SourceValue = sourceValue };
         }
 
         if (Value.EditorMode == ConversionEditorMode.Code && _codeEditor is not null)
         {
-            string code = await _codeEditor.FlushAsync();
+            var code = await _codeEditor.FlushAsync();
             return input with { Code = code };
         }
 
         return input;
     }
 
-    private Task SetModeAsync(string mode) => SetModeAsync(Enum.Parse<ConversionEditorMode>(mode));
+    private Task SetModeAsync(string mode)
+    {
+        return SetModeAsync(Enum.Parse<ConversionEditorMode>(mode));
+    }
 
     private async Task SetModeAsync(ConversionEditorMode mode)
     {
@@ -101,39 +110,75 @@ public partial class ConversionEditor
         await ValueChanged.InvokeAsync(input with { EditorMode = ConversionEditorMode.Fields });
     }
 
-    private Task SetSourceKindAsync(ConversionSourceKind value) => UpdateAsync(Value with
+    private Task SetSourceKindAsync(ConversionSourceKind value)
     {
-        SourceKind = value,
-        SourceValue = value == ConversionSourceKind.Null ? string.Empty : Value.SourceValue
-    });
+        return UpdateAsync(Value with
+        {
+            SourceKind = value,
+            SourceValue = value == ConversionSourceKind.Null ? string.Empty : Value.SourceValue
+        });
+    }
 
-    private Task SetTargetTypeAsync(string value) => UpdateAsync(Value with { TargetType = value });
-
-    private Task SetSourceValueAsync(string value) => UpdateAsync(Value with { SourceValue = value });
-
-    private Task SetCultureAsync(string value) => UpdateAsync(Value with { Culture = value });
-
-    private Task SetOverflowAsync(OverflowPolicy value) => UpdateAsync(Value with { Overflow = value });
-
-    private Task SetNullPolicyAsync(NullPolicy value) => UpdateAsync(Value with { Nulls = value });
-
-    private Task SetEnumPolicyAsync(EnumPolicy value) => UpdateAsync(Value with { Enums = value });
-
-    private Task SetNumericLossAsync(NumericLossPolicy value) => UpdateAsync(Value with { NumericLoss = value });
-
-    private Task SetNumericBooleansAsync(NumericBooleanPolicy value) => UpdateAsync(Value with { NumericBooleans = value });
-
-    private Task SetTemporalTextAsync(TemporalTextPolicy value) => UpdateAsync(Value with { TemporalText = value });
-
-    private Task SetMaximumDepthAsync(int value) => UpdateAsync(Value with
+    private Task SetTargetTypeAsync(string value)
     {
-        MaximumDepth = Math.Clamp(value, 1, 64)
-    });
+        return UpdateAsync(Value with { TargetType = value });
+    }
 
-    private Task SetMaximumItemsAsync(int value) => UpdateAsync(Value with
+    private Task SetSourceValueAsync(string value)
     {
-        MaximumCollectionItems = Math.Clamp(value, 1, 500)
-    });
+        return UpdateAsync(Value with { SourceValue = value });
+    }
+
+    private Task SetCultureAsync(string value)
+    {
+        return UpdateAsync(Value with { Culture = value });
+    }
+
+    private Task SetOverflowAsync(OverflowPolicy value)
+    {
+        return UpdateAsync(Value with { Overflow = value });
+    }
+
+    private Task SetNullPolicyAsync(NullPolicy value)
+    {
+        return UpdateAsync(Value with { Nulls = value });
+    }
+
+    private Task SetEnumPolicyAsync(EnumPolicy value)
+    {
+        return UpdateAsync(Value with { Enums = value });
+    }
+
+    private Task SetNumericLossAsync(NumericLossPolicy value)
+    {
+        return UpdateAsync(Value with { NumericLoss = value });
+    }
+
+    private Task SetNumericBooleansAsync(NumericBooleanPolicy value)
+    {
+        return UpdateAsync(Value with { NumericBooleans = value });
+    }
+
+    private Task SetTemporalTextAsync(TemporalTextPolicy value)
+    {
+        return UpdateAsync(Value with { TemporalText = value });
+    }
+
+    private Task SetMaximumDepthAsync(int value)
+    {
+        return UpdateAsync(Value with
+        {
+            MaximumDepth = Math.Clamp(value, 1, 64)
+        });
+    }
+
+    private Task SetMaximumItemsAsync(int value)
+    {
+        return UpdateAsync(Value with
+        {
+            MaximumCollectionItems = Math.Clamp(value, 1, 500)
+        });
+    }
 
     private Task SetCodeAsync(string value)
     {

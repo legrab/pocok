@@ -1,7 +1,7 @@
 @implements IAsyncDisposable
 
 <div class="actions">
-    <ShowcaseRunButton Label="@RunLabel" Disabled="_running" Clicked="RunAsync" />
+    <ShowcaseRunButton Label="@RunLabel" Disabled="_running" Clicked="RunAsync"/>
     @if (_running)
     {
         <button type="button" class="secondary" @onclick="Cancel">@CancelLabel</button>
@@ -13,7 +13,7 @@
         @if (_progress.Count > 0)
         {
             <ol class="timeline progress-timeline">
-                @foreach (ShowcaseProgressEvent progress in _progress)
+                @foreach (var progress in _progress)
                 {
                     <li><span class="mono">@progress.Stage</span><span>@progress.Message</span></li>
                 }
@@ -28,41 +28,29 @@
     private string? _lastResetKey;
     private bool _running;
 
-    [Parameter, EditorRequired]
-    public IShowcaseSlice Slice { get; set; } = default!;
+    [Parameter][EditorRequired] public IShowcaseSlice Slice { get; set; } = default!;
 
-    [Parameter, EditorRequired]
-    public object Input { get; set; } = default!;
+    [Parameter][EditorRequired] public object Input { get; set; } = default!;
 
-    [Parameter, EditorRequired]
-    public IShowcaseRunClient RunClient { get; set; } = default!;
+    [Parameter][EditorRequired] public IShowcaseRunClient RunClient { get; set; } = default!;
 
-    [Parameter, EditorRequired]
-    public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
+    [Parameter][EditorRequired] public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
 
-    [Parameter]
-    public string RunLabel { get; set; } = "Run";
+    [Parameter] public string RunLabel { get; set; } = "Run";
 
-    [Parameter]
-    public string CancelLabel { get; set; } = "Cancel";
+    [Parameter] public string CancelLabel { get; set; } = "Cancel";
 
-    [Parameter]
-    public string? ResetKey { get; set; }
+    [Parameter] public string? ResetKey { get; set; }
 
-    [Parameter]
-    public EventCallback BeforeRun { get; set; }
+    [Parameter] public EventCallback BeforeRun { get; set; }
 
-    [Parameter]
-    public Func<Task<object?>>? InputResolver { get; set; }
+    [Parameter] public Func<Task<object?>>? InputResolver { get; set; }
 
-    [Parameter]
-    public EventCallback<ShowcaseRunResult?> ResultChanged { get; set; }
+    [Parameter] public EventCallback<ShowcaseRunResult?> ResultChanged { get; set; }
 
-    [Parameter]
-    public EventCallback<bool> RunningChanged { get; set; }
+    [Parameter] public EventCallback<bool> RunningChanged { get; set; }
 
-    [Parameter]
-    public EventCallback<IReadOnlyList<ShowcaseProgressEvent>> ProgressChanged { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<ShowcaseProgressEvent>> ProgressChanged { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -88,7 +76,7 @@
         if (BeforeRun.HasDelegate)
             await BeforeRun.InvokeAsync();
 
-        object resolvedInput = InputResolver is null
+        var resolvedInput = InputResolver is null
             ? Input
             : await InputResolver() ?? throw new InvalidOperationException("The input resolver returned null.");
 
@@ -101,8 +89,8 @@
         try
         {
             _handle = await RunClient.SubmitAsync(Slice, resolvedInput, Culture);
-            Task progressTask = ReadProgressAsync(_handle.Progress);
-            ShowcaseRunResult result = await _handle.Completion;
+            var progressTask = ReadProgressAsync(_handle.Progress);
+            var result = await _handle.Completion;
             await progressTask;
             await ResultChanged.InvokeAsync(result);
         }
@@ -119,22 +107,28 @@
 
     private async Task ReadProgressAsync(ChannelReader<ShowcaseProgressEvent> reader)
     {
-        await foreach (ShowcaseProgressEvent item in reader.ReadAllAsync())
+        await foreach (var item in reader.ReadAllAsync())
         {
             _progress.Add(item);
             await NotifyProgressChangedAsync();
         }
     }
 
-    private Task NotifyProgressChangedAsync() => InvokeAsync(async () =>
+    private Task NotifyProgressChangedAsync()
     {
-        if (ProgressChanged.HasDelegate)
-            await ProgressChanged.InvokeAsync(_progress.ToArray());
-        else
-            StateHasChanged();
-    });
+        return InvokeAsync(async () =>
+        {
+            if (ProgressChanged.HasDelegate)
+                await ProgressChanged.InvokeAsync(_progress.ToArray());
+            else
+                StateHasChanged();
+        });
+    }
 
-    private void Cancel() => _handle?.Cancel();
+    private void Cancel()
+    {
+        _handle?.Cancel();
+    }
 
     public async ValueTask DisposeAsync()
     {
@@ -145,4 +139,5 @@
         await _handle.DisposeAsync();
         _handle = null;
     }
+
 }

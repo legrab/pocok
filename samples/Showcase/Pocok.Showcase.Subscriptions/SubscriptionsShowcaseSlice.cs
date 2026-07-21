@@ -17,7 +17,8 @@ public sealed record SubscriptionsInput
 
 public sealed record SubscriptionsOutput(string Code);
 
-public sealed class SubscriptionsShowcaseSlice : ShowcaseSlice<SubscriptionsInput, SubscriptionsOutput>, IShowcasePackageCoverage
+public sealed class SubscriptionsShowcaseSlice : ShowcaseSlice<SubscriptionsInput, SubscriptionsOutput>,
+    IShowcasePackageCoverage
 {
     private static readonly IReadOnlyList<ShowcaseSample<SubscriptionsInput>> SampleDefinitions =
     [
@@ -71,11 +72,6 @@ public sealed class SubscriptionsShowcaseSlice : ShowcaseSlice<SubscriptionsInpu
             "recipe")
     ];
 
-    public IReadOnlyList<string> CoveredPackageIds { get; } =
-    [
-        "Pocok.Subscriptions"
-    ];
-
     public override ShowcaseSliceDescriptor Descriptor { get; } = new(
         "pocok.showcase.subscriptions",
         "Pocok.Subscriptions",
@@ -93,6 +89,7 @@ public sealed class SubscriptionsShowcaseSlice : ShowcaseSlice<SubscriptionsInpu
 
     public override Type PageComponentType => typeof(SubscriptionsPage);
     public override IReadOnlyList<ShowcaseSample<SubscriptionsInput>> TypedSamples => SampleDefinitions;
+
     public override ShowcaseGuide Guide { get; } = new(
         [new ShowcaseGuideSection("purpose", "Guide.Purpose.Title", ["Guide.Purpose.Body"], ["recipe"])],
         [
@@ -103,24 +100,31 @@ public sealed class SubscriptionsShowcaseSlice : ShowcaseSlice<SubscriptionsInpu
                 "Select a preset and adjust the constrained options.")
         ]);
 
+    public IReadOnlyList<string> CoveredPackageIds { get; } =
+    [
+        "Pocok.Subscriptions"
+    ];
+
     public override ValueTask<SubscriptionsOutput> ExecuteAsync(
         SubscriptionsInput input,
         ShowcaseExecutionContext context,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        string code = SubscriptionsRecipeRenderer.Render(input);
+        var code = SubscriptionsRecipeRenderer.Render(input);
         context.Output.Write(code);
         return ValueTask.FromResult(new SubscriptionsOutput(code));
     }
 
-    protected override ShowcaseRunResult CreateRunResult(SubscriptionsOutput output, TimeSpan elapsed) =>
-        new(
+    protected override ShowcaseRunResult CreateRunResult(SubscriptionsOutput output, TimeSpan elapsed)
+    {
+        return new ShowcaseRunResult(
             ShowcaseRunStatus.Success,
             "Recipe generated",
             codePreview: output.Code,
             elapsed: elapsed,
             tipKeys: ["Tips.Generated", "Tips.Ownership"]);
+    }
 }
 
 public static class SubscriptionsRecipeRenderer
@@ -129,40 +133,40 @@ public static class SubscriptionsRecipeRenderer
 
     public static string Render(SubscriptionsInput input)
     {
-        string configuration = input.Mode == "filter-map"
+        var configuration = input.Mode == "filter-map"
             ? """
-                options => options
-                    .WithObjectFilter(value => value is string)
-                    .WithValueMapper(value => int.Parse((string)value!, System.Globalization.CultureInfo.InvariantCulture))
-                    .WithValueFilter(value => value is >= 0 and <= 100)
-                """
+              options => options
+                  .WithObjectFilter(value => value is string)
+                  .WithValueMapper(value => int.Parse((string)value!, System.Globalization.CultureInfo.InvariantCulture))
+                  .WithValueFilter(value => value is >= 0 and <= 100)
+              """
             : input.IncludeOptional
                 ? "options => options.WithValueFilter(value => value >= 0)"
                 : "null";
-        bool explicitOwnership = input.Mode == "remove" || input.IncludeLifecycle;
-        string hubDeclaration = explicitOwnership
+        var explicitOwnership = input.Mode == "remove" || input.IncludeLifecycle;
+        var hubDeclaration = explicitOwnership
             ? "var hub = new KeyedSubscriptionHub<string>(StringComparer.Ordinal);"
             : "using var hub = new KeyedSubscriptionHub<string>(StringComparer.Ordinal);";
-        string registrationDeclaration = explicitOwnership
+        var registrationDeclaration = explicitOwnership
             ? "IDisposable registration"
             : "using IDisposable registration";
-        string removal = explicitOwnership
+        var removal = explicitOwnership
             ? "\nregistration.Dispose();\nhub.Dispose();"
             : string.Empty;
-        string publishedValue = input.Mode == "filter-map" ? "\"21\"" : "21";
+        var publishedValue = input.Mode == "filter-map" ? "\"21\"" : "21";
         return $$"""
-            // Install Pocok.Subscriptions.
-            using Pocok.Subscriptions;
+                 // Install Pocok.Subscriptions.
+                 using Pocok.Subscriptions;
 
-            {{hubDeclaration}}
-            {{registrationDeclaration}} = hub.Subscribe<int>(
-                "temperature",
-                (_, value) => Console.WriteLine(value),
-                {{configuration}});
-            int delivered = 0;
-            for (int index = 0; index < {{Math.Clamp(input.Capacity, 1, 100)}}; index++)
-                delivered += hub.Publish("temperature", {{publishedValue}});{{removal}}
-            """;
+                 {{hubDeclaration}}
+                 {{registrationDeclaration}} = hub.Subscribe<int>(
+                     "temperature",
+                     (_, value) => Console.WriteLine(value),
+                     {{configuration}});
+                 int delivered = 0;
+                 for (int index = 0; index < {{Math.Clamp(input.Capacity, 1, 100)}}; index++)
+                     delivered += hub.Publish("temperature", {{publishedValue}});{{removal}}
+                 """;
     }
 
     internal static void CompileProof()

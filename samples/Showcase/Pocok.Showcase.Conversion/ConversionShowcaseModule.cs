@@ -18,6 +18,7 @@ public sealed class ConversionShowcaseModule : IServiceModule
             context.BaseDirectory,
             "Content/Locales/Conversion"));
         services.AddSingleton<ConversionShowcaseSlice>();
-        services.AddSingleton<IShowcaseSlice>(static provider => provider.GetRequiredService<ConversionShowcaseSlice>());
+        services.AddSingleton<IShowcaseSlice>(static provider =>
+            provider.GetRequiredService<ConversionShowcaseSlice>());
     }
 }

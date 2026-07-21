@@ -20,8 +20,10 @@ public sealed record ScriptBinding
 
     /// <summary>Gets the binding name.</summary>
     public string Name { get; }
+
     /// <summary>Gets the scalar value.</summary>
     public object? Value { get; }
+
     /// <summary>Gets the explicitly callable function.</summary>
     public Delegate? Function { get; }
 

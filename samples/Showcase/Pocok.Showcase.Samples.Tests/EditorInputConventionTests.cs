@@ -15,21 +15,19 @@ public sealed class EditorInputConventionTests
     [Test]
     public void SamplePluginsDoNotPublishParentStateForEveryKeystroke()
     {
-        string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
+        var samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
         var violations = new List<string>();
 
-        foreach (string path in Directory.EnumerateFiles(samplesRoot, "*.razor", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFiles(samplesRoot, "*.razor", SearchOption.AllDirectories))
         {
-            string[] lines = File.ReadAllLines(path);
-            for (int index = 0; index < lines.Length; index++)
-            {
+            var lines = File.ReadAllLines(path);
+            for (var index = 0; index < lines.Length; index++)
                 if (lines[index].Contains("@bind:event=\"oninput\"", StringComparison.Ordinal)
                     || lines[index].Contains("@oninput=", StringComparison.Ordinal))
                 {
-                    string relativePath = Path.GetRelativePath(TestSupport.RepositoryRoot, path);
+                    var relativePath = Path.GetRelativePath(TestSupport.RepositoryRoot, path);
                     violations.Add($"{relativePath}:{index + 1}");
                 }
-            }
         }
 
         violations.ShouldBeEmpty(
@@ -40,21 +38,17 @@ public sealed class EditorInputConventionTests
     [Test]
     public void BufferedTextAreaValuesAreRazorExpressionsRatherThanLiteralMemberPaths()
     {
-        string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
+        var samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
         var violations = new List<string>();
 
-        foreach (string path in Directory.EnumerateFiles(samplesRoot, "*.razor", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFiles(samplesRoot, "*.razor", SearchOption.AllDirectories))
         {
-            string content = File.ReadAllText(path);
+            var content = File.ReadAllText(path);
             foreach (Match match in BufferedTextAreaPattern.Matches(content))
-            {
                 if (match.Value.Contains("Value=\"", StringComparison.Ordinal)
                     && !match.Value.Contains("Value=\"@", StringComparison.Ordinal)
                     && !match.Value.Contains("@bind-Value", StringComparison.Ordinal))
-                {
                     violations.Add(Path.GetRelativePath(TestSupport.RepositoryRoot, path));
-                }
-            }
         }
 
         violations.ShouldBeEmpty(
@@ -65,20 +59,16 @@ public sealed class EditorInputConventionTests
     [Test]
     public void NativeInputsDoNotUseGetterSetterBindDirectivesThatPublishAsLiteralAttributes()
     {
-        string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
+        var samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
         var violations = new List<string>();
 
-        foreach (string path in Directory.EnumerateFiles(samplesRoot, "*.razor", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFiles(samplesRoot, "*.razor", SearchOption.AllDirectories))
         {
-            string[] lines = File.ReadAllLines(path);
-            for (int index = 0; index < lines.Length; index++)
-            {
+            var lines = File.ReadAllLines(path);
+            for (var index = 0; index < lines.Length; index++)
                 if (lines[index].Contains("@bind:get=", StringComparison.Ordinal)
                     || lines[index].Contains("@bind:set=", StringComparison.Ordinal))
-                {
                     violations.Add($"{Path.GetRelativePath(TestSupport.RepositoryRoot, path)}:{index + 1}");
-                }
-            }
         }
 
         violations.ShouldBeEmpty(
@@ -89,20 +79,18 @@ public sealed class EditorInputConventionTests
     [Test]
     public void PluginRazorImportsEnableDomEventHandlers()
     {
-        string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
+        var samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
         var violations = new List<string>();
 
-        foreach (string projectDirectory in Directory.EnumerateDirectories(samplesRoot))
+        foreach (var projectDirectory in Directory.EnumerateDirectories(samplesRoot))
         {
             if (!Directory.EnumerateFiles(projectDirectory, "*.razor", SearchOption.AllDirectories).Any())
                 continue;
 
-            string importsPath = Path.Combine(projectDirectory, "_Imports.razor");
-            string imports = File.Exists(importsPath) ? File.ReadAllText(importsPath) : string.Empty;
+            var importsPath = Path.Combine(projectDirectory, "_Imports.razor");
+            var imports = File.Exists(importsPath) ? File.ReadAllText(importsPath) : string.Empty;
             if (!imports.Contains("@using Microsoft.AspNetCore.Components.Web", StringComparison.Ordinal))
-            {
                 violations.Add(Path.GetRelativePath(TestSupport.RepositoryRoot, projectDirectory));
-            }
         }
 
         violations.ShouldBeEmpty(
@@ -113,25 +101,23 @@ public sealed class EditorInputConventionTests
     [Test]
     public void SamplePagesAdvanceAUniqueEditorRevisionForEverySelection()
     {
-        string samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
+        var samplesRoot = Path.Combine(TestSupport.RepositoryRoot, "samples", "Showcase");
         var violations = new List<string>();
 
-        foreach (string path in Directory.EnumerateFiles(samplesRoot, "*Page.razor", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFiles(samplesRoot, "*Page.razor", SearchOption.AllDirectories))
         {
-            string content = File.ReadAllText(path);
+            var content = File.ReadAllText(path);
             if (!content.Contains("<ShowcaseSamplePicker", StringComparison.Ordinal))
                 continue;
 
-            string codeBehindPath = path + ".cs";
-            string codeBehind = File.Exists(codeBehindPath) ? File.ReadAllText(codeBehindPath) : string.Empty;
-            string implementation = content + Environment.NewLine + codeBehind;
+            var codeBehindPath = path + ".cs";
+            var codeBehind = File.Exists(codeBehindPath) ? File.ReadAllText(codeBehindPath) : string.Empty;
+            var implementation = content + Environment.NewLine + codeBehind;
             if (!content.Contains("@key=\"_sampleRevision\"", StringComparison.Ordinal)
                 || !implementation.Contains("_sampleRevision = checked(_sampleRevision + 1);", StringComparison.Ordinal)
                 || (content.Contains("<ShowcaseExecutionControls", StringComparison.Ordinal)
                     && !content.Contains("ResetKey=\"@SampleResetKey\"", StringComparison.Ordinal)))
-            {
                 violations.Add(Path.GetRelativePath(TestSupport.RepositoryRoot, path));
-            }
         }
 
         violations.ShouldBeEmpty(

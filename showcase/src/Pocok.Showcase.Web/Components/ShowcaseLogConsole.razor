@@ -13,11 +13,12 @@
         }
         else
         {
-            @foreach (ShowcaseLogRecord record in Records)
+            @foreach (var record in Records)
             {
                 <article class="rail-log-entry log-@LevelClass(record.Level)" @key="record.Sequence">
                     <div class="rail-log-meta">
-                        <time datetime="@record.Timestamp.ToString("O", CultureInfo.InvariantCulture)">@record.Timestamp.ToString("HH:mm", CultureInfo.InvariantCulture)</time>
+                        <time
+                            datetime="@record.Timestamp.ToString("O", CultureInfo.InvariantCulture)">@record.Timestamp.ToString("HH:mm", CultureInfo.InvariantCulture)</time>
                         <span>@LevelLabel(record.Level)</span>
                         <span title="@record.Category">@record.Category</span>
                     </div>
@@ -33,8 +34,7 @@
     private ShowcaseLogSubscription? _subscription;
     private Task? _watchTask;
 
-    [Parameter, EditorRequired]
-    public ShowcaseLogBuffer Buffer { get; set; } = default!;
+    [Parameter][EditorRequired] public ShowcaseLogBuffer Buffer { get; set; } = default!;
 
     private IReadOnlyList<ShowcaseLogRecord> Records { get; set; } = [];
 
@@ -60,12 +60,13 @@
             {
             }
         }
+
         _disposeToken.Dispose();
     }
 
     private async Task WatchAsync(ShowcaseLogSubscription subscription, CancellationToken cancellationToken)
     {
-        await foreach (long _ in subscription.Updates.ReadAllAsync(cancellationToken))
+        await foreach (var _ in subscription.Updates.ReadAllAsync(cancellationToken))
         {
             await InvokeAsync(() =>
             {
@@ -75,16 +76,23 @@
         }
     }
 
-    private static string LevelClass(LogLevel level) => level.ToString().ToLowerInvariant();
-
-    private static string LevelLabel(LogLevel level) => level switch
+    private static string LevelClass(LogLevel level)
     {
-        LogLevel.Trace => "TRC",
-        LogLevel.Debug => "DBG",
-        LogLevel.Information => "INF",
-        LogLevel.Warning => "WRN",
-        LogLevel.Error => "ERR",
-        LogLevel.Critical => "CRT",
-        _ => "---"
-    };
+        return level.ToString().ToLowerInvariant();
+    }
+
+    private static string LevelLabel(LogLevel level)
+    {
+        return level switch
+        {
+            LogLevel.Trace => "TRC",
+            LogLevel.Debug => "DBG",
+            LogLevel.Information => "INF",
+            LogLevel.Warning => "WRN",
+            LogLevel.Error => "ERR",
+            LogLevel.Critical => "CRT",
+            _ => "---"
+        };
+    }
+
 }
