@@ -117,12 +117,12 @@ public sealed class ScriptingRuntimeWarmupService(
         return Task.CompletedTask;
     }
 
-    private static ScriptExecutionOptions CreateWarmupOptions(ScriptEngineId engineId)
+    private ScriptExecutionOptions CreateWarmupOptions(ScriptEngineId engineId)
     {
         return engineId == ScriptEngineId.JavaScript
             ? new ScriptExecutionOptions
             {
-                Timeout = TimeSpan.FromSeconds(10),
+                Timeout = TimeSpan.FromMilliseconds(_showcaseOptions.WarmupTimeoutMilliseconds),
                 MaxSourceCharacters = 64,
                 MaxOutputBytes = 1_024,
                 MaxStatements = 100,
@@ -131,7 +131,7 @@ public sealed class ScriptingRuntimeWarmupService(
             }
             : new ScriptExecutionOptions
             {
-                Timeout = TimeSpan.FromSeconds(10),
+                Timeout = TimeSpan.FromMilliseconds(_showcaseOptions.WarmupTimeoutMilliseconds),
                 MaxSourceCharacters = 64,
                 MaxOutputBytes = 1_024
             };

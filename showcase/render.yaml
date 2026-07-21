@@ -19,15 +19,17 @@ services:
       - key: Showcase__Scripting__MaximumOutputBytes
         value: "8192"
       - key: Showcase__Scripting__MaximumTimeoutMilliseconds
-        value: "2000"
+        value: "10000"
       - key: Showcase__Scripting__MaximumStatements
         value: "10000"
       - key: Showcase__Scripting__MaximumRecursionDepth
         value: "64"
       - key: Showcase__Scripting__MaximumMemoryMegabytes
         value: "16"
+      - key: Showcase__Scripting__WarmupTimeoutMilliseconds
+        value: "30000"
       - key: Showcase__ScriptingClientExecutionLimit
-        value: "10"
+        value: "5"
       - key: Showcase__ScriptingClientExecutionWindow
         value: "00:10:00"
       - key: Showcase__ScriptingRateLimitMaximumTrackedClients
@@ -35,4 +37,4 @@ services:
       - key: Showcase__QueueCapacity
         value: "4"
       - key: Showcase__RunTimeout
-        value: "00:00:06"
+        value: "00:00:30"

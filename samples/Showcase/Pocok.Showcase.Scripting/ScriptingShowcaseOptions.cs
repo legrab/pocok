@@ -15,6 +15,7 @@ public sealed class ScriptingShowcaseOptions
     public int MaximumStatements { get; init; } = 10_000;
     public int MaximumRecursionDepth { get; init; } = 64;
     public int MaximumMemoryMegabytes { get; init; } = 16;
+    public int WarmupTimeoutMilliseconds { get; init; } = 30_000;
 
     public static ScriptingShowcaseOptions FromConfiguration(IConfiguration configuration)
     {
@@ -58,7 +59,13 @@ public sealed class ScriptingShowcaseOptions
                 nameof(MaximumMemoryMegabytes),
                 16,
                 4,
-                1_024)
+                1_024),
+            WarmupTimeoutMilliseconds = ReadInteger(
+                configuration,
+                nameof(WarmupTimeoutMilliseconds),
+                30_000,
+                1_000,
+                120_000)
         };
     }
 
