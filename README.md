@@ -9,8 +9,7 @@ capabilities and transparent application defaults without introducing a private 
 > ## Explore Pocok in the Showcase
 >
 > Browse all current package families, edit bounded inputs, run safe demonstrations, and generate source-accurate recipes
-> in the deployed application. JavaScript execution is available publicly; trusted-local C# and Python execution remain
-> explicitly operator-gated.
+> in the deployed application.
 >
 > **[Open the deployed Pocok Showcase](https://pocok-showcase.onrender.com/)**
 
@@ -22,10 +21,6 @@ capabilities and transparent application defaults without introducing a private 
 | Scripting | [![Pocok.Scripting](https://img.shields.io/nuget/v/Pocok.Scripting?label=Pocok.Scripting&logo=nuget)](https://www.nuget.org/packages/Pocok.Scripting)<br>[![Pocok.Scripting.JavaScript](https://img.shields.io/nuget/v/Pocok.Scripting.JavaScript?label=Pocok.Scripting.JavaScript&logo=nuget)](https://www.nuget.org/packages/Pocok.Scripting.JavaScript)<br>[![Pocok.Scripting.CSharp](https://img.shields.io/nuget/v/Pocok.Scripting.CSharp?label=Pocok.Scripting.CSharp&logo=nuget)](https://www.nuget.org/packages/Pocok.Scripting.CSharp)<br>[![Pocok.Scripting.Python](https://img.shields.io/nuget/v/Pocok.Scripting.Python?label=Pocok.Scripting.Python&logo=nuget)](https://www.nuget.org/packages/Pocok.Scripting.Python) |
 | Modularity | [![Pocok.Modularity.Contracts](https://img.shields.io/nuget/v/Pocok.Modularity.Contracts?label=Pocok.Modularity.Contracts&logo=nuget)](https://www.nuget.org/packages/Pocok.Modularity.Contracts)<br>[![Pocok.Modularity](https://img.shields.io/nuget/v/Pocok.Modularity?label=Pocok.Modularity&logo=nuget)](https://www.nuget.org/packages/Pocok.Modularity) |
 | Application defaults | [![Pocok.AppDefaults](https://img.shields.io/nuget/v/Pocok.AppDefaults?label=Pocok.AppDefaults&logo=nuget)](https://www.nuget.org/packages/Pocok.AppDefaults)<br>[![Pocok.AppDefaults.Logging](https://img.shields.io/nuget/v/Pocok.AppDefaults.Logging?label=Pocok.AppDefaults.Logging&logo=nuget)](https://www.nuget.org/packages/Pocok.AppDefaults.Logging)<br>[![Pocok.AppDefaults.Logging.Serilog](https://img.shields.io/nuget/v/Pocok.AppDefaults.Logging.Serilog?label=Pocok.AppDefaults.Logging.Serilog&logo=nuget)](https://www.nuget.org/packages/Pocok.AppDefaults.Logging.Serilog)<br>[![Pocok.AppDefaults.Modularity](https://img.shields.io/nuget/v/Pocok.AppDefaults.Modularity?label=Pocok.AppDefaults.Modularity&logo=nuget)](https://www.nuget.org/packages/Pocok.AppDefaults.Modularity)<br>[![Pocok.AppDefaults.Licensing](https://img.shields.io/nuget/v/Pocok.AppDefaults.Licensing?label=Pocok.AppDefaults.Licensing&logo=nuget)](https://www.nuget.org/packages/Pocok.AppDefaults.Licensing) |
-
-`Active` and `Experimental` describe API maturity in the package catalog. Both states may be alpha-publication eligible
-when `eng/packages.json` marks the package releasable. Scripting and Licensing also publish package-specific tags;
-Licensing issuer and checker executables remain GitHub Release assets rather than NuGet packages.
 
 <details>
 <summary><strong>Unit test coverage</strong></summary>
