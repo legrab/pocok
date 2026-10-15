@@ -35,7 +35,7 @@ capabilities and transparent application defaults without introducing a private 
 | Pocok.AppDefaults.Logging | 87.04% | 87.04% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
 | Pocok.AppDefaults.Logging.Serilog | 100.00% | 100.00% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
 | Pocok.AppDefaults.Modularity | 97.37% | 97.37% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
-| Pocok.BackgroundWork | 78.34% | 78.34% | 0.00 pp | 93.59% | 93.59% | 0.00 pp |
+| Pocok.BackgroundWork | 78.34% | 78.34% | 0.00 pp | 97.30% | 97.30% | 0.00 pp |
 | Pocok.Conversion | 83.01% | 83.01% | 0.00 pp | 94.14% | 94.14% | 0.00 pp |
 | Pocok.Licensing | 78.71% | 78.71% | 0.00 pp | 92.03% | 92.03% | 0.00 pp |
 | Pocok.Localization | 89.42% | 89.42% | 0.00 pp | 99.19% | 99.19% | 0.00 pp |
@@ -46,7 +46,7 @@ capabilities and transparent application defaults without introducing a private 
 | Pocok.Scripting.CSharp | 77.18% | 77.18% | 0.00 pp | 92.11% | 92.11% | 0.00 pp |
 | Pocok.Scripting.JavaScript | 65.61% | 65.61% | 0.00 pp | 52.86% | 52.86% | 0.00 pp |
 | Pocok.Scripting.Python | 79.84% | 79.84% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
-| Pocok.Signals | 80.00% | 80.00% | 0.00 pp | 93.57% | 93.57% | 0.00 pp |
+| Pocok.Signals | 80.00% | 80.00% | 0.00 pp | 93.53% | 93.53% | 0.00 pp |
 | Pocok.Subscriptions | 100.00% | 100.00% | 0.00 pp | 100.00% | 100.00% | 0.00 pp |
 
 Coverage is refreshed automatically from successful `main` CI. Line coverage is authoritative; branch coverage is shown only when condition identities can be merged safely.
